@@ -12,8 +12,29 @@ generator client {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
+  id            Int       @id @default(autoincrement())
+  stravaId      Int       @unique
+  username      String?   // might be null
+  firstname     String?
+  lastname      String?
+  sex           String?
+  city          String?
+  country       String?
+  profile       String?
+  profileMedium String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  tokens        StravaToken[]
+}
+
+model StravaToken {
+  id           Int      @id @default(autoincrement())
+  accessToken  String
+  refreshToken String
+  expiresAt    Int      // timestamp epoch
+  createdAt    DateTime @default(now())
+
+  userId Int
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

@@ -16,10 +16,8 @@
     "db:push": {
       "cache": false
     },
-    "db:seed": {
-      "cache": false
-    },
     "dev": {
+      "dependsOn": ["^dev"],
       "cache": false,
       "persistent": true
     },

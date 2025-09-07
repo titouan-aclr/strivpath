@@ -6,13 +6,12 @@ export class AuthController {
   @Get('strava')
   @UseGuards(AuthGuard('strava'))
   async stravaLogin() {
-    // Passport redirige automatiquement vers Strava
+    // Passport automatically redirect to Strava
   }
 
   @Get('strava/callback')
   @UseGuards(AuthGuard('strava'))
   async stravaCallback(@Req() req) {
-    // Après succès, Passport met l’utilisateur dans req.user
-    return req.user; // ici tu peux appeler ton service pour sauvegarder en DB
+    return { status: 'ok', user: req.user };
   }
 }
