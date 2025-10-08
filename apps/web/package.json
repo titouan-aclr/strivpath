@@ -6,7 +6,13 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint . --max-warnings 0"
+    "lint": "eslint . --max-warnings 0",
+    "test": "vitest --run --passWithNoTests",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest --watch",
+    "test:cov": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@apollo/client": "^4.0.7",
@@ -19,13 +25,25 @@
   },
   "devDependencies": {
     "@next/eslint-plugin-next": "15.5.2",
+    "@playwright/test": "^1.56.0",
     "@repo/eslint-config": "workspace:*",
     "@repo/typescript-config": "workspace:*",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^20.11.24",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "^5.0.4",
+    "@vitest/coverage-v8": "^3.2.4",
+    "@vitest/ui": "^3.2.4",
     "eslint": "^8.57.0",
-    "typescript": "5.5.4"
+    "jsdom": "^27.0.0",
+    "msw": "^2.11.4",
+    "typescript": "5.5.4",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.2.4"
   },
   "pnpm": {
     "overrides": {

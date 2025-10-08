@@ -7,18 +7,18 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll() {
-    return this.prisma.user.findMany();
+    return await this.prisma.user.findMany();
   }
 
   async findByStravaId(stravaId: number) {
-    return this.prisma.user.findUnique({
+    return await this.prisma.user.findUnique({
       where: { stravaId },
       include: { tokens: { orderBy: { createdAt: 'desc' }, take: 1 } },
     });
   }
 
   async createWithTokens(userData: Prisma.UserCreateInput, tokenData: Prisma.StravaTokenCreateWithoutUserInput) {
-    return this.prisma.user.create({
+    return await this.prisma.user.create({
       data: {
         ...userData,
         tokens: {
@@ -30,7 +30,7 @@ export class UserService {
   }
 
   async updateTokens(userId: number, tokenData: Prisma.StravaTokenCreateWithoutUserInput) {
-    return this.prisma.stravaToken.create({
+    return await this.prisma.stravaToken.create({
       data: { ...tokenData, userId },
     });
   }
