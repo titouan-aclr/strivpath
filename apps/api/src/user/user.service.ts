@@ -1,9 +1,14 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { PrismaClient, Prisma } from '@repo/database';
+import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../database/prisma.service.js';
 
 @Injectable()
 export class UserService {
-  constructor(@Inject('PRISMA') private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findAll() {
+    return this.prisma.user.findMany();
+  }
 
   async findByStravaId(stravaId: number) {
     return this.prisma.user.findUnique({

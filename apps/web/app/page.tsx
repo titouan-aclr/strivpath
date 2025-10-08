@@ -1,12 +1,49 @@
-import { prisma } from '@repo/database';
+import { getClient } from '../lib/apollo-client';
+import { gql } from '@apollo/client';
+import { User } from '@repo/graphql-types';
+
+const GET_USERS = gql`
+  query GetUsers {
+    users {
+      id
+      stravaId
+      username
+      firstname
+      lastname
+      city
+      country
+    }
+  }
+`;
 
 export default async function IndexPage() {
-   const users = await prisma.user.findMany();
+  const client = getClient();
+  const { data } = await client.query<{ users: User[] }>({
+    query: GET_USERS,
+  });
 
-   return (
-      <div>
-         <h1>Hello World</h1>
-         <pre>{JSON.stringify(users, null, 2)}</pre>
-      </div>
-   );
+  return (
+    <div style={{ padding: '2rem' }}>
+      <h1>Stravanalytics</h1>
+      <p>Users from GraphQL API:</p>
+
+      {data.users.length === 0 ? (
+        <p>No users found</p>
+      ) : (
+        <ul>
+          {data.users.map((user) => (
+            <li key={user.id}>
+              <strong>{user.username || `User ${user.stravaId}`}</strong>
+              {user.firstname && user.lastname && (
+                <span> - {user.firstname} {user.lastname}</span>
+              )}
+              {user.city && user.country && (
+                <span> ({user.city}, {user.country})</span>
+              )}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
 }
