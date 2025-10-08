@@ -4,7 +4,10 @@ import { Strategy } from 'passport-oauth2';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
+import { User } from '@repo/graphql-types';
 import { UserService } from '../../user/user.service';
+import { UserMapper } from '../../user/user.mapper';
+import { StravaAthleteResponse } from '../types';
 
 @Injectable()
 export class StravaStrategy extends PassportStrategy(Strategy, 'strava') {
@@ -23,19 +26,20 @@ export class StravaStrategy extends PassportStrategy(Strategy, 'strava') {
     });
   }
 
-  async validate(accessToken: string, refreshToken: string) {
-    // fetch user profile profile via Strava
+  async validate(accessToken: string, refreshToken: string): Promise<User> {
     const { data } = await firstValueFrom(
-      this.httpService.get('https://www.strava.com/api/v3/athlete', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      }),
+      this.httpService.get<StravaAthleteResponse>(
+        'https://www.strava.com/api/v3/athlete',
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      ),
     );
 
-    let user = await this.userService.findByStravaId(data.id);
+    const prismaUser = await this.userService.findByStravaId(data.id);
 
-    if (!user) {
-      // create
-      user = await this.userService.createWithTokens(
+    if (!prismaUser) {
+      const newUser = await this.userService.createWithTokens(
         {
           stravaId: data.id,
           username: data.username,
@@ -53,15 +57,15 @@ export class StravaStrategy extends PassportStrategy(Strategy, 'strava') {
           expiresAt: data.expires_at ?? Math.floor(Date.now() / 1000) + 21600,
         },
       );
-    } else {
-      // update tokens
-      await this.userService.updateTokens(user.id, {
-        accessToken,
-        refreshToken,
-        expiresAt: data.expires_at ?? Math.floor(Date.now() / 1000) + 21600,
-      });
+      return UserMapper.toGraphQL(newUser);
     }
 
-    return user;
+    await this.userService.updateTokens(prismaUser.id, {
+      accessToken,
+      refreshToken,
+      expiresAt: data.expires_at ?? Math.floor(Date.now() / 1000) + 21600,
+    });
+
+    return UserMapper.toGraphQL(prismaUser);
   }
 }

@@ -1,17 +1,22 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from '@repo/graphql-types';
+import { AuthenticatedRequest } from './types';
 
 @Controller('auth')
 export class AuthController {
   @Get('strava')
   @UseGuards(AuthGuard('strava'))
-  async stravaLogin() {
+  stravaLogin() {
     // Passport automatically redirect to Strava
   }
 
   @Get('strava/callback')
   @UseGuards(AuthGuard('strava'))
-  async stravaCallback(@Req() req) {
+  stravaCallback(@Req() req: AuthenticatedRequest): {
+    status: string;
+    user: User;
+  } {
     return { status: 'ok', user: req.user };
   }
 }

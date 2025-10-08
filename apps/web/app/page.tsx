@@ -22,6 +22,15 @@ export default async function IndexPage() {
     query: GET_USERS,
   });
 
+  if (!data) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <h1>Stravanalytics</h1>
+        <p>Failed to load users</p>
+      </div>
+    );
+  }
+
   return (
     <div style={{ padding: '2rem' }}>
       <h1>Stravanalytics</h1>
