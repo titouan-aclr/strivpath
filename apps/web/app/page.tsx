@@ -40,14 +40,20 @@ export default async function IndexPage() {
         <p>No users found</p>
       ) : (
         <ul>
-          {data.users.map((user) => (
+          {data.users.map(user => (
             <li key={user.id}>
               <strong>{user.username || `User ${user.stravaId}`}</strong>
               {user.firstname && user.lastname && (
-                <span> - {user.firstname} {user.lastname}</span>
+                <span>
+                  {' '}
+                  - {user.firstname} {user.lastname}
+                </span>
               )}
               {user.city && user.country && (
-                <span> ({user.city}, {user.country})</span>
+                <span>
+                  {' '}
+                  ({user.city}, {user.country})
+                </span>
               )}
             </li>
           ))}

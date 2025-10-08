@@ -28,12 +28,9 @@ export class StravaStrategy extends PassportStrategy(Strategy, 'strava') {
 
   async validate(accessToken: string, refreshToken: string): Promise<User> {
     const { data } = await firstValueFrom(
-      this.httpService.get<StravaAthleteResponse>(
-        'https://www.strava.com/api/v3/athlete',
-        {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        },
-      ),
+      this.httpService.get<StravaAthleteResponse>('https://www.strava.com/api/v3/athlete', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }),
     );
 
     const prismaUser = await this.userService.findByStravaId(data.id);

@@ -17,10 +17,7 @@ export class UserService {
     });
   }
 
-  async createWithTokens(
-    userData: Prisma.UserCreateInput,
-    tokenData: Prisma.StravaTokenCreateWithoutUserInput,
-  ) {
+  async createWithTokens(userData: Prisma.UserCreateInput, tokenData: Prisma.StravaTokenCreateWithoutUserInput) {
     return this.prisma.user.create({
       data: {
         ...userData,
@@ -32,10 +29,7 @@ export class UserService {
     });
   }
 
-  async updateTokens(
-    userId: number,
-    tokenData: Prisma.StravaTokenCreateWithoutUserInput,
-  ) {
+  async updateTokens(userId: number, tokenData: Prisma.StravaTokenCreateWithoutUserInput) {
     return this.prisma.stravaToken.create({
       data: { ...tokenData, userId },
     });

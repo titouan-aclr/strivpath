@@ -10,13 +10,11 @@ export class UserResolver {
   @Query(() => [User])
   async users(): Promise<User[]> {
     const prismaUsers = await this.userService.findAll();
-    return prismaUsers.map((user) => UserMapper.toGraphQL(user));
+    return prismaUsers.map(user => UserMapper.toGraphQL(user));
   }
 
   @Query(() => User, { nullable: true })
-  async userByStravaId(
-    @Args('stravaId', { type: () => Int }) stravaId: number,
-  ): Promise<User | null> {
+  async userByStravaId(@Args('stravaId', { type: () => Int }) stravaId: number): Promise<User | null> {
     const prismaUser = await this.userService.findByStravaId(stravaId);
     return prismaUser ? UserMapper.toGraphQL(prismaUser) : null;
   }

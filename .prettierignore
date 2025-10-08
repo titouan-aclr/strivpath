@@ -1,5 +1,8 @@
 node_modules
 dist
+dist-cjs
 .build
 .next
 *.log
+schema.gql
+*.d.ts.map

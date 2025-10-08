@@ -7,11 +7,7 @@ import { StravaStrategy } from './strategies/strava.strategy';
 import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [
-    PassportModule.register({ defaultStrategy: 'strava' }),
-    HttpModule,
-    UserModule,
-  ],
+  imports: [PassportModule.register({ defaultStrategy: 'strava' }), HttpModule, UserModule],
   providers: [AuthService, StravaStrategy],
   controllers: [AuthController],
 })
