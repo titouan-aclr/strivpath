@@ -4,7 +4,7 @@ import { Strategy } from 'passport-oauth2';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import { ConfigService } from '@nestjs/config';
-import { UserService } from '../../user/user.service.js';
+import { UserService } from '../../user/user.service';
 
 @Injectable()
 export class StravaStrategy extends PassportStrategy(Strategy, 'strava') {
