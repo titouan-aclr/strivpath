@@ -9,6 +9,7 @@ import { StravaModule } from './strava/strava.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
+import { GraphQLContext } from './common/types';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { join } from 'path';
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       playground: true,
       sortSchema: true,
-      context: ({ req, res }) => ({ req, res }),
+      context: ({ req, res }: GraphQLContext): GraphQLContext => ({ req, res }),
     }),
     DatabaseModule,
     AuthModule,

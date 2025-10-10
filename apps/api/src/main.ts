@@ -1,5 +1,5 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, RequestMethod } from '@nestjs/common';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
@@ -22,7 +22,7 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('v1', {
-    exclude: [{ path: 'graphql', method: 'ALL' as any }],
+    exclude: [{ path: 'graphql', method: RequestMethod.ALL }],
   });
 
   await app.listen(process.env.PORT ?? 3011);

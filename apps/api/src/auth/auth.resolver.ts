@@ -1,7 +1,6 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
 import { User, AuthResponse, AuthenticateWithStravaInput, RefreshTokenInput } from '@repo/graphql-types';
 import { AuthService } from './auth.service';
 import { StravaService } from '../strava/strava.service';
@@ -9,6 +8,7 @@ import { UserService } from '../user/user.service';
 import { GqlAuthGuard } from './guards/gql-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { TokenPayload } from './types';
+import { GraphQLContext } from '../common/types';
 
 @Resolver()
 export class AuthResolver {
@@ -21,8 +21,8 @@ export class AuthResolver {
 
   @Query(() => String, { description: 'Generate Strava OAuth authorization URL' })
   stravaAuthUrl(): string {
-    const clientId = this.configService.getOrThrow('STRAVA_CLIENT_ID');
-    const redirectUri = this.configService.getOrThrow('STRAVA_REDIRECT_URI');
+    const clientId = this.configService.getOrThrow<string>('STRAVA_CLIENT_ID');
+    const redirectUri = this.configService.getOrThrow<string>('STRAVA_REDIRECT_URI');
     const scope = 'read,activity:read_all,profile:read_all';
 
     return `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
@@ -37,7 +37,7 @@ export class AuthResolver {
   @Mutation(() => AuthResponse, { description: 'Authenticate with Strava OAuth code' })
   async authenticateWithStrava(
     @Args('input') input: AuthenticateWithStravaInput,
-    @Context() context: { res: Response },
+    @Context() context: GraphQLContext,
   ): Promise<AuthResponse> {
     const stravaTokens = await this.stravaService.exchangeCodeForToken(input.code);
 
@@ -55,7 +55,7 @@ export class AuthResolver {
   @Mutation(() => AuthResponse, { description: 'Refresh access token using refresh token' })
   async refreshToken(
     @Args('input') input: RefreshTokenInput,
-    @Context() context: { res: Response },
+    @Context() context: GraphQLContext,
   ): Promise<AuthResponse> {
     const { accessToken, refreshToken, user } = await this.authService.refreshAccessToken(input.refreshToken);
 
@@ -65,7 +65,7 @@ export class AuthResolver {
   }
 
   @Mutation(() => Boolean, { description: 'Logout and revoke refresh token' })
-  async logout(@Args('refreshToken') refreshToken: string, @Context() context: { res: Response }): Promise<boolean> {
+  async logout(@Args('refreshToken') refreshToken: string, @Context() context: GraphQLContext): Promise<boolean> {
     await this.authService.revokeRefreshToken(refreshToken);
 
     this.clearAccessTokenCookie(context.res);
@@ -73,7 +73,7 @@ export class AuthResolver {
     return true;
   }
 
-  private setAccessTokenCookie(res: Response, accessToken: string): void {
+  private setAccessTokenCookie(res: GraphQLContext['res'], accessToken: string): void {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
 
     res.cookie('Authentication', accessToken, {
@@ -84,7 +84,7 @@ export class AuthResolver {
     });
   }
 
-  private clearAccessTokenCookie(res: Response): void {
+  private clearAccessTokenCookie(res: GraphQLContext['res']): void {
     res.clearCookie('Authentication');
   }
 }

@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { StravaTokenResponse, StravaAthleteResponse } from './types';
+import { HttpError } from '../common/types';
 
 @Injectable()
 export class StravaService {
@@ -18,8 +19,8 @@ export class StravaService {
     const response = (await firstValueFrom(
       this.httpService
         .post<StravaTokenResponse>(`${this.STRAVA_API_BASE}/oauth/token`, {
-          client_id: this.configService.getOrThrow('STRAVA_CLIENT_ID'),
-          client_secret: this.configService.getOrThrow('STRAVA_CLIENT_SECRET'),
+          client_id: this.configService.getOrThrow<string>('STRAVA_CLIENT_ID'),
+          client_secret: this.configService.getOrThrow<string>('STRAVA_CLIENT_SECRET'),
           code,
           grant_type: 'authorization_code',
         })
@@ -42,7 +43,7 @@ export class StravaService {
   }
 
   private handleStravaError(operation: string) {
-    return catchError(error => {
+    return catchError((error: HttpError) => {
       if (error.response?.status === 401) {
         return throwError(() => new UnauthorizedException(`Strava authentication failed: ${operation}`));
       }
