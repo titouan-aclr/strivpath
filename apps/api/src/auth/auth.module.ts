@@ -1,17 +1,20 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { HttpModule } from '@nestjs/axios';
 import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { StravaStrategy } from './strategies/strava.strategy';
+import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '../user/user.module';
+import { StravaModule } from '../strava/strava.module';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), JwtModule.register({}), HttpModule, UserModule],
-  providers: [AuthService, StravaStrategy, JwtStrategy],
-  controllers: [AuthController],
+  imports: [
+    PassportModule.register({ defaultStrategy: 'jwt' }),
+    JwtModule.register({}),
+    forwardRef(() => UserModule),
+    StravaModule,
+  ],
+  providers: [AuthService, AuthResolver, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

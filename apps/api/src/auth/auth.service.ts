@@ -61,7 +61,7 @@ export class AuthService {
     }
   }
 
-  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const payload = await this.verifyRefreshToken(refreshToken);
 
     const storedToken = await this.validateStoredRefreshToken(refreshToken);
@@ -80,7 +80,7 @@ export class AuthService {
 
     const accessToken = this.generateAccessToken(user);
 
-    return { accessToken, refreshToken };
+    return { accessToken, refreshToken, user };
   }
 
   async revokeRefreshToken(refreshToken: string): Promise<void> {

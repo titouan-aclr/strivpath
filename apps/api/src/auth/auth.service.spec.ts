@@ -127,7 +127,7 @@ describe('AuthService', () => {
   });
 
   describe('refreshAccessToken', () => {
-    it('should generate new access token without rotating refresh token', async () => {
+    it('should generate new access token without rotating refresh token and return user', async () => {
       const mockRefreshToken = 'valid-refresh-token';
       const mockAccessToken = 'new-access-token';
       const mockPayload = { sub: 1, stravaId: 12345 };
@@ -156,6 +156,7 @@ describe('AuthService', () => {
       expect(result).toEqual({
         accessToken: mockAccessToken,
         refreshToken: mockRefreshToken,
+        user: mockUser,
       });
       expect(mockPrismaService.refreshToken.update).toHaveBeenCalledWith({
         where: { id: mockStoredToken.id },

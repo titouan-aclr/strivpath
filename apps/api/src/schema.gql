@@ -2,14 +2,44 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthResponse {
+  accessToken: String!
+  refreshToken: String!
+  user: User!
+}
+
+input AuthenticateWithStravaInput {
+  code: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+type Mutation {
+  """Authenticate with Strava OAuth code"""
+  authenticateWithStrava(input: AuthenticateWithStravaInput!): AuthResponse!
+
+  """Logout and revoke refresh token"""
+  logout(refreshToken: String!): Boolean!
+
+  """Refresh access token using refresh token"""
+  refreshToken(input: RefreshTokenInput!): AuthResponse!
+}
+
 type Query {
+  """Get current authenticated user"""
+  currentUser: User
+
+  """Generate Strava OAuth authorization URL"""
+  stravaAuthUrl: String!
   userByStravaId(stravaId: Int!): User
   users: [User!]!
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
 }
 
 type User {

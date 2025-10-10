@@ -1,3 +1,12 @@
+export interface StravaTokenResponse {
+  token_type: string;
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+  access_token: string;
+  athlete: StravaAthleteResponse;
+}
+
 export interface StravaAthleteResponse {
   id: number;
   username: string;
@@ -31,5 +40,4 @@ export interface StravaAthleteResponse {
   ftp: null | number;
   bikes: unknown[];
   shoes: unknown[];
-  expires_at?: number;
 }

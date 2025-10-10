@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { User } from '@repo/graphql-types';
 import { PrismaService } from '../database/prisma.service';
 import { UserMapper } from './user.mapper';
+import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
 
 @Injectable()
 export class UserService {
@@ -43,5 +44,67 @@ export class UserService {
     return await this.prisma.stravaToken.create({
       data: { ...tokenData, userId },
     });
+  }
+
+  async upsertFromStrava(athlete: StravaAthleteResponse, stravaTokens: StravaTokenResponse): Promise<User> {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { stravaId: athlete.id },
+    });
+
+    if (existingUser) {
+      const updatedUser = await this.prisma.user.update({
+        where: { id: existingUser.id },
+        data: {
+          username: athlete.username,
+          firstname: athlete.firstname,
+          lastname: athlete.lastname,
+          sex: athlete.sex,
+          city: athlete.city,
+          country: athlete.country,
+          profile: athlete.profile,
+          profileMedium: athlete.profile_medium,
+          tokens: {
+            create: {
+              accessToken: stravaTokens.access_token,
+              refreshToken: stravaTokens.refresh_token,
+              expiresAt: stravaTokens.expires_at,
+            },
+          },
+        },
+      });
+
+      return UserMapper.toGraphQL(updatedUser);
+    }
+
+    const newUser = await this.prisma.user.create({
+      data: {
+        stravaId: athlete.id,
+        username: athlete.username,
+        firstname: athlete.firstname,
+        lastname: athlete.lastname,
+        sex: athlete.sex,
+        city: athlete.city,
+        country: athlete.country,
+        profile: athlete.profile,
+        profileMedium: athlete.profile_medium,
+        tokens: {
+          create: {
+            accessToken: stravaTokens.access_token,
+            refreshToken: stravaTokens.refresh_token,
+            expiresAt: stravaTokens.expires_at,
+          },
+        },
+        preferences: {
+          create: {
+            selectedSports: [],
+            onboardingCompleted: false,
+            locale: 'en',
+            theme: 'system',
+          },
+        },
+      },
+    });
+
+    return UserMapper.toGraphQL(newUser);
   }
 }
