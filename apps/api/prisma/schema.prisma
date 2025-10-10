@@ -28,6 +28,7 @@ model User {
   preferences   UserPreferences?
   activities    Activity[]
   syncHistory   SyncHistory[]
+  refreshTokens RefreshToken[]
 }
 
 model StravaToken {
@@ -98,4 +99,20 @@ model SyncHistory {
   completedAt          DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  tokenHash         String    @unique
+  expiresAt         DateTime
+  revoked           Boolean   @default(false)
+  deviceFingerprint String?
+  lastUsedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revoked])
+  @@index([tokenHash, revoked])
 }

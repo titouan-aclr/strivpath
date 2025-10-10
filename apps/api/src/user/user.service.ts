@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { User } from '@repo/graphql-types';
 import { PrismaService } from '../database/prisma.service';
+import { UserMapper } from './user.mapper';
 
 @Injectable()
 export class UserService {
@@ -8,6 +10,14 @@ export class UserService {
 
   async findAll() {
     return await this.prisma.user.findMany();
+  }
+
+  async findById(id: number): Promise<User | null> {
+    const prismaUser = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    return prismaUser ? UserMapper.toGraphQL(prismaUser) : null;
   }
 
   async findByStravaId(stravaId: number) {

@@ -1,3 +1,4 @@
 export interface TokenPayload {
-  userId: string;
+  sub: number;
+  stravaId: number;
 }

@@ -1,14 +1,17 @@
 import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { HttpModule } from '@nestjs/axios';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { HttpModule } from '@nestjs/axios';
-import { PassportModule } from '@nestjs/passport';
 import { StravaStrategy } from './strategies/strava.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [PassportModule.register({ defaultStrategy: 'strava' }), HttpModule, UserModule],
-  providers: [AuthService, StravaStrategy],
+  imports: [PassportModule.register({ defaultStrategy: 'jwt' }), JwtModule.register({}), HttpModule, UserModule],
+  providers: [AuthService, StravaStrategy, JwtStrategy],
   controllers: [AuthController],
+  exports: [AuthService],
 })
 export class AuthModule {}
