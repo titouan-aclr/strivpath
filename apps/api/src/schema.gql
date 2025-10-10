@@ -26,6 +26,9 @@ type Mutation {
 
   """Refresh access token using refresh token"""
   refreshToken(input: RefreshTokenInput!): AuthResponse!
+
+  """Update user preferences (sports, locale, theme)"""
+  updateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
 }
 
 type Query {
@@ -42,6 +45,26 @@ input RefreshTokenInput {
   refreshToken: String!
 }
 
+"""Available sport types for activity tracking"""
+enum SportType {
+  RIDE
+  RUN
+  SWIM
+}
+
+"""Available theme options"""
+enum ThemeType {
+  DARK
+  LIGHT
+  SYSTEM
+}
+
+input UpdateUserPreferencesInput {
+  locale: String
+  selectedSports: [SportType!]
+  theme: ThemeType
+}
+
 type User {
   city: String
   country: String
@@ -55,4 +78,15 @@ type User {
   stravaId: Int!
   updatedAt: DateTime!
   username: String
+}
+
+type UserPreferences {
+  createdAt: DateTime!
+  id: Int!
+  locale: String!
+  onboardingCompleted: Boolean!
+  selectedSports: [SportType!]!
+  theme: ThemeType!
+  updatedAt: DateTime!
+  userId: Int!
 }

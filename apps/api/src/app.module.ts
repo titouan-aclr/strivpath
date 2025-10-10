@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { UserModule } from './user/user.module';
+import { UserPreferencesModule } from './user-preferences/user-preferences.module';
 import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
 import { GraphQLModule } from '@nestjs/graphql';
@@ -24,6 +25,7 @@ import { GraphQLContext } from './common/types';
     DatabaseModule,
     AuthModule,
     UserModule,
+    UserPreferencesModule,
     StravaModule,
   ],
   controllers: [AppController],

@@ -1,4 +1,8 @@
-import { User as PrismaUser, StravaToken as PrismaStravaToken } from '@prisma/client';
+import {
+  User as PrismaUser,
+  StravaToken as PrismaStravaToken,
+  UserPreferences as PrismaUserPreferences,
+} from '@prisma/client';
 
 let mockIdCounter = 1;
 
@@ -49,6 +53,22 @@ export const createMockStravaToken = (userId: number, overrides?: Partial<Prisma
     refreshToken: randomString(40),
     expiresAt,
     scope: 'read,activity:read_all,profile:read_all',
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+};
+
+export const createMockPrismaUserPreferences = (overrides?: Partial<PrismaUserPreferences>): PrismaUserPreferences => {
+  const id = mockIdCounter++;
+
+  return {
+    id,
+    userId: randomInt(1, 1000),
+    selectedSports: [],
+    onboardingCompleted: false,
+    locale: 'en',
+    theme: 'system',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
     ...overrides,
