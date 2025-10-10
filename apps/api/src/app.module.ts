@@ -7,10 +7,12 @@ import { UserModule } from './user/user.module';
 import { UserPreferencesModule } from './user-preferences/user-preferences.module';
 import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
+import { ActivityModule } from './activity/activity.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GraphQLContext } from './common/types';
+import { GraphQLBigInt } from 'graphql-scalars';
 
 @Module({
   imports: [
@@ -21,12 +23,16 @@ import { GraphQLContext } from './common/types';
       playground: true,
       sortSchema: true,
       context: ({ req, res }: GraphQLContext): GraphQLContext => ({ req, res }),
+      resolvers: {
+        BigInt: GraphQLBigInt,
+      },
     }),
     DatabaseModule,
     AuthModule,
     UserModule,
     UserPreferencesModule,
     StravaModule,
+    ActivityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
