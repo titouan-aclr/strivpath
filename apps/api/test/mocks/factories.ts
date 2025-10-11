@@ -2,6 +2,8 @@ import {
   User as PrismaUser,
   StravaToken as PrismaStravaToken,
   UserPreferences as PrismaUserPreferences,
+  Activity as PrismaActivity,
+  SyncHistory as PrismaSyncHistory,
 } from '@prisma/client';
 
 let mockIdCounter = 1;
@@ -71,6 +73,56 @@ export const createMockPrismaUserPreferences = (overrides?: Partial<PrismaUserPr
     theme: 'system',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
+    ...overrides,
+  };
+};
+
+export const createMockPrismaActivity = (overrides?: Partial<PrismaActivity>): PrismaActivity => {
+  const id = mockIdCounter++;
+  const stravaId = BigInt(randomInt(1000000000, 9999999999));
+
+  return {
+    id,
+    stravaId,
+    userId: randomInt(1, 1000),
+    name: `Morning Run ${id}`,
+    type: 'Run',
+    distance: randomInt(1000, 50000),
+    movingTime: randomInt(600, 10800),
+    elapsedTime: randomInt(600, 10800),
+    totalElevationGain: randomInt(0, 1000),
+    startDate: new Date('2024-01-01T08:00:00Z'),
+    startDateLocal: new Date('2024-01-01T09:00:00Z'),
+    timezone: '(GMT+01:00) Europe/Paris',
+    averageSpeed: 3.5,
+    maxSpeed: 5.2,
+    averageHeartrate: 145,
+    maxHeartrate: 175,
+    kilojoules: 850,
+    deviceWatts: true,
+    hasKudoed: false,
+    kudosCount: randomInt(0, 50),
+    averageCadence: 85,
+    raw: { summary_polyline: 'abc123', map: { id: 'xyz789' } },
+    createdAt: new Date('2024-01-01'),
+    updatedAt: new Date(),
+    ...overrides,
+  };
+};
+
+export const createMockPrismaSyncHistory = (overrides?: Partial<PrismaSyncHistory>): PrismaSyncHistory => {
+  const id = mockIdCounter++;
+
+  return {
+    id,
+    userId: randomInt(1, 1000),
+    status: 'COMPLETED',
+    stage: 'COMPLETED',
+    totalActivities: 100,
+    processedActivities: 100,
+    errorMessage: null,
+    startedAt: new Date('2024-01-01T10:00:00Z'),
+    completedAt: new Date('2024-01-01T10:05:00Z'),
     ...overrides,
   };
 };

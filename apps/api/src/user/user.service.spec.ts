@@ -50,6 +50,76 @@ describe('UserService', () => {
     });
   });
 
+  describe('findById', () => {
+    it('should return a GraphQL user when found', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 1,
+        stravaId: 12345,
+        username: 'testuser',
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(1);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(1);
+      expect(result?.stravaId).toBe(12345);
+      expect(result?.username).toBe('testuser');
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+    });
+
+    it('should return null when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.findById(99999);
+
+      expect(result).toBeNull();
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 99999 },
+      });
+    });
+
+    it('should convert Prisma user to GraphQL user using mapper', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 42,
+        stravaId: 67890,
+        username: 'athlete',
+        firstname: 'Test',
+        lastname: 'Athlete',
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(42);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(42);
+      expect(result?.stravaId).toBe(67890);
+      expect(result?.username).toBe('athlete');
+      expect(result?.firstname).toBe('Test');
+      expect(result?.lastname).toBe('Athlete');
+    });
+
+    it('should handle null optional fields in returned GraphQL user', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 5,
+        stravaId: 11111,
+        username: null,
+        firstname: null,
+        lastname: null,
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(5);
+
+      expect(result).toBeDefined();
+      expect(result?.username).toBeUndefined();
+      expect(result?.firstname).toBeUndefined();
+      expect(result?.lastname).toBeUndefined();
+    });
+  });
+
   describe('findByStravaId', () => {
     it('should return a user with tokens when found', async () => {
       const mockUser = createMockPrismaUser({ stravaId: 12345 });
