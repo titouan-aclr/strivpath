@@ -45,8 +45,8 @@ export const createMockPrismaUser = (overrides?: Partial<PrismaUser>): PrismaUse
 
 export const createMockStravaToken = (userId: number, overrides?: Partial<PrismaStravaToken>): PrismaStravaToken => {
   const id = mockIdCounter++;
-  const expiresAt = new Date();
-  expiresAt.setFullYear(expiresAt.getFullYear() + 1);
+  const now = Date.now();
+  const expiresAt = Math.floor(now / 1000) + 3600;
 
   return {
     id,
@@ -54,9 +54,7 @@ export const createMockStravaToken = (userId: number, overrides?: Partial<Prisma
     accessToken: randomString(40),
     refreshToken: randomString(40),
     expiresAt,
-    scope: 'read,activity:read_all,profile:read_all',
     createdAt: new Date('2024-01-01'),
-    updatedAt: new Date(),
     ...overrides,
   };
 };

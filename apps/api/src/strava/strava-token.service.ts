@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject, forwardRef } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from './strava.service';
 import { StravaTokenNotFoundException, StravaRefreshTokenExpiredException } from './strava-token.exceptions';
@@ -7,6 +7,7 @@ import { StravaTokenNotFoundException, StravaRefreshTokenExpiredException } from
 export class StravaTokenService {
   constructor(
     private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => StravaService))
     private readonly stravaService: StravaService,
   ) {}
 

@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { Injectable, Inject, forwardRef, UnauthorizedException, BadRequestException } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
@@ -14,6 +14,7 @@ export class StravaService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    @Inject(forwardRef(() => StravaTokenService))
     private readonly stravaTokenService: StravaTokenService,
   ) {}
 
