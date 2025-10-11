@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { StravaService } from '../strava/strava.service';
+import { StravaService } from './strava.service';
 import { StravaTokenNotFoundException, StravaRefreshTokenExpiredException } from './strava-token.exceptions';
 
 @Injectable()

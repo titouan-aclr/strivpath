@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ActivityService } from './activity.service';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';
-import { StravaTokenService } from '../strava-token/strava-token.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { BadRequestException } from '@nestjs/common';
 import { SyncStatus, SyncStage, SportType } from '@repo/graphql-types';
@@ -11,7 +10,6 @@ describe('ActivityService', () => {
   let service: ActivityService;
   let prismaService: PrismaService;
   let stravaService: StravaService;
-  let stravaTokenService: StravaTokenService;
   let syncHistoryService: SyncHistoryService;
 
   const mockPrismaService = {
@@ -29,10 +27,6 @@ describe('ActivityService', () => {
     getActivities: jest.fn(),
   };
 
-  const mockStravaTokenService = {
-    getValidAccessToken: jest.fn(),
-  };
-
   const mockSyncHistoryService = {
     create: jest.fn(),
     update: jest.fn(),
@@ -45,7 +39,6 @@ describe('ActivityService', () => {
         ActivityService,
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: StravaService, useValue: mockStravaService },
-        { provide: StravaTokenService, useValue: mockStravaTokenService },
         { provide: SyncHistoryService, useValue: mockSyncHistoryService },
       ],
     }).compile();
@@ -53,7 +46,6 @@ describe('ActivityService', () => {
     service = module.get<ActivityService>(ActivityService);
     prismaService = module.get<PrismaService>(PrismaService);
     stravaService = module.get<StravaService>(StravaService);
-    stravaTokenService = module.get<StravaTokenService>(StravaTokenService);
     syncHistoryService = module.get<SyncHistoryService>(SyncHistoryService);
   });
 
@@ -65,7 +57,6 @@ describe('ActivityService', () => {
     it('should throw BadRequestException if no preferences found', async () => {
       const userId = 1;
 
-      mockStravaTokenService.getValidAccessToken.mockResolvedValue('valid-token');
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(null);
 
       await expect(service.syncActivities(userId)).rejects.toThrow(BadRequestException);
@@ -112,7 +103,6 @@ describe('ActivityService', () => {
         startDate: new Date('2025-01-09T08:00:00Z'),
       };
 
-      mockStravaTokenService.getValidAccessToken.mockResolvedValue('valid-token');
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockPrismaService.activity.findMany.mockResolvedValue(mockExistingActivities);
       mockPrismaService.activity.findFirst.mockResolvedValue(mockLatestActivity);
@@ -124,7 +114,6 @@ describe('ActivityService', () => {
 
       const result = await service.syncActivities(userId);
 
-      expect(stravaTokenService.getValidAccessToken).toHaveBeenCalledWith(userId);
       expect(prismaService.userPreferences.findUnique).toHaveBeenCalledWith({ where: { userId } });
       expect(stravaService.getActivities).toHaveBeenCalled();
       expect(result.status).toBe(SyncStatus.COMPLETED);
@@ -183,7 +172,6 @@ describe('ActivityService', () => {
         },
       ];
 
-      mockStravaTokenService.getValidAccessToken.mockResolvedValue('valid-token');
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockPrismaService.activity.findMany.mockResolvedValue(mockExistingActivities);
       mockPrismaService.activity.findFirst.mockResolvedValue({ startDate: new Date('2025-01-09') });
@@ -254,7 +242,6 @@ describe('ActivityService', () => {
         },
       ];
 
-      mockStravaTokenService.getValidAccessToken.mockResolvedValue('valid-token');
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockPrismaService.activity.findMany.mockResolvedValue(mockExistingActivities);
       mockPrismaService.activity.findFirst.mockResolvedValue({ startDate: new Date('2025-01-09') });
@@ -295,7 +282,6 @@ describe('ActivityService', () => {
         startedAt: new Date(),
       };
 
-      mockStravaTokenService.getValidAccessToken.mockResolvedValue('valid-token');
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockPrismaService.activity.findMany.mockResolvedValue([]);
       mockSyncHistoryService.create.mockResolvedValue(mockSync);

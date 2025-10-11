@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { StravaTokenService } from './strava-token.service';
 import { PrismaService } from '../database/prisma.service';
-import { StravaService } from '../strava/strava.service';
+import { StravaService } from './strava.service';
 import { StravaTokenNotFoundException, StravaRefreshTokenExpiredException } from './strava-token.exceptions';
 
 describe('StravaTokenService', () => {

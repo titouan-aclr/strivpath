@@ -1,34 +1,39 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Activity, SyncHistory, SyncStatus, SyncStage, SportType } from '@repo/graphql-types';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';
-import { StravaTokenService } from '../strava-token/strava-token.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { ActivityMapper } from './activity.mapper';
 import { StravaActivitySummary } from '../strava/types';
+
+const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
+  [SportType.RUN]: new Set(['Run', 'TrailRun', 'VirtualRun']),
+  [SportType.RIDE]: new Set([
+    'Ride',
+    'MountainBikeRide',
+    'VirtualRide',
+    'EBikeRide',
+    'EMountainBikeRide',
+    'Velomobile',
+  ]),
+  [SportType.SWIM]: new Set(['Swim']),
+};
 
 @Injectable()
 export class ActivityService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly stravaService: StravaService,
-    private readonly stravaTokenService: StravaTokenService,
     private readonly syncHistoryService: SyncHistoryService,
   ) {}
 
   private getActivitySportType(stravaType: string): SportType | null {
-    const normalizedType = stravaType.toLowerCase();
-
-    if (normalizedType.includes('run') || normalizedType === 'walk' || normalizedType === 'hike') {
-      return SportType.RUN;
+    for (const [sportType, stravaTypes] of Object.entries(STRAVA_SPORT_TYPE_MAPPING)) {
+      if (stravaTypes.has(stravaType)) {
+        return sportType as SportType;
+      }
     }
-    if (normalizedType.includes('ride') || normalizedType.includes('bike') || normalizedType === 'velomobile') {
-      return SportType.RIDE;
-    }
-    if (normalizedType.includes('swim')) {
-      return SportType.SWIM;
-    }
-
     return null;
   }
 
@@ -71,7 +76,6 @@ export class ActivityService {
   }
 
   private async syncHistoricalActivitiesForSports(
-    accessToken: string,
     userId: number,
     sports: SportType[],
   ): Promise<StravaActivitySummary[]> {
@@ -81,7 +85,7 @@ export class ActivityService {
     let hasMore = true;
 
     while (hasMore) {
-      const activities = await this.stravaService.getActivities(accessToken, {
+      const activities = await this.stravaService.getActivities(userId, {
         page,
         per_page: perPage,
       });
@@ -98,7 +102,7 @@ export class ActivityService {
     return allActivities;
   }
 
-  private async syncRecentActivities(accessToken: string, userId: number): Promise<StravaActivitySummary[]> {
+  private async syncRecentActivities(userId: number): Promise<StravaActivitySummary[]> {
     const latestActivity = await this.prisma.activity.findFirst({
       where: { userId },
       orderBy: { startDate: 'desc' },
@@ -112,7 +116,7 @@ export class ActivityService {
     let hasMore = true;
 
     while (hasMore) {
-      const activities = await this.stravaService.getActivities(accessToken, {
+      const activities = await this.stravaService.getActivities(userId, {
         page,
         per_page: perPage,
         ...(after && { after }),
@@ -170,7 +174,7 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
-          raw: stravaActivity as any,
+          raw: stravaActivity as Prisma.InputJsonValue,
         },
         update: {
           name: stravaActivity.name,
@@ -191,7 +195,7 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
-          raw: stravaActivity as any,
+          raw: stravaActivity as Prisma.InputJsonValue,
         },
       });
 
@@ -204,8 +208,6 @@ export class ActivityService {
   }
 
   async syncActivities(userId: number): Promise<SyncHistory> {
-    const accessToken = await this.stravaTokenService.getValidAccessToken(userId);
-
     const preferences = await this.prisma.userPreferences.findUnique({
       where: { userId },
     });
@@ -229,15 +231,11 @@ export class ActivityService {
       const allActivities: StravaActivitySummary[] = [];
 
       if (newlySelectedSports.length > 0) {
-        const historicalActivities = await this.syncHistoricalActivitiesForSports(
-          accessToken,
-          userId,
-          newlySelectedSports,
-        );
+        const historicalActivities = await this.syncHistoricalActivitiesForSports(userId, newlySelectedSports);
         allActivities.push(...historicalActivities);
       }
 
-      const recentActivities = await this.syncRecentActivities(accessToken, userId);
+      const recentActivities = await this.syncRecentActivities(userId);
       allActivities.push(...recentActivities);
 
       await this.storeActivities(allActivities, userId, selectedSports as SportType[], sync.id);

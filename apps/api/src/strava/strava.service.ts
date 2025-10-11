@@ -5,6 +5,7 @@ import { firstValueFrom, catchError, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { StravaTokenResponse, StravaAthleteResponse, StravaActivitySummary } from './types';
 import { HttpError } from '../common/types';
+import { StravaTokenService } from './strava-token.service';
 
 @Injectable()
 export class StravaService {
@@ -13,6 +14,7 @@ export class StravaService {
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly stravaTokenService: StravaTokenService,
   ) {}
 
   async exchangeCodeForToken(code: string): Promise<StravaTokenResponse> {
@@ -43,7 +45,7 @@ export class StravaService {
   }
 
   async getActivities(
-    accessToken: string,
+    userId: number,
     params?: {
       page?: number;
       per_page?: number;
@@ -51,6 +53,8 @@ export class StravaService {
       after?: number;
     },
   ): Promise<StravaActivitySummary[]> {
+    const accessToken = await this.stravaTokenService.getValidAccessToken(userId);
+
     const response = (await firstValueFrom(
       this.httpService
         .get<StravaActivitySummary[]>(`${this.STRAVA_API_BASE}/api/v3/athlete/activities`, {
