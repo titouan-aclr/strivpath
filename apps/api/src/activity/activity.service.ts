@@ -174,7 +174,7 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
-          raw: stravaActivity as Prisma.InputJsonValue,
+          raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
         update: {
           name: stravaActivity.name,
@@ -195,7 +195,7 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
-          raw: stravaActivity as Prisma.InputJsonValue,
+          raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
       });
 
