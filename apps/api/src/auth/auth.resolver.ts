@@ -1,9 +1,9 @@
-import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Context } from '@nestjs/graphql';
 import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User, AuthResponse, AuthenticateWithStravaInput } from '@repo/graphql-types';
+import { User, AuthResponse } from '@repo/graphql-types';
 import { AuthService } from './auth.service';
-import { StravaService } from '../strava/strava.service';
+import { AuthCookieService } from './auth-cookie.service';
 import { UserService } from '../user/user.service';
 import { GqlAuthGuard } from './guards/gql-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
@@ -14,7 +14,7 @@ import { GraphQLContext } from '../common/types';
 export class AuthResolver {
   constructor(
     private readonly authService: AuthService,
-    private readonly stravaService: StravaService,
+    private readonly authCookieService: AuthCookieService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
   ) {}
@@ -34,25 +34,6 @@ export class AuthResolver {
     return this.userService.findById(tokenPayload.sub);
   }
 
-  @Mutation(() => AuthResponse, { description: 'Authenticate with Strava OAuth code' })
-  async authenticateWithStrava(
-    @Args('input') input: AuthenticateWithStravaInput,
-    @Context() context: GraphQLContext,
-  ): Promise<AuthResponse> {
-    const stravaTokens = await this.stravaService.exchangeCodeForToken(input.code);
-
-    const athlete = stravaTokens.athlete;
-
-    const user = await this.userService.upsertFromStrava(athlete, stravaTokens);
-
-    const { accessToken, refreshToken } = await this.authService.generateTokens(user);
-
-    this.setAccessTokenCookie(context.res, accessToken);
-    this.setRefreshTokenCookie(context.res, refreshToken);
-
-    return { user };
-  }
-
   @Mutation(() => AuthResponse, { description: 'Refresh access token using refresh token cookie' })
   async refreshToken(@Context() context: GraphQLContext): Promise<AuthResponse> {
     const refreshToken = context.req.cookies?.RefreshToken as string | undefined;
@@ -67,8 +48,8 @@ export class AuthResolver {
       user,
     } = await this.authService.refreshAccessToken(refreshToken);
 
-    this.setAccessTokenCookie(context.res, accessToken);
-    this.setRefreshTokenCookie(context.res, newRefreshToken);
+    this.authCookieService.setAccessTokenCookie(context.res, accessToken);
+    this.authCookieService.setRefreshTokenCookie(context.res, newRefreshToken);
 
     return { user };
   }
@@ -81,43 +62,8 @@ export class AuthResolver {
       await this.authService.revokeRefreshToken(refreshToken);
     }
 
-    this.clearAccessTokenCookie(context.res);
-    this.clearRefreshTokenCookie(context.res);
+    this.authCookieService.clearAllAuthCookies(context.res);
 
     return true;
-  }
-
-  private setAccessTokenCookie(res: GraphQLContext['res'], accessToken: string): void {
-    const isProduction = this.configService.get('NODE_ENV') === 'production';
-
-    // TODO: verify config before prod, sameSite: strict
-    res.cookie('Authentication', accessToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 15 * 60 * 1000,
-      path: '/',
-    });
-  }
-
-  private clearAccessTokenCookie(res: GraphQLContext['res']): void {
-    res.clearCookie('Authentication');
-  }
-
-  private setRefreshTokenCookie(res: GraphQLContext['res'], refreshToken: string): void {
-    const isProduction = this.configService.get('NODE_ENV') === 'production';
-
-    // TODO: verify config before prod, sameSite: strict
-    res.cookie('RefreshToken', refreshToken, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? 'none' : 'lax',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      path: '/',
-    });
-  }
-
-  private clearRefreshTokenCookie(res: GraphQLContext['res']): void {
-    res.clearCookie('RefreshToken');
   }
 }

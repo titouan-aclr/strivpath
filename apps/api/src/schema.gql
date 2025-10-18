@@ -43,10 +43,6 @@ type AuthResponse {
   user: User!
 }
 
-input AuthenticateWithStravaInput {
-  code: String!
-}
-
 """
 The `BigInt` scalar type represents non-fractional signed whole numeric values.
 """
@@ -58,9 +54,6 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  """Authenticate with Strava OAuth code"""
-  authenticateWithStrava(input: AuthenticateWithStravaInput!): AuthResponse!
-
   """Logout and revoke refresh token"""
   logout: Boolean!
 

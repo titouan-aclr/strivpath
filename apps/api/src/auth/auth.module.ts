@@ -3,6 +3,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
+import { AuthController } from './auth.controller';
+import { AuthCookieService } from './auth-cookie.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '../user/user.module';
 import { StravaModule } from '../strava/strava.module';
@@ -14,7 +16,8 @@ import { StravaModule } from '../strava/strava.module';
     forwardRef(() => UserModule),
     StravaModule,
   ],
-  providers: [AuthService, AuthResolver, JwtStrategy],
+  controllers: [AuthController],
+  providers: [AuthService, AuthResolver, AuthCookieService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

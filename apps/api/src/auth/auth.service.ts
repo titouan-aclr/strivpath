@@ -6,6 +6,7 @@ import { RefreshToken } from '@prisma/client';
 import * as crypto from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
+import { StravaService } from '../strava/strava.service';
 import { TokenPayload } from './types';
 
 @Injectable()
@@ -16,6 +17,8 @@ export class AuthService {
     private readonly prisma: PrismaService,
     @Inject(forwardRef(() => UserService))
     private readonly userService: UserService,
+    @Inject(forwardRef(() => StravaService))
+    private readonly stravaService: StravaService,
   ) {}
 
   private generateAccessToken(user: User): string {
@@ -49,6 +52,25 @@ export class AuthService {
     await this.storeRefreshToken(user.id, refreshToken, deviceFingerprint);
 
     return { accessToken, refreshToken };
+  }
+
+  async handleOAuthCallback(
+    code: string,
+  ): Promise<{ user: User; accessToken: string; refreshToken: string; redirectPath: string }> {
+    const stravaTokens = await this.stravaService.exchangeCodeForToken(code);
+    const athlete = stravaTokens.athlete;
+
+    const user = await this.userService.upsertFromStrava(athlete, stravaTokens);
+
+    const { accessToken, refreshToken } = await this.generateTokens(user);
+
+    const preferences = await this.prisma.userPreferences.findUnique({
+      where: { userId: user.id },
+    });
+
+    const redirectPath = preferences?.onboardingCompleted ? '/dashboard' : '/onboarding';
+
+    return { user, accessToken, refreshToken, redirectPath };
   }
 
   private async verifyRefreshToken(token: string): Promise<TokenPayload> {
