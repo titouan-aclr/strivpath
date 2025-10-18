@@ -76,11 +76,13 @@ export class AuthResolver {
   private setAccessTokenCookie(res: GraphQLContext['res'], accessToken: string): void {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
 
+    // TODO: verify config before prod
     res.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: isProduction,
-      sameSite: 'strict',
+      sameSite: isProduction ? 'none' : 'lax',
       maxAge: 15 * 60 * 1000,
+      path: '/',
     });
   }
 

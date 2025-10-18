@@ -20,7 +20,11 @@ import { GraphQLBigInt } from 'graphql-scalars';
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: true,
+      playground: {
+        settings: {
+          'request.credentials': 'include',
+        },
+      },
       sortSchema: true,
       context: ({ req, res }: GraphQLContext): GraphQLContext => ({ req, res }),
       resolvers: {
