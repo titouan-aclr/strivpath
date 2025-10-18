@@ -3,31 +3,33 @@ import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
-import { StravaService } from '../strava/strava.service';
+import { AuthCookieService } from './auth-cookie.service';
 import { UserService } from '../user/user.service';
 import { User } from '@repo/graphql-types';
-import { StravaTokenResponse, StravaAthleteResponse } from '../strava/types';
-import { Response } from 'express';
+import { Response, Request } from 'express';
+import { GraphQLContext } from '../common/types';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
   let authService: AuthService;
-  let stravaService: StravaService;
+  let authCookieService: AuthCookieService;
   let userService: UserService;
   let configService: ConfigService;
 
   const mockAuthService = {
-    generateTokens: jest.fn(),
     refreshAccessToken: jest.fn(),
     revokeRefreshToken: jest.fn(),
   };
 
-  const mockStravaService = {
-    exchangeCodeForToken: jest.fn(),
+  const mockAuthCookieService = {
+    setAccessTokenCookie: jest.fn(),
+    setRefreshTokenCookie: jest.fn(),
+    clearAccessTokenCookie: jest.fn(),
+    clearRefreshTokenCookie: jest.fn(),
+    clearAllAuthCookies: jest.fn(),
   };
 
   const mockUserService = {
-    upsertFromStrava: jest.fn(),
     findById: jest.fn(),
   };
 
@@ -61,7 +63,7 @@ describe('AuthResolver', () => {
       providers: [
         AuthResolver,
         { provide: AuthService, useValue: mockAuthService },
-        { provide: StravaService, useValue: mockStravaService },
+        { provide: AuthCookieService, useValue: mockAuthCookieService },
         { provide: UserService, useValue: mockUserService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
@@ -69,7 +71,7 @@ describe('AuthResolver', () => {
 
     resolver = module.get<AuthResolver>(AuthResolver);
     authService = module.get<AuthService>(AuthService);
-    stravaService = module.get<StravaService>(StravaService);
+    authCookieService = module.get<AuthCookieService>(AuthCookieService);
     userService = module.get<UserService>(UserService);
     configService = module.get<ConfigService>(ConfigService);
 
@@ -86,7 +88,7 @@ describe('AuthResolver', () => {
       expect(result).toContain('https://www.strava.com/oauth/authorize');
       expect(result).toContain('client_id=test-client-id');
       expect(result).toContain('redirect_uri=http://localhost:3000/auth/callback');
-      expect(result).toContain('scope=read,activity:read_all,profile:read_all');
+      expect(result).toContain('scope=read_all,activity:read_all,profile:read_all');
     });
   });
 
@@ -111,92 +113,80 @@ describe('AuthResolver', () => {
     });
   });
 
-  describe('authenticateWithStrava', () => {
-    it('should authenticate and set cookies', async () => {
-      const mockCode = 'test-oauth-code';
-      const mockAthleteResponse: StravaAthleteResponse = {
-        id: 12345,
-        username: 'testathlete',
-        firstname: 'Test',
-        lastname: 'Athlete',
-      } as StravaAthleteResponse;
-
-      const mockStravaTokens: StravaTokenResponse = {
-        token_type: 'Bearer',
-        expires_at: 1234567890,
-        expires_in: 21600,
-        refresh_token: 'strava-refresh',
-        access_token: 'strava-access',
-        athlete: mockAthleteResponse,
-      };
-
-      const mockJwtTokens = {
-        accessToken: 'jwt-access-token',
-        refreshToken: 'jwt-refresh-token',
-      };
-
-      mockStravaService.exchangeCodeForToken.mockResolvedValue(mockStravaTokens);
-      mockUserService.upsertFromStrava.mockResolvedValue(mockUser);
-      mockAuthService.generateTokens.mockResolvedValue(mockJwtTokens);
-      mockConfigService.get.mockReturnValue('development');
-
-      const result = await resolver.authenticateWithStrava({ code: mockCode }, { res: mockResponse });
-
-      expect(result).toEqual({
-        accessToken: mockJwtTokens.accessToken,
-        refreshToken: mockJwtTokens.refreshToken,
-        user: mockUser,
-      });
-      expect(stravaService.exchangeCodeForToken).toHaveBeenCalledWith(mockCode);
-      expect(userService.upsertFromStrava).toHaveBeenCalledWith(mockAthleteResponse, mockStravaTokens);
-      expect(authService.generateTokens).toHaveBeenCalledWith(mockUser);
-      expect(mockResponse.cookie).toHaveBeenCalledTimes(1);
-      expect(mockResponse.cookie).toHaveBeenCalledWith(
-        'Authentication',
-        mockJwtTokens.accessToken,
-        expect.objectContaining({
-          httpOnly: true,
-          sameSite: 'strict',
-        }),
-      );
-    });
-  });
-
   describe('refreshToken', () => {
     it('should refresh token and update cookies', async () => {
       const mockRefreshToken = 'old-refresh-token';
-      const mockNewTokens = {
-        accessToken: 'new-access-token',
-        refreshToken: 'old-refresh-token',
-        user: mockUser,
+      const mockNewAccessToken = 'new-access-token';
+      const mockNewRefreshToken = 'new-refresh-token';
+
+      const mockContext: GraphQLContext = {
+        req: {
+          cookies: { RefreshToken: mockRefreshToken },
+        } as Request,
+        res: mockResponse,
       };
 
-      mockAuthService.refreshAccessToken.mockResolvedValue(mockNewTokens);
-      mockConfigService.get.mockReturnValue('development');
-
-      const result = await resolver.refreshToken({ refreshToken: mockRefreshToken }, { res: mockResponse });
-
-      expect(result).toEqual({
-        accessToken: mockNewTokens.accessToken,
-        refreshToken: mockNewTokens.refreshToken,
+      mockAuthService.refreshAccessToken.mockResolvedValue({
+        accessToken: mockNewAccessToken,
+        refreshToken: mockNewRefreshToken,
         user: mockUser,
       });
+
+      const result = await resolver.refreshToken(mockContext);
+
+      expect(result).toEqual({ user: mockUser });
       expect(authService.refreshAccessToken).toHaveBeenCalledWith(mockRefreshToken);
-      expect(mockResponse.cookie).toHaveBeenCalledTimes(1);
+      expect(authCookieService.setAccessTokenCookie).toHaveBeenCalledWith(mockResponse, mockNewAccessToken);
+      expect(authCookieService.setRefreshTokenCookie).toHaveBeenCalledWith(mockResponse, mockNewRefreshToken);
+    });
+
+    it('should throw UnauthorizedException when refresh token cookie missing', async () => {
+      const mockContext: GraphQLContext = {
+        req: {
+          cookies: {},
+        } as Request,
+        res: mockResponse,
+      };
+
+      await expect(resolver.refreshToken(mockContext)).rejects.toThrow(UnauthorizedException);
+      await expect(resolver.refreshToken(mockContext)).rejects.toThrow('No refresh token provided');
+      expect(authService.refreshAccessToken).not.toHaveBeenCalled();
     });
   });
 
   describe('logout', () => {
-    it('should revoke token and clear cookies', async () => {
+    it('should revoke token and clear cookies when refresh token present', async () => {
       const mockRefreshToken = 'test-refresh-token';
+
+      const mockContext: GraphQLContext = {
+        req: {
+          cookies: { RefreshToken: mockRefreshToken },
+        } as Request,
+        res: mockResponse,
+      };
+
       mockAuthService.revokeRefreshToken.mockResolvedValue(undefined);
 
-      const result = await resolver.logout(mockRefreshToken, { res: mockResponse });
+      const result = await resolver.logout(mockContext);
 
       expect(result).toBe(true);
       expect(authService.revokeRefreshToken).toHaveBeenCalledWith(mockRefreshToken);
-      expect(mockResponse.clearCookie).toHaveBeenCalledTimes(1);
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication');
+      expect(authCookieService.clearAllAuthCookies).toHaveBeenCalledWith(mockResponse);
+    });
+
+    it('should clear cookies even when refresh token missing', async () => {
+      const mockContext: GraphQLContext = {
+        req: {
+          cookies: {},
+        } as Request,
+        res: mockResponse,
+      };
+
+      const result = await resolver.logout(mockContext);
+
+      expect(result).toBe(true);
+      expect(authService.revokeRefreshToken).not.toHaveBeenCalled();
+      expect(authCookieService.clearAllAuthCookies).toHaveBeenCalledWith(mockResponse);
     });
   });
 });
