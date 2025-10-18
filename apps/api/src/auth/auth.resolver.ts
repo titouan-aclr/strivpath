@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args, Context } from '@nestjs/graphql';
-import { UseGuards } from '@nestjs/common';
+import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User, AuthResponse, AuthenticateWithStravaInput, RefreshTokenInput } from '@repo/graphql-types';
+import { User, AuthResponse, AuthenticateWithStravaInput } from '@repo/graphql-types';
 import { AuthService } from './auth.service';
 import { StravaService } from '../strava/strava.service';
 import { UserService } from '../user/user.service';
@@ -23,7 +23,7 @@ export class AuthResolver {
   stravaAuthUrl(): string {
     const clientId = this.configService.getOrThrow<string>('STRAVA_CLIENT_ID');
     const redirectUri = this.configService.getOrThrow<string>('STRAVA_REDIRECT_URI');
-    const scope = 'read,activity:read_all,profile:read_all';
+    const scope = 'read_all,activity:read_all,profile:read_all';
 
     return `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
   }
@@ -48,27 +48,41 @@ export class AuthResolver {
     const { accessToken, refreshToken } = await this.authService.generateTokens(user);
 
     this.setAccessTokenCookie(context.res, accessToken);
+    this.setRefreshTokenCookie(context.res, refreshToken);
 
-    return { accessToken, refreshToken, user };
+    return { user };
   }
 
-  @Mutation(() => AuthResponse, { description: 'Refresh access token using refresh token' })
-  async refreshToken(
-    @Args('input') input: RefreshTokenInput,
-    @Context() context: GraphQLContext,
-  ): Promise<AuthResponse> {
-    const { accessToken, refreshToken, user } = await this.authService.refreshAccessToken(input.refreshToken);
+  @Mutation(() => AuthResponse, { description: 'Refresh access token using refresh token cookie' })
+  async refreshToken(@Context() context: GraphQLContext): Promise<AuthResponse> {
+    const refreshToken = context.req.cookies?.RefreshToken as string | undefined;
+
+    if (!refreshToken) {
+      throw new UnauthorizedException('No refresh token provided');
+    }
+
+    const {
+      accessToken,
+      refreshToken: newRefreshToken,
+      user,
+    } = await this.authService.refreshAccessToken(refreshToken);
 
     this.setAccessTokenCookie(context.res, accessToken);
+    this.setRefreshTokenCookie(context.res, newRefreshToken);
 
-    return { accessToken, refreshToken, user };
+    return { user };
   }
 
   @Mutation(() => Boolean, { description: 'Logout and revoke refresh token' })
-  async logout(@Args('refreshToken') refreshToken: string, @Context() context: GraphQLContext): Promise<boolean> {
-    await this.authService.revokeRefreshToken(refreshToken);
+  async logout(@Context() context: GraphQLContext): Promise<boolean> {
+    const refreshToken = context.req.cookies?.RefreshToken as string | undefined;
+
+    if (refreshToken) {
+      await this.authService.revokeRefreshToken(refreshToken);
+    }
 
     this.clearAccessTokenCookie(context.res);
+    this.clearRefreshTokenCookie(context.res);
 
     return true;
   }
@@ -76,7 +90,7 @@ export class AuthResolver {
   private setAccessTokenCookie(res: GraphQLContext['res'], accessToken: string): void {
     const isProduction = this.configService.get('NODE_ENV') === 'production';
 
-    // TODO: verify config before prod
+    // TODO: verify config before prod, sameSite: strict
     res.cookie('Authentication', accessToken, {
       httpOnly: true,
       secure: isProduction,
@@ -88,5 +102,22 @@ export class AuthResolver {
 
   private clearAccessTokenCookie(res: GraphQLContext['res']): void {
     res.clearCookie('Authentication');
+  }
+
+  private setRefreshTokenCookie(res: GraphQLContext['res'], refreshToken: string): void {
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+
+    // TODO: verify config before prod, sameSite: strict
+    res.cookie('RefreshToken', refreshToken, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: '/',
+    });
+  }
+
+  private clearRefreshTokenCookie(res: GraphQLContext['res']): void {
+    res.clearCookie('RefreshToken');
   }
 }

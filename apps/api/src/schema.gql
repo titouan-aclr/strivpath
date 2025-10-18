@@ -40,8 +40,6 @@ type Activity {
 }
 
 type AuthResponse {
-  accessToken: String!
-  refreshToken: String!
   user: User!
 }
 
@@ -64,10 +62,10 @@ type Mutation {
   authenticateWithStrava(input: AuthenticateWithStravaInput!): AuthResponse!
 
   """Logout and revoke refresh token"""
-  logout(refreshToken: String!): Boolean!
+  logout: Boolean!
 
-  """Refresh access token using refresh token"""
-  refreshToken(input: RefreshTokenInput!): AuthResponse!
+  """Refresh access token using refresh token cookie"""
+  refreshToken: AuthResponse!
 
   """Synchronize activities from Strava"""
   syncActivities: SyncHistory!
@@ -93,10 +91,6 @@ type Query {
   syncStatus: SyncHistory
   userByStravaId(stravaId: Int!): User
   users: [User!]!
-}
-
-input RefreshTokenInput {
-  refreshToken: String!
 }
 
 """Available sport types for activity tracking"""

@@ -66,11 +66,14 @@ export class AuthService {
 
     const storedToken = await this.validateStoredRefreshToken(refreshToken);
 
-    if (!storedToken || storedToken.revoked) {
-      throw new UnauthorizedException('Refresh token invalid or revoked');
+    if (!storedToken) {
+      throw new UnauthorizedException('Refresh token not found');
     }
 
-    await this.updateRefreshTokenUsage(storedToken.id);
+    if (storedToken.revoked) {
+      await this.revokeAllUserRefreshTokens(payload.sub);
+      throw new UnauthorizedException('Token replay detected - all sessions revoked');
+    }
 
     const user = await this.userService.findById(payload.sub);
 
@@ -78,9 +81,14 @@ export class AuthService {
       throw new UnauthorizedException('User not found');
     }
 
-    const accessToken = this.generateAccessToken(user);
+    const newAccessToken = this.generateAccessToken(user);
+    const newRefreshToken = this.generateRefreshToken(user);
 
-    return { accessToken, refreshToken, user };
+    await this.storeRefreshToken(user.id, newRefreshToken);
+
+    await this.revokeRefreshToken(refreshToken);
+
+    return { accessToken: newAccessToken, refreshToken: newRefreshToken, user };
   }
 
   async revokeRefreshToken(refreshToken: string): Promise<void> {
@@ -88,6 +96,13 @@ export class AuthService {
 
     await this.prisma.refreshToken.updateMany({
       where: { tokenHash },
+      data: { revoked: true },
+    });
+  }
+
+  async revokeAllUserRefreshTokens(userId: number): Promise<void> {
+    await this.prisma.refreshToken.updateMany({
+      where: { userId, revoked: false },
       data: { revoked: true },
     });
   }

@@ -8,11 +8,3 @@ export class AuthenticateWithStravaInput {
   @IsNotEmpty()
   code: string;
 }
-
-@InputType()
-export class RefreshTokenInput {
-  @Field()
-  @IsString()
-  @IsNotEmpty()
-  refreshToken: string;
-}
