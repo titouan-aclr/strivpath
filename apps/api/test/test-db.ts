@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
+import { JwtService } from '@nestjs/jwt';
+import { AccessTokenPayload } from '../src/auth/types';
 
 let prisma: PrismaClient;
 let databaseUrl: string;
@@ -99,7 +101,7 @@ export const seedTestUser = async (overrides?: {
   const preferences = await prisma.userPreferences.create({
     data: {
       userId: user.id,
-      selectedSports: [],
+      selectedSports: ['Run'],
       onboardingCompleted: false,
       locale: 'en',
       theme: 'system',
@@ -193,5 +195,21 @@ export const seedTestRefreshToken = async (
       revoked: overrides?.revoked ?? false,
       deviceFingerprint: overrides?.deviceFingerprint ?? null,
     },
+  });
+};
+
+export const generateTestAccessToken = (userId: number, stravaId: number): string => {
+  const jwtService = new JwtService();
+  const payload: AccessTokenPayload = {
+    sub: userId,
+    stravaId,
+  };
+
+  const secret = process.env.JWT_ACCESS_TOKEN_SECRET || 'test-access-secret';
+  const expiresIn = process.env.JWT_ACCESS_TOKEN_EXPIRATION || '15m';
+
+  return jwtService.sign(payload, {
+    secret,
+    expiresIn,
   });
 };

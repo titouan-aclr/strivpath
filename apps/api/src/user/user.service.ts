@@ -96,7 +96,7 @@ export class UserService {
         },
         preferences: {
           create: {
-            selectedSports: [],
+            selectedSports: ['Run'],
             onboardingCompleted: false,
             locale: 'en',
             theme: 'system',
