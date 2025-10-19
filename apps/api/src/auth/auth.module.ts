@@ -5,6 +5,7 @@ import { AuthService } from './auth.service';
 import { AuthResolver } from './auth.resolver';
 import { AuthController } from './auth.controller';
 import { AuthCookieService } from './auth-cookie.service';
+import { TokenCleanupService } from './token-cleanup.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { UserModule } from '../user/user.module';
 import { StravaModule } from '../strava/strava.module';
@@ -17,7 +18,7 @@ import { StravaModule } from '../strava/strava.module';
     StravaModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, AuthResolver, AuthCookieService, JwtStrategy],
+  providers: [AuthService, AuthResolver, AuthCookieService, TokenCleanupService, JwtStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

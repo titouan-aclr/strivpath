@@ -176,7 +176,7 @@ export const seedTestActivity = async (
 
 export const seedTestRefreshToken = async (
   userId: number,
-  tokenHash: string,
+  jti: string,
   overrides?: {
     expiresAt?: Date;
     revoked?: boolean;
@@ -188,7 +188,7 @@ export const seedTestRefreshToken = async (
   return await prisma.refreshToken.create({
     data: {
       userId,
-      tokenHash,
+      jti,
       expiresAt,
       revoked: overrides?.revoked ?? false,
       deviceFingerprint: overrides?.deviceFingerprint ?? null,

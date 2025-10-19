@@ -7,7 +7,6 @@ import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { StravaService } from '../strava/strava.service';
 import { User } from '@repo/graphql-types';
-import * as crypto from 'crypto';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -91,7 +90,6 @@ describe('AuthService', () => {
     it('should generate both access and refresh tokens and store refresh token in DB', async () => {
       const mockAccessToken = 'mock-access-token';
       const mockRefreshToken = 'mock-refresh-token';
-      const mockTokenHash = crypto.createHash('sha256').update(mockRefreshToken).digest('hex');
       const deviceFingerprint = 'test-device';
 
       mockConfigService.getOrThrow.mockReturnValue('secret');
@@ -106,13 +104,27 @@ describe('AuthService', () => {
         refreshToken: mockRefreshToken,
       });
       expect(jwtService.sign).toHaveBeenCalledTimes(2);
-      expect(prismaService.refreshToken.create).toHaveBeenCalledWith({
-        data: {
-          userId: mockUser.id,
-          tokenHash: mockTokenHash,
-          expiresAt: expect.any(Date),
-          deviceFingerprint,
-        },
+
+      const accessTokenCall = jwtService.sign.mock.calls[0][0];
+      expect(accessTokenCall).toEqual({
+        sub: mockUser.id,
+        stravaId: mockUser.stravaId,
+      });
+      expect(accessTokenCall).not.toHaveProperty('jti');
+
+      const refreshTokenCall = jwtService.sign.mock.calls[1][0];
+      expect(refreshTokenCall).toEqual({
+        sub: mockUser.id,
+        stravaId: mockUser.stravaId,
+        jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+      });
+
+      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data).toEqual({
+        userId: mockUser.id,
+        jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+        expiresAt: expect.any(Date),
+        deviceFingerprint,
       });
     });
 
@@ -136,6 +148,47 @@ describe('AuthService', () => {
       expect(expiresAt.getTime()).toBeGreaterThanOrEqual(beforeTime + expectedExpiration);
       expect(expiresAt.getTime()).toBeLessThanOrEqual(afterTime + expectedExpiration);
     });
+
+    it('should generate valid UUID v4 for jti', async () => {
+      const mockAccessToken = 'mock-access-token';
+      const mockRefreshToken = 'mock-refresh-token';
+
+      mockConfigService.getOrThrow.mockReturnValue('secret');
+      mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
+      mockJwtService.sign.mockReturnValueOnce(mockAccessToken).mockReturnValueOnce(mockRefreshToken);
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+
+      await service.generateTokens(mockUser);
+
+      const refreshTokenCall = jwtService.sign.mock.calls[1][0];
+      const jti = refreshTokenCall.jti;
+
+      expect(jti).toBeDefined();
+      expect(typeof jti).toBe('string');
+      expect(jti).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
+
+      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data.jti).toBe(jti);
+    });
+
+    it('should not include jti in access token payload', async () => {
+      const mockAccessToken = 'mock-access-token';
+      const mockRefreshToken = 'mock-refresh-token';
+
+      mockConfigService.getOrThrow.mockReturnValue('secret');
+      mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
+      mockJwtService.sign.mockReturnValueOnce(mockAccessToken).mockReturnValueOnce(mockRefreshToken);
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+
+      await service.generateTokens(mockUser);
+
+      const accessTokenPayload = jwtService.sign.mock.calls[0][0];
+      expect(accessTokenPayload).not.toHaveProperty('jti');
+      expect(accessTokenPayload).toEqual({
+        sub: mockUser.id,
+        stravaId: mockUser.stravaId,
+      });
+    });
   });
 
   describe('refreshAccessToken', () => {
@@ -143,13 +196,12 @@ describe('AuthService', () => {
       const mockOldRefreshToken = 'old-refresh-token';
       const mockNewAccessToken = 'new-access-token';
       const mockNewRefreshToken = 'new-refresh-token';
-      const mockPayload = { sub: 1, stravaId: 12345 };
-      const mockOldTokenHash = crypto.createHash('sha256').update(mockOldRefreshToken).digest('hex');
-      const mockNewTokenHash = crypto.createHash('sha256').update(mockNewRefreshToken).digest('hex');
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
       const mockStoredToken = {
         id: 1,
         userId: 1,
-        tokenHash: mockOldTokenHash,
+        jti: mockJti,
         revoked: false,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
@@ -158,8 +210,8 @@ describe('AuthService', () => {
       };
 
       mockConfigService.getOrThrow
-        .mockReturnValueOnce('access-secret')
         .mockReturnValueOnce('refresh-secret')
+        .mockReturnValueOnce('access-secret')
         .mockReturnValueOnce('refresh-secret');
       mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
       mockJwtService.verify.mockReturnValue(mockPayload);
@@ -176,16 +228,25 @@ describe('AuthService', () => {
         refreshToken: mockNewRefreshToken,
         user: mockUser,
       });
-      expect(mockPrismaService.refreshToken.create).toHaveBeenCalledWith({
-        data: {
-          userId: mockUser.id,
-          tokenHash: mockNewTokenHash,
-          expiresAt: expect.any(Date),
-          deviceFingerprint: undefined,
+
+      expect(mockPrismaService.refreshToken.findFirst).toHaveBeenCalledWith({
+        where: {
+          jti: mockJti,
+          revoked: false,
+          expiresAt: { gt: expect.any(Date) },
         },
       });
+
+      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data).toEqual({
+        userId: mockUser.id,
+        jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
+        expiresAt: expect.any(Date),
+        deviceFingerprint: undefined,
+      });
+
       expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
-        where: { tokenHash: mockOldTokenHash },
+        where: { jti: mockJti },
         data: { revoked: true },
       });
       expect(userService.findById).toHaveBeenCalledWith(1);
@@ -193,12 +254,12 @@ describe('AuthService', () => {
 
     it('should revoke all user tokens and throw on token replay attack', async () => {
       const mockRefreshToken = 'revoked-token';
-      const mockPayload = { sub: 1, stravaId: 12345 };
-      const mockTokenHash = crypto.createHash('sha256').update(mockRefreshToken).digest('hex');
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
       const mockStoredToken = {
         id: 1,
         userId: 1,
-        tokenHash: mockTokenHash,
+        jti: mockJti,
         revoked: true,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
@@ -223,18 +284,21 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if refresh token not found in DB', async () => {
       const mockRefreshToken = 'unknown-token';
-      const mockPayload = { sub: 1, stravaId: 12345 };
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
 
       mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
       mockJwtService.verify.mockReturnValue(mockPayload);
       mockPrismaService.refreshToken.findFirst.mockResolvedValue(null);
 
       await expect(service.refreshAccessToken(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
+      await expect(service.refreshAccessToken(mockRefreshToken)).rejects.toThrow('Refresh token not found');
     });
 
     it('should throw UnauthorizedException if refresh token is expired', async () => {
       const mockRefreshToken = 'expired-token';
-      const mockPayload = { sub: 1, stravaId: 12345 };
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
 
       mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
       mockJwtService.verify.mockReturnValue(mockPayload);
@@ -245,12 +309,12 @@ describe('AuthService', () => {
 
     it('should throw UnauthorizedException if user no longer exists', async () => {
       const mockRefreshToken = 'valid-refresh-token';
-      const mockPayload = { sub: 1, stravaId: 12345 };
-      const mockTokenHash = crypto.createHash('sha256').update(mockRefreshToken).digest('hex');
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
       const mockStoredToken = {
         id: 1,
         userId: 1,
-        tokenHash: mockTokenHash,
+        jti: mockJti,
         revoked: false,
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
@@ -265,6 +329,46 @@ describe('AuthService', () => {
 
       await expect(service.refreshAccessToken(mockRefreshToken)).rejects.toThrow(UnauthorizedException);
       await expect(service.refreshAccessToken(mockRefreshToken)).rejects.toThrow('User not found');
+    });
+
+    it('should verify jti is extracted from refresh token payload', async () => {
+      const mockOldRefreshToken = 'old-refresh-token';
+      const mockNewAccessToken = 'new-access-token';
+      const mockNewRefreshToken = 'new-refresh-token';
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
+      const mockStoredToken = {
+        id: 1,
+        userId: 1,
+        jti: mockJti,
+        revoked: false,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        createdAt: new Date(),
+        lastUsedAt: null,
+        deviceFingerprint: null,
+      };
+
+      mockConfigService.getOrThrow.mockReturnValue('secret');
+      mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
+      mockJwtService.verify.mockReturnValue(mockPayload);
+      mockJwtService.sign.mockReturnValueOnce(mockNewAccessToken).mockReturnValueOnce(mockNewRefreshToken);
+      mockPrismaService.refreshToken.findFirst.mockResolvedValue(mockStoredToken);
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+      mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
+      mockUserService.findById.mockResolvedValue(mockUser);
+
+      await service.refreshAccessToken(mockOldRefreshToken);
+
+      expect(mockJwtService.verify).toHaveBeenCalledWith(mockOldRefreshToken, {
+        secret: expect.any(String),
+      });
+      expect(mockPrismaService.refreshToken.findFirst).toHaveBeenCalledWith({
+        where: {
+          jti: mockJti,
+          revoked: false,
+          expiresAt: { gt: expect.any(Date) },
+        },
+      });
     });
   });
 
@@ -311,6 +415,10 @@ describe('AuthService', () => {
       });
       expect(stravaService.exchangeCodeForToken).toHaveBeenCalledWith(mockCode);
       expect(userService.upsertFromStrava).toHaveBeenCalledWith(mockStravaTokens.athlete, mockStravaTokens);
+
+      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      expect(createCall.data.jti).toBeDefined();
+      expect(createCall.data.jti).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });
 
     it('should handle OAuth callback and redirect to onboarding for incomplete onboarding', async () => {
@@ -403,18 +511,36 @@ describe('AuthService', () => {
   });
 
   describe('revokeRefreshToken', () => {
-    it('should mark refresh token as revoked', async () => {
+    it('should extract jti from token and mark it as revoked', async () => {
       const mockRefreshToken = 'token-to-revoke';
-      const mockTokenHash = crypto.createHash('sha256').update(mockRefreshToken).digest('hex');
+      const mockJti = '123e4567-e89b-12d3-a456-426614174000';
+      const mockPayload = { sub: 1, stravaId: 12345, jti: mockJti };
 
+      mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
+      mockJwtService.verify.mockReturnValue(mockPayload);
       mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
 
       await service.revokeRefreshToken(mockRefreshToken);
 
+      expect(mockJwtService.verify).toHaveBeenCalledWith(mockRefreshToken, {
+        secret: expect.any(String),
+      });
       expect(prismaService.refreshToken.updateMany).toHaveBeenCalledWith({
-        where: { tokenHash: mockTokenHash },
+        where: { jti: mockJti },
         data: { revoked: true },
       });
+    });
+
+    it('should handle invalid tokens gracefully', async () => {
+      const mockRefreshToken = 'invalid-token';
+
+      mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
+      mockJwtService.verify.mockImplementation(() => {
+        throw new Error('Invalid token');
+      });
+
+      await expect(service.revokeRefreshToken(mockRefreshToken)).resolves.not.toThrow();
+      expect(mockPrismaService.refreshToken.updateMany).not.toHaveBeenCalled();
     });
   });
 });

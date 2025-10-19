@@ -104,7 +104,7 @@ model SyncHistory {
 model RefreshToken {
   id                Int       @id @default(autoincrement())
   userId            Int
-  tokenHash         String    @unique
+  jti               String    @unique
   expiresAt         DateTime
   revoked           Boolean   @default(false)
   deviceFingerprint String?
@@ -114,5 +114,5 @@ model RefreshToken {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, revoked])
-  @@index([tokenHash, revoked])
+  @@index([jti, revoked])
 }

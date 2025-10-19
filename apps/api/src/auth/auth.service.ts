@@ -3,11 +3,11 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@repo/graphql-types';
 import { RefreshToken } from '@prisma/client';
-import * as crypto from 'crypto';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { StravaService } from '../strava/strava.service';
-import { TokenPayload } from './types';
+import { AccessTokenPayload, RefreshTokenPayload } from './types';
 
 @Injectable()
 export class AuthService {
@@ -22,7 +22,7 @@ export class AuthService {
   ) {}
 
   private generateAccessToken(user: User): string {
-    const payload: TokenPayload = {
+    const payload: AccessTokenPayload = {
       sub: user.id,
       stravaId: user.stravaId,
     };
@@ -33,23 +33,27 @@ export class AuthService {
     });
   }
 
-  private generateRefreshToken(user: User): string {
-    const payload: TokenPayload = {
+  private generateRefreshToken(user: User): { token: string; jti: string } {
+    const jti = randomUUID();
+    const payload: RefreshTokenPayload = {
       sub: user.id,
       stravaId: user.stravaId,
+      jti,
     };
 
-    return this.jwtService.sign(payload, {
+    const token = this.jwtService.sign(payload, {
       secret: this.configService.getOrThrow('JWT_REFRESH_TOKEN_SECRET'),
       expiresIn: this.configService.get('JWT_REFRESH_TOKEN_EXPIRATION', '7d'),
     });
+
+    return { token, jti };
   }
 
   async generateTokens(user: User, deviceFingerprint?: string): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(user);
-    const refreshToken = this.generateRefreshToken(user);
+    const { token: refreshToken, jti } = this.generateRefreshToken(user);
 
-    await this.storeRefreshToken(user.id, refreshToken, deviceFingerprint);
+    await this.storeRefreshToken(user.id, jti, deviceFingerprint);
 
     return { accessToken, refreshToken };
   }
@@ -73,7 +77,7 @@ export class AuthService {
     return { user, accessToken, refreshToken, redirectPath };
   }
 
-  private async verifyRefreshToken(token: string): Promise<TokenPayload> {
+  private async verifyRefreshToken(token: string): Promise<RefreshTokenPayload> {
     try {
       return this.jwtService.verify(token, {
         secret: this.configService.getOrThrow('JWT_REFRESH_TOKEN_SECRET'),
@@ -86,7 +90,7 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const payload = await this.verifyRefreshToken(refreshToken);
 
-    const storedToken = await this.validateStoredRefreshToken(refreshToken);
+    const storedToken = await this.validateStoredRefreshToken(payload.jti);
 
     if (!storedToken) {
       throw new UnauthorizedException('Refresh token not found');
@@ -104,20 +108,27 @@ export class AuthService {
     }
 
     const newAccessToken = this.generateAccessToken(user);
-    const newRefreshToken = this.generateRefreshToken(user);
+    const { token: newRefreshToken, jti: newJti } = this.generateRefreshToken(user);
 
-    await this.storeRefreshToken(user.id, newRefreshToken);
+    await this.storeRefreshToken(user.id, newJti);
 
-    await this.revokeRefreshToken(refreshToken);
+    await this.revokeRefreshTokenByJti(payload.jti);
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken, user };
   }
 
   async revokeRefreshToken(refreshToken: string): Promise<void> {
-    const tokenHash = this.hashToken(refreshToken);
+    try {
+      const payload = await this.verifyRefreshToken(refreshToken);
+      await this.revokeRefreshTokenByJti(payload.jti);
+    } catch {
+      return;
+    }
+  }
 
+  private async revokeRefreshTokenByJti(jti: string): Promise<void> {
     await this.prisma.refreshToken.updateMany({
-      where: { tokenHash },
+      where: { jti },
       data: { revoked: true },
     });
   }
@@ -129,12 +140,7 @@ export class AuthService {
     });
   }
 
-  private hashToken(token: string): string {
-    return crypto.createHash('sha256').update(token).digest('hex');
-  }
-
-  private async storeRefreshToken(userId: number, refreshToken: string, deviceFingerprint?: string): Promise<void> {
-    const tokenHash = this.hashToken(refreshToken);
+  private async storeRefreshToken(userId: number, jti: string, deviceFingerprint?: string): Promise<void> {
     const expirationString = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION', '7d');
     const expirationMs = this.parseExpirationToMs(expirationString);
     const expiresAt = new Date(Date.now() + expirationMs);
@@ -142,19 +148,17 @@ export class AuthService {
     await this.prisma.refreshToken.create({
       data: {
         userId,
-        tokenHash,
+        jti,
         expiresAt,
         deviceFingerprint,
       },
     });
   }
 
-  private async validateStoredRefreshToken(refreshToken: string): Promise<RefreshToken | null> {
-    const tokenHash = this.hashToken(refreshToken);
-
+  private async validateStoredRefreshToken(jti: string): Promise<RefreshToken | null> {
     return await this.prisma.refreshToken.findFirst({
       where: {
-        tokenHash,
+        jti,
         revoked: false,
         expiresAt: { gt: new Date() },
       },

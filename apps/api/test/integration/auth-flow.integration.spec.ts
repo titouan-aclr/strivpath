@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/auth/auth.service';
 import { UserService } from '../../src/user/user.service';
@@ -11,6 +10,7 @@ import { PrismaService } from '../../src/database/prisma.service';
 import { getTestPrismaClient, seedTestUser } from '../test-db';
 import { StravaTokenResponse, StravaAthleteResponse } from '../../src/strava/types';
 import { User } from '@repo/graphql-types';
+import { RefreshTokenPayload } from '../../src/auth/types';
 
 describe('Auth Flow Integration', () => {
   let app: INestApplication;
@@ -181,10 +181,11 @@ describe('Auth Flow Integration', () => {
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
 
-      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      const payload = jwtService.decode(refreshToken) as RefreshTokenPayload;
+      const jti = payload.jti;
 
       const storedToken = await prisma.refreshToken.findUnique({
-        where: { tokenHash },
+        where: { jti },
       });
 
       expect(storedToken).toBeDefined();
@@ -194,7 +195,7 @@ describe('Auth Flow Integration', () => {
       expect(storedToken?.expiresAt.getTime()).toBeGreaterThan(Date.now());
     });
 
-    it('should hash refresh token before storing', async () => {
+    it('should store jti as UUID v4 in database', async () => {
       const { user } = await seedTestUser();
 
       const graphqlUser: User = {
@@ -212,18 +213,20 @@ describe('Auth Flow Integration', () => {
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
 
+      const payload = jwtService.decode(refreshToken) as RefreshTokenPayload;
+
       const tokens = await prisma.refreshToken.findMany({
         where: { userId: user.id },
       });
 
       expect(tokens).toHaveLength(1);
-      expect(tokens[0].tokenHash).not.toBe(refreshToken);
-      expect(tokens[0].tokenHash).toHaveLength(64);
+      expect(tokens[0].jti).toBe(payload.jti);
+      expect(tokens[0].jti).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });
   });
 
   describe('refreshAccessToken', () => {
-    it('should refresh access token without rotation', async () => {
+    it('should refresh access token with rotation', async () => {
       const { user } = await seedTestUser();
 
       const graphqlUser: User = {
@@ -248,7 +251,8 @@ describe('Auth Flow Integration', () => {
       } = await authService.refreshAccessToken(originalRefreshToken);
 
       expect(accessToken).toBeDefined();
-      expect(refreshToken).toBe(originalRefreshToken);
+      expect(refreshToken).toBeDefined();
+      expect(refreshToken).not.toBe(originalRefreshToken);
       expect(returnedUser.id).toBe(user.id);
 
       const decodedAccess = jwtService.verify(accessToken, {
@@ -257,7 +261,7 @@ describe('Auth Flow Integration', () => {
       expect(decodedAccess.sub).toBe(user.id);
     });
 
-    it('should update lastUsedAt on refresh', async () => {
+    it('should revoke old token and create new token on refresh', async () => {
       const { user } = await seedTestUser();
 
       const graphqlUser: User = {
@@ -273,25 +277,37 @@ describe('Auth Flow Integration', () => {
         profileMedium: user.profileMedium || undefined,
       };
 
-      const { refreshToken } = await authService.generateTokens(graphqlUser);
+      const { refreshToken: originalRefreshToken } = await authService.generateTokens(graphqlUser);
 
-      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      const originalPayload = jwtService.decode(originalRefreshToken) as RefreshTokenPayload;
+      const originalJti = originalPayload.jti;
 
       const tokenBefore = await prisma.refreshToken.findUnique({
-        where: { tokenHash },
+        where: { jti: originalJti },
       });
-      expect(tokenBefore?.lastUsedAt).toBeNull();
+      expect(tokenBefore).toBeDefined();
+      expect(tokenBefore?.revoked).toBe(false);
 
-      await authService.refreshAccessToken(refreshToken);
+      const { refreshToken: newRefreshToken } = await authService.refreshAccessToken(originalRefreshToken);
 
-      const tokenAfter = await prisma.refreshToken.findUnique({
-        where: { tokenHash },
+      const newPayload = jwtService.decode(newRefreshToken) as RefreshTokenPayload;
+      const newJti = newPayload.jti;
+
+      expect(newJti).not.toBe(originalJti);
+
+      const oldTokenAfter = await prisma.refreshToken.findUnique({
+        where: { jti: originalJti },
       });
-      expect(tokenAfter?.lastUsedAt).toBeInstanceOf(Date);
-      expect(tokenAfter?.lastUsedAt!.getTime()).toBeGreaterThan(Date.now() - 5000);
+      expect(oldTokenAfter?.revoked).toBe(true);
+
+      const newTokenAfter = await prisma.refreshToken.findUnique({
+        where: { jti: newJti },
+      });
+      expect(newTokenAfter).toBeDefined();
+      expect(newTokenAfter?.revoked).toBe(false);
     });
 
-    it('should reject revoked refresh token', async () => {
+    it('should reject revoked refresh token and revoke all user sessions', async () => {
       const { user } = await seedTestUser();
 
       const graphqlUser: User = {
@@ -307,18 +323,29 @@ describe('Auth Flow Integration', () => {
         profileMedium: user.profileMedium || undefined,
       };
 
-      const { refreshToken } = await authService.generateTokens(graphqlUser);
+      const { refreshToken: token1 } = await authService.generateTokens(graphqlUser);
+      const { refreshToken: token2 } = await authService.generateTokens(graphqlUser);
 
-      await authService.revokeRefreshToken(refreshToken);
+      await authService.revokeRefreshToken(token1);
 
-      await expect(authService.refreshAccessToken(refreshToken)).rejects.toThrow('Refresh token invalid or revoked');
+      await expect(authService.refreshAccessToken(token1)).rejects.toThrow(
+        'Token replay detected - all sessions revoked',
+      );
+
+      const allTokens = await prisma.refreshToken.findMany({
+        where: { userId: user.id },
+      });
+
+      allTokens.forEach(token => {
+        expect(token.revoked).toBe(true);
+      });
     });
 
     it('should reject expired refresh token', async () => {
       const { user } = await seedTestUser();
 
       const expiredRefreshToken = jwtService.sign(
-        { sub: user.id, stravaId: user.stravaId },
+        { sub: user.id, stravaId: user.stravaId, jti: 'expired-jti-123' },
         {
           secret: configService.getOrThrow('JWT_REFRESH_TOKEN_SECRET'),
           expiresIn: '0s',
@@ -348,17 +375,18 @@ describe('Auth Flow Integration', () => {
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
 
-      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+      const payload = jwtService.decode(refreshToken) as RefreshTokenPayload;
+      const jti = payload.jti;
 
       const tokenBefore = await prisma.refreshToken.findUnique({
-        where: { tokenHash },
+        where: { jti },
       });
       expect(tokenBefore?.revoked).toBe(false);
 
       await authService.revokeRefreshToken(refreshToken);
 
       const tokenAfter = await prisma.refreshToken.findUnique({
-        where: { tokenHash },
+        where: { jti },
       });
       expect(tokenAfter?.revoked).toBe(true);
     });
