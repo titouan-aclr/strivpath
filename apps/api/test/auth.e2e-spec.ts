@@ -1,4 +1,4 @@
-import * as request from 'supertest';
+import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
@@ -81,7 +81,7 @@ describe('Auth GraphQL (e2e)', () => {
       expect(response.body.data.logout).toBe(true);
 
       const cookies = response.headers['set-cookie'];
-      if (cookies) {
+      if (cookies && Array.isArray(cookies)) {
         const hasClearedAuth = cookies.some((cookie: string) => cookie.includes('Authentication=;'));
         expect(hasClearedAuth).toBe(true);
 

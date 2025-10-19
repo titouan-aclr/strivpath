@@ -5,7 +5,7 @@ import { UserPreferencesService } from '../../src/user-preferences/user-preferen
 import { UserService } from '../../src/user/user.service';
 import { PrismaService } from '../../src/database/prisma.service';
 import { getTestPrismaClient, seedTestUser } from '../test-db';
-import { SportType, UpdateUserPreferencesInput } from '@repo/graphql-types';
+import { SportType, ThemeType, UpdateUserPreferencesInput } from '@repo/graphql-types';
 
 describe('User Preferences Integration', () => {
   let app: INestApplication;
@@ -168,7 +168,7 @@ describe('User Preferences Integration', () => {
       });
 
       const input: UpdateUserPreferencesInput = {
-        theme: 'dark',
+        theme: ThemeType.DARK,
       };
 
       const updatedPreferences = await userPreferencesService.update(user.id, input);
@@ -189,7 +189,7 @@ describe('User Preferences Integration', () => {
       const input: UpdateUserPreferencesInput = {
         selectedSports: [SportType.RUN, SportType.SWIM],
         locale: 'es',
-        theme: 'light',
+        theme: ThemeType.LIGHT,
       };
 
       const updatedPreferences = await userPreferencesService.update(user.id, input);
@@ -289,7 +289,7 @@ describe('User Preferences Integration', () => {
       });
 
       const update2 = userPreferencesService.update(user.id, {
-        theme: 'dark',
+        theme: ThemeType.DARK,
       });
 
       await Promise.all([update1, update2]);
@@ -314,7 +314,7 @@ describe('User Preferences Integration', () => {
       });
 
       await userPreferencesService.update(user.id, {
-        theme: 'dark',
+        theme: ThemeType.DARK,
       });
 
       const finalPreferences = await prisma.userPreferences.findUnique({

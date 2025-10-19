@@ -1,6 +1,7 @@
 import { ExecutionContext } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { GqlAuthGuard } from './gql-auth.guard';
+import '../../common/types/express-request.interface';
 
 describe('GqlAuthGuard', () => {
   let guard: GqlAuthGuard;
@@ -86,7 +87,7 @@ describe('GqlAuthGuard', () => {
     const result = guard.getRequest(mockExecutionContext);
 
     expect(result).toBe(mockRequest);
-    expect(result.user).toBeUndefined();
+    expect((result as any).user).toBeUndefined();
   });
 
   it('should handle request with authenticated user', () => {
@@ -129,7 +130,7 @@ describe('GqlAuthGuard', () => {
     const result = guard.getRequest(mockExecutionContext);
 
     expect(result).toBe(mockRequest);
-    expect(result.user).toEqual(mockUser);
+    expect((result as any).user).toEqual(mockUser);
   });
 
   it('should correctly transform execution context to GraphQL context', () => {
@@ -201,8 +202,8 @@ describe('GqlAuthGuard', () => {
     const result = guard.getRequest(mockExecutionContext);
 
     expect(result).toBe(expectedRequest);
-    expect(result.url).toBe('/graphql');
-    expect(result.method).toBe('POST');
-    expect(result.headers.authorization).toBe('Bearer token');
+    expect((result as any).url).toBe('/graphql');
+    expect((result as any).method).toBe('POST');
+    expect((result as any).headers.authorization).toBe('Bearer token');
   });
 });

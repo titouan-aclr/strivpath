@@ -177,6 +177,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
@@ -209,6 +211,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
@@ -240,6 +244,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken: originalRefreshToken } = await authService.generateTokens(graphqlUser);
@@ -275,6 +281,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken: originalRefreshToken } = await authService.generateTokens(graphqlUser);
@@ -321,6 +329,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken: token1 } = await authService.generateTokens(graphqlUser);
@@ -371,6 +381,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
@@ -405,6 +417,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       const { refreshToken } = await authService.generateTokens(graphqlUser);
@@ -430,6 +444,8 @@ describe('Auth Flow Integration', () => {
         country: user.country || undefined,
         profile: user.profile || undefined,
         profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
       };
 
       await authService.generateTokens(graphqlUser);

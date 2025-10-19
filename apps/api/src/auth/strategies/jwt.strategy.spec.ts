@@ -35,7 +35,7 @@ describe('JwtStrategy', () => {
       cookies: {
         Authentication: 'test-jwt-token',
       },
-    } as Request;
+    } as unknown as Request;
 
     const extractors = (strategy as any)._jwtFromRequest;
     const token = extractors(mockRequest);
@@ -48,7 +48,7 @@ describe('JwtStrategy', () => {
       cookies: {
         OtherCookie: 'value',
       },
-    } as Request;
+    } as unknown as Request;
 
     const extractors = (strategy as any)._jwtFromRequest;
     const token = extractors(mockRequest);

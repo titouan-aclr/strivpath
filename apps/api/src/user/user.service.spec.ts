@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { PrismaService } from '@/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUser, createMockStravaToken } from '../../test/mocks/factories';
 import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
@@ -154,7 +154,7 @@ describe('UserService', () => {
       const tokenData = {
         accessToken: 'access123',
         refreshToken: 'refresh123',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: Math.floor(new Date('2025-12-31').getTime() / 1000),
         scope: 'read,activity:read_all',
       };
 
@@ -186,7 +186,7 @@ describe('UserService', () => {
       const tokenData = {
         accessToken: 'newaccess123',
         refreshToken: 'newrefresh123',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: Math.floor(new Date('2025-12-31').getTime() / 1000),
         scope: 'read,activity:read_all',
       };
 

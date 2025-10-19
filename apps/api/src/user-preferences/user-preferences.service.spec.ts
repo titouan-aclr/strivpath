@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { UserPreferencesService } from './user-preferences.service';
-import { PrismaService } from '@/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUserPreferences } from '../../test/mocks/factories';
 import { SportType, ThemeType } from '@repo/graphql-types';

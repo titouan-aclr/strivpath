@@ -10,11 +10,11 @@ import { User } from '@repo/graphql-types';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let jwtService: JwtService;
-  let configService: ConfigService;
-  let prismaService: PrismaService;
-  let userService: UserService;
-  let stravaService: StravaService;
+  let jwtService: jest.Mocked<JwtService>;
+  let configService: jest.Mocked<ConfigService>;
+  let prismaService: jest.Mocked<PrismaService>;
+  let userService: jest.Mocked<UserService>;
+  let stravaService: jest.Mocked<StravaService>;
 
   const mockUser: User = {
     id: 1,
@@ -41,9 +41,10 @@ describe('AuthService', () => {
     get: jest.fn(),
   };
 
+  const mockRefreshTokenCreate = jest.fn();
   const mockPrismaService = {
     refreshToken: {
-      create: jest.fn(),
+      create: mockRefreshTokenCreate,
       findFirst: jest.fn(),
       update: jest.fn(),
       updateMany: jest.fn(),
@@ -75,11 +76,11 @@ describe('AuthService', () => {
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    jwtService = module.get<JwtService>(JwtService);
-    configService = module.get<ConfigService>(ConfigService);
-    prismaService = module.get<PrismaService>(PrismaService);
-    userService = module.get<UserService>(UserService);
-    stravaService = module.get<StravaService>(StravaService);
+    jwtService = module.get(JwtService) as jest.Mocked<JwtService>;
+    configService = module.get(ConfigService) as jest.Mocked<ConfigService>;
+    prismaService = module.get(PrismaService) as jest.Mocked<PrismaService>;
+    userService = module.get(UserService) as jest.Mocked<UserService>;
+    stravaService = module.get(StravaService) as jest.Mocked<StravaService>;
   });
 
   afterEach(() => {
@@ -119,7 +120,7 @@ describe('AuthService', () => {
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
       });
 
-      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      const createCall = mockRefreshTokenCreate.mock.calls[0][0];
       expect(createCall.data).toEqual({
         userId: mockUser.id,
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
@@ -160,14 +161,14 @@ describe('AuthService', () => {
 
       await service.generateTokens(mockUser);
 
-      const refreshTokenCall = jwtService.sign.mock.calls[1][0];
+      const refreshTokenCall = jwtService.sign.mock.calls[1][0] as any;
       const jti = refreshTokenCall.jti;
 
       expect(jti).toBeDefined();
       expect(typeof jti).toBe('string');
       expect(jti).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
 
-      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      const createCall = mockRefreshTokenCreate.mock.calls[0][0];
       expect(createCall.data.jti).toBe(jti);
     });
 
@@ -237,7 +238,7 @@ describe('AuthService', () => {
         },
       });
 
-      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      const createCall = mockRefreshTokenCreate.mock.calls[0][0];
       expect(createCall.data).toEqual({
         userId: mockUser.id,
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
@@ -416,7 +417,7 @@ describe('AuthService', () => {
       expect(stravaService.exchangeCodeForToken).toHaveBeenCalledWith(mockCode);
       expect(userService.upsertFromStrava).toHaveBeenCalledWith(mockStravaTokens.athlete, mockStravaTokens);
 
-      const createCall = prismaService.refreshToken.create.mock.calls[0][0];
+      const createCall = mockRefreshTokenCreate.mock.calls[0][0];
       expect(createCall.data.jti).toBeDefined();
       expect(createCall.data.jti).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i);
     });

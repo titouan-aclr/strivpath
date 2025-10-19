@@ -8,6 +8,7 @@ import { UserService } from '../user/user.service';
 import { User } from '@repo/graphql-types';
 import { Response, Request } from 'express';
 import { GraphQLContext } from '../common/types';
+import '../common/types/express-request.interface';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
@@ -122,7 +123,7 @@ describe('AuthResolver', () => {
       const mockContext: GraphQLContext = {
         req: {
           cookies: { RefreshToken: mockRefreshToken },
-        } as Request,
+        } as unknown as Request,
         res: mockResponse,
       };
 
@@ -144,7 +145,7 @@ describe('AuthResolver', () => {
       const mockContext: GraphQLContext = {
         req: {
           cookies: {},
-        } as Request,
+        } as unknown as Request,
         res: mockResponse,
       };
 
@@ -161,7 +162,7 @@ describe('AuthResolver', () => {
       const mockContext: GraphQLContext = {
         req: {
           cookies: { RefreshToken: mockRefreshToken },
-        } as Request,
+        } as unknown as Request,
         res: mockResponse,
       };
 
@@ -178,7 +179,7 @@ describe('AuthResolver', () => {
       const mockContext: GraphQLContext = {
         req: {
           cookies: {},
-        } as Request,
+        } as unknown as Request,
         res: mockResponse,
       };
 

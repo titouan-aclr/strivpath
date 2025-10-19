@@ -62,7 +62,7 @@ describe('AuthController', () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
 
-      await controller.callback(code, undefined, undefined, mockResponse as Response);
+      await controller.callback(code, null as any, null as any, mockResponse as Response);
 
       expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code);
       expect(authCookieService.setAccessTokenCookie).toHaveBeenCalledWith(mockResponse, 'access-token');
@@ -81,7 +81,7 @@ describe('AuthController', () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
 
-      await controller.callback('code', undefined, undefined, mockResponse as Response);
+      await controller.callback('code', null as any, null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/onboarding');
     });
@@ -89,7 +89,7 @@ describe('AuthController', () => {
     it('should redirect to error page when error parameter present', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(undefined, 'access_denied', undefined, mockResponse as Response);
+      await controller.callback(null as any, 'access_denied', null as any, mockResponse as Response);
 
       expect(authService.handleOAuthCallback).not.toHaveBeenCalled();
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=access_denied');
@@ -98,7 +98,7 @@ describe('AuthController', () => {
     it('should redirect to error page when code missing', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(undefined, undefined, undefined, mockResponse as Response);
+      await controller.callback(null as any, null as any, null as any, mockResponse as Response);
 
       expect(authService.handleOAuthCallback).not.toHaveBeenCalled();
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=missing_code');
@@ -109,7 +109,7 @@ describe('AuthController', () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockRejectedValue(new Error('OAuth failed'));
 
-      await controller.callback('code', undefined, undefined, mockResponse as Response);
+      await controller.callback('code', null as any, null as any, mockResponse as Response);
 
       expect(consoleErrorSpy).toHaveBeenCalledWith('OAuth callback error:', expect.any(Error));
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=auth_failed');
@@ -120,7 +120,7 @@ describe('AuthController', () => {
     it('should use default frontend URL if not configured', async () => {
       mockConfigService.get.mockImplementation((key: string, defaultValue?: string) => defaultValue);
 
-      await controller.callback(undefined, 'error', undefined, mockResponse as Response);
+      await controller.callback(null as any, 'error', null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=error');
     });
@@ -128,7 +128,7 @@ describe('AuthController', () => {
     it('should use custom frontend URL from configuration', async () => {
       mockConfigService.get.mockReturnValue('https://app.example.com');
 
-      await controller.callback(undefined, 'error', undefined, mockResponse as Response);
+      await controller.callback(null as any, 'error', null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('https://app.example.com/auth/error?error=error');
     });
@@ -136,7 +136,7 @@ describe('AuthController', () => {
     it('should not set cookies when error parameter present', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(undefined, 'access_denied', undefined, mockResponse as Response);
+      await controller.callback(null as any, 'access_denied', null as any, mockResponse as Response);
 
       expect(authCookieService.setAccessTokenCookie).not.toHaveBeenCalled();
       expect(authCookieService.setRefreshTokenCookie).not.toHaveBeenCalled();
@@ -145,7 +145,7 @@ describe('AuthController', () => {
     it('should not set cookies when code is missing', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(undefined, undefined, undefined, mockResponse as Response);
+      await controller.callback(null as any, null as any, null as any, mockResponse as Response);
 
       expect(authCookieService.setAccessTokenCookie).not.toHaveBeenCalled();
       expect(authCookieService.setRefreshTokenCookie).not.toHaveBeenCalled();
