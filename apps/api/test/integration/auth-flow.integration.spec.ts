@@ -498,4 +498,215 @@ describe('Auth Flow Integration', () => {
       expect(preferencesAfter).toBeNull();
     });
   });
+
+  describe('token expiration', () => {
+    it('should allow refresh with valid refresh token after access token expires', async () => {
+      const { user } = await seedTestUser();
+
+      const graphqlUser: User = {
+        id: user.id,
+        stravaId: user.stravaId,
+        username: user.username || 'test',
+        firstname: user.firstname || undefined,
+        lastname: user.lastname || undefined,
+        sex: user.sex || undefined,
+        city: user.city || undefined,
+        country: user.country || undefined,
+        profile: user.profile || undefined,
+        profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      const { refreshToken: validRefreshToken } = await authService.generateTokens(graphqlUser);
+
+      const result = await authService.refreshAccessToken(validRefreshToken);
+
+      expect(result.accessToken).toBeDefined();
+      expect(result.refreshToken).toBeDefined();
+      expect(result.user.id).toBe(user.id);
+    });
+
+    it('should reject refresh after refresh token expires in database', async () => {
+      const { user } = await seedTestUser();
+
+      const graphqlUser: User = {
+        id: user.id,
+        stravaId: user.stravaId,
+        username: user.username || 'test',
+        firstname: user.firstname || undefined,
+        lastname: user.lastname || undefined,
+        sex: user.sex || undefined,
+        city: user.city || undefined,
+        country: user.country || undefined,
+        profile: user.profile || undefined,
+        profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      const { refreshToken } = await authService.generateTokens(graphqlUser);
+
+      const payload = jwtService.decode(refreshToken) as RefreshTokenPayload;
+
+      await prisma.refreshToken.update({
+        where: { jti: payload.jti },
+        data: { expiresAt: new Date(Date.now() - 1000) },
+      });
+
+      await expect(authService.refreshAccessToken(refreshToken)).rejects.toThrow('Refresh token expired');
+    });
+  });
+
+  describe('concurrent sessions', () => {
+    it('should support multiple active sessions per user', async () => {
+      const { user } = await seedTestUser();
+
+      const graphqlUser: User = {
+        id: user.id,
+        stravaId: user.stravaId,
+        username: user.username || 'test',
+        firstname: user.firstname || undefined,
+        lastname: user.lastname || undefined,
+        sex: user.sex || undefined,
+        city: user.city || undefined,
+        country: user.country || undefined,
+        profile: user.profile || undefined,
+        profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      const session1 = await authService.generateTokens(graphqlUser);
+      const session2 = await authService.generateTokens(graphqlUser);
+      const session3 = await authService.generateTokens(graphqlUser);
+
+      const tokens = await prisma.refreshToken.findMany({
+        where: { userId: user.id, revoked: false },
+      });
+
+      expect(tokens).toHaveLength(3);
+
+      const payload1 = jwtService.decode(session1.refreshToken) as RefreshTokenPayload;
+      const payload2 = jwtService.decode(session2.refreshToken) as RefreshTokenPayload;
+      const payload3 = jwtService.decode(session3.refreshToken) as RefreshTokenPayload;
+
+      expect(tokens.map(t => t.jti)).toContain(payload1.jti);
+      expect(tokens.map(t => t.jti)).toContain(payload2.jti);
+      expect(tokens.map(t => t.jti)).toContain(payload3.jti);
+
+      const result1 = await authService.refreshAccessToken(session1.refreshToken);
+      const result2 = await authService.refreshAccessToken(session2.refreshToken);
+      const result3 = await authService.refreshAccessToken(session3.refreshToken);
+
+      expect(result1.accessToken).toBeDefined();
+      expect(result2.accessToken).toBeDefined();
+      expect(result3.accessToken).toBeDefined();
+    });
+
+    it('should revoke only specific session on logout', async () => {
+      const { user } = await seedTestUser();
+
+      const graphqlUser: User = {
+        id: user.id,
+        stravaId: user.stravaId,
+        username: user.username || 'test',
+        firstname: user.firstname || undefined,
+        lastname: user.lastname || undefined,
+        sex: user.sex || undefined,
+        city: user.city || undefined,
+        country: user.country || undefined,
+        profile: user.profile || undefined,
+        profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      const session1 = await authService.generateTokens(graphqlUser);
+      const session2 = await authService.generateTokens(graphqlUser);
+
+      await authService.revokeRefreshToken(session1.refreshToken);
+
+      const payload1 = jwtService.decode(session1.refreshToken) as RefreshTokenPayload;
+      const payload2 = jwtService.decode(session2.refreshToken) as RefreshTokenPayload;
+
+      const token1 = await prisma.refreshToken.findUnique({ where: { jti: payload1.jti } });
+      const token2 = await prisma.refreshToken.findUnique({ where: { jti: payload2.jti } });
+
+      expect(token1?.revoked).toBe(true);
+      expect(token2?.revoked).toBe(false);
+
+      const result = await authService.refreshAccessToken(session2.refreshToken);
+
+      expect(result.accessToken).toBeDefined();
+    });
+
+    it('should revoke all sessions on replay attack', async () => {
+      const { user } = await seedTestUser();
+
+      const graphqlUser: User = {
+        id: user.id,
+        stravaId: user.stravaId,
+        username: user.username || 'test',
+        firstname: user.firstname || undefined,
+        lastname: user.lastname || undefined,
+        sex: user.sex || undefined,
+        city: user.city || undefined,
+        country: user.country || undefined,
+        profile: user.profile || undefined,
+        profileMedium: user.profileMedium || undefined,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      };
+
+      const session1 = await authService.generateTokens(graphqlUser);
+      const session2 = await authService.generateTokens(graphqlUser);
+      const session3 = await authService.generateTokens(graphqlUser);
+
+      await authService.revokeRefreshToken(session1.refreshToken);
+
+      await expect(authService.refreshAccessToken(session1.refreshToken)).rejects.toThrow(
+        'Token replay detected - all sessions revoked',
+      );
+
+      const allTokens = await prisma.refreshToken.findMany({
+        where: { userId: user.id },
+      });
+
+      allTokens.forEach(token => {
+        expect(token.revoked).toBe(true);
+      });
+    });
+  });
+
+  describe('Strava token management', () => {
+    it('should not duplicate Strava tokens on re-authentication', async () => {
+      const { user } = await seedTestUser();
+
+      const updatedAthlete: StravaAthleteResponse = {
+        ...mockStravaAthlete,
+        id: user.stravaId,
+        username: 'newusername',
+      };
+
+      const updatedTokenResponse: StravaTokenResponse = {
+        ...mockStravaTokenResponse,
+        athlete: updatedAthlete,
+        access_token: 'new_access_token',
+        refresh_token: 'new_refresh_token',
+        expires_at: Math.floor(Date.now() / 1000) + 21600,
+      };
+
+      await userService.upsertFromStrava(updatedAthlete, updatedTokenResponse);
+
+      const stravaTokens = await prisma.stravaToken.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: 'desc' },
+      });
+
+      expect(stravaTokens.length).toBeGreaterThanOrEqual(1);
+      expect(stravaTokens[0].accessToken).toBe('new_access_token');
+      expect(stravaTokens[0].refreshToken).toBe('new_refresh_token');
+    });
+  });
 });

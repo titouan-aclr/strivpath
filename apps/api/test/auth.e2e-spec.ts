@@ -49,7 +49,7 @@ describe('Auth GraphQL (e2e)', () => {
           expect(res.body.data.stravaAuthUrl).toContain('strava.com/oauth/authorize');
           expect(res.body.data.stravaAuthUrl).toContain('client_id=');
           expect(res.body.data.stravaAuthUrl).toContain('response_type=code');
-          expect(res.body.data.stravaAuthUrl).toContain('scope=read,activity:read_all,profile:read_all');
+          expect(res.body.data.stravaAuthUrl).toContain('scope=read_all,activity:read_all,profile:read_all');
         });
     });
   });
@@ -66,13 +66,13 @@ describe('Auth GraphQL (e2e)', () => {
   });
 
   describe('logout', () => {
-    it('should return true when logging out and clear only Authentication cookie', async () => {
+    it('should return true when logging out and clear both cookies', async () => {
       const response = await request(app.getHttpServer())
         .post('/graphql')
         .send({
           query: `
             mutation {
-              logout(refreshToken: "test-token")
+              logout
             }
           `,
         });
@@ -85,8 +85,8 @@ describe('Auth GraphQL (e2e)', () => {
         const hasClearedAuth = cookies.some((cookie: string) => cookie.includes('Authentication=;'));
         expect(hasClearedAuth).toBe(true);
 
-        const hasClearedRefresh = cookies.some((cookie: string) => cookie.includes('Refresh=;'));
-        expect(hasClearedRefresh).toBe(false);
+        const hasClearedRefresh = cookies.some((cookie: string) => cookie.includes('RefreshToken=;'));
+        expect(hasClearedRefresh).toBe(true);
       }
     });
   });

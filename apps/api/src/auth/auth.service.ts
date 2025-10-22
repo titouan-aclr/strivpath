@@ -2,7 +2,6 @@ import { Inject, Injectable, UnauthorizedException, forwardRef } from '@nestjs/c
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { User } from '@repo/graphql-types';
-import { RefreshToken } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
@@ -90,7 +89,9 @@ export class AuthService {
   async refreshAccessToken(refreshToken: string): Promise<{ accessToken: string; refreshToken: string; user: User }> {
     const payload = await this.verifyRefreshToken(refreshToken);
 
-    const storedToken = await this.validateStoredRefreshToken(payload.jti);
+    const storedToken = await this.prisma.refreshToken.findFirst({
+      where: { jti: payload.jti },
+    });
 
     if (!storedToken) {
       throw new UnauthorizedException('Refresh token not found');
@@ -99,6 +100,10 @@ export class AuthService {
     if (storedToken.revoked) {
       await this.revokeAllUserRefreshTokens(payload.sub);
       throw new UnauthorizedException('Token replay detected - all sessions revoked');
+    }
+
+    if (storedToken.expiresAt <= new Date()) {
+      throw new UnauthorizedException('Refresh token expired');
     }
 
     const user = await this.userService.findById(payload.sub);
@@ -152,23 +157,6 @@ export class AuthService {
         expiresAt,
         deviceFingerprint,
       },
-    });
-  }
-
-  private async validateStoredRefreshToken(jti: string): Promise<RefreshToken | null> {
-    return await this.prisma.refreshToken.findFirst({
-      where: {
-        jti,
-        revoked: false,
-        expiresAt: { gt: new Date() },
-      },
-    });
-  }
-
-  private async updateRefreshTokenUsage(tokenId: number): Promise<void> {
-    await this.prisma.refreshToken.update({
-      where: { id: tokenId },
-      data: { lastUsedAt: new Date() },
     });
   }
 

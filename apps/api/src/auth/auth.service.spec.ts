@@ -233,8 +233,6 @@ describe('AuthService', () => {
       expect(mockPrismaService.refreshToken.findFirst).toHaveBeenCalledWith({
         where: {
           jti: mockJti,
-          revoked: false,
-          expiresAt: { gt: expect.any(Date) },
         },
       });
 
@@ -366,8 +364,6 @@ describe('AuthService', () => {
       expect(mockPrismaService.refreshToken.findFirst).toHaveBeenCalledWith({
         where: {
           jti: mockJti,
-          revoked: false,
-          expiresAt: { gt: expect.any(Date) },
         },
       });
     });
