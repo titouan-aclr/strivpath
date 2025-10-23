@@ -81,6 +81,18 @@ describe('Activity Sync Integration', () => {
     };
   };
 
+  const createPaginatedMock = (activities: StravaActivitySummary[]) => {
+    return async (
+      userId: number,
+      options: { page?: number; per_page?: number; before?: number; after?: number } = {},
+    ): Promise<StravaActivitySummary[]> => {
+      const { page = 1, per_page = 100 } = options;
+      const startIndex = (page - 1) * per_page;
+      const endIndex = startIndex + per_page;
+      return activities.slice(startIndex, endIndex);
+    };
+  };
+
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
@@ -108,21 +120,28 @@ describe('Activity Sync Integration', () => {
         data: { selectedSports: [SportType.RUN] },
       });
 
-      const mockActivities = [
-        createMockStravaActivity(1001, 'Run'),
-        createMockStravaActivity(1002, 'Run'),
-        createMockStravaActivity(1003, 'Run'),
-      ];
+      jest
+        .spyOn(stravaService, 'getActivities')
+        .mockImplementation(
+          async (
+            userId: number,
+            options: { page?: number; per_page?: number; before?: number; after?: number } = {},
+          ): Promise<StravaActivitySummary[]> => {
+            const { page = 1 } = options;
 
-      jest.spyOn(stravaService, 'getActivities').mockResolvedValue(mockActivities);
+            if (page === 1) return [createMockStravaActivity(1), createMockStravaActivity(2)];
+            if (page === 2) return [createMockStravaActivity(3)];
+            return [];
+          },
+        );
 
       const syncHistory = await activityService.syncActivities(user.id);
 
       expect(syncHistory).toBeDefined();
       expect(syncHistory.status).toBe(SyncStatus.COMPLETED);
       expect(syncHistory.stage).toBe(SyncStage.DONE);
-      expect(syncHistory.totalActivities).toBe(3);
-      expect(syncHistory.processedActivities).toBe(3);
+      expect(syncHistory.totalActivities).toBe(6);
+      expect(syncHistory.processedActivities).toBe(6);
       expect(syncHistory.completedAt).toBeInstanceOf(Date);
 
       const dbActivities = await prisma.activity.findMany({
@@ -130,7 +149,7 @@ describe('Activity Sync Integration', () => {
       });
 
       expect(dbActivities).toHaveLength(3);
-      expect(dbActivities[0].name).toBe('Activity 1001');
+      expect(dbActivities[0].name).toBe('Activity 1');
       expect(dbActivities[0].type).toBe('Run');
       expect(dbActivities[0].distance).toBe(5000);
       expect(dbActivities[0].movingTime).toBe(1800);
@@ -144,9 +163,15 @@ describe('Activity Sync Integration', () => {
         data: { selectedSports: [SportType.RUN] },
       });
 
+      await seedTestActivity(user.id, {
+        stravaId: BigInt(2000),
+        type: 'Run',
+        startDate: new Date('2024-01-01T08:00:00Z'),
+      });
+
       const mockActivities = [createMockStravaActivity(2001, 'Run')];
 
-      jest.spyOn(stravaService, 'getActivities').mockResolvedValue(mockActivities);
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(createPaginatedMock(mockActivities));
 
       const syncHistory = await activityService.syncActivities(user.id);
 
@@ -180,11 +205,15 @@ describe('Activity Sync Integration', () => {
         createMockStravaActivity(3003, 'Run', { start_date: '2024-01-03T08:00:00Z' }),
       ];
 
-      jest.spyOn(stravaService, 'getActivities').mockImplementation(async (userId, params) => {
-        if (params?.after) {
-          return [newMockActivities[1], newMockActivities[2]];
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(async (userId, params = {}) => {
+        const { page = 1, per_page = 100, after } = params;
+
+        if (after) {
+          const recentActivities = newMockActivities;
+          return createPaginatedMock(recentActivities)(userId, { page, per_page });
         }
-        return newMockActivities;
+
+        return createPaginatedMock(newMockActivities)(userId, { page, per_page });
       });
 
       await activityService.syncActivities(user.id);
@@ -216,7 +245,7 @@ describe('Activity Sync Integration', () => {
         createMockStravaActivity(4004, 'Swim'),
       ];
 
-      jest.spyOn(stravaService, 'getActivities').mockResolvedValue(mockActivities);
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(createPaginatedMock(mockActivities));
 
       await activityService.syncActivities(user.id);
 
@@ -269,10 +298,9 @@ describe('Activity Sync Integration', () => {
 
       const user2Activities = [createMockStravaActivity(6001, 'Run'), createMockStravaActivity(6002, 'Run')];
 
-      jest.spyOn(stravaService, 'getActivities').mockImplementation(async userId => {
-        if (userId === user1.id) return user1Activities;
-        if (userId === user2.id) return user2Activities;
-        return [];
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(async (userId, options = {}) => {
+        const activities = userId === user1.id ? user1Activities : userId === user2.id ? user2Activities : [];
+        return createPaginatedMock(activities)(userId, options);
       });
 
       await activityService.syncActivities(user1.id);
@@ -313,7 +341,7 @@ describe('Activity Sync Integration', () => {
         device_watts: undefined,
       });
 
-      jest.spyOn(stravaService, 'getActivities').mockResolvedValue([minimalActivity]);
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(createPaginatedMock([minimalActivity]));
 
       await activityService.syncActivities(user.id);
 
@@ -340,7 +368,7 @@ describe('Activity Sync Integration', () => {
       const largeId = 9007199254740992;
       const activityWithLargeId = createMockStravaActivity(largeId, 'Run');
 
-      jest.spyOn(stravaService, 'getActivities').mockResolvedValue([activityWithLargeId]);
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(createPaginatedMock([activityWithLargeId]));
 
       await activityService.syncActivities(user.id);
 
@@ -373,8 +401,43 @@ describe('Activity Sync Integration', () => {
     it('should throw error when no sports selected', async () => {
       const { user } = await seedTestUser();
 
+      await prisma.userPreferences.update({
+        where: { userId: user.id },
+        data: { selectedSports: [] },
+      });
+
       await expect(activityService.syncActivities(user.id)).rejects.toThrow(BadRequestException);
       await expect(activityService.syncActivities(user.id)).rejects.toThrow('no sports selected');
+    });
+
+    it('should throw error when exceeding MAX_PAGES limit during historical sync', async () => {
+      const { user } = await seedTestUser();
+
+      await prisma.userPreferences.update({
+        where: { userId: user.id },
+        data: { selectedSports: [SportType.RUN] },
+      });
+
+      jest.spyOn(stravaService, 'getActivities').mockImplementation(async (userId, options = {}) => {
+        const { page = 1, per_page = 100 } = options;
+        const activities = Array.from({ length: per_page }, (_, i) => createMockStravaActivity(page * 1000 + i, 'Run'));
+        return activities;
+      });
+
+      await expect(activityService.syncActivities(user.id)).rejects.toThrow(
+        /Activity sync limit exceeded for user.*historical sync/,
+      );
+
+      const syncHistories = await prisma.syncHistory.findMany({
+        where: { userId: user.id },
+        orderBy: { startedAt: 'desc' },
+      });
+
+      expect(syncHistories).toHaveLength(1);
+      expect(syncHistories[0].status).toBe(SyncStatus.FAILED);
+      expect(syncHistories[0].errorMessage).toContain('Activity sync limit exceeded');
+      expect(syncHistories[0].errorMessage).toContain('20 pages');
+      expect(syncHistories[0].completedAt).toBeInstanceOf(Date);
     });
   });
 

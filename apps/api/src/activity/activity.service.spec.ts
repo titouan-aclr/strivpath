@@ -60,6 +60,23 @@ describe('ActivityService', () => {
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(null);
 
       await expect(service.syncActivities(userId)).rejects.toThrow(BadRequestException);
+      await expect(service.syncActivities(userId)).rejects.toThrow('User preferences not found');
+    });
+
+    it('should throw BadRequestException if selectedSports is empty', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+
+      await expect(service.syncActivities(userId)).rejects.toThrow(BadRequestException);
       await expect(service.syncActivities(userId)).rejects.toThrow('User preferences not found or no sports selected');
     });
 

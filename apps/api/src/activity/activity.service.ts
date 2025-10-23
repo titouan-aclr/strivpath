@@ -6,6 +6,7 @@ import { StravaService } from '../strava/strava.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { ActivityMapper } from './activity.mapper';
 import { StravaActivitySummary } from '../strava/types';
+import { ActivitySyncLimitExceededException } from './exceptions/activity-sync-limit-exceeded.exception';
 
 const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
   [SportType.RUN]: new Set(['Run', 'TrailRun', 'VirtualRun']),
@@ -83,8 +84,9 @@ export class ActivityService {
     let page = 1;
     const perPage = 100;
     let hasMore = true;
+    const MAX_PAGES = 20;
 
-    while (hasMore) {
+    while (hasMore && page <= MAX_PAGES) {
       const activities = await this.stravaService.getActivities(userId, {
         page,
         per_page: perPage,
@@ -97,6 +99,10 @@ export class ActivityService {
         allActivities.push(...filteredActivities);
         page++;
       }
+    }
+
+    if (page > MAX_PAGES) {
+      throw new ActivitySyncLimitExceededException(userId, MAX_PAGES, allActivities.length, 'historical');
     }
 
     return allActivities;
@@ -114,8 +120,9 @@ export class ActivityService {
     let page = 1;
     const perPage = 100;
     let hasMore = true;
+    const MAX_PAGES = 20;
 
-    while (hasMore) {
+    while (hasMore && page <= MAX_PAGES) {
       const activities = await this.stravaService.getActivities(userId, {
         page,
         per_page: perPage,
@@ -128,6 +135,10 @@ export class ActivityService {
         allActivities.push(...activities);
         page++;
       }
+    }
+
+    if (page > MAX_PAGES) {
+      throw new ActivitySyncLimitExceededException(userId, MAX_PAGES, allActivities.length, 'recent');
     }
 
     return allActivities;
@@ -212,11 +223,15 @@ export class ActivityService {
       where: { userId },
     });
 
-    if (!preferences || !preferences.selectedSports) {
-      throw new BadRequestException('User preferences not found or no sports selected');
+    if (!preferences) {
+      throw new BadRequestException('User preferences not found');
     }
 
-    const selectedSports = preferences.selectedSports as string[];
+    const selectedSports = (preferences.selectedSports as string[]) || [];
+
+    if (selectedSports.length === 0) {
+      throw new BadRequestException('User preferences not found or no sports selected');
+    }
 
     const sync = await this.syncHistoryService.create(userId);
 
