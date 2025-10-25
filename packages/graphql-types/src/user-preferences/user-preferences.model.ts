@@ -12,6 +12,11 @@ export enum ThemeType {
   DARK = 'dark',
   SYSTEM = 'system',
 }
+
+export enum LocaleType {
+  EN = 'en',
+  FR = 'fr',
+}
 /* eslint-enable no-unused-vars */
 
 registerEnumType(SportType, {
@@ -22,6 +27,11 @@ registerEnumType(SportType, {
 registerEnumType(ThemeType, {
   name: 'ThemeType',
   description: 'Available theme options',
+});
+
+registerEnumType(LocaleType, {
+  name: 'LocaleType',
+  description: 'Available locale options',
 });
 
 @ObjectType()
@@ -38,8 +48,8 @@ export class UserPreferences {
   @Field()
   onboardingCompleted: boolean;
 
-  @Field()
-  locale: string;
+  @Field(() => LocaleType)
+  locale: LocaleType;
 
   @Field(() => ThemeType)
   theme: ThemeType;

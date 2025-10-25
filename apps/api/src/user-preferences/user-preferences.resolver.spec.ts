@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserPreferencesResolver } from './user-preferences.resolver';
 import { UserPreferencesService } from './user-preferences.service';
-import { UserPreferences, SportType, ThemeType } from '@repo/graphql-types';
+import { UserPreferences, SportType, ThemeType, LocaleType } from '@repo/graphql-types';
 import { TokenPayload } from '../auth/types';
 
 describe('UserPreferencesResolver', () => {
@@ -18,7 +18,7 @@ describe('UserPreferencesResolver', () => {
     userId: 1,
     selectedSports: [SportType.RUN, SportType.RIDE],
     onboardingCompleted: true,
-    locale: 'en',
+    locale: LocaleType.EN,
     theme: ThemeType.SYSTEM,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
@@ -48,14 +48,14 @@ describe('UserPreferencesResolver', () => {
     it('should update user preferences and return updated data', async () => {
       const input = {
         selectedSports: [SportType.RUN, SportType.SWIM],
-        locale: 'fr',
+        locale: LocaleType.FR,
         theme: ThemeType.DARK,
       };
 
       const updatedPreferences: UserPreferences = {
         ...mockUserPreferences,
         selectedSports: [SportType.RUN, SportType.SWIM],
-        locale: 'fr',
+        locale: LocaleType.FR,
         theme: ThemeType.DARK,
       };
 
@@ -69,7 +69,7 @@ describe('UserPreferencesResolver', () => {
     });
 
     it('should use userId from token payload (@CurrentUser decorator)', async () => {
-      const input = { locale: 'en' };
+      const input = { locale: LocaleType.EN };
       const tokenPayloadWithDifferentUser: TokenPayload = {
         sub: 42,
         stravaId: 99999,

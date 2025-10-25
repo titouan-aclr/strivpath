@@ -4,7 +4,7 @@ import { UserPreferencesService } from './user-preferences.service';
 import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUserPreferences } from '../../test/mocks/factories';
-import { SportType, ThemeType } from '@repo/graphql-types';
+import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
 
 describe('UserPreferencesService', () => {
   let service: UserPreferencesService;
@@ -121,9 +121,9 @@ describe('UserPreferencesService', () => {
 
       prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
 
-      const result = await service.update(1, { locale: 'fr' });
+      const result = await service.update(1, { locale: LocaleType.FR });
 
-      expect(result.locale).toBe('fr');
+      expect(result.locale).toBe(LocaleType.FR);
       expect(result.onboardingCompleted).toBe(true);
       expect(prisma.userPreferences.update).toHaveBeenCalledWith({
         where: { userId: 1 },
@@ -171,12 +171,12 @@ describe('UserPreferencesService', () => {
 
       const result = await service.update(1, {
         selectedSports: [SportType.SWIM],
-        locale: 'fr',
+        locale: LocaleType.FR,
         theme: ThemeType.LIGHT,
       });
 
       expect(result.selectedSports).toEqual([SportType.SWIM]);
-      expect(result.locale).toBe('fr');
+      expect(result.locale).toBe(LocaleType.FR);
       expect(result.theme).toBe(ThemeType.LIGHT);
       expect(result.onboardingCompleted).toBe(true);
       expect(prisma.userPreferences.update).toHaveBeenCalledWith({

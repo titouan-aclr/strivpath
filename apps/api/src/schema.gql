@@ -53,6 +53,12 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+"""Available locale options"""
+enum LocaleType {
+  EN
+  FR
+}
+
 type Mutation {
   """Logout and revoke refresh token"""
   logout: Boolean!
@@ -129,7 +135,7 @@ enum ThemeType {
 }
 
 input UpdateUserPreferencesInput {
-  locale: String
+  locale: LocaleType
   selectedSports: [SportType!]
   theme: ThemeType
 }
@@ -152,7 +158,7 @@ type User {
 type UserPreferences {
   createdAt: DateTime!
   id: Int!
-  locale: String!
+  locale: LocaleType!
   onboardingCompleted: Boolean!
   selectedSports: [SportType!]!
   theme: ThemeType!

@@ -5,7 +5,7 @@ import { AppModule } from '../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import { generateTestAccessToken } from './test-db';
-import { SportType, ThemeType } from '@repo/graphql-types';
+import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
 
 describe('UserPreferences GraphQL (e2e)', () => {
   let app: INestApplication;
@@ -65,10 +65,10 @@ describe('UserPreferences GraphQL (e2e)', () => {
     const preferences = await prisma.userPreferences.create({
       data: {
         userId: user.id,
-        selectedSports: ['Run'],
+        selectedSports: [SportType.RUN],
         onboardingCompleted: false,
-        locale: 'en',
-        theme: 'system',
+        locale: LocaleType.EN,
+        theme: ThemeType.SYSTEM,
       },
     });
 
@@ -275,13 +275,13 @@ describe('UserPreferences GraphQL (e2e)', () => {
             query: mutation,
             variables: {
               input: {
-                locale: 'fr',
+                locale: 'FR',
               },
             },
           });
 
         expect(response.status).toBe(200);
-        expect(response.body.data.updateUserPreferences.locale).toBe('fr');
+        expect(response.body.data.updateUserPreferences.locale).toBe('FR');
       });
 
       it('should update theme successfully', async () => {
@@ -335,7 +335,7 @@ describe('UserPreferences GraphQL (e2e)', () => {
             variables: {
               input: {
                 selectedSports: ['RUN', 'SWIM'],
-                locale: 'fr',
+                locale: 'FR',
                 theme: 'LIGHT',
               },
             },
@@ -343,7 +343,7 @@ describe('UserPreferences GraphQL (e2e)', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.data.updateUserPreferences.selectedSports).toEqual(['RUN', 'SWIM']);
-        expect(response.body.data.updateUserPreferences.locale).toBe('fr');
+        expect(response.body.data.updateUserPreferences.locale).toBe('FR');
         expect(response.body.data.updateUserPreferences.theme).toBe('LIGHT');
         expect(response.body.data.updateUserPreferences.onboardingCompleted).toBe(true);
       });
@@ -397,13 +397,13 @@ describe('UserPreferences GraphQL (e2e)', () => {
             query: mutation,
             variables: {
               input: {
-                locale: 'invalid-locale',
+                locale: 'INVALID_LOCALE',
               },
             },
           });
 
         expect(response.body.errors).toBeDefined();
-        expect(response.body.errors[0].message).toContain('Bad Request');
+        expect(response.body.errors[0].message).toContain('LocaleType');
       });
 
       it('should reject invalid SportType enum value', async () => {
@@ -583,9 +583,9 @@ describe('UserPreferences GraphQL (e2e)', () => {
         await prisma.userPreferences.update({
           where: { userId: user.id },
           data: {
-            selectedSports: ['Run'],
-            locale: 'en',
-            theme: 'dark',
+            selectedSports: [SportType.RUN],
+            locale: LocaleType.EN,
+            theme: ThemeType.DARK,
           },
         });
 
@@ -611,7 +611,7 @@ describe('UserPreferences GraphQL (e2e)', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.data.updateUserPreferences.selectedSports).toEqual(['RUN']);
-        expect(response.body.data.updateUserPreferences.locale).toBe('en');
+        expect(response.body.data.updateUserPreferences.locale).toBe('EN');
         expect(response.body.data.updateUserPreferences.theme).toBe('DARK');
       });
 
@@ -648,7 +648,7 @@ describe('UserPreferences GraphQL (e2e)', () => {
         expect(response.body.data.updateUserPreferences.onboardingCompleted).toBe(true);
       });
 
-      it('should support both locale values: en and fr', async () => {
+      it('should support both locale values: EN and FR', async () => {
         const { user } = await seedTestUser();
         const token = generateTestAccessToken(user.id, user.stravaId);
 
@@ -667,13 +667,13 @@ describe('UserPreferences GraphQL (e2e)', () => {
             query: mutation,
             variables: {
               input: {
-                locale: 'en',
+                locale: 'EN',
               },
             },
           });
 
         expect(responseEn.status).toBe(200);
-        expect(responseEn.body.data.updateUserPreferences.locale).toBe('en');
+        expect(responseEn.body.data.updateUserPreferences.locale).toBe('EN');
 
         const responseFr = await request(app.getHttpServer())
           .post('/graphql')
@@ -682,13 +682,13 @@ describe('UserPreferences GraphQL (e2e)', () => {
             query: mutation,
             variables: {
               input: {
-                locale: 'fr',
+                locale: 'FR',
               },
             },
           });
 
         expect(responseFr.status).toBe(200);
-        expect(responseFr.body.data.updateUserPreferences.locale).toBe('fr');
+        expect(responseFr.body.data.updateUserPreferences.locale).toBe('FR');
       });
 
       it('should support all theme types: system, light, dark', async () => {

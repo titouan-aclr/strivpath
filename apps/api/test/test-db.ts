@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import { JwtService } from '@nestjs/jwt';
 import { AccessTokenPayload } from '../src/auth/types';
+import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
 
 let prisma: PrismaClient;
 let databaseUrl: string;
@@ -101,10 +102,10 @@ export const seedTestUser = async (overrides?: {
   const preferences = await prisma.userPreferences.create({
     data: {
       userId: user.id,
-      selectedSports: ['Run'],
+      selectedSports: [SportType.RUN],
       onboardingCompleted: false,
-      locale: 'en',
-      theme: 'system',
+      locale: LocaleType.EN,
+      theme: ThemeType.SYSTEM,
     },
   });
 

@@ -1,6 +1,6 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsArray, IsEnum, ArrayMinSize, ArrayMaxSize, IsString, IsIn, IsOptional } from 'class-validator';
-import { SportType, ThemeType } from './user-preferences.model';
+import { IsArray, IsEnum, ArrayMinSize, ArrayMaxSize, IsOptional } from 'class-validator';
+import { SportType, ThemeType, LocaleType } from './user-preferences.model';
 
 @InputType()
 export class UpdateUserPreferencesInput {
@@ -12,11 +12,10 @@ export class UpdateUserPreferencesInput {
   @ArrayMaxSize(3)
   selectedSports?: SportType[];
 
-  @Field({ nullable: true })
+  @Field(() => LocaleType, { nullable: true })
   @IsOptional()
-  @IsString()
-  @IsIn(['en', 'fr'])
-  locale?: string;
+  @IsEnum(LocaleType)
+  locale?: LocaleType;
 
   @Field(() => ThemeType, { nullable: true })
   @IsOptional()

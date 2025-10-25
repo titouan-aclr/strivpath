@@ -6,7 +6,7 @@ import { UserService } from '../../src/user/user.service';
 import { PrismaService } from '../../src/database/prisma.service';
 import { UserPreferencesResolver } from '../../src/user-preferences/user-preferences.resolver';
 import { getTestPrismaClient, seedTestUser, generateTestAccessToken } from '../test-db';
-import { SportType, ThemeType, UpdateUserPreferencesInput } from '@repo/graphql-types';
+import { SportType, ThemeType, LocaleType, UpdateUserPreferencesInput } from '@repo/graphql-types';
 import { TokenPayload } from '../../src/auth/types';
 
 describe('User Preferences Integration', () => {
@@ -40,10 +40,10 @@ describe('User Preferences Integration', () => {
 
       expect(preferences).toBeDefined();
       expect(preferences.userId).toBe(user.id);
-      expect(preferences.selectedSports).toEqual(['Run']);
+      expect(preferences.selectedSports).toEqual([SportType.RUN]);
       expect(preferences.onboardingCompleted).toBe(false);
-      expect(preferences.locale).toBe('en');
-      expect(preferences.theme).toBe('system');
+      expect(preferences.locale).toBe(LocaleType.EN);
+      expect(preferences.theme).toBe(ThemeType.SYSTEM);
     });
 
     it('should retrieve preferences by userId', async () => {
@@ -128,18 +128,18 @@ describe('User Preferences Integration', () => {
       });
 
       const input: UpdateUserPreferencesInput = {
-        locale: 'fr',
+        locale: LocaleType.FR,
       };
 
       const updatedPreferences = await userPreferencesService.update(user.id, input);
 
-      expect(updatedPreferences.locale).toBe('fr');
+      expect(updatedPreferences.locale).toBe(LocaleType.FR);
       expect(updatedPreferences.selectedSports).toEqual([SportType.RUN]);
 
       const dbPreferences = await prisma.userPreferences.findUnique({
         where: { userId: user.id },
       });
-      expect(dbPreferences?.locale).toBe('fr');
+      expect(dbPreferences?.locale).toBe(LocaleType.FR);
       expect(dbPreferences?.selectedSports).toEqual([SportType.RUN]);
     });
 
@@ -150,7 +150,7 @@ describe('User Preferences Integration', () => {
         where: { userId: user.id },
         data: {
           selectedSports: [SportType.RUN],
-          locale: 'en',
+          locale: LocaleType.EN,
         },
       });
 
@@ -160,14 +160,14 @@ describe('User Preferences Integration', () => {
 
       const updatedPreferences = await userPreferencesService.update(user.id, input);
 
-      expect(updatedPreferences.theme).toBe('dark');
-      expect(updatedPreferences.locale).toBe('en');
+      expect(updatedPreferences.theme).toBe(ThemeType.DARK);
+      expect(updatedPreferences.locale).toBe(LocaleType.EN);
       expect(updatedPreferences.selectedSports).toEqual([SportType.RUN]);
 
       const dbPreferences = await prisma.userPreferences.findUnique({
         where: { userId: user.id },
       });
-      expect(dbPreferences?.theme).toBe('dark');
+      expect(dbPreferences?.theme).toBe(ThemeType.DARK);
     });
 
     it('should update multiple fields at once', async () => {
@@ -175,15 +175,15 @@ describe('User Preferences Integration', () => {
 
       const input: UpdateUserPreferencesInput = {
         selectedSports: [SportType.RUN, SportType.SWIM],
-        locale: 'es',
+        locale: LocaleType.FR,
         theme: ThemeType.LIGHT,
       };
 
       const updatedPreferences = await userPreferencesService.update(user.id, input);
 
       expect(updatedPreferences.selectedSports).toEqual([SportType.RUN, SportType.SWIM]);
-      expect(updatedPreferences.locale).toBe('es');
-      expect(updatedPreferences.theme).toBe('light');
+      expect(updatedPreferences.locale).toBe(LocaleType.FR);
+      expect(updatedPreferences.theme).toBe(ThemeType.LIGHT);
       expect(updatedPreferences.onboardingCompleted).toBe(true);
     });
 
@@ -243,12 +243,12 @@ describe('User Preferences Integration', () => {
 
       await userPreferencesService.update(user1.id, {
         selectedSports: [SportType.RUN],
-        locale: 'en',
+        locale: LocaleType.EN,
       });
 
       await userPreferencesService.update(user2.id, {
         selectedSports: [SportType.RIDE],
-        locale: 'fr',
+        locale: LocaleType.FR,
       });
 
       await prisma.user.delete({ where: { id: user1.id } });
@@ -263,7 +263,7 @@ describe('User Preferences Integration', () => {
       });
       expect(user2Preferences).toBeDefined();
       expect(user2Preferences?.selectedSports).toEqual([SportType.RIDE]);
-      expect(user2Preferences?.locale).toBe('fr');
+      expect(user2Preferences?.locale).toBe(LocaleType.FR);
     });
   });
 
@@ -272,7 +272,7 @@ describe('User Preferences Integration', () => {
       const { user } = await seedTestUser();
 
       const update1 = userPreferencesService.update(user.id, {
-        locale: 'en',
+        locale: LocaleType.EN,
       });
 
       const update2 = userPreferencesService.update(user.id, {
@@ -286,7 +286,7 @@ describe('User Preferences Integration', () => {
       });
 
       expect(finalPreferences).toBeDefined();
-      expect(finalPreferences?.locale === 'en' || finalPreferences?.theme === 'dark').toBe(true);
+      expect(finalPreferences?.locale === LocaleType.EN || finalPreferences?.theme === ThemeType.DARK).toBe(true);
     });
 
     it('should maintain consistency with sequential updates', async () => {
@@ -297,7 +297,7 @@ describe('User Preferences Integration', () => {
       });
 
       await userPreferencesService.update(user.id, {
-        locale: 'fr',
+        locale: LocaleType.FR,
       });
 
       await userPreferencesService.update(user.id, {
@@ -310,8 +310,8 @@ describe('User Preferences Integration', () => {
 
       expect(finalPreferences).toBeDefined();
       expect(finalPreferences?.selectedSports).toEqual([SportType.RUN]);
-      expect(finalPreferences?.locale).toBe('fr');
-      expect(finalPreferences?.theme).toBe('dark');
+      expect(finalPreferences?.locale).toBe(LocaleType.FR);
+      expect(finalPreferences?.theme).toBe(ThemeType.DARK);
       expect(finalPreferences?.onboardingCompleted).toBe(true);
     });
   });
@@ -347,14 +347,14 @@ describe('User Preferences Integration', () => {
 
       const input: UpdateUserPreferencesInput = {
         selectedSports: [SportType.RUN],
-        locale: 'fr',
+        locale: LocaleType.FR,
       };
 
       const result = await userPreferencesResolver.updateUserPreferences(input, tokenPayload);
 
       expect(result).toBeDefined();
       expect(result.selectedSports).toEqual([SportType.RUN]);
-      expect(result.locale).toBe('fr');
+      expect(result.locale).toBe(LocaleType.FR);
       expect(result.userId).toBe(user.id);
     });
 
@@ -403,7 +403,7 @@ describe('User Preferences Integration', () => {
         where: { userId: user2.id },
       });
 
-      expect(user2Preferences?.selectedSports).toEqual(['Run']);
+      expect(user2Preferences?.selectedSports).toEqual([SportType.RUN]);
       expect(user2Preferences?.onboardingCompleted).toBe(false);
     });
   });
@@ -414,7 +414,7 @@ describe('User Preferences Integration', () => {
 
       await userPreferencesService.update(user.id, {
         selectedSports: [SportType.RUN],
-        locale: 'en',
+        locale: LocaleType.EN,
         theme: ThemeType.DARK,
       });
 
@@ -424,15 +424,15 @@ describe('User Preferences Integration', () => {
 
       expect(result).toBeDefined();
       expect(result.selectedSports).toEqual([SportType.RUN]);
-      expect(result.locale).toBe('en');
-      expect(result.theme).toBe('dark');
+      expect(result.locale).toBe(LocaleType.EN);
+      expect(result.theme).toBe(ThemeType.DARK);
     });
 
     it('should update only selectedSports when provided alone', async () => {
       const { user } = await seedTestUser();
 
       await userPreferencesService.update(user.id, {
-        locale: 'fr',
+        locale: LocaleType.FR,
         theme: ThemeType.LIGHT,
       });
 
@@ -443,8 +443,8 @@ describe('User Preferences Integration', () => {
       const result = await userPreferencesService.update(user.id, input);
 
       expect(result.selectedSports).toEqual([SportType.SWIM]);
-      expect(result.locale).toBe('fr');
-      expect(result.theme).toBe('light');
+      expect(result.locale).toBe(LocaleType.FR);
+      expect(result.theme).toBe(ThemeType.LIGHT);
     });
 
     it('should update only locale when provided alone', async () => {
@@ -456,14 +456,14 @@ describe('User Preferences Integration', () => {
       });
 
       const input: UpdateUserPreferencesInput = {
-        locale: 'fr',
+        locale: LocaleType.FR,
       };
 
       const result = await userPreferencesService.update(user.id, input);
 
-      expect(result.locale).toBe('fr');
+      expect(result.locale).toBe(LocaleType.FR);
       expect(result.selectedSports).toEqual([SportType.RUN]);
-      expect(result.theme).toBe('dark');
+      expect(result.theme).toBe(ThemeType.DARK);
     });
 
     it('should update only theme when provided alone', async () => {
@@ -471,7 +471,7 @@ describe('User Preferences Integration', () => {
 
       await userPreferencesService.update(user.id, {
         selectedSports: [SportType.RIDE],
-        locale: 'en',
+        locale: LocaleType.EN,
       });
 
       const input: UpdateUserPreferencesInput = {
@@ -480,9 +480,9 @@ describe('User Preferences Integration', () => {
 
       const result = await userPreferencesService.update(user.id, input);
 
-      expect(result.theme).toBe('light');
+      expect(result.theme).toBe(ThemeType.LIGHT);
       expect(result.selectedSports).toEqual([SportType.RIDE]);
-      expect(result.locale).toBe('en');
+      expect(result.locale).toBe(LocaleType.EN);
     });
 
     it('should change from default Run to multiple sports', async () => {
@@ -491,7 +491,7 @@ describe('User Preferences Integration', () => {
       const preferencesBeforeUpdate = await prisma.userPreferences.findUnique({
         where: { userId: user.id },
       });
-      expect(preferencesBeforeUpdate?.selectedSports).toEqual(['Run']);
+      expect(preferencesBeforeUpdate?.selectedSports).toEqual([SportType.RUN]);
       expect(preferencesBeforeUpdate?.onboardingCompleted).toBe(false);
 
       const result = await userPreferencesService.update(user.id, {
@@ -520,11 +520,11 @@ describe('User Preferences Integration', () => {
       const { user } = await seedTestUser();
 
       const update1Promise = userPreferencesService.update(user.id, {
-        locale: 'en',
+        locale: LocaleType.EN,
       });
 
       const update2Promise = userPreferencesService.update(user.id, {
-        locale: 'fr',
+        locale: LocaleType.FR,
       });
 
       const update3Promise = userPreferencesService.update(user.id, {
@@ -538,8 +538,8 @@ describe('User Preferences Integration', () => {
       });
 
       expect(finalPreferences).toBeDefined();
-      expect(['en', 'fr']).toContain(finalPreferences?.locale);
-      expect(['system', 'dark']).toContain(finalPreferences?.theme);
+      expect([LocaleType.EN, LocaleType.FR]).toContain(finalPreferences?.locale);
+      expect([ThemeType.SYSTEM, ThemeType.DARK]).toContain(finalPreferences?.theme);
     });
   });
 });
