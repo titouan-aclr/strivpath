@@ -1,6 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-/* eslint-disable no-unused-vars */
 export enum SyncStatus {
   PENDING = 'PENDING',
   IN_PROGRESS = 'IN_PROGRESS',
@@ -14,7 +13,6 @@ export enum SyncStage {
   COMPUTING = 'COMPUTING',
   DONE = 'DONE',
 }
-/* eslint-enable no-unused-vars */
 
 registerEnumType(SyncStatus, {
   name: 'SyncStatus',

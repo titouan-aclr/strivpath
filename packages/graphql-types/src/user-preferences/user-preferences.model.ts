@@ -1,6 +1,5 @@
 import { ObjectType, Field, registerEnumType, Int } from '@nestjs/graphql';
 
-/* eslint-disable no-unused-vars */
 export enum SportType {
   RUN = 'Run',
   RIDE = 'Ride',
@@ -17,7 +16,6 @@ export enum LocaleType {
   EN = 'en',
   FR = 'fr',
 }
-/* eslint-enable no-unused-vars */
 
 registerEnumType(SportType, {
   name: 'SportType',

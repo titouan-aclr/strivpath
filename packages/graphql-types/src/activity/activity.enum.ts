@@ -1,6 +1,5 @@
 import { registerEnumType } from '@nestjs/graphql';
 
-/* eslint-disable no-unused-vars */
 export enum ActivityType {
   RUN = 'Run',
   RIDE = 'Ride',
@@ -36,7 +35,6 @@ export enum ActivityType {
   WORKOUT = 'Workout',
   YOGA = 'Yoga',
 }
-/* eslint-enable no-unused-vars */
 
 registerEnumType(ActivityType, {
   name: 'ActivityType',

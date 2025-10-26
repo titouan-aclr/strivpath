@@ -1,12 +1,12 @@
 # Web - Next.js Frontend
 
-Next.js 15 frontend application for Stravanalytics with Apollo Client for GraphQL data fetching.
+Next.js 16 frontend application for Stravanalytics with Apollo Client for GraphQL data fetching.
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (App Router)
+- **Framework**: Next.js 16 (App Router)
 - **React**: React 19
-- **GraphQL Client**: Apollo Client with `@apollo/experimental-nextjs-app-support`
+- **GraphQL Client**: Apollo Client with `@apollo/client-integration-nextjs`
 - **Module System**: ESM (native)
 - **Testing**: Vitest + @testing-library/react + Playwright
 - **Styling**: TailwindCSS (to be configured)
@@ -87,7 +87,7 @@ export default async function Page() {
 }
 ```
 
-Uses `@apollo/experimental-nextjs-app-support` for Next.js App Router compatibility.
+Uses `@apollo/client-integration-nextjs` for Next.js App Router compatibility.
 
 ### Shared Types
 
