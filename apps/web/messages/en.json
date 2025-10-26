@@ -1,0 +1,22 @@
+{
+  "common": {
+    "appName": "Stravanalytics",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "home": {
+    "title": "Stravanalytics",
+    "usersFromApi": "Users from GraphQL API:",
+    "demoButton": "Demo Button",
+    "noUsers": "No users found",
+    "failedToLoadUsers": "Failed to load users",
+    "userLabel": "User {id}"
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist",
+      "goHome": "Go back home"
+    }
+  }
+}
