@@ -88,10 +88,10 @@ describe('UserResolver', () => {
 
   describe('userByStravaId', () => {
     it('should return a GraphQL user when found', async () => {
-      const mockPrismaUser = createMockPrismaUser({ stravaId: 12345 });
+      const mockPrismaUser = { ...createMockPrismaUser({ stravaId: 12345 }), tokens: [] };
       const expectedGraphQLUser = UserMapper.toGraphQL(mockPrismaUser);
 
-      jest.spyOn(userService, 'findByStravaId').mockResolvedValue(mockPrismaUser);
+      jest.spyOn(userService, 'findByStravaId').mockResolvedValue(mockPrismaUser as any);
 
       const result = await resolver.userByStravaId(12345);
 
@@ -109,16 +109,19 @@ describe('UserResolver', () => {
     });
 
     it('should handle nullable fields correctly', async () => {
-      const mockPrismaUser = createMockPrismaUser({
-        stravaId: 12345,
-        username: null,
-        firstname: null,
-        lastname: null,
-        city: null,
-        country: null,
-      });
+      const mockPrismaUser = {
+        ...createMockPrismaUser({
+          stravaId: 12345,
+          username: null,
+          firstname: null,
+          lastname: null,
+          city: null,
+          country: null,
+        }),
+        tokens: [],
+      };
 
-      jest.spyOn(userService, 'findByStravaId').mockResolvedValue(mockPrismaUser);
+      jest.spyOn(userService, 'findByStravaId').mockResolvedValue(mockPrismaUser as any);
 
       const result = await resolver.userByStravaId(12345);
 

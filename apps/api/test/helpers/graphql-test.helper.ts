@@ -2,7 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import * as request from 'supertest';
+import request from 'supertest';
 
 interface GraphQLTestConfig {
   imports: any[];
@@ -10,7 +10,7 @@ interface GraphQLTestConfig {
 }
 
 export class GraphQLTestHelper {
-  private app: INestApplication;
+  private app!: INestApplication;
 
   async setupTestingModule(config: GraphQLTestConfig): Promise<void> {
     const moduleFixture: TestingModule = await Test.createTestingModule({
