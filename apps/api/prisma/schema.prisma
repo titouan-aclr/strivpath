@@ -13,7 +13,7 @@ generator client {
 model User {
   id            Int       @id @default(autoincrement())
   stravaId      Int       @unique
-  username      String?   // might be null
+  username      String?
   firstname     String?
   lastname      String?
   sex           String?
@@ -25,15 +25,94 @@ model User {
   updatedAt     DateTime  @updatedAt
 
   tokens        StravaToken[]
+  preferences   UserPreferences?
+  activities    Activity[]
+  syncHistory   SyncHistory[]
+  refreshTokens RefreshToken[]
 }
 
 model StravaToken {
   id           Int      @id @default(autoincrement())
   accessToken  String
   refreshToken String
-  expiresAt    Int      // timestamp epoch
+  expiresAt    Int
   createdAt    DateTime @default(now())
 
   userId Int
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model UserPreferences {
+  id                   Int      @id @default(autoincrement())
+  userId               Int      @unique
+  selectedSports       Json
+  onboardingCompleted  Boolean  @default(false)
+  locale               String   @default("en")
+  theme                String   @default("system")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Activity {
+  id                   Int      @id @default(autoincrement())
+  stravaId             BigInt   @unique
+  userId               Int
+  name                 String
+  type                 String
+  distance             Float
+  movingTime           Int
+  elapsedTime          Int
+  totalElevationGain   Float
+  startDate            DateTime
+  startDateLocal       DateTime
+  timezone             String
+  averageSpeed         Float?
+  maxSpeed             Float?
+  averageHeartrate     Float?
+  maxHeartrate         Float?
+  kilojoules           Float?
+  deviceWatts          Boolean?
+  hasKudoed            Boolean  @default(false)
+  kudosCount           Int      @default(0)
+  averageCadence       Float?
+  raw                  Json
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startDate])
+  @@index([userId, type])
+}
+
+model SyncHistory {
+  id                   Int       @id @default(autoincrement())
+  userId               Int
+  status               String
+  stage                String?
+  totalActivities      Int       @default(0)
+  processedActivities  Int       @default(0)
+  errorMessage         String?
+  startedAt            DateTime  @default(now())
+  completedAt          DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  jti               String    @unique
+  expiresAt         DateTime
+  revoked           Boolean   @default(false)
+  deviceFingerprint String?
+  lastUsedAt        DateTime?
+  createdAt         DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, revoked])
+  @@index([jti, revoked])
 }

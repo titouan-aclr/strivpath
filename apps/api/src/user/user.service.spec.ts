@@ -1,8 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
-import { PrismaService } from '@/database/prisma.service';
+import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUser, createMockStravaToken } from '../../test/mocks/factories';
+import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
 
 describe('UserService', () => {
   let service: UserService;
@@ -49,6 +50,76 @@ describe('UserService', () => {
     });
   });
 
+  describe('findById', () => {
+    it('should return a GraphQL user when found', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 1,
+        stravaId: 12345,
+        username: 'testuser',
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(1);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(1);
+      expect(result?.stravaId).toBe(12345);
+      expect(result?.username).toBe('testuser');
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+    });
+
+    it('should return null when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const result = await service.findById(99999);
+
+      expect(result).toBeNull();
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { id: 99999 },
+      });
+    });
+
+    it('should convert Prisma user to GraphQL user using mapper', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 42,
+        stravaId: 67890,
+        username: 'athlete',
+        firstname: 'Test',
+        lastname: 'Athlete',
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(42);
+
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(42);
+      expect(result?.stravaId).toBe(67890);
+      expect(result?.username).toBe('athlete');
+      expect(result?.firstname).toBe('Test');
+      expect(result?.lastname).toBe('Athlete');
+    });
+
+    it('should handle null optional fields in returned GraphQL user', async () => {
+      const mockPrismaUser = createMockPrismaUser({
+        id: 5,
+        stravaId: 11111,
+        username: null,
+        firstname: null,
+        lastname: null,
+      });
+      prisma.user.findUnique.mockResolvedValue(mockPrismaUser);
+
+      const result = await service.findById(5);
+
+      expect(result).toBeDefined();
+      expect(result?.username).toBeUndefined();
+      expect(result?.firstname).toBeUndefined();
+      expect(result?.lastname).toBeUndefined();
+    });
+  });
+
   describe('findByStravaId', () => {
     it('should return a user with tokens when found', async () => {
       const mockUser = createMockPrismaUser({ stravaId: 12345 });
@@ -83,7 +154,7 @@ describe('UserService', () => {
       const tokenData = {
         accessToken: 'access123',
         refreshToken: 'refresh123',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: Math.floor(new Date('2025-12-31').getTime() / 1000),
         scope: 'read,activity:read_all',
       };
 
@@ -115,7 +186,7 @@ describe('UserService', () => {
       const tokenData = {
         accessToken: 'newaccess123',
         refreshToken: 'newrefresh123',
-        expiresAt: new Date('2025-12-31'),
+        expiresAt: Math.floor(new Date('2025-12-31').getTime() / 1000),
         scope: 'read,activity:read_all',
       };
 
@@ -128,6 +199,165 @@ describe('UserService', () => {
       expect(prisma.stravaToken.create).toHaveBeenCalledWith({
         data: { ...tokenData, userId },
       });
+    });
+  });
+
+  describe('upsertFromStrava', () => {
+    const mockAthleteResponse: StravaAthleteResponse = {
+      id: 12345,
+      username: 'testathlete',
+      resource_state: 3,
+      firstname: 'Test',
+      lastname: 'Athlete',
+      bio: 'Test bio',
+      city: 'Paris',
+      state: 'Île-de-France',
+      country: 'France',
+      sex: 'M',
+      premium: false,
+      summit: false,
+      created_at: '2020-01-01T00:00:00Z',
+      updated_at: '2023-01-01T00:00:00Z',
+      badge_type_id: 1,
+      weight: 70,
+      profile_medium: 'https://example.com/profile-medium.jpg',
+      profile: 'https://example.com/profile.jpg',
+      friend: null,
+      follower: null,
+      blocked: false,
+      can_follow: true,
+      follower_count: 10,
+      friend_count: 5,
+      mutual_friend_count: 2,
+      athlete_type: 1,
+      date_preference: 'dd/MM/yyyy',
+      measurement_preference: 'meters',
+      clubs: [],
+      ftp: null,
+      bikes: [],
+      shoes: [],
+    };
+
+    const mockStravaTokens: StravaTokenResponse = {
+      token_type: 'Bearer',
+      expires_at: 1234567890,
+      expires_in: 21600,
+      refresh_token: 'strava-refresh-token',
+      access_token: 'strava-access-token',
+      athlete: mockAthleteResponse,
+    };
+
+    it('should create new user with default preferences on first login', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      const mockCreatedUser = createMockPrismaUser({
+        stravaId: mockAthleteResponse.id,
+        username: mockAthleteResponse.username,
+        firstname: mockAthleteResponse.firstname,
+        lastname: mockAthleteResponse.lastname,
+      });
+
+      prisma.user.create.mockResolvedValue(mockCreatedUser);
+
+      const result = await service.upsertFromStrava(mockAthleteResponse, mockStravaTokens);
+
+      expect(result.stravaId).toBe(mockAthleteResponse.id);
+      expect(result.username).toBe(mockAthleteResponse.username);
+      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+        where: { stravaId: mockAthleteResponse.id },
+      });
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: {
+          stravaId: mockAthleteResponse.id,
+          username: mockAthleteResponse.username,
+          firstname: mockAthleteResponse.firstname,
+          lastname: mockAthleteResponse.lastname,
+          sex: mockAthleteResponse.sex,
+          city: mockAthleteResponse.city,
+          country: mockAthleteResponse.country,
+          profile: mockAthleteResponse.profile,
+          profileMedium: mockAthleteResponse.profile_medium,
+          tokens: {
+            create: {
+              accessToken: mockStravaTokens.access_token,
+              refreshToken: mockStravaTokens.refresh_token,
+              expiresAt: mockStravaTokens.expires_at,
+            },
+          },
+          preferences: {
+            create: {
+              selectedSports: ['Run'],
+              onboardingCompleted: false,
+              locale: 'en',
+              theme: 'system',
+            },
+          },
+        },
+      });
+    });
+
+    it('should update existing user and add new Strava token', async () => {
+      const existingUser = createMockPrismaUser({
+        id: 1,
+        stravaId: mockAthleteResponse.id,
+        username: 'oldusername',
+        firstname: 'Old',
+        lastname: 'Name',
+      });
+
+      const updatedUser = createMockPrismaUser({
+        id: 1,
+        stravaId: mockAthleteResponse.id,
+        username: mockAthleteResponse.username,
+        firstname: mockAthleteResponse.firstname,
+        lastname: mockAthleteResponse.lastname,
+        city: mockAthleteResponse.city,
+        country: mockAthleteResponse.country,
+      });
+
+      prisma.user.findUnique.mockResolvedValue(existingUser);
+      prisma.user.update.mockResolvedValue(updatedUser);
+
+      const result = await service.upsertFromStrava(mockAthleteResponse, mockStravaTokens);
+
+      expect(result.stravaId).toBe(mockAthleteResponse.id);
+      expect(result.username).toBe(mockAthleteResponse.username);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: existingUser.id },
+        data: {
+          username: mockAthleteResponse.username,
+          firstname: mockAthleteResponse.firstname,
+          lastname: mockAthleteResponse.lastname,
+          sex: mockAthleteResponse.sex,
+          city: mockAthleteResponse.city,
+          country: mockAthleteResponse.country,
+          profile: mockAthleteResponse.profile,
+          profileMedium: mockAthleteResponse.profile_medium,
+          tokens: {
+            create: {
+              accessToken: mockStravaTokens.access_token,
+              refreshToken: mockStravaTokens.refresh_token,
+              expiresAt: mockStravaTokens.expires_at,
+            },
+          },
+        },
+      });
+    });
+
+    it('should preserve token history when updating user', async () => {
+      const existingUser = createMockPrismaUser({
+        id: 1,
+        stravaId: mockAthleteResponse.id,
+      });
+
+      prisma.user.findUnique.mockResolvedValue(existingUser);
+      prisma.user.update.mockResolvedValue(existingUser);
+
+      await service.upsertFromStrava(mockAthleteResponse, mockStravaTokens);
+
+      const updateCall = (prisma.user.update as jest.Mock).mock.calls[0][0];
+      expect(updateCall.data.tokens.create).toBeDefined();
+      expect(updateCall.data.tokens.create.accessToken).toBe(mockStravaTokens.access_token);
     });
   });
 });
