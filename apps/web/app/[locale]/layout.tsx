@@ -4,6 +4,7 @@ import { getMessages } from 'next-intl/server';
 import { setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { ThemeProvider } from '@/components/providers/theme-provider';
+import { ApolloWrapper } from '@/lib/apollo-wrapper';
 import { routing } from '@/i18n/routing';
 import '../globals.css';
 
@@ -35,11 +36,13 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body>
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            {children}
-          </ThemeProvider>
-        </NextIntlClientProvider>
+        <ApolloWrapper>
+          <NextIntlClientProvider messages={messages}>
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+              {children}
+            </ThemeProvider>
+          </NextIntlClientProvider>
+        </ApolloWrapper>
       </body>
     </html>
   );
