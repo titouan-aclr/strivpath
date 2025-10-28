@@ -1,0 +1,18 @@
+fragment UserBasicInfo on User {
+  id
+  username
+  firstname
+  lastname
+  profile
+  profileMedium
+}
+
+fragment UserFullInfo on User {
+  ...UserBasicInfo
+  stravaId
+  city
+  country
+  sex
+  createdAt
+  updatedAt
+}
