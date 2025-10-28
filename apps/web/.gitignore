@@ -36,4 +36,4 @@ yarn-error.log*
 .vercel
 
 # GraphQL generated types
-/src/gql/
+gql/

@@ -8,7 +8,7 @@ export default tseslint.config(
       'playwright-report/**',
       'test-results/**',
       '.next/**',
-      'src/gql/**',
+      'gql/**',
       'eslint.config.mjs',
       '*.config.js',
       '*.config.mjs',
