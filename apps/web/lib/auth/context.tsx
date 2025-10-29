@@ -1,18 +1,9 @@
 'use client';
 
-/* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any */
-
 import { createContext, useContext } from 'react';
 import { useSuspenseQuery } from '@apollo/client/react';
-import { graphql, type User } from '@/lib/graphql';
-
-const CurrentUserDocument = graphql(/* GraphQL */ `
-  query CurrentUser {
-    currentUser {
-      ...UserFullInfo
-    }
-  }
-`);
+import { type User, getFragmentData } from '@/lib/graphql';
+import { CurrentUserDocument, UserFullInfoFragmentDoc } from '@/gql/graphql';
 
 interface AuthContextValue {
   user: User | null;
@@ -22,14 +13,16 @@ interface AuthContextValue {
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const { data, refetch } = useSuspenseQuery(CurrentUserDocument as any);
+  const { data, refetch } = useSuspenseQuery(CurrentUserDocument);
+
+  const userFragment = data.currentUser ? getFragmentData(UserFullInfoFragmentDoc, data.currentUser) : null;
 
   const handleRefetch = async () => {
     await refetch();
   };
 
   return (
-    <AuthContext.Provider value={{ user: (data as any).currentUser ?? null, refetch: handleRefetch }}>
+    <AuthContext.Provider value={{ user: userFragment as User | null, refetch: handleRefetch }}>
       {children}
     </AuthContext.Provider>
   );
