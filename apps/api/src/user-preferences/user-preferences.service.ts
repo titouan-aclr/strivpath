@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserPreferences, UpdateUserPreferencesInput } from '@repo/graphql-types';
+import { UserPreferences } from './models/user-preferences.model';
+import { UpdateUserPreferencesInput } from './dto/user-preferences.input';
 import { PrismaService } from '../database/prisma.service';
 import { UserPreferencesMapper } from './user-preferences.mapper';
 

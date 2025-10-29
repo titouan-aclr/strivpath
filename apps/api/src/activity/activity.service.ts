@@ -1,5 +1,9 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Activity, SyncHistory, SyncStatus, SyncStage, SportType } from '@repo/graphql-types';
+import { Activity } from './models/activity.model';
+import { SyncHistory } from '../sync-history/models/sync-history.model';
+import { SyncStatus } from '../sync-history/enums/sync-status.enum';
+import { SyncStage } from '../sync-history/enums/sync-stage.enum';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';

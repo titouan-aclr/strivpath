@@ -1,5 +1,5 @@
 import { Activity as PrismaActivity } from '@prisma/client';
-import { Activity as GraphQLActivity } from '@repo/graphql-types';
+import { Activity as GraphQLActivity } from './models/activity.model';
 
 export class ActivityMapper {
   static toGraphQL(prismaActivity: PrismaActivity): GraphQLActivity {

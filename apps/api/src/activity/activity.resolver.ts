@@ -1,6 +1,8 @@
 import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Activity, SyncHistory, ActivitiesFilterInput } from '@repo/graphql-types';
+import { Activity } from './models/activity.model';
+import { SyncHistory } from '../sync-history/models/sync-history.model';
+import { ActivitiesFilterInput } from './dto/activity.input';
 import { ActivityService } from './activity.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';

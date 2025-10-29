@@ -1,5 +1,5 @@
 import { User as PrismaUser } from '@prisma/client';
-import { User as GraphQLUser } from '@repo/graphql-types';
+import { User as GraphQLUser } from './models/user.model';
 
 export class UserMapper {
   static toGraphQL(prismaUser: PrismaUser): GraphQLUser {

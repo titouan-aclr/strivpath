@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException, forwardRef } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { User } from '@repo/graphql-types';
+import { User } from '../user/models/user.model';
 import { randomUUID } from 'crypto';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { User } from '@repo/graphql-types';
+import { User } from './models/user.model';
 import { PrismaService } from '../database/prisma.service';
 import { UserMapper } from './user.mapper';
 import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
