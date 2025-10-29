@@ -1,6 +1,7 @@
 import { SyncHistoryMapper } from './sync-history.mapper';
 import { createMockPrismaSyncHistory } from '../../test/mocks/factories';
-import { SyncStatus, SyncStage } from '@repo/graphql-types';
+import { SyncStatus } from './enums/sync-status.enum';
+import { SyncStage } from './enums/sync-stage.enum';
 
 describe('SyncHistoryMapper', () => {
   describe('toGraphQL', () => {

@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserPreferencesResolver } from './user-preferences.resolver';
 import { UserPreferencesService } from './user-preferences.service';
-import { UserPreferences, SportType, ThemeType, LocaleType } from '@repo/graphql-types';
+import { UserPreferences } from './models/user-preferences.model';
+import { SportType } from './enums/sport-type.enum';
+import { ThemeType } from './enums/theme-type.enum';
+import { LocaleType } from './enums/locale-type.enum';
 import { TokenPayload } from '../auth/types';
 
 describe('UserPreferencesResolver', () => {

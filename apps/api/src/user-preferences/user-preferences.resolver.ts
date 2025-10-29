@@ -1,6 +1,7 @@
 import { Resolver, Mutation, Args } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { UserPreferences, UpdateUserPreferencesInput } from '@repo/graphql-types';
+import { UserPreferences } from './models/user-preferences.model';
+import { UpdateUserPreferencesInput } from './dto/user-preferences.input';
 import { UserPreferencesService } from './user-preferences.service';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';

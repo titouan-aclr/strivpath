@@ -2,7 +2,10 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ActivityResolver } from './activity.resolver';
 import { ActivityService } from './activity.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
-import { Activity, SyncHistory, SyncStatus, SyncStage } from '@repo/graphql-types';
+import { Activity } from './models/activity.model';
+import { SyncHistory } from '../sync-history/models/sync-history.model';
+import { SyncStatus } from '../sync-history/enums/sync-status.enum';
+import { SyncStage } from '../sync-history/enums/sync-stage.enum';
 import { TokenPayload } from '../auth/types';
 
 describe('ActivityResolver', () => {

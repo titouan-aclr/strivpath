@@ -4,7 +4,9 @@ import { UserPreferencesService } from './user-preferences.service';
 import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUserPreferences } from '../../test/mocks/factories';
-import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
+import { SportType } from './enums/sport-type.enum';
+import { ThemeType } from './enums/theme-type.enum';
+import { LocaleType } from './enums/locale-type.enum';
 
 describe('UserPreferencesService', () => {
   let service: UserPreferencesService;
