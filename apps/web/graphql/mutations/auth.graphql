@@ -1,0 +1,11 @@
+mutation RefreshToken {
+  refreshToken {
+    user {
+      ...UserBasicInfo
+    }
+  }
+}
+
+mutation Logout {
+  logout
+}

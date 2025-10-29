@@ -1,0 +1,11 @@
+query Activities($filter: ActivitiesFilterInput) {
+  activities(filter: $filter) {
+    ...ActivityCard
+  }
+}
+
+query Activity($id: Int!) {
+  activity(id: $id) {
+    ...ActivityDetail
+  }
+}

@@ -1,0 +1,12 @@
+mutation SyncActivities {
+  syncActivities {
+    id
+    status
+    stage
+    totalActivities
+    processedActivities
+    startedAt
+    completedAt
+    errorMessage
+  }
+}

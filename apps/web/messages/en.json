@@ -1,0 +1,65 @@
+{
+  "common": {
+    "appName": "Stravanalytics",
+    "loading": "Loading...",
+    "error": "An error occurred"
+  },
+  "home": {
+    "title": "Stravanalytics",
+    "usersFromApi": "Users from GraphQL API:",
+    "demoButton": "Demo Button",
+    "noUsers": "No users found",
+    "failedToLoadUsers": "Failed to load users",
+    "userLabel": "User {id}"
+  },
+  "navigation": {
+    "dashboard": "Dashboard",
+    "activities": "Activities",
+    "goals": "Goals",
+    "badges": "Badges",
+    "settings": "Settings",
+    "sports": {
+      "title": "Sports",
+      "running": "Running",
+      "cycling": "Cycling",
+      "swimming": "Swimming"
+    }
+  },
+  "layout": {
+    "userMenu": {
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    },
+    "themeSwitcher": {
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System"
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "selectSports": "Select your sports",
+      "syncActivities": "Sync your activities"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome to Stravanalytics",
+      "description": "Connect your Strava account to start tracking your progress and achieving your goals",
+      "connectButton": "Connect with Strava"
+    },
+    "error": {
+      "title": "Authentication Error",
+      "description": "An error occurred during authentication. Please try again.",
+      "tryAgain": "Try again"
+    }
+  },
+  "errors": {
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you are looking for does not exist",
+      "goHome": "Go back home"
+    }
+  }
+}

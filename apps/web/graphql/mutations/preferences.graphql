@@ -1,0 +1,5 @@
+mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
+  updateUserPreferences(input: $input) {
+    ...UserPreferencesInfo
+  }
+}

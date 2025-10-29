@@ -1,11 +1,49 @@
-import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
-import { registerApolloClient } from '@apollo/experimental-nextjs-app-support';
+import { ApolloClient, HttpLink, InMemoryCache, from } from '@apollo/client';
+import { registerApolloClient } from '@apollo/client-integration-nextjs';
+import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { ErrorLink } from '@apollo/client/link/error';
 
-export const { getClient } = registerApolloClient(() => {
+const errorLink = new ErrorLink(({ error }) => {
+  if (CombinedGraphQLErrors.is(error)) {
+    error.errors.forEach(({ message, locations, path }) => {
+      console.error(
+        `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${String(path)}`,
+      );
+    });
+  } else {
+    console.error('[Network error]:', error);
+  }
+});
+
+const httpLink = new HttpLink({
+  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
+  credentials: 'include',
+});
+
+export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
   return new ApolloClient({
-    cache: new InMemoryCache(),
-    link: new HttpLink({
-      uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
+    cache: new InMemoryCache({
+      typePolicies: {
+        Query: {
+          fields: {
+            activities: {
+              keyArgs: ['filter', ['type']],
+              merge(existing: unknown[] = [], incoming: unknown[]): unknown[] {
+                return [...existing, ...incoming];
+              },
+            },
+          },
+        },
+        Activity: {
+          keyFields: ['stravaId'],
+        },
+      },
     }),
+    link: from([errorLink, httpLink]),
+    defaultOptions: {
+      watchQuery: {
+        fetchPolicy: 'cache-and-network',
+      },
+    },
   });
 });
