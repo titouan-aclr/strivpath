@@ -9,8 +9,11 @@ import {
 } from '@apollo/client-integration-nextjs';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { ErrorLink } from '@apollo/client/link/error';
+import { createRefreshLink } from './apollo-refresh-link';
 
 function makeClient() {
+  const refreshLink = createRefreshLink();
+
   const errorLink = new ErrorLink(({ error }) => {
     if (CombinedGraphQLErrors.is(error)) {
       error.errors.forEach(({ message, locations, path }) => {
@@ -49,7 +52,7 @@ function makeClient() {
     link:
       typeof window === 'undefined'
         ? ApolloLink.from([new SSRMultipartLink({ stripDefer: true }), errorLink, httpLink])
-        : ApolloLink.from([errorLink, httpLink]),
+        : ApolloLink.from([refreshLink, errorLink, httpLink]),
     defaultOptions: {
       watchQuery: {
         fetchPolicy: 'cache-and-network',
