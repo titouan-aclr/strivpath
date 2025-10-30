@@ -4,40 +4,40 @@ import { GraphQLBigInt } from 'graphql-scalars';
 @ObjectType()
 export class Activity {
   @Field(() => ID)
-  id: number;
+  id!: number;
 
   @Field(() => GraphQLBigInt)
-  stravaId: bigint;
+  stravaId!: bigint;
 
   @Field(() => Int)
-  userId: number;
+  userId!: number;
 
   @Field()
-  name: string;
+  name!: string;
 
   @Field()
-  type: string;
+  type!: string;
 
   @Field(() => Float)
-  distance: number;
+  distance!: number;
 
   @Field(() => Int)
-  movingTime: number;
+  movingTime!: number;
 
   @Field(() => Int)
-  elapsedTime: number;
+  elapsedTime!: number;
 
   @Field(() => Float)
-  totalElevationGain: number;
+  totalElevationGain!: number;
 
   @Field()
-  startDate: Date;
+  startDate!: Date;
 
   @Field()
-  startDateLocal: Date;
+  startDateLocal!: Date;
 
   @Field()
-  timezone: string;
+  timezone!: string;
 
   @Field(() => Float, { nullable: true })
   averageSpeed?: number;
@@ -58,17 +58,17 @@ export class Activity {
   deviceWatts?: boolean;
 
   @Field()
-  hasKudoed: boolean;
+  hasKudoed!: boolean;
 
   @Field(() => Int)
-  kudosCount: number;
+  kudosCount!: number;
 
   @Field(() => Float, { nullable: true })
   averageCadence?: number;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

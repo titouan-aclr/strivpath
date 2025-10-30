@@ -1,5 +1,8 @@
 import { UserPreferences as PrismaUserPreferences } from '@prisma/client';
-import { UserPreferences as GraphQLUserPreferences, SportType, ThemeType, LocaleType } from '@repo/graphql-types';
+import { UserPreferences as GraphQLUserPreferences } from './models/user-preferences.model';
+import { SportType } from './enums/sport-type.enum';
+import { LocaleType } from './enums/locale-type.enum';
+import { ThemeType } from './enums/theme-type.enum';
 
 export class UserPreferencesMapper {
   static toGraphQL(prismaPreferences: PrismaUserPreferences): GraphQLUserPreferences {

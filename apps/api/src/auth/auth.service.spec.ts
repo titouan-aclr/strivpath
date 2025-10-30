@@ -6,7 +6,7 @@ import { AuthService } from './auth.service';
 import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { StravaService } from '../strava/strava.service';
-import { User } from '@repo/graphql-types';
+import { User } from '../user/models/user.model';
 
 describe('AuthService', () => {
   let service: AuthService;

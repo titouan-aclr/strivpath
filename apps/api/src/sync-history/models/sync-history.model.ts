@@ -1,31 +1,32 @@
 import { ObjectType, Field, ID, Int } from '@nestjs/graphql';
-import { SyncStatus, SyncStage } from './sync-history.enum';
+import { SyncStatus } from '../enums/sync-status.enum';
+import { SyncStage } from '../enums/sync-stage.enum';
 
 @ObjectType()
 export class SyncHistory {
   @Field(() => ID)
-  id: number;
+  id!: number;
 
   @Field(() => Int)
-  userId: number;
+  userId!: number;
 
   @Field(() => SyncStatus)
-  status: SyncStatus;
+  status!: SyncStatus;
 
   @Field(() => SyncStage, { nullable: true })
   stage?: SyncStage;
 
   @Field(() => Int)
-  totalActivities: number;
+  totalActivities!: number;
 
   @Field(() => Int)
-  processedActivities: number;
+  processedActivities!: number;
 
   @Field({ nullable: true })
   errorMessage?: string;
 
   @Field()
-  startedAt: Date;
+  startedAt!: Date;
 
   @Field({ nullable: true })
   completedAt?: Date;

@@ -4,7 +4,9 @@ import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { BadRequestException } from '@nestjs/common';
-import { SyncStatus, SyncStage, SportType } from '@repo/graphql-types';
+import { SyncStatus } from '../sync-history/enums/sync-status.enum';
+import { SyncStage } from '../sync-history/enums/sync-stage.enum';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 describe('ActivityService', () => {
   let service: ActivityService;

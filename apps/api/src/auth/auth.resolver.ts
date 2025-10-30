@@ -1,7 +1,8 @@
 import { Resolver, Query, Mutation, Context } from '@nestjs/graphql';
 import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { User, AuthResponse } from '@repo/graphql-types';
+import { User } from '../user/models/user.model';
+import { AuthResponse } from './models/auth-response.model';
 import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
 import { UserService } from '../user/user.service';

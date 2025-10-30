@@ -3,10 +3,10 @@ import { ObjectType, Field, Int, ID } from '@nestjs/graphql';
 @ObjectType()
 export class User {
   @Field(() => ID)
-  id: number;
+  id!: number;
 
   @Field(() => Int)
-  stravaId: number;
+  stravaId!: number;
 
   @Field({ nullable: true })
   username?: string;
@@ -33,8 +33,8 @@ export class User {
   profileMedium?: string;
 
   @Field()
-  createdAt: Date;
+  createdAt!: Date;
 
   @Field()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
