@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { SyncHistory, SyncStatus, SyncStage } from '@repo/graphql-types';
+import { SyncHistory } from './models/sync-history.model';
+import { SyncStatus } from './enums/sync-status.enum';
+import { SyncStage } from './enums/sync-stage.enum';
 import { PrismaService } from '../database/prisma.service';
 import { SyncHistoryMapper } from './sync-history.mapper';
 

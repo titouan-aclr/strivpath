@@ -1,6 +1,7 @@
 import { UserPreferencesMapper } from './user-preferences.mapper';
 import { createMockPrismaUserPreferences } from '../../test/mocks/factories';
-import { SportType, ThemeType } from '@repo/graphql-types';
+import { SportType } from './enums/sport-type.enum';
+import { ThemeType } from './enums/theme-type.enum';
 
 describe('UserPreferencesMapper', () => {
   describe('toGraphQL', () => {

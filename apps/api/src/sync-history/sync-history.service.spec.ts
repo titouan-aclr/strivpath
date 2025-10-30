@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SyncHistoryService } from './sync-history.service';
 import { PrismaService } from '../database/prisma.service';
-import { SyncStatus, SyncStage } from '@repo/graphql-types';
+import { SyncStatus } from './enums/sync-status.enum';
+import { SyncStage } from './enums/sync-stage.enum';
 
 describe('SyncHistoryService', () => {
   let service: SyncHistoryService;

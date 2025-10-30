@@ -5,7 +5,7 @@ import { IsInt, IsOptional, IsString } from 'class-validator';
 export class CreateUserInput {
   @Field(() => Int)
   @IsInt()
-  stravaId: number;
+  stravaId!: number;
 
   @Field({ nullable: true })
   @IsOptional()

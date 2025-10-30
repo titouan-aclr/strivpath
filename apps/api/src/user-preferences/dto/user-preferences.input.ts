@@ -1,6 +1,8 @@
 import { InputType, Field } from '@nestjs/graphql';
 import { IsArray, IsEnum, ArrayMinSize, ArrayMaxSize, IsOptional } from 'class-validator';
-import { SportType, ThemeType, LocaleType } from './user-preferences.model';
+import { SportType } from '../enums/sport-type.enum';
+import { ThemeType } from '../enums/theme-type.enum';
+import { LocaleType } from '../enums/locale-type.enum';
 
 @InputType()
 export class UpdateUserPreferencesInput {

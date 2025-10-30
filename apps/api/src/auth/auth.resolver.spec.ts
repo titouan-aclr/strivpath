@@ -5,7 +5,7 @@ import { AuthResolver } from './auth.resolver';
 import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
 import { UserService } from '../user/user.service';
-import { User } from '@repo/graphql-types';
+import { User } from '../user/models/user.model';
 import { Response, Request } from 'express';
 import { GraphQLContext } from '../common/types';
 import '../common/types/express-request.interface';
