@@ -4,13 +4,7 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getClient } from '@/lib/apollo-client';
-import { gql } from '@apollo/client';
-
-const GET_STRAVA_AUTH_URL = gql`
-  query GetStravaAuthUrl {
-    stravaAuthUrl
-  }
-`;
+import { GetStravaAuthUrlDocument, type GetStravaAuthUrlQuery } from '@/gql/graphql';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -23,8 +17,8 @@ export default async function LoginPage({ params }: Props) {
   const t = await getTranslations('auth.login');
 
   const client = getClient();
-  const { data } = await client.query<{ stravaAuthUrl: string }>({
-    query: GET_STRAVA_AUTH_URL,
+  const { data } = await client.query<GetStravaAuthUrlQuery>({
+    query: GetStravaAuthUrlDocument,
   });
 
   return (
