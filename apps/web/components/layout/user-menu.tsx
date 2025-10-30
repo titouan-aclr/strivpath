@@ -12,29 +12,15 @@ import {
 import { Settings, LogOut } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { gql } from '@apollo/client';
-import { useMutation } from '@apollo/client/react';
-
-const LOGOUT_MUTATION = gql`
-  mutation Logout {
-    logout
-  }
-`;
-
-type LogoutData = {
-  logout: boolean;
-};
+import { useMutation } from '@/lib/graphql';
+import { LogoutDocument, type LogoutMutation } from '@/gql/graphql';
+import { useAuth } from '@/lib/auth/context';
 
 export function UserMenu() {
   const t = useTranslations('layout.userMenu');
   const router = useRouter();
-  const [logoutMutation] = useMutation<LogoutData>(LOGOUT_MUTATION);
-
-  const user = {
-    firstname: 'John',
-    lastname: 'Doe',
-    profileImageUrl: null,
-  };
+  const { user } = useAuth();
+  const [logoutMutation] = useMutation<LogoutMutation>(LogoutDocument);
 
   const handleLogout = () => {
     void logoutMutation()
@@ -47,12 +33,16 @@ export function UserMenu() {
       });
   };
 
+  if (!user) {
+    return null;
+  }
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-start gap-2 px-2">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={user.profileImageUrl || undefined} />
+            <AvatarImage src={user.profile || user.profileMedium || undefined} />
             <AvatarFallback>
               {user.firstname?.[0]}
               {user.lastname?.[0]}
