@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext } from 'react';
-import { useSuspenseQuery } from '@apollo/client/react';
+import { createContext, useContext, useState, useCallback } from 'react';
+import { useLazyQuery } from '@apollo/client/react';
 import { type User, getFragmentData } from '@/lib/graphql';
 import { CurrentUserDocument, UserFullInfoFragmentDoc } from '@/gql/graphql';
 
@@ -12,20 +12,22 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-export function AuthContextProvider({ children }: { children: React.ReactNode }) {
-  const { data, refetch } = useSuspenseQuery(CurrentUserDocument);
+interface AuthContextProviderProps {
+  children: React.ReactNode;
+  initialUser: User | null;
+}
 
-  const userFragment = data.currentUser ? getFragmentData(UserFullInfoFragmentDoc, data.currentUser) : null;
+export function AuthContextProvider({ children, initialUser }: AuthContextProviderProps) {
+  const [user, setUser] = useState<User | null>(initialUser);
+  const [refetchQuery] = useLazyQuery(CurrentUserDocument);
 
-  const handleRefetch = async () => {
-    await refetch();
-  };
+  const handleRefetch = useCallback(async () => {
+    const { data } = await refetchQuery();
+    const userFragment = data?.currentUser ? getFragmentData(UserFullInfoFragmentDoc, data.currentUser) : null;
+    setUser(userFragment as User | null);
+  }, [refetchQuery]);
 
-  return (
-    <AuthContext.Provider value={{ user: userFragment as User | null, refetch: handleRefetch }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, refetch: handleRefetch }}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {
