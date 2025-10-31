@@ -29,7 +29,8 @@
     "userMenu": {
       "profile": "Profile",
       "settings": "Settings",
-      "logout": "Logout"
+      "logout": "Logout",
+      "loggingOut": "Logging out..."
     },
     "themeSwitcher": {
       "light": "Light",
