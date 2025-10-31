@@ -7,9 +7,17 @@ export async function verifyAuth(): Promise<boolean> {
   return !!token;
 }
 
-export async function requireAuth(): Promise<void> {
+export async function requireAuth(errorReason?: string): Promise<void> {
   const isAuthenticated = await verifyAuth();
   if (!isAuthenticated) {
-    redirect('/login');
+    const errorParam = errorReason ? `?error=${errorReason}` : '';
+    redirect(`/login${errorParam}`);
+  }
+}
+
+export async function redirectIfAuthenticated(): Promise<void> {
+  const isAuthenticated = await verifyAuth();
+  if (isAuthenticated) {
+    redirect('/dashboard');
   }
 }
