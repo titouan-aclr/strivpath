@@ -9,28 +9,24 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { useMutation } from '@/lib/graphql';
-import { LogoutDocument, type LogoutMutation } from '@/gql/graphql';
 import { useAuth } from '@/lib/auth/context';
+import { useLogout } from '@/lib/auth/use-logout';
 
 export function UserMenu() {
   const t = useTranslations('layout.userMenu');
   const router = useRouter();
   const { user } = useAuth();
-  const [logoutMutation] = useMutation<LogoutMutation>(LogoutDocument);
+  const { logout, isLoading } = useLogout();
 
-  const handleLogout = () => {
-    void logoutMutation()
-      .then(() => {
-        router.push('/login');
-        router.refresh();
-      })
-      .catch((err: Error) => {
-        console.error('Logout error:', err.message);
-      });
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
   if (!user) {
@@ -61,9 +57,25 @@ export function UserMenu() {
           {t('settings')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-          <LogOut className="mr-2 h-4 w-4" />
-          {t('logout')}
+        <DropdownMenuItem
+          onClick={() => {
+            void handleLogout();
+          }}
+          disabled={isLoading}
+          aria-busy={isLoading}
+          className="text-destructive"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <span>{t('loggingOut')}</span>
+            </>
+          ) : (
+            <>
+              <LogOut className="mr-2 h-4 w-4" />
+              {t('logout')}
+            </>
+          )}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
