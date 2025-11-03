@@ -6,20 +6,7 @@ import { ErrorLink } from '@apollo/client/link/error';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { refreshTokenSSR } from './auth/refresh-token-ssr';
-
-const isUnauthenticatedError = (error: unknown): boolean => {
-  if (!CombinedGraphQLErrors.is(error)) {
-    return false;
-  }
-
-  return error.errors.some(
-    err => err.extensions?.code === 'UNAUTHENTICATED' || err.message?.includes('UNAUTHENTICATED'),
-  );
-};
-
-const isRefreshTokenOperation = (operationName?: string): boolean => {
-  return operationName === 'RefreshToken';
-};
+import { isUnauthenticatedError, isRefreshTokenOperation } from './auth/token-refresh-shared';
 
 const refreshLinkSSR = new ApolloLink((operation, forward) => {
   if (isRefreshTokenOperation(operation.operationName)) {
