@@ -1,8 +1,8 @@
 'use client';
 
-import { ApolloLink, Observable, Operation, FetchResult } from '@apollo/client';
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { ApolloLink, Observable, FetchResult } from '@apollo/client';
 import { RefreshTokenDocument } from '@/gql/graphql';
+import { isUnauthenticatedError, isRefreshTokenOperation, isValidRefreshResponse } from './auth/token-refresh-shared';
 
 interface RefreshLinkContext {
   isRefreshing: boolean;
@@ -12,50 +12,6 @@ interface RefreshLinkContext {
 const refreshContext: RefreshLinkContext = {
   isRefreshing: false,
   pendingRequests: [],
-};
-
-const isUnauthenticatedError = (error: unknown): boolean => {
-  if (!CombinedGraphQLErrors.is(error)) {
-    return false;
-  }
-
-  return error.errors.some(
-    err => err.extensions?.code === 'UNAUTHENTICATED' || err.message?.includes('UNAUTHENTICATED'),
-  );
-};
-
-const isRefreshTokenOperation = (operation: Operation): boolean => {
-  return operation.operationName === 'RefreshToken';
-};
-
-interface RefreshTokenResponse {
-  data?: {
-    refreshToken?: {
-      user: {
-        id: string;
-      };
-    };
-  };
-  errors?: unknown[];
-}
-
-const isValidRefreshResponse = (value: unknown): value is RefreshTokenResponse => {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  const response = value as Record<string, unknown>;
-
-  if ('errors' in response) {
-    return false;
-  }
-
-  if (!('data' in response) || typeof response.data !== 'object' || !response.data) {
-    return false;
-  }
-
-  const data = response.data as Record<string, unknown>;
-  return 'refreshToken' in data && typeof data.refreshToken === 'object' && data.refreshToken !== null;
 };
 
 const performTokenRefresh = async (): Promise<boolean> => {
@@ -113,7 +69,7 @@ const handleTokenRefresh = async (): Promise<boolean> => {
 
 export const createRefreshLink = () => {
   return new ApolloLink((operation, forward) => {
-    if (isRefreshTokenOperation(operation)) {
+    if (isRefreshTokenOperation(operation.operationName)) {
       return forward(operation);
     }
 
