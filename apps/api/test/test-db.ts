@@ -185,7 +185,6 @@ export const seedTestRefreshToken = async (
   overrides?: {
     expiresAt?: Date;
     revoked?: boolean;
-    deviceFingerprint?: string;
   },
 ) => {
   const expiresAt = overrides?.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -196,7 +195,6 @@ export const seedTestRefreshToken = async (
       jti,
       expiresAt,
       revoked: overrides?.revoked ?? false,
-      deviceFingerprint: overrides?.deviceFingerprint ?? null,
     },
   });
 };

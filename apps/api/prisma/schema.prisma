@@ -102,14 +102,13 @@ model SyncHistory {
 }
 
 model RefreshToken {
-  id                Int       @id @default(autoincrement())
-  userId            Int
-  jti               String    @unique
-  expiresAt         DateTime
-  revoked           Boolean   @default(false)
-  deviceFingerprint String?
-  lastUsedAt        DateTime?
-  createdAt         DateTime  @default(now())
+  id         Int       @id @default(autoincrement())
+  userId     Int
+  jti        String    @unique
+  expiresAt  DateTime
+  revoked    Boolean   @default(false)
+  lastUsedAt DateTime?
+  createdAt  DateTime  @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
