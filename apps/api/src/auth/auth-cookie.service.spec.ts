@@ -117,27 +117,99 @@ describe('AuthCookieService', () => {
   });
 
   describe('clearAccessTokenCookie', () => {
-    it('should clear Authentication cookie', () => {
+    it('should clear Authentication cookie with correct options in development', () => {
+      mockConfigService.get.mockReturnValue('development');
+
       service.clearAccessTokenCookie(mockResponse as Response);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication');
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+      });
+    });
+
+    it('should clear Authentication cookie with correct options in production', () => {
+      mockConfigService.get.mockReturnValue('production');
+
+      service.clearAccessTokenCookie(mockResponse as Response);
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
     });
   });
 
   describe('clearRefreshTokenCookie', () => {
-    it('should clear RefreshToken cookie', () => {
+    it('should clear RefreshToken cookie with correct options in development', () => {
+      mockConfigService.get.mockReturnValue('development');
+
       service.clearRefreshTokenCookie(mockResponse as Response);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken');
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+      });
+    });
+
+    it('should clear RefreshToken cookie with correct options in production', () => {
+      mockConfigService.get.mockReturnValue('production');
+
+      service.clearRefreshTokenCookie(mockResponse as Response);
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
     });
   });
 
   describe('clearAllAuthCookies', () => {
-    it('should clear both authentication cookies', () => {
+    it('should clear both authentication cookies in development', () => {
+      mockConfigService.get.mockReturnValue('development');
+
       service.clearAllAuthCookies(mockResponse as Response);
 
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication');
-      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken');
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+      });
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken', {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'lax',
+        path: '/',
+      });
+      expect(mockResponse.clearCookie).toHaveBeenCalledTimes(2);
+    });
+
+    it('should clear both authentication cookies in production', () => {
+      mockConfigService.get.mockReturnValue('production');
+
+      service.clearAllAuthCookies(mockResponse as Response);
+
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('Authentication', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
+      expect(mockResponse.clearCookie).toHaveBeenCalledWith('RefreshToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+        path: '/',
+      });
       expect(mockResponse.clearCookie).toHaveBeenCalledTimes(2);
     });
   });

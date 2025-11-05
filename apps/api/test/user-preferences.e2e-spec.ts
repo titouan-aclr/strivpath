@@ -5,7 +5,9 @@ import { AppModule } from '../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import { generateTestAccessToken } from './test-db';
-import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
+import { SportType } from '../src/user-preferences/enums/sport-type.enum';
+import { ThemeType } from '../src/user-preferences/enums/theme-type.enum';
+import { LocaleType } from '../src/user-preferences/enums/locale-type.enum';
 
 describe('UserPreferences GraphQL (e2e)', () => {
   let app: INestApplication;
