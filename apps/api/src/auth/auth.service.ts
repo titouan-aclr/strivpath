@@ -48,11 +48,11 @@ export class AuthService {
     return { token, jti };
   }
 
-  async generateTokens(user: User, deviceFingerprint?: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(user);
     const { token: refreshToken, jti } = this.generateRefreshToken(user);
 
-    await this.storeRefreshToken(user.id, jti, deviceFingerprint);
+    await this.storeRefreshToken(user.id, jti);
 
     return { accessToken, refreshToken };
   }
@@ -150,7 +150,7 @@ export class AuthService {
     });
   }
 
-  private async storeRefreshToken(userId: number, jti: string, deviceFingerprint?: string): Promise<void> {
+  private async storeRefreshToken(userId: number, jti: string): Promise<void> {
     const expirationString = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION', '7d');
     const expirationMs = this.parseExpirationToMs(expirationString);
     const expiresAt = new Date(Date.now() + expirationMs);
@@ -160,7 +160,6 @@ export class AuthService {
         userId,
         jti,
         expiresAt,
-        deviceFingerprint,
       },
     });
   }
