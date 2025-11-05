@@ -117,6 +117,11 @@ export class AuthService {
 
     await this.storeRefreshToken(user.id, newJti);
 
+    await this.prisma.refreshToken.update({
+      where: { jti: payload.jti },
+      data: { lastUsedAt: new Date() },
+    });
+
     await this.revokeRefreshTokenByJti(payload.jti);
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken, user };

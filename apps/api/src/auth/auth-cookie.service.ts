@@ -32,11 +32,25 @@ export class AuthCookieService {
   }
 
   clearAccessTokenCookie(res: Response): void {
-    res.clearCookie('Authentication');
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+
+    res.clearCookie('Authentication', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
   }
 
   clearRefreshTokenCookie(res: Response): void {
-    res.clearCookie('RefreshToken');
+    const isProduction = this.configService.get('NODE_ENV') === 'production';
+
+    res.clearCookie('RefreshToken', {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: isProduction ? 'none' : 'lax',
+      path: '/',
+    });
   }
 
   clearAllAuthCookies(res: Response): void {

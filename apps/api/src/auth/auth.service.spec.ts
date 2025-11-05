@@ -219,6 +219,10 @@ describe('AuthService', () => {
       mockJwtService.sign.mockReturnValueOnce(mockNewAccessToken).mockReturnValueOnce(mockNewRefreshToken);
       mockPrismaService.refreshToken.findFirst.mockResolvedValue(mockStoredToken);
       mockPrismaService.refreshToken.create.mockResolvedValue({});
+      mockPrismaService.refreshToken.update.mockResolvedValue({
+        ...mockStoredToken,
+        lastUsedAt: expect.any(Date),
+      });
       mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
       mockUserService.findById.mockResolvedValue(mockUser);
 
@@ -242,6 +246,11 @@ describe('AuthService', () => {
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
         expiresAt: expect.any(Date),
         deviceFingerprint: undefined,
+      });
+
+      expect(mockPrismaService.refreshToken.update).toHaveBeenCalledWith({
+        where: { jti: mockJti },
+        data: { lastUsedAt: expect.any(Date) },
       });
 
       expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({

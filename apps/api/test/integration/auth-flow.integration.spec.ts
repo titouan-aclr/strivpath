@@ -9,7 +9,7 @@ import { StravaService } from '../../src/strava/strava.service';
 import { PrismaService } from '../../src/database/prisma.service';
 import { getTestPrismaClient, seedTestUser } from '../test-db';
 import { StravaTokenResponse, StravaAthleteResponse } from '../../src/strava/types';
-import { User } from '@repo/graphql-types';
+import { User } from '../../src/user/models/user.model';
 import { RefreshTokenPayload } from '../../src/auth/types';
 
 describe('Auth Flow Integration', () => {
