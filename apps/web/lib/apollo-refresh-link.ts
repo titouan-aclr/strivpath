@@ -62,6 +62,11 @@ const handleTokenRefresh = async (): Promise<boolean> => {
     refreshContext.pendingRequests = [];
 
     return success;
+  } catch (error) {
+    refreshContext.pendingRequests.forEach(callback => callback(false));
+    refreshContext.pendingRequests = [];
+    console.error('[RefreshLink] Exception during token refresh:', error);
+    return false;
   } finally {
     refreshContext.isRefreshing = false;
   }
