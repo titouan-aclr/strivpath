@@ -5,6 +5,7 @@ import {
   isUnauthenticatedError,
   isRefreshTokenOperation,
   isValidRefreshResponse,
+  isNetworkError,
   type RefreshTokenResponse,
 } from './token-refresh-shared';
 
@@ -146,6 +147,69 @@ describe('token-refresh-shared', () => {
 
     it('should return false for empty object', () => {
       expect(isValidRefreshResponse({})).toBe(false);
+    });
+  });
+
+  describe('isNetworkError', () => {
+    it('should return true for TypeError with "fetch" in message', () => {
+      const error = new TypeError('Failed to fetch');
+      expect(isNetworkError(error)).toBe(true);
+    });
+
+    it('should return true for TypeError with "network" in message', () => {
+      const error = new TypeError('Network request failed');
+      expect(isNetworkError(error)).toBe(true);
+    });
+
+    it('should return true for TypeError with "failed to fetch" in message', () => {
+      const error = new TypeError('failed to fetch resource');
+      expect(isNetworkError(error)).toBe(true);
+    });
+
+    it('should return false for TypeError without network-related message', () => {
+      const error = new TypeError('Cannot read property of undefined');
+      expect(isNetworkError(error)).toBe(false);
+    });
+
+    it('should return true for GraphQL NETWORK_ERROR code', () => {
+      const graphQLError = new GraphQLError('Network error', {
+        extensions: { code: 'NETWORK_ERROR' },
+      });
+      const combinedError = new CombinedGraphQLErrors({
+        errors: [graphQLError],
+      });
+
+      expect(isNetworkError(combinedError)).toBe(true);
+    });
+
+    it('should return true for GraphQL error without code', () => {
+      const graphQLError = new GraphQLError('Unknown error');
+      const combinedError = new CombinedGraphQLErrors({
+        errors: [graphQLError],
+      });
+
+      expect(isNetworkError(combinedError)).toBe(true);
+    });
+
+    it('should return false for GraphQL error with other code', () => {
+      const graphQLError = new GraphQLError('Internal error', {
+        extensions: { code: 'INTERNAL_SERVER_ERROR' },
+      });
+      const combinedError = new CombinedGraphQLErrors({
+        errors: [graphQLError],
+      });
+
+      expect(isNetworkError(combinedError)).toBe(false);
+    });
+
+    it('should return false for regular errors', () => {
+      const error = new Error('Some error');
+      expect(isNetworkError(error)).toBe(false);
+    });
+
+    it('should return false for null or undefined', () => {
+      expect(isNetworkError(null)).toBe(false);
+      expect(isNetworkError(undefined)).toBe(false);
     });
   });
 });

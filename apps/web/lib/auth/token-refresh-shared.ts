@@ -25,6 +25,19 @@ export const isRefreshTokenOperation = (operationName?: string): boolean => {
   return operationName === 'RefreshToken';
 };
 
+export const isNetworkError = (error: unknown): boolean => {
+  if (error instanceof TypeError) {
+    const message = error.message.toLowerCase();
+    return message.includes('fetch') || message.includes('network') || message.includes('failed to fetch');
+  }
+
+  if (CombinedGraphQLErrors.is(error)) {
+    return error.errors.some(err => err.extensions?.code === 'NETWORK_ERROR' || !err.extensions?.code);
+  }
+
+  return false;
+};
+
 export const isValidRefreshResponse = (value: unknown): value is RefreshTokenResponse => {
   if (!value || typeof value !== 'object') {
     return false;
