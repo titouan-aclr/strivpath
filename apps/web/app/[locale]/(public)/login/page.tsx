@@ -5,7 +5,7 @@ import { LanguageSwitcher } from '@/components/language-switcher';
 import { AlertCircle } from 'lucide-react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getClient } from '@/lib/apollo-client';
-import { GetStravaAuthUrlDocument, type GetStravaAuthUrlQuery } from '@/gql/graphql';
+import { StravaAuthUrlDocument, type StravaAuthUrlQuery } from '@/gql/graphql';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -20,8 +20,8 @@ export default async function LoginPage({ params, searchParams }: Props) {
   const t = await getTranslations('auth.login');
 
   const client = getClient();
-  const { data } = await client.query<GetStravaAuthUrlQuery>({
-    query: GetStravaAuthUrlDocument,
+  const { data } = await client.query<StravaAuthUrlQuery>({
+    query: StravaAuthUrlDocument,
   });
 
   return (
