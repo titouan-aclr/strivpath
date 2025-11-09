@@ -30,7 +30,8 @@
       "profile": "Profile",
       "settings": "Settings",
       "logout": "Logout",
-      "loggingOut": "Logging out..."
+      "loggingOut": "Logging out...",
+      "refreshing": "Refreshing..."
     },
     "themeSwitcher": {
       "light": "Light",
@@ -60,7 +61,16 @@
       "title": "Authentication Error",
       "description": "An error occurred during authentication. Please try again.",
       "tryAgain": "Try again"
-    }
+    },
+    "errors": {
+      "networkError": "Network error",
+      "retrying": "Retrying automatically...",
+      "authFailed": "Authentication failed",
+      "pleaseLogin": "Please log in again",
+      "unexpectedError": "An unexpected error occurred",
+      "sessionExpired": "Your session has expired"
+    },
+    "refreshing": "Refreshing session..."
   },
   "errors": {
     "notFound": {
