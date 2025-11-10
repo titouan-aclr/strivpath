@@ -46,7 +46,7 @@ describe('fetchCurrentUserWithRetry', () => {
         data: { currentUser: mockUser },
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
       const result = await resultPromise;
 
@@ -66,7 +66,7 @@ describe('fetchCurrentUserWithRetry', () => {
         return Promise.resolve({ data: { currentUser: mockUser } });
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
       const result = await resultPromise;
 
@@ -79,7 +79,7 @@ describe('fetchCurrentUserWithRetry', () => {
         data: { currentUser: null },
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
       const result = await resultPromise;
 
@@ -99,7 +99,7 @@ describe('fetchCurrentUserWithRetry', () => {
         return Promise.resolve({ data: { currentUser: createMockUser() } });
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
 
       await vi.advanceTimersByTimeAsync(INITIAL_RETRY_DELAY);
       await vi.advanceTimersByTimeAsync(INITIAL_RETRY_DELAY * 2);
@@ -114,7 +114,7 @@ describe('fetchCurrentUserWithRetry', () => {
     it('should fail after max retry attempts on network error', async () => {
       mockQuery.mockRejectedValue(new TypeError('Failed to fetch'));
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
 
       for (let i = 0; i < MAX_RETRY_ATTEMPTS; i++) {
         await vi.advanceTimersByTimeAsync(INITIAL_RETRY_DELAY * Math.pow(2, i) + 100);
@@ -141,7 +141,7 @@ describe('fetchCurrentUserWithRetry', () => {
         return Promise.resolve({ data: { currentUser: mockUser } });
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
       const result = await resultPromise;
 
@@ -151,7 +151,7 @@ describe('fetchCurrentUserWithRetry', () => {
   });
 
   describe('authentication error', () => {
-    it('should immediately throw on UNAUTHENTICATED error without retry', async () => {
+    it('should immediately return null on UNAUTHENTICATED error without retry', async () => {
       const graphQLError = new GraphQLError('Unauthorized', {
         extensions: { code: 'UNAUTHENTICATED' },
       });
@@ -161,15 +161,16 @@ describe('fetchCurrentUserWithRetry', () => {
 
       mockQuery.mockRejectedValue(authError);
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
 
       await vi.runAllTimersAsync();
 
-      await expect(resultPromise).rejects.toThrow();
+      const result = await resultPromise;
+      expect(result).toBeNull();
       expect(mockQuery).toHaveBeenCalledTimes(1);
     });
 
-    it('should not retry on authentication error', async () => {
+    it('should not retry on authentication error and return null', async () => {
       const graphQLError = new GraphQLError('UNAUTHENTICATED: Token expired');
       const authError = new CombinedGraphQLErrors({
         errors: [graphQLError],
@@ -177,10 +178,11 @@ describe('fetchCurrentUserWithRetry', () => {
 
       mockQuery.mockRejectedValue(authError);
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
 
-      await expect(resultPromise).rejects.toThrow();
+      const result = await resultPromise;
+      expect(result).toBeNull();
       expect(mockQuery).toHaveBeenCalledTimes(1);
     });
   });
@@ -196,7 +198,7 @@ describe('fetchCurrentUserWithRetry', () => {
 
       mockQuery.mockRejectedValue(serverError);
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
 
       await expect(resultPromise).rejects.toThrow();
@@ -208,7 +210,7 @@ describe('fetchCurrentUserWithRetry', () => {
 
       mockQuery.mockRejectedValue(unexpectedError);
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
       await vi.runAllTimersAsync();
 
       await expect(resultPromise).rejects.toThrow('Unexpected error');
@@ -230,7 +232,7 @@ describe('fetchCurrentUserWithRetry', () => {
         throw new TypeError('Network error');
       });
 
-      const resultPromise = fetchCurrentUserWithRetry();
+      const resultPromise = fetchCurrentUserWithRetry({ headers: { cookie: '' } });
 
       await vi.advanceTimersByTimeAsync(100);
       await vi.advanceTimersByTimeAsync(INITIAL_RETRY_DELAY);

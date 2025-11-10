@@ -2,23 +2,23 @@ import { getClient } from '../apollo-client';
 import { CurrentUserDocument, UserFullInfoFragmentDoc } from '@/gql/graphql';
 import { getFragmentData, type User } from '@/lib/graphql';
 import { isNetworkError, isUnauthenticatedError } from './token-refresh-shared';
-import { getServerRequestContext } from '../apollo-ssr-context';
+import { getServerRequestContext, type ApolloServerContext } from '../apollo-ssr-context';
 
 export const MAX_RETRY_ATTEMPTS = 3;
 export const INITIAL_RETRY_DELAY = 1000;
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-export async function fetchCurrentUserWithRetry(): Promise<User | null> {
+export async function fetchCurrentUserWithRetry(context?: ApolloServerContext): Promise<User | null> {
   let lastError: unknown;
 
-  const context = await getServerRequestContext();
+  const apolloContext = context ?? (await getServerRequestContext());
 
   for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
     try {
       const { data } = await getClient().query({
         query: CurrentUserDocument,
-        context,
+        context: apolloContext,
         errorPolicy: 'none',
       });
 
