@@ -5,6 +5,7 @@ import { AuthContextProvider } from '@/lib/auth/context';
 import { AuthErrorBoundary } from '@/components/auth/auth-error-boundary';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { useAuthToast } from '@/lib/auth/use-auth-toast';
+import { AuthLoadingFallback } from '@/components/auth/auth-loading-fallback';
 import type { User } from '@/lib/graphql';
 
 interface DashboardClientLayoutProps {
@@ -31,9 +32,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 }
 
 export function DashboardClientLayout({ children, initialUser }: DashboardClientLayoutProps) {
+  const showSpinner = initialUser === null;
+
   return (
     <AuthContextProvider initialUser={initialUser}>
-      <DashboardContent>{children}</DashboardContent>
+      {showSpinner ? (
+        <AuthLoadingFallback variant="inline" message="Authenticating..." />
+      ) : (
+        <DashboardContent>{children}</DashboardContent>
+      )}
     </AuthContextProvider>
   );
 }
