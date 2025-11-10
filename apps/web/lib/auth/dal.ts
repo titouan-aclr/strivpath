@@ -3,8 +3,8 @@ import { redirect } from 'next/navigation';
 
 export async function verifyAuth(): Promise<boolean> {
   const cookieStore = await cookies();
-  const token = cookieStore.get('Authentication')?.value;
-  return !!token;
+  const authToken = cookieStore.get('Authentication');
+  return !!authToken;
 }
 
 export async function requireAuth(errorReason?: string): Promise<void> {

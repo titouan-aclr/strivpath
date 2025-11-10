@@ -29,6 +29,9 @@ const performTokenRefresh = async (): Promise<boolean> => {
     });
 
     if (!response.ok) {
+      console.warn('[RefreshLink] Refresh failed', {
+        status: response.status,
+      });
       return false;
     }
 
@@ -41,7 +44,9 @@ const performTokenRefresh = async (): Promise<boolean> => {
 
     return true;
   } catch (error) {
-    console.error('[RefreshLink] Token refresh failed:', error);
+    console.error('[RefreshLink] Token refresh failed', {
+      error: error instanceof Error ? error.message : 'Unknown',
+    });
     return false;
   }
 };
@@ -65,7 +70,9 @@ const handleTokenRefresh = async (): Promise<boolean> => {
   } catch (error) {
     refreshContext.pendingRequests.forEach(callback => callback(false));
     refreshContext.pendingRequests = [];
-    console.error('[RefreshLink] Exception during token refresh:', error);
+    console.error('[RefreshLink] Exception during token refresh', {
+      error: error instanceof Error ? error.message : 'Unknown',
+    });
     return false;
   } finally {
     refreshContext.isRefreshing = false;
@@ -87,12 +94,15 @@ export const createRefreshLink = () => {
             observer.next(result);
           },
           error: (error: Error) => {
-            if (isUnauthenticatedError(error) && !isRetry) {
+            const isUnauth = isUnauthenticatedError(error);
+
+            if (isUnauth && !isRetry) {
               handleTokenRefresh()
                 .then(refreshSuccess => {
                   if (refreshSuccess) {
                     attemptRequest(true);
                   } else {
+                    console.error('[RefreshLink] Refresh failed - redirecting to login');
                     if (typeof window !== 'undefined') {
                       window.location.href = '/login';
                     }
@@ -100,7 +110,9 @@ export const createRefreshLink = () => {
                   }
                 })
                 .catch(refreshError => {
-                  console.error('[RefreshLink] Refresh error:', refreshError);
+                  console.error('[RefreshLink] Refresh error - redirecting to login', {
+                    error: refreshError instanceof Error ? refreshError.message : 'Unknown',
+                  });
                   if (typeof window !== 'undefined') {
                     window.location.href = '/login';
                   }
