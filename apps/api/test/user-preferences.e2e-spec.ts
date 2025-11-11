@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { Test, TestingModule } from '@nestjs/testing';
-import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { INestApplication, ValidationPipe, RequestMethod } from '@nestjs/common';
 import { AppModule } from '../src/app.module';
 import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
@@ -33,6 +33,10 @@ describe('UserPreferences GraphQL (e2e)', () => {
     app.enableCors({
       origin: process.env.FRONTEND_URL || 'http://localhost:3000',
       credentials: true,
+    });
+
+    app.setGlobalPrefix('v1', {
+      exclude: [{ path: 'graphql', method: RequestMethod.ALL }],
     });
 
     await app.init();
