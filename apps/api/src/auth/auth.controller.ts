@@ -1,10 +1,13 @@
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, Query, Res, UseGuards } from '@nestjs/common';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
+import { Throttle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
+import { UnifiedThrottlerGuard } from '../common/guards/throttler.guard';
 
 @Controller('auth/strava')
+@UseGuards(UnifiedThrottlerGuard)
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -13,6 +16,7 @@ export class AuthController {
   ) {}
 
   @Get('callback')
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
   async callback(
     @Query('code') code: string,
     @Query('error') error: string,

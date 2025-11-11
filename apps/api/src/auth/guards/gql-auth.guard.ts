@@ -15,7 +15,7 @@ export class GqlAuthGuard extends AuthGuard('jwt') {
         error: err?.message || info?.message || 'Unknown',
       });
 
-      throw err || new UnauthorizedException('Authentication required');
+      throw err || new UnauthorizedException('Unauthorized');
     }
 
     return user;
