@@ -181,8 +181,6 @@ pnpm --filter @repo/graphql-types build
 - **Activity**: Imported Strava activities
 - **SyncHistory**: Activity synchronization tracking
 
-See `.claude/IMPLEMENTATION_PLAN.md` for complete schema details.
-
 ## Git Workflow
 
 Commits follow conventional commit format enforced by commitlint:

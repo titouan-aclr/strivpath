@@ -420,9 +420,3 @@ export function UserProfile() {
 - **Apollo Cache**: Normalized cache with custom merge policies
 - **Code Splitting**: Automatic route-based splitting
 - **Image Optimization**: Next.js Image component
-
-## Further Documentation
-
-- **Setup Details**: See `.claude/FRONTEND_SETUP.md`
-- **Implementation Plan**: See `.claude/IMPLEMENTATION_PLAN.md`
-- **Project Guidelines**: See `CLAUDE.md`
