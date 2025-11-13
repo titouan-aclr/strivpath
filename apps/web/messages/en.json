@@ -29,7 +29,9 @@
     "userMenu": {
       "profile": "Profile",
       "settings": "Settings",
-      "logout": "Logout"
+      "logout": "Logout",
+      "loggingOut": "Logging out...",
+      "refreshing": "Refreshing..."
     },
     "themeSwitcher": {
       "light": "Light",
@@ -47,13 +49,28 @@
     "login": {
       "title": "Welcome to Stravanalytics",
       "description": "Connect your Strava account to start tracking your progress and achieving your goals",
-      "connectButton": "Connect with Strava"
+      "connectButton": "Connect with Strava",
+      "errors": {
+        "unauthorized": "You must be logged in to access this page.",
+        "session_expired": "Your session has expired. Please log in again.",
+        "auth_failed": "Authentication failed. Please try again.",
+        "missing_code": "Authentication code is missing."
+      }
     },
     "error": {
       "title": "Authentication Error",
       "description": "An error occurred during authentication. Please try again.",
       "tryAgain": "Try again"
-    }
+    },
+    "errors": {
+      "networkError": "Network error",
+      "retrying": "Retrying automatically...",
+      "authFailed": "Authentication failed",
+      "pleaseLogin": "Please log in again",
+      "unexpectedError": "An unexpected error occurred",
+      "sessionExpired": "Your session has expired"
+    },
+    "refreshing": "Refreshing session..."
   },
   "errors": {
     "notFound": {

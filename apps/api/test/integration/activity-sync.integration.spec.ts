@@ -7,7 +7,9 @@ import { SyncHistoryService } from '../../src/sync-history/sync-history.service'
 import { PrismaService } from '../../src/database/prisma.service';
 import { getTestPrismaClient, seedTestUser, seedTestActivity } from '../test-db';
 import { StravaActivitySummary } from '../../src/strava/types';
-import { SyncStatus, SyncStage, SportType } from '@repo/graphql-types';
+import { SyncStatus } from '../../src/sync-history/enums/sync-status.enum';
+import { SyncStage } from '../../src/sync-history/enums/sync-stage.enum';
+import { SportType } from '../../src/user-preferences/enums/sport-type.enum';
 
 describe('Activity Sync Integration', () => {
   let app: INestApplication;

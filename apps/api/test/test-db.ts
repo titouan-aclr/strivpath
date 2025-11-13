@@ -2,7 +2,9 @@ import { PrismaClient } from '@prisma/client';
 import { execSync } from 'child_process';
 import { JwtService } from '@nestjs/jwt';
 import { AccessTokenPayload } from '../src/auth/types';
-import { SportType, ThemeType, LocaleType } from '@repo/graphql-types';
+import { SportType } from '../src/user-preferences/enums/sport-type.enum';
+import { ThemeType } from '../src/user-preferences/enums/theme-type.enum';
+import { LocaleType } from '../src/user-preferences/enums/locale-type.enum';
 
 let prisma: PrismaClient;
 let databaseUrl: string;
@@ -183,7 +185,6 @@ export const seedTestRefreshToken = async (
   overrides?: {
     expiresAt?: Date;
     revoked?: boolean;
-    deviceFingerprint?: string;
   },
 ) => {
   const expiresAt = overrides?.expiresAt ?? new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
@@ -194,7 +195,6 @@ export const seedTestRefreshToken = async (
       jti,
       expiresAt,
       revoked: overrides?.revoked ?? false,
-      deviceFingerprint: overrides?.deviceFingerprint ?? null,
     },
   });
 };

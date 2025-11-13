@@ -9,55 +9,51 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, LogOut } from 'lucide-react';
+import { Settings, LogOut, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { gql } from '@apollo/client';
-import { useMutation } from '@apollo/client/react';
-
-const LOGOUT_MUTATION = gql`
-  mutation Logout {
-    logout
-  }
-`;
-
-type LogoutData = {
-  logout: boolean;
-};
+import { useAuth } from '@/lib/auth/context';
+import { useAuthFeedback } from '@/lib/auth/use-auth-feedback';
+import { useLogout } from '@/lib/auth/use-logout';
+import { AuthStatusIndicator } from '@/components/auth/auth-status-indicator';
 
 export function UserMenu() {
   const t = useTranslations('layout.userMenu');
   const router = useRouter();
-  const [logoutMutation] = useMutation<LogoutData>(LOGOUT_MUTATION);
+  const { user } = useAuth();
+  const { showRefreshing } = useAuthFeedback();
+  const { logout, isLoading } = useLogout();
 
-  const user = {
-    firstname: 'John',
-    lastname: 'Doe',
-    profileImageUrl: null,
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
   };
 
-  const handleLogout = () => {
-    void logoutMutation()
-      .then(() => {
-        router.push('/login');
-        router.refresh();
-      })
-      .catch((err: Error) => {
-        console.error('Logout error:', err.message);
-      });
-  };
+  if (!user) {
+    return null;
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="w-full justify-start gap-2 px-2">
-          <Avatar className="h-8 w-8">
-            <AvatarImage src={user.profileImageUrl || undefined} />
-            <AvatarFallback>
-              {user.firstname?.[0]}
-              {user.lastname?.[0]}
-            </AvatarFallback>
-          </Avatar>
+          <div className="relative">
+            <Avatar className="h-8 w-8">
+              <AvatarImage src={user.profile || user.profileMedium || undefined} />
+              <AvatarFallback>
+                {user.firstname?.[0] ?? '?'}
+                {user.lastname?.[0] ?? ''}
+              </AvatarFallback>
+            </Avatar>
+            {showRefreshing && (
+              <div className="absolute -top-1 -right-1" title={t('refreshing')}>
+                <AuthStatusIndicator variant="badge" message={t('refreshing')} />
+              </div>
+            )}
+          </div>
           <div className="flex flex-col items-start text-sm">
             <span className="font-medium">
               {user.firstname} {user.lastname}
@@ -71,9 +67,25 @@ export function UserMenu() {
           {t('settings')}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleLogout} className="text-destructive">
-          <LogOut className="mr-2 h-4 w-4" />
-          {t('logout')}
+        <DropdownMenuItem
+          onClick={() => {
+            void handleLogout();
+          }}
+          disabled={isLoading}
+          aria-busy={isLoading}
+          className="text-destructive"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />
+              <span>{t('loggingOut')}</span>
+            </>
+          ) : (
+            <>
+              <LogOut className="mr-2 h-4 w-4" />
+              {t('logout')}
+            </>
+          )}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

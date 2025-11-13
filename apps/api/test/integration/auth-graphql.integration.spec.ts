@@ -8,7 +8,7 @@ import { AppModule } from '../../src/app.module';
 import { AuthService } from '../../src/auth/auth.service';
 import { PrismaService } from '../../src/database/prisma.service';
 import { getTestPrismaClient, seedTestUser, generateTestAccessToken } from '../test-db';
-import { User } from '@repo/graphql-types';
+import { User } from '../../src/user/models/user.model';
 
 describe('GraphQL Auth Integration', () => {
   let app: INestApplication;
