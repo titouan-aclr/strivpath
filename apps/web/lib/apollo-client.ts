@@ -15,12 +15,12 @@ const errorLink = new ErrorLink(({ error }) => {
   }
 });
 
-const httpLink = new HttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
-  credentials: 'include',
-});
+function createApolloClient() {
+  const httpLink = new HttpLink({
+    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
+    credentials: 'include',
+  });
 
-export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
   return new ApolloClient({
     cache: new InMemoryCache({
       typePolicies: {
@@ -46,4 +46,6 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(() => {
       },
     },
   });
-});
+}
+
+export const { getClient } = registerApolloClient(createApolloClient);

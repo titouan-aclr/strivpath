@@ -9,6 +9,7 @@ import { User } from '../user/models/user.model';
 import { Response, Request } from 'express';
 import { GraphQLContext } from '../common/types';
 import '../common/types/express-request.interface';
+import { UnifiedThrottlerGuard } from '../common/guards/throttler.guard';
 
 describe('AuthResolver', () => {
   let resolver: AuthResolver;
@@ -68,7 +69,10 @@ describe('AuthResolver', () => {
         { provide: UserService, useValue: mockUserService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
-    }).compile();
+    })
+      .overrideGuard(UnifiedThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     resolver = module.get<AuthResolver>(AuthResolver);
     authService = module.get<AuthService>(AuthService);

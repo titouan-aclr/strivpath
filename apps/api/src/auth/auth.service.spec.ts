@@ -91,14 +91,13 @@ describe('AuthService', () => {
     it('should generate both access and refresh tokens and store refresh token in DB', async () => {
       const mockAccessToken = 'mock-access-token';
       const mockRefreshToken = 'mock-refresh-token';
-      const deviceFingerprint = 'test-device';
 
       mockConfigService.getOrThrow.mockReturnValue('secret');
       mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
       mockJwtService.sign.mockReturnValueOnce(mockAccessToken).mockReturnValueOnce(mockRefreshToken);
       mockPrismaService.refreshToken.create.mockResolvedValue({});
 
-      const result = await service.generateTokens(mockUser, deviceFingerprint);
+      const result = await service.generateTokens(mockUser);
 
       expect(result).toEqual({
         accessToken: mockAccessToken,
@@ -125,7 +124,6 @@ describe('AuthService', () => {
         userId: mockUser.id,
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
         expiresAt: expect.any(Date),
-        deviceFingerprint,
       });
     });
 
@@ -207,7 +205,6 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         lastUsedAt: null,
-        deviceFingerprint: null,
       };
 
       mockConfigService.getOrThrow
@@ -219,6 +216,10 @@ describe('AuthService', () => {
       mockJwtService.sign.mockReturnValueOnce(mockNewAccessToken).mockReturnValueOnce(mockNewRefreshToken);
       mockPrismaService.refreshToken.findFirst.mockResolvedValue(mockStoredToken);
       mockPrismaService.refreshToken.create.mockResolvedValue({});
+      mockPrismaService.refreshToken.update.mockResolvedValue({
+        ...mockStoredToken,
+        lastUsedAt: expect.any(Date),
+      });
       mockPrismaService.refreshToken.updateMany.mockResolvedValue({ count: 1 });
       mockUserService.findById.mockResolvedValue(mockUser);
 
@@ -241,7 +242,11 @@ describe('AuthService', () => {
         userId: mockUser.id,
         jti: expect.stringMatching(/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i),
         expiresAt: expect.any(Date),
-        deviceFingerprint: undefined,
+      });
+
+      expect(mockPrismaService.refreshToken.update).toHaveBeenCalledWith({
+        where: { jti: mockJti },
+        data: { lastUsedAt: expect.any(Date) },
       });
 
       expect(mockPrismaService.refreshToken.updateMany).toHaveBeenCalledWith({
@@ -263,7 +268,6 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         lastUsedAt: null,
-        deviceFingerprint: null,
       };
 
       mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
@@ -318,7 +322,6 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         lastUsedAt: null,
-        deviceFingerprint: null,
       };
 
       mockConfigService.getOrThrow.mockReturnValue('refresh-secret');
@@ -344,7 +347,6 @@ describe('AuthService', () => {
         expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         createdAt: new Date(),
         lastUsedAt: null,
-        deviceFingerprint: null,
       };
 
       mockConfigService.getOrThrow.mockReturnValue('secret');

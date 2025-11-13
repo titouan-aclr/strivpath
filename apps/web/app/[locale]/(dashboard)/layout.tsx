@@ -1,10 +1,14 @@
+import { Suspense } from 'react';
 import { AuthProvider } from '@/lib/auth/provider';
-import { DashboardLayout } from '@/components/layout/dashboard-layout';
+import { DashboardClientLayout } from '@/components/layout/dashboard-client-layout';
+import { DashboardSkeleton } from '@/components/layout/dashboard-skeleton';
 
-export default function DashboardLayoutPage({ children }: { children: React.ReactNode }) {
+export default function ProtectedDashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <AuthProvider>
-      <DashboardLayout>{children}</DashboardLayout>
-    </AuthProvider>
+    <Suspense fallback={<DashboardSkeleton />}>
+      <AuthProvider>
+        {user => <DashboardClientLayout initialUser={user}>{children}</DashboardClientLayout>}
+      </AuthProvider>
+    </Suspense>
   );
 }

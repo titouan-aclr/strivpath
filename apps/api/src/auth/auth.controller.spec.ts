@@ -4,6 +4,7 @@ import { Response } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AuthCookieService } from './auth-cookie.service';
+import { UnifiedThrottlerGuard } from '../common/guards/throttler.guard';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -37,7 +38,10 @@ describe('AuthController', () => {
         { provide: AuthCookieService, useValue: mockAuthCookieService },
         { provide: ConfigService, useValue: mockConfigService },
       ],
-    }).compile();
+    })
+      .overrideGuard(UnifiedThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);

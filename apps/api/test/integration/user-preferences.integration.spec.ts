@@ -6,7 +6,10 @@ import { UserService } from '../../src/user/user.service';
 import { PrismaService } from '../../src/database/prisma.service';
 import { UserPreferencesResolver } from '../../src/user-preferences/user-preferences.resolver';
 import { getTestPrismaClient, seedTestUser, generateTestAccessToken } from '../test-db';
-import { SportType, ThemeType, LocaleType, UpdateUserPreferencesInput } from '@repo/graphql-types';
+import { SportType } from '../../src/user-preferences/enums/sport-type.enum';
+import { ThemeType } from '../../src/user-preferences/enums/theme-type.enum';
+import { LocaleType } from '../../src/user-preferences/enums/locale-type.enum';
+import { UpdateUserPreferencesInput } from '../../src/user-preferences/dto/user-preferences.input';
 import { TokenPayload } from '../../src/auth/types';
 
 describe('User Preferences Integration', () => {

@@ -2,29 +2,26 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModeToggle } from '@/components/mode-toggle';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { AlertCircle } from 'lucide-react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getClient } from '@/lib/apollo-client';
-import { gql } from '@apollo/client';
-
-const GET_STRAVA_AUTH_URL = gql`
-  query GetStravaAuthUrl {
-    stravaAuthUrl
-  }
-`;
+import { StravaAuthUrlDocument, type StravaAuthUrlQuery } from '@/gql/graphql';
 
 type Props = {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ error?: string }>;
 };
 
-export default async function LoginPage({ params }: Props) {
+export default async function LoginPage({ params, searchParams }: Props) {
   const { locale } = await params;
+  const { error } = await searchParams;
   setRequestLocale(locale);
 
   const t = await getTranslations('auth.login');
 
   const client = getClient();
-  const { data } = await client.query<{ stravaAuthUrl: string }>({
-    query: GET_STRAVA_AUTH_URL,
+  const { data } = await client.query<StravaAuthUrlQuery>({
+    query: StravaAuthUrlDocument,
   });
 
   return (
@@ -39,6 +36,12 @@ export default async function LoginPage({ params }: Props) {
 
       <main className="flex flex-1 items-center justify-center px-6">
         <Card className="w-full max-w-md">
+          {error && (
+            <div className="mb-4 flex items-center gap-2 rounded-lg border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
+              <AlertCircle className="h-4 w-4" />
+              <span>{t(`errors.${error}`)}</span>
+            </div>
+          )}
           <CardHeader className="text-center">
             <CardTitle className="text-3xl">{t('title')}</CardTitle>
             <CardDescription>{t('description')}</CardDescription>

@@ -7,6 +7,7 @@ import { PrismaService } from '../database/prisma.service';
 import { UserService } from '../user/user.service';
 import { StravaService } from '../strava/strava.service';
 import { AccessTokenPayload, RefreshTokenPayload } from './types';
+import { parseJwtExpirationToMs } from './utils/jwt-expiration.utils';
 
 @Injectable()
 export class AuthService {
@@ -48,11 +49,11 @@ export class AuthService {
     return { token, jti };
   }
 
-  async generateTokens(user: User, deviceFingerprint?: string): Promise<{ accessToken: string; refreshToken: string }> {
+  async generateTokens(user: User): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.generateAccessToken(user);
     const { token: refreshToken, jti } = this.generateRefreshToken(user);
 
-    await this.storeRefreshToken(user.id, jti, deviceFingerprint);
+    await this.storeRefreshToken(user.id, jti);
 
     return { accessToken, refreshToken };
   }
@@ -117,6 +118,11 @@ export class AuthService {
 
     await this.storeRefreshToken(user.id, newJti);
 
+    await this.prisma.refreshToken.update({
+      where: { jti: payload.jti },
+      data: { lastUsedAt: new Date() },
+    });
+
     await this.revokeRefreshTokenByJti(payload.jti);
 
     return { accessToken: newAccessToken, refreshToken: newRefreshToken, user };
@@ -145,9 +151,9 @@ export class AuthService {
     });
   }
 
-  private async storeRefreshToken(userId: number, jti: string, deviceFingerprint?: string): Promise<void> {
+  private async storeRefreshToken(userId: number, jti: string): Promise<void> {
     const expirationString = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION', '7d');
-    const expirationMs = this.parseExpirationToMs(expirationString);
+    const expirationMs = parseJwtExpirationToMs(expirationString);
     const expiresAt = new Date(Date.now() + expirationMs);
 
     await this.prisma.refreshToken.create({
@@ -155,28 +161,7 @@ export class AuthService {
         userId,
         jti,
         expiresAt,
-        deviceFingerprint,
       },
     });
-  }
-
-  private parseExpirationToMs(expiration: string): number {
-    const match = expiration.match(/^(\d+)([smhd])$/);
-
-    if (!match) {
-      throw new Error(`Invalid expiration format: ${expiration}`);
-    }
-
-    const value = parseInt(match[1], 10);
-    const unit = match[2];
-
-    const unitToMs: Record<string, number> = {
-      s: 1000,
-      m: 60 * 1000,
-      h: 60 * 60 * 1000,
-      d: 24 * 60 * 60 * 1000,
-    };
-
-    return value * unitToMs[unit];
   }
 }
