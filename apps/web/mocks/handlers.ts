@@ -5,7 +5,10 @@ export const handlers = [
   graphql.query('CurrentUser', () => {
     return HttpResponse.json({
       data: {
-        currentUser: createMockUser(),
+        currentUser: {
+          __typename: 'User',
+          ...createMockUser(),
+        },
       },
     });
   }),
@@ -14,7 +17,11 @@ export const handlers = [
     return HttpResponse.json({
       data: {
         refreshToken: {
-          user: createMockUser(),
+          __typename: 'AuthResponse',
+          user: {
+            __typename: 'User',
+            ...createMockUser(),
+          },
         },
       },
     });
