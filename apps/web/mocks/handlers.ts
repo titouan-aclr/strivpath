@@ -121,6 +121,24 @@ export const authErrorHandlers = {
       data: null,
     });
   }),
+
+  logoutFailed: graphql.mutation('Logout', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Logout failed',
+          extensions: {
+            code: 'INTERNAL_SERVER_ERROR',
+          },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  logoutNetworkError: graphql.mutation('Logout', () => {
+    return HttpResponse.error();
+  }),
 };
 
 export { MOCK_USERS };
