@@ -38,31 +38,37 @@ export const handlers = [
 
 export const authErrorHandlers = {
   unauthenticated: graphql.query('CurrentUser', () => {
-    return HttpResponse.json({
-      errors: [
-        {
-          message: 'Unauthorized',
-          extensions: {
-            code: 'UNAUTHENTICATED',
+    return HttpResponse.json(
+      {
+        errors: [
+          {
+            message: 'Unauthorized',
+            extensions: {
+              code: 'UNAUTHENTICATED',
+            },
           },
-        },
-      ],
-      data: null,
-    });
+        ],
+        data: null,
+      },
+      { status: 401 },
+    );
   }),
 
   refreshTokenUnauthenticated: graphql.mutation('RefreshToken', () => {
-    return HttpResponse.json({
-      errors: [
-        {
-          message: 'Invalid refresh token',
-          extensions: {
-            code: 'UNAUTHENTICATED',
+    return HttpResponse.json(
+      {
+        errors: [
+          {
+            message: 'Invalid refresh token',
+            extensions: {
+              code: 'UNAUTHENTICATED',
+            },
           },
-        },
-      ],
-      data: null,
-    });
+        ],
+        data: null,
+      },
+      { status: 401 },
+    );
   }),
 
   networkError: graphql.query('CurrentUser', () => {
