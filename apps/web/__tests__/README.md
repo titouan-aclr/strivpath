@@ -124,7 +124,169 @@ describe('UsersPage', () => {
 });
 ```
 
+## E2E Test Infrastructure
+
+The E2E testing infrastructure provides complete isolation with dedicated database, authentication helpers, and Playwright fixtures.
+
+### Directory Structure (E2E)
+
+```
+__tests__/
+├── setup/
+│   ├── global-setup.ts          # Database initialization and migrations
+│   ├── global-teardown.ts       # Cleanup after all tests
+│   └── db-helpers.ts            # Database utilities (reset, seed)
+├── fixtures/
+│   ├── auth.fixture.ts          # Playwright fixtures with auth support
+│   └── test-data.ts             # Test data constants
+├── helpers/
+│   ├── auth.ts                  # Auth helpers (login, logout, wait)
+│   └── cookies.ts               # Cookie management helpers
+└── auth/
+    └── smoke.spec.ts            # Infrastructure validation tests
+```
+
+### Database Setup
+
+E2E tests use a dedicated database: `stravanalytics_test_e2e`
+
+Create the database:
+
+```bash
+docker exec stravanalytics-postgres psql -U postgres -c "CREATE DATABASE stravanalytics_test_e2e;"
+```
+
+The global setup automatically applies migrations before tests run.
+
+### Using Fixtures
+
+The `auth.fixture.ts` provides ready-to-use authenticated pages:
+
+```typescript
+import { test, expect } from '../fixtures/auth.fixture';
+
+test('should access protected page when authenticated', async ({ authenticatedPage }) => {
+  await authenticatedPage.goto('/dashboard');
+  await expect(authenticatedPage).toHaveURL(/\/dashboard/);
+});
+```
+
+Available fixtures:
+
+- **`authenticatedPage`**: Page with authenticated user and cookies set
+- **`authenticatedUser`**: User data, tokens, and preferences
+- **`db`**: Direct Prisma database access for assertions
+
+### Auth Helpers: Two Approaches
+
+This project provides two authentication methods for E2E tests, each suited for different testing scenarios.
+
+#### `loginViaBackend()` - Direct Authentication
+
+**Use for**: Tests focused on authenticated behavior without testing OAuth flow
+
+**Advantages**:
+
+- Fast execution (no HTTP round-trip)
+- Complete control over user state
+- Simplified test setup
+
+**Example**:
+
+```typescript
+import { loginViaBackend } from '../helpers/auth';
+
+const user = await loginViaBackend(page, {
+  username: 'testuser',
+  stravaId: 123456,
+  onboardingCompleted: true,
+});
+```
+
+#### `loginViaOAuth()` - Realistic OAuth Flow
+
+**Use for**: Tests validating OAuth integration and cookie handling
+
+**Advantages**:
+
+- Tests real OAuth callback route
+- Validates MSW handler behavior
+- Realistic browser flow
+
+**Example**:
+
+```typescript
+import { loginViaOAuth } from '../helpers/auth';
+
+await loginViaOAuth(page, {
+  mockCode: 'test-oauth-code',
+  expectedRedirect: /\/en\/onboarding/,
+});
+```
+
+#### Other Auth Helpers
+
+```typescript
+// Logout (calls GraphQL mutation + clears cookies)
+await logout(page);
+
+// Wait for auth to be loaded in Apollo cache
+await waitForAuth(page);
+```
+
+### Database Helpers
+
+```typescript
+import { resetDatabase, createTestUser, seedAuthenticatedUser } from '../setup/db-helpers';
+
+// Reset database (truncate all tables)
+await resetDatabase();
+
+// Create simple test user
+const { user, preferences } = await createTestUser({
+  username: 'testuser',
+  stravaId: 123456,
+});
+
+// Create authenticated user with JWT tokens
+const authUser = await seedAuthenticatedUser({
+  username: 'authuser',
+  onboardingCompleted: true,
+});
+```
+
 ## Writing E2E Tests
+
+### Testing with Authentication
+
+```typescript
+import { test, expect } from '../fixtures/auth.fixture';
+
+test.describe('Dashboard', () => {
+  test('should display user info when authenticated', async ({ authenticatedPage, authenticatedUser }) => {
+    await authenticatedPage.goto('/dashboard');
+
+    await expect(authenticatedPage.getByText(authenticatedUser.user.firstname)).toBeVisible();
+  });
+});
+```
+
+### Testing Unauthenticated Access
+
+```typescript
+import { test as base } from '@playwright/test';
+import { resetDatabase } from '../setup/db-helpers';
+import { expectUnauthenticated } from '../helpers/auth';
+
+base.beforeEach(async () => {
+  await resetDatabase();
+});
+
+base('should redirect to login when unauthenticated', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expectUnauthenticated(page);
+});
+```
 
 ### Testing Page Navigation
 
