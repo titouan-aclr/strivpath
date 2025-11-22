@@ -1,4 +1,4 @@
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
+import { CombinedGraphQLErrors, ServerError } from '@apollo/client/errors';
 
 export interface RefreshTokenResponse {
   data?: {
@@ -12,13 +12,17 @@ export interface RefreshTokenResponse {
 }
 
 export const isUnauthenticatedError = (error: unknown): boolean => {
-  if (!CombinedGraphQLErrors.is(error)) {
-    return false;
+  if (error instanceof ServerError) {
+    return error.statusCode === 401;
   }
 
-  return error.errors.some(
-    err => err.extensions?.code === 'UNAUTHENTICATED' || err.message?.includes('UNAUTHENTICATED'),
-  );
+  if (CombinedGraphQLErrors.is(error)) {
+    return error.errors.some(
+      err => err.extensions?.code === 'UNAUTHENTICATED' || err.message?.includes('UNAUTHENTICATED'),
+    );
+  }
+
+  return false;
 };
 
 export const isRefreshTokenOperation = (operationName?: string): boolean => {
