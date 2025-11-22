@@ -14,6 +14,11 @@ const refreshContext: RefreshLinkContext = {
   pendingRequests: [],
 };
 
+export const __resetRefreshContextForTests = () => {
+  refreshContext.isRefreshing = false;
+  refreshContext.pendingRequests = [];
+};
+
 const performTokenRefresh = async (): Promise<boolean> => {
   try {
     const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql', {
