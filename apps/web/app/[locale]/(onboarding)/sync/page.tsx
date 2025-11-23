@@ -1,25 +1,18 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Progress } from '@/components/ui/progress';
-import { setRequestLocale } from 'next-intl/server';
+'use client';
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
+import { SyncProgress } from '@/components/onboarding/sync-progress';
+import { useSyncProgress } from '@/lib/onboarding/use-sync-progress';
 
-export default async function SyncPage({ params }: Props) {
-  const { locale } = await params;
-  setRequestLocale(locale);
+export default function SyncPage() {
+  const { syncStatus, error, isInitializing, isRedirecting, handleRetry } = useSyncProgress();
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Syncing Your Activities</CardTitle>
-        <CardDescription>Please wait while we import your Strava activities</CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        <Progress value={33} />
-        <p className="text-center text-sm text-muted-foreground">Activity sync page will be implemented in next step</p>
-      </CardContent>
-    </Card>
+    <SyncProgress
+      syncStatus={syncStatus}
+      error={error}
+      isInitializing={isInitializing}
+      isRedirecting={isRedirecting}
+      onRetry={handleRetry}
+    />
   );
 }
