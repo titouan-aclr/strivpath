@@ -1,6 +1,7 @@
 query SyncStatus {
   syncStatus {
     id
+    userId
     status
     stage
     totalActivities
