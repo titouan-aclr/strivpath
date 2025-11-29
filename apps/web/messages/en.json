@@ -91,7 +91,18 @@
     "errors": {
       "saveFailed": "Failed to save your preferences",
       "syncFailed": "Failed to sync activities",
-      "pleaseTryAgain": "Please try again"
+      "pleaseTryAgain": "Please try again",
+      "network": "Connection error",
+      "networkDescription": "Unable to reach server. Please check your connection.",
+      "tokenExpired": "Strava connection expired",
+      "tokenExpiredDescription": "Please reconnect your Strava account to continue",
+      "reconnectButton": "Reconnect Strava",
+      "rateLimitTitle": "Too many requests",
+      "rateLimitDescription": "Please wait a few minutes before trying again",
+      "unknownError": "An unexpected error occurred",
+      "contactSupport": "Contact Support",
+      "errorCode": "Error code: {code}",
+      "supportId": "Support ID"
     }
   },
   "auth": {
