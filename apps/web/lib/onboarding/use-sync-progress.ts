@@ -6,11 +6,13 @@ import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useMutation, useQuery } from '@/lib/graphql';
 import { SyncActivitiesDocument, SyncStatusDocument, type SyncHistory, SyncStatus } from '@/gql/graphql';
-import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS, REDIRECT_DELAY_MS, ONBOARDING_TOAST_IDS } from './constants';
+import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS, REDIRECT_DELAY_MS, ONBOARDING_TOAST_CONFIG } from './constants';
+import { classifyOnboardingError, logOnboardingError, type OnboardingError } from './error-handling';
+import { useAuth } from '@/lib/auth/context';
 
 interface UseSyncProgressResult {
   syncStatus: SyncHistory | null;
-  error: string | null;
+  error: OnboardingError | null;
   isInitializing: boolean;
   isRedirecting: boolean;
   handleRetry: () => void;
@@ -19,8 +21,9 @@ interface UseSyncProgressResult {
 export function useSyncProgress(): UseSyncProgressResult {
   const router = useRouter();
   const t = useTranslations('onboarding.sync');
+  const { user } = useAuth();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<OnboardingError | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const hasInitializedRef = useRef(false);
@@ -70,21 +73,57 @@ export function useSyncProgress(): UseSyncProgressResult {
       } else if (currentStatus.status === SyncStatus.InProgress) {
         startPolling();
       } else if (currentStatus.status === SyncStatus.Failed) {
-        setError(currentStatus.errorMessage || t('errors.syncFailed'));
+        const failedError = new Error(currentStatus.errorMessage || t('errors.syncFailed'));
+        const onboardingError = classifyOnboardingError(failedError, t);
+        logOnboardingError({
+          location: 'use-sync-progress/initSync/existingFailedSync',
+          errorType: onboardingError.type,
+          errorCode: onboardingError.code,
+          supportId: onboardingError.supportId,
+          userId: user?.id,
+          rawError: failedError,
+        });
+        setError(onboardingError);
         return;
       }
 
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         stopPolling();
-        setError(t('timeout'));
+        const timeoutError = new Error(t('timeout'));
+        const onboardingError = classifyOnboardingError(timeoutError, t);
+        logOnboardingError({
+          location: 'use-sync-progress/initSync/timeout',
+          errorType: onboardingError.type,
+          errorCode: onboardingError.code,
+          supportId: onboardingError.supportId,
+          userId: user?.id,
+          rawError: timeoutError,
+        });
+        setError(onboardingError);
       }, SYNC_TIMEOUT_MS);
-    } catch {
-      setError(t('errors.syncFailed'));
-      toast.error(t('errors.syncFailed'), {
-        id: ONBOARDING_TOAST_IDS.SYNC_ERROR,
+    } catch (err) {
+      const onboardingError = classifyOnboardingError(err, t);
+      logOnboardingError({
+        location: 'use-sync-progress/initSync',
+        errorType: onboardingError.type,
+        errorCode: onboardingError.code,
+        supportId: onboardingError.supportId,
+        userId: user?.id,
+        rawError: err,
       });
+      setError(onboardingError);
+
+      if (onboardingError.type === 'network') {
+        const config = ONBOARDING_TOAST_CONFIG.NETWORK_ERROR;
+        toast.error(onboardingError.message, {
+          id: config.id,
+          duration: config.duration,
+          dismissible: config.dismissible,
+        });
+      }
     }
-  }, [syncActivities, refetch, startPolling, stopPolling, router, t]);
+  }, [syncActivities, refetch, startPolling, stopPolling, router, t, user]);
 
   useEffect(() => {
     void initSync();
@@ -111,9 +150,19 @@ export function useSyncProgress(): UseSyncProgressResult {
     if (syncStatus.status === SyncStatus.Failed) {
       stopPolling();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      setError(syncStatus.errorMessage || t('errors.syncFailed'));
+      const failedError = new Error(syncStatus.errorMessage || t('errors.syncFailed'));
+      const onboardingError = classifyOnboardingError(failedError, t);
+      logOnboardingError({
+        location: 'use-sync-progress/syncStatusEffect/failed',
+        errorType: onboardingError.type,
+        errorCode: onboardingError.code,
+        supportId: onboardingError.supportId,
+        userId: user?.id,
+        rawError: failedError,
+      });
+      setError(onboardingError);
     }
-  }, [syncStatus, stopPolling, router, t]);
+  }, [syncStatus, stopPolling, t, user?.id]);
 
   const handleRetry = useCallback(() => {
     setError(null);
@@ -121,17 +170,43 @@ export function useSyncProgress(): UseSyncProgressResult {
       void syncActivities();
       startPolling();
 
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         stopPolling();
-        setError(t('timeout'));
+        const timeoutError = new Error(t('timeout'));
+        const onboardingError = classifyOnboardingError(timeoutError, t);
+        logOnboardingError({
+          location: 'use-sync-progress/handleRetry/timeout',
+          errorType: onboardingError.type,
+          errorCode: onboardingError.code,
+          supportId: onboardingError.supportId,
+          userId: user?.id,
+          rawError: timeoutError,
+        });
+        setError(onboardingError);
       }, SYNC_TIMEOUT_MS);
-    } catch {
-      setError(t('errors.syncFailed'));
-      toast.error(t('errors.syncFailed'), {
-        id: ONBOARDING_TOAST_IDS.SYNC_ERROR,
+    } catch (err) {
+      const onboardingError = classifyOnboardingError(err, t);
+      logOnboardingError({
+        location: 'use-sync-progress/handleRetry',
+        errorType: onboardingError.type,
+        errorCode: onboardingError.code,
+        supportId: onboardingError.supportId,
+        userId: user?.id,
+        rawError: err,
       });
+      setError(onboardingError);
+
+      if (onboardingError.type === 'network') {
+        const config = ONBOARDING_TOAST_CONFIG.NETWORK_ERROR;
+        toast.error(onboardingError.message, {
+          id: config.id,
+          duration: config.duration,
+          dismissible: config.dismissible,
+        });
+      }
     }
-  }, [syncActivities, startPolling, stopPolling, t]);
+  }, [syncActivities, startPolling, stopPolling, t, user]);
 
   return {
     syncStatus,
