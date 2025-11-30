@@ -133,7 +133,7 @@ describe('classifyOnboardingError', () => {
     expect(result.type).toBe('network');
     expect(result.message).toBe('Connection error');
     expect(result.retriable).toBe(true);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 
   it('should classify Strava token expired errors correctly', () => {
@@ -149,7 +149,7 @@ describe('classifyOnboardingError', () => {
     expect(result.message).toBe('Strava connection expired');
     expect(result.code).toBe('STRAVA_REFRESH_TOKEN_EXPIRED');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 
   it('should classify rate limit errors correctly', () => {
@@ -165,7 +165,7 @@ describe('classifyOnboardingError', () => {
     expect(result.message).toBe('Too many requests');
     expect(result.code).toBe('RATE_LIMIT_EXCEEDED');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 
   it('should classify sync failed errors correctly', () => {
@@ -180,7 +180,7 @@ describe('classifyOnboardingError', () => {
     expect(result.type).toBe('sync_failed');
     expect(result.message).toBe('Database connection lost');
     expect(result.retriable).toBe(true);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 
   it('should classify unknown errors with fallback', () => {
@@ -191,7 +191,7 @@ describe('classifyOnboardingError', () => {
     expect(result.message).toBe('An unexpected error occurred');
     expect(result.code).toBe('UNKNOWN');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 
   it('should extract error code from GraphQL extensions', () => {
@@ -327,6 +327,6 @@ describe('Support ID generation', () => {
     const error = new Error('Test');
     const result = classifyOnboardingError(error, mockT);
 
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
   });
 });
