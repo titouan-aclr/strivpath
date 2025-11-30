@@ -42,7 +42,6 @@ describe('SyncProgress', () => {
     syncStatus: null,
     error: null,
     isInitializing: false,
-    isRedirecting: false,
     onRetry: vi.fn(),
   };
 
@@ -59,15 +58,6 @@ describe('SyncProgress', () => {
       render(<SyncProgress {...defaultProps} isInitializing={true} />);
 
       expect(screen.getByLabelText('Loading')).toBeInTheDocument();
-    });
-  });
-
-  describe('Redirecting State', () => {
-    it('should show success UI when redirecting', () => {
-      render(<SyncProgress {...defaultProps} isRedirecting={true} />);
-
-      expect(screen.getByText('status.done')).toBeInTheDocument();
-      expect(screen.getByText('redirecting')).toBeInTheDocument();
     });
   });
 

@@ -42,7 +42,8 @@
   "onboarding": {
     "steps": {
       "selectSports": "Select your sports",
-      "syncActivities": "Sync your activities"
+      "syncActivities": "Sync your activities",
+      "confirmation": "All set!"
     },
     "sports": {
       "title": "Select Your Sports",
@@ -79,8 +80,20 @@
       },
       "progress": "{current} of {total} activities",
       "retry": "Retry Sync",
-      "redirecting": "Redirecting to dashboard...",
-      "timeout": "Sync is taking longer than expected. Please retry."
+      "timeout": "Sync took longer than expected (60s timeout). Please retry."
+    },
+    "confirmation": {
+      "title": "You're all set!",
+      "description": "Your activities have been successfully imported",
+      "activitiesImported": "activities imported",
+      "whatsNext": {
+        "title": "What's next?",
+        "viewDashboard": "View your personalized dashboard",
+        "trackProgress": "Track your progress and performance",
+        "setGoals": "Set goals and earn badges"
+      },
+      "goToDashboard": "Go to Dashboard",
+      "autoRedirect": "Redirecting automatically in {seconds} seconds..."
     },
     "error": {
       "title": "Onboarding Error",
@@ -102,7 +115,8 @@
       "unknownError": "An unexpected error occurred",
       "contactSupport": "Contact Support",
       "errorCode": "Error code: {code}",
-      "supportId": "Support ID"
+      "supportId": "Support ID",
+      "timeoutHint": "This may happen with large activity history (1000+ activities). Multiple retries may be needed."
     }
   },
   "auth": {

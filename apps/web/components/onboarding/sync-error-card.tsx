@@ -46,6 +46,9 @@ export function SyncErrorCard({ error, onRetry, onReconnect }: SyncErrorCardProp
                   {t('errors.errorCode', { code: error.code })}
                 </p>
               )}
+              {error.message.toLowerCase().includes('timeout') && (
+                <p className="text-xs text-muted-foreground text-center mt-3 italic">{t('errors.timeoutHint')}</p>
+              )}
             </div>
 
             <div className="text-center">

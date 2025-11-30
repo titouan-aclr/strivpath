@@ -67,7 +67,7 @@ export function useSyncProgress(): UseSyncProgressResult {
       } else if (currentStatus.status === SyncStatus.Completed) {
         setIsRedirecting(true);
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/onboarding-complete');
         }, REDIRECT_DELAY_MS);
         return;
       } else if (currentStatus.status === SyncStatus.InProgress) {
@@ -90,7 +90,7 @@ export function useSyncProgress(): UseSyncProgressResult {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         stopPolling();
-        const timeoutError = new Error(t('timeout'));
+        const timeoutError = new Error(t('sync.timeout'));
         const onboardingError = classifyOnboardingError(timeoutError, t);
         logOnboardingError({
           location: 'use-sync-progress/initSync/timeout',
@@ -143,7 +143,7 @@ export function useSyncProgress(): UseSyncProgressResult {
 
       setIsRedirecting(true);
       setTimeout(() => {
-        router.push('/dashboard');
+        router.push('/onboarding-complete');
       }, REDIRECT_DELAY_MS);
     }
 
@@ -173,7 +173,7 @@ export function useSyncProgress(): UseSyncProgressResult {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       timeoutRef.current = setTimeout(() => {
         stopPolling();
-        const timeoutError = new Error(t('timeout'));
+        const timeoutError = new Error(t('sync.timeout'));
         const onboardingError = classifyOnboardingError(timeoutError, t);
         logOnboardingError({
           location: 'use-sync-progress/handleRetry/timeout',

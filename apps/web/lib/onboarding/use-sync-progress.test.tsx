@@ -349,7 +349,7 @@ describe('useSyncProgress', () => {
   });
 
   describe('Redirect Behavior', () => {
-    it('should eventually redirect to dashboard after completion', async () => {
+    it('should eventually redirect to onboarding-complete after completion', async () => {
       server.use(
         graphql.query('SyncStatus', () => {
           return HttpResponse.json({
@@ -364,7 +364,7 @@ describe('useSyncProgress', () => {
 
       await waitFor(
         () => {
-          expect(mockRouterPush).toHaveBeenCalledWith('/dashboard');
+          expect(mockRouterPush).toHaveBeenCalledWith('/onboarding-complete');
         },
         { timeout: 3000 },
       );
