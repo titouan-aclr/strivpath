@@ -1,6 +1,7 @@
 export const SYNC_POLL_INTERVAL = 2000;
 export const SYNC_TIMEOUT_MS = 60000;
 export const REDIRECT_DELAY_MS = 1000;
+export const CONFIRMATION_AUTO_REDIRECT_MS = 3000;
 export const MAX_SPORTS_SELECTION = 3;
 export const MIN_SPORTS_SELECTION = 1;
 
