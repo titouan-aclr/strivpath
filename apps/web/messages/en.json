@@ -42,7 +42,81 @@
   "onboarding": {
     "steps": {
       "selectSports": "Select your sports",
-      "syncActivities": "Sync your activities"
+      "syncActivities": "Sync your activities",
+      "confirmation": "All set!"
+    },
+    "sports": {
+      "title": "Select Your Sports",
+      "description": "Choose at least one sport to track with Stravanalytics",
+      "run": {
+        "title": "Running",
+        "description": "Track your runs and improve your pace"
+      },
+      "ride": {
+        "title": "Cycling",
+        "description": "Monitor your rides and routes"
+      },
+      "swim": {
+        "title": "Swimming",
+        "description": "Record your swimming sessions"
+      },
+      "validation": {
+        "minOne": "Select at least one sport",
+        "maxThree": "You can select up to 3 sports"
+      },
+      "continue": "Continue to Sync",
+      "saving": "Saving preferences..."
+    },
+    "sync": {
+      "title": "Syncing Your Activities",
+      "description": "Importing your Strava activities",
+      "status": {
+        "pending": "Preparing synchronization...",
+        "fetching": "Downloading activities from Strava",
+        "storing": "Storing activities in database",
+        "computing": "Computing your statistics",
+        "done": "Synchronization complete!",
+        "failed": "Synchronization failed"
+      },
+      "progress": "{current} of {total} activities",
+      "retry": "Retry Sync",
+      "timeout": "Sync took longer than expected (60s timeout). Please retry."
+    },
+    "confirmation": {
+      "title": "You're all set!",
+      "description": "Your activities have been successfully imported",
+      "activitiesImported": "activities imported",
+      "whatsNext": {
+        "title": "What's next?",
+        "viewDashboard": "View your personalized dashboard",
+        "trackProgress": "Track your progress and performance",
+        "setGoals": "Set goals and earn badges"
+      },
+      "goToDashboard": "Go to Dashboard",
+      "autoRedirect": "Redirecting automatically in {seconds} seconds..."
+    },
+    "error": {
+      "title": "Onboarding Error",
+      "description": "An error occurred during onboarding. Please try again.",
+      "tryAgain": "Try Again",
+      "goToLogin": "Go to Login"
+    },
+    "errors": {
+      "saveFailed": "Failed to save your preferences",
+      "syncFailed": "Failed to sync activities",
+      "pleaseTryAgain": "Please try again",
+      "network": "Connection error",
+      "networkDescription": "Unable to reach server. Please check your connection.",
+      "tokenExpired": "Strava connection expired",
+      "tokenExpiredDescription": "Please reconnect your Strava account to continue",
+      "reconnectButton": "Reconnect Strava",
+      "rateLimitTitle": "Too many requests",
+      "rateLimitDescription": "Please wait a few minutes before trying again",
+      "unknownError": "An unexpected error occurred",
+      "contactSupport": "Contact Support",
+      "errorCode": "Error code: {code}",
+      "supportId": "Support ID",
+      "timeoutHint": "This may happen with large activity history (1000+ activities). Multiple retries may be needed."
     }
   },
   "auth": {

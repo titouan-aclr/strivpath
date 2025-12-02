@@ -1,5 +1,6 @@
 import { graphql, HttpResponse } from 'msw';
 import { createMockUser, MOCK_USERS } from './fixtures/user.fixture';
+import { SportType, SyncStatus, LocaleType } from '@/gql/graphql';
 
 export const handlers = [
   graphql.query('CurrentUser', () => {
@@ -32,6 +33,51 @@ export const handlers = [
       data: {
         logout: true,
       },
+    });
+  }),
+
+  graphql.mutation('UpdateUserPreferences', () => {
+    return HttpResponse.json({
+      data: {
+        updateUserPreferences: {
+          __typename: 'UserPreferences',
+          id: '1',
+          userId: 1,
+          selectedSports: [SportType.Run, SportType.Ride],
+          locale: LocaleType.En,
+          theme: 'light',
+          onboardingCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      },
+    });
+  }),
+
+  graphql.mutation('SyncActivities', () => {
+    return HttpResponse.json({
+      data: {
+        syncActivities: {
+          __typename: 'SyncHistory',
+          id: '1',
+          userId: 1,
+          status: SyncStatus.Pending,
+          stage: null,
+          totalActivities: 0,
+          processedActivities: 0,
+          errorMessage: null,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          startedAt: new Date().toISOString(),
+          completedAt: null,
+        },
+      },
+    });
+  }),
+
+  graphql.query('SyncStatus', () => {
+    return HttpResponse.json({
+      data: { syncStatus: null },
     });
   }),
 ];
@@ -145,6 +191,54 @@ export const authErrorHandlers = {
   logoutNetworkError: graphql.mutation('Logout', () => {
     return HttpResponse.error();
   }),
+};
+
+export const onboardingErrorHandlers = {
+  updatePreferencesNetworkError: graphql.mutation('UpdateUserPreferences', () => HttpResponse.error()),
+
+  updatePreferencesTokenExpired: graphql.mutation('UpdateUserPreferences', () => {
+    return HttpResponse.json(
+      {
+        errors: [
+          {
+            message: 'Strava refresh token expired',
+            extensions: { code: 'STRAVA_REFRESH_TOKEN_EXPIRED' },
+          },
+        ],
+        data: null,
+      },
+      { status: 401 },
+    );
+  }),
+
+  updatePreferencesRateLimit: graphql.mutation('UpdateUserPreferences', () => {
+    return HttpResponse.json(
+      {
+        errors: [
+          {
+            message: 'Too many requests',
+            extensions: { code: 'RATE_LIMIT_EXCEEDED' },
+          },
+        ],
+        data: null,
+      },
+      { status: 429 },
+    );
+  }),
+
+  syncActivitiesFailed: graphql.mutation('SyncActivities', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Failed to start sync',
+          extensions: { code: 'SYNC_FAILED' },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  syncStatusNetworkError: graphql.query('SyncStatus', () => HttpResponse.error()),
 };
 
 export { MOCK_USERS };

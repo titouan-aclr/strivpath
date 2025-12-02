@@ -260,6 +260,10 @@ export class ActivityService {
       await this.storeActivities(allActivities, userId, selectedSports as SportType[], sync.id);
 
       await this.syncHistoryService.update(sync.id, {
+        stage: SyncStage.COMPUTING,
+      });
+
+      await this.syncHistoryService.update(sync.id, {
         status: SyncStatus.COMPLETED,
         stage: SyncStage.DONE,
         completedAt: new Date(),
