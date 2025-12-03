@@ -7,6 +7,9 @@ import { BadRequestException } from '@nestjs/common';
 import { SyncStatus } from '../sync-history/enums/sync-status.enum';
 import { SyncStage } from '../sync-history/enums/sync-stage.enum';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
+import { ActivityType } from './enums/activity-type.enum';
+import { OrderBy } from './enums/order-by.enum';
+import { OrderDirection } from './enums/order-direction.enum';
 
 describe('ActivityService', () => {
   let service: ActivityService;
@@ -364,7 +367,7 @@ describe('ActivityService', () => {
 
     it('should filter activities by type', async () => {
       const userId = 1;
-      const type = 'Run';
+      const type = ActivityType.RUN;
 
       mockPrismaService.activity.findMany.mockResolvedValue([]);
 
@@ -372,6 +375,175 @@ describe('ActivityService', () => {
 
       expect(prismaService.activity.findMany).toHaveBeenCalledWith({
         where: { userId, type },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should filter activities by date range', async () => {
+      const userId = 1;
+      const startDate = new Date('2025-01-01');
+      const endDate = new Date('2025-01-31');
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, { startDate, endDate });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          startDate: { gte: startDate, lte: endDate },
+        },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should filter activities by start date only', async () => {
+      const userId = 1;
+      const startDate = new Date('2025-01-01');
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, { startDate });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          startDate: { gte: startDate },
+        },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should filter activities by end date only', async () => {
+      const userId = 1;
+      const endDate = new Date('2025-01-31');
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, { endDate });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          startDate: { lte: endDate },
+        },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should throw BadRequestException when startDate is after endDate', async () => {
+      const userId = 1;
+      const startDate = new Date('2025-01-31');
+      const endDate = new Date('2025-01-01');
+
+      await expect(service.findAll(userId, { startDate, endDate })).rejects.toThrow(BadRequestException);
+      await expect(service.findAll(userId, { startDate, endDate })).rejects.toThrow(
+        'startDate must be before or equal to endDate',
+      );
+    });
+
+    it('should accept same date for startDate and endDate', async () => {
+      const userId = 1;
+      const sameDate = new Date('2025-01-15');
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, { startDate: sameDate, endDate: sameDate });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          startDate: { gte: sameDate, lte: sameDate },
+        },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should sort activities by distance descending', async () => {
+      const userId = 1;
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, {
+        orderBy: OrderBy.DISTANCE,
+        orderDirection: OrderDirection.DESC,
+      });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        orderBy: { distance: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should sort activities by duration ascending', async () => {
+      const userId = 1;
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, {
+        orderBy: OrderBy.DURATION,
+        orderDirection: OrderDirection.ASC,
+      });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        orderBy: { movingTime: 'asc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should apply combined filters with sorting', async () => {
+      const userId = 1;
+      const type = ActivityType.RUN;
+      const startDate = new Date('2025-01-01');
+      const endDate = new Date('2025-01-31');
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, {
+        type,
+        startDate,
+        endDate,
+        orderBy: OrderBy.DISTANCE,
+        orderDirection: OrderDirection.ASC,
+        offset: 10,
+        limit: 20,
+      });
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          type,
+          startDate: { gte: startDate, lte: endDate },
+        },
+        orderBy: { distance: 'asc' },
+        skip: 10,
+        take: 20,
+      });
+    });
+
+    it('should use default sorting when not specified', async () => {
+      const userId = 1;
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      await service.findAll(userId, {});
+
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
         orderBy: { startDate: 'desc' },
         skip: 0,
         take: 30,
