@@ -25,6 +25,30 @@
       "swimming": "Swimming"
     }
   },
+  "activities": {
+    "sportTypes": {
+      "run": "Running",
+      "ride": "Cycling",
+      "swim": "Swimming"
+    },
+    "filters": {
+      "dateRange": {
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days",
+        "thisYear": "This year",
+        "allTime": "All time"
+      }
+    },
+    "sort": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "distanceDesc": "Longest distance",
+      "distanceAsc": "Shortest distance",
+      "durationDesc": "Longest duration",
+      "durationAsc": "Shortest duration"
+    }
+  },
   "layout": {
     "userMenu": {
       "profile": "Profile",
