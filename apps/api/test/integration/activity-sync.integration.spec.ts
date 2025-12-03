@@ -10,6 +10,7 @@ import { StravaActivitySummary } from '../../src/strava/types';
 import { SyncStatus } from '../../src/sync-history/enums/sync-status.enum';
 import { SyncStage } from '../../src/sync-history/enums/sync-stage.enum';
 import { SportType } from '../../src/user-preferences/enums/sport-type.enum';
+import { ActivityType } from '../../src/activity/enums/activity-type.enum';
 
 describe('Activity Sync Integration', () => {
   let app: INestApplication;
@@ -471,13 +472,13 @@ describe('Activity Sync Integration', () => {
       await seedTestActivity(user.id, { stravaId: BigInt(9002), type: 'Ride' });
       await seedTestActivity(user.id, { stravaId: BigInt(9003), type: 'Run' });
 
-      const runActivities = await activityService.findAll(user.id, { type: 'Run' });
+      const runActivities = await activityService.findAll(user.id, { type: ActivityType.RUN });
       expect(runActivities).toHaveLength(2);
-      expect(runActivities.every(a => a.type === 'Run')).toBe(true);
+      expect(runActivities.every(a => a.type === ActivityType.RUN)).toBe(true);
 
-      const rideActivities = await activityService.findAll(user.id, { type: 'Ride' });
+      const rideActivities = await activityService.findAll(user.id, { type: ActivityType.RIDE });
       expect(rideActivities).toHaveLength(1);
-      expect(rideActivities[0].type).toBe('Ride');
+      expect(rideActivities[0].type).toBe(ActivityType.RIDE);
     });
 
     it('should order activities by start date descending', async () => {

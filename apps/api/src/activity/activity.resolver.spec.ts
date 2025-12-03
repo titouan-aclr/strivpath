@@ -6,6 +6,7 @@ import { Activity } from './models/activity.model';
 import { SyncHistory } from '../sync-history/models/sync-history.model';
 import { SyncStatus } from '../sync-history/enums/sync-status.enum';
 import { SyncStage } from '../sync-history/enums/sync-stage.enum';
+import { ActivityType } from './enums/activity-type.enum';
 import { TokenPayload } from '../auth/types';
 
 describe('ActivityResolver', () => {
@@ -104,7 +105,7 @@ describe('ActivityResolver', () => {
     });
 
     it('should return activities with custom filter', async () => {
-      const filter = { offset: 10, limit: 20, type: 'Run' };
+      const filter = { offset: 10, limit: 20, type: ActivityType.RUN };
       mockActivityService.findAll.mockResolvedValue([mockActivity]);
 
       const result = await resolver.activities(mockTokenPayload, filter);
@@ -112,7 +113,7 @@ describe('ActivityResolver', () => {
       expect(activityService.findAll).toHaveBeenCalledWith(mockTokenPayload.sub, {
         offset: 10,
         limit: 20,
-        type: 'Run',
+        type: ActivityType.RUN,
       });
       expect(result).toEqual([mockActivity]);
     });
