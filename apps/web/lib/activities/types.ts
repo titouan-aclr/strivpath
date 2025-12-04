@@ -1,8 +1,8 @@
-import type { SportType } from '@/gql/graphql';
+import type { ActivityType } from '@/gql/graphql';
 import type { OrderBy, OrderDirection } from './constants';
 
 export interface ActivityFilter {
-  type?: SportType;
+  type?: ActivityType;
   startDate?: Date;
   endDate?: Date;
   orderBy?: OrderBy;

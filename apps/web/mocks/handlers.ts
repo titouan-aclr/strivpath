@@ -1,6 +1,14 @@
 import { graphql, HttpResponse } from 'msw';
 import { createMockUser, MOCK_USERS } from './fixtures/user.fixture';
+import { MOCK_ACTIVITIES_ARRAY } from './fixtures/activity.fixture';
 import { SportType, SyncStatus, LocaleType } from '@/gql/graphql';
+
+function serializeActivity(activity: (typeof MOCK_ACTIVITIES_ARRAY)[number]) {
+  return {
+    ...activity,
+    stravaId: activity.stravaId.toString(),
+  };
+}
 
 export const handlers = [
   graphql.query('CurrentUser', () => {
@@ -78,6 +86,65 @@ export const handlers = [
   graphql.query('SyncStatus', () => {
     return HttpResponse.json({
       data: { syncStatus: null },
+    });
+  }),
+
+  graphql.query('Activities', ({ variables }) => {
+    const filter = variables.filter as
+      | {
+          offset?: number;
+          limit?: number;
+          type?: SportType;
+          startDate?: string;
+          endDate?: string;
+          orderBy?: string;
+          orderDirection?: string;
+        }
+      | undefined;
+
+    let activities = [...MOCK_ACTIVITIES_ARRAY];
+
+    if (filter?.type) {
+      const filterType = filter.type as string;
+      activities = activities.filter(a => a.type === filterType);
+    }
+
+    if (filter?.startDate) {
+      const start = new Date(filter.startDate);
+      activities = activities.filter(a => new Date(a.startDate) >= start);
+    }
+    if (filter?.endDate) {
+      const end = new Date(filter.endDate);
+      activities = activities.filter(a => new Date(a.startDate) <= end);
+    }
+
+    const orderBy = filter?.orderBy || 'DATE';
+    const orderDirection = filter?.orderDirection || 'DESC';
+
+    activities.sort((a, b) => {
+      let comparison = 0;
+      switch (orderBy) {
+        case 'DATE':
+          comparison = new Date(a.startDate).getTime() - new Date(b.startDate).getTime();
+          break;
+        case 'DISTANCE':
+          comparison = (a.distance || 0) - (b.distance || 0);
+          break;
+        case 'DURATION':
+          comparison = (a.movingTime || 0) - (b.movingTime || 0);
+          break;
+      }
+      return orderDirection === 'DESC' ? -comparison : comparison;
+    });
+
+    const offset = filter?.offset || 0;
+    const limit = filter?.limit || 20;
+    const paginatedActivities = activities.slice(offset, offset + limit);
+
+    return HttpResponse.json({
+      data: {
+        activities: paginatedActivities.map(serializeActivity),
+      },
     });
   }),
 ];
