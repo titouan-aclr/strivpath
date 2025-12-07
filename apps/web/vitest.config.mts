@@ -19,6 +19,12 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
+      include: [
+        'components/**/*.{ts,tsx}',
+        'lib/**/*.{ts,tsx}',
+        'hooks/**/*.{ts,tsx}',
+        'app/**/*.{ts,tsx}',
+      ],
       exclude: [
         'node_modules/',
         'vitest.setup.ts',

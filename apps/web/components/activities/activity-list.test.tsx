@@ -70,26 +70,26 @@ const renderWithIntl = (component: React.ReactElement) => {
   );
 };
 
-let mockIntersectionObserver: {
-  observe: ReturnType<typeof vi.fn>;
-  unobserve: ReturnType<typeof vi.fn>;
-  disconnect: ReturnType<typeof vi.fn>;
-};
-
+let mockObserve: ReturnType<typeof vi.fn>;
+let mockUnobserve: ReturnType<typeof vi.fn>;
+let mockDisconnect: ReturnType<typeof vi.fn>;
 let intersectionCallback: IntersectionObserverCallback;
 
 describe('ActivityList', () => {
   beforeEach(() => {
-    mockIntersectionObserver = {
-      observe: vi.fn(),
-      unobserve: vi.fn(),
-      disconnect: vi.fn(),
-    };
+    mockObserve = vi.fn();
+    mockUnobserve = vi.fn();
+    mockDisconnect = vi.fn();
 
-    global.IntersectionObserver = vi.fn((callback: IntersectionObserverCallback) => {
-      intersectionCallback = callback;
-      return mockIntersectionObserver;
-    }) as unknown as typeof IntersectionObserver;
+    global.IntersectionObserver = class MockIntersectionObserver {
+      observe = mockObserve;
+      unobserve = mockUnobserve;
+      disconnect = mockDisconnect;
+
+      constructor(callback: IntersectionObserverCallback) {
+        intersectionCallback = callback;
+      }
+    } as unknown as typeof IntersectionObserver;
   });
 
   describe('Rendering', () => {
@@ -227,8 +227,7 @@ describe('ActivityList', () => {
         <ActivityList activities={mockActivities} loading={false} hasMore={true} onLoadMore={onLoadMore} />,
       );
 
-      expect(global.IntersectionObserver).toHaveBeenCalled();
-      expect(mockIntersectionObserver.observe).toHaveBeenCalled();
+      expect(mockObserve).toHaveBeenCalled();
     });
 
     it('should call onLoadMore when observer triggers intersection', async () => {
@@ -237,6 +236,10 @@ describe('ActivityList', () => {
       renderWithIntl(
         <ActivityList activities={mockActivities} loading={false} hasMore={true} onLoadMore={onLoadMore} />,
       );
+
+      await waitFor(() => {
+        expect(mockObserve).toHaveBeenCalled();
+      });
 
       intersectionCallback([{ isIntersecting: true } as IntersectionObserverEntry], {} as IntersectionObserver);
 
@@ -251,6 +254,10 @@ describe('ActivityList', () => {
       renderWithIntl(
         <ActivityList activities={mockActivities} loading={false} hasMore={true} onLoadMore={onLoadMore} />,
       );
+
+      await waitFor(() => {
+        expect(mockObserve).toHaveBeenCalled();
+      });
 
       intersectionCallback([{ isIntersecting: false } as IntersectionObserverEntry], {} as IntersectionObserver);
 
@@ -268,7 +275,7 @@ describe('ActivityList', () => {
 
       unmount();
 
-      expect(mockIntersectionObserver.disconnect).toHaveBeenCalled();
+      expect(mockDisconnect).toHaveBeenCalled();
     });
   });
 
