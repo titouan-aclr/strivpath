@@ -41,7 +41,7 @@ const TEST_QUERY = gql`
 `;
 
 describe('apollo-client (SSR)', () => {
-  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  let consoleErrorSpy: vi.SpyInstance;
   let originalEnv: string | undefined;
 
   beforeEach(() => {
