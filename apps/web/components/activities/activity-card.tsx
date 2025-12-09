@@ -25,7 +25,11 @@ interface ActivityCardProps {
 export function ActivityCard({ activity, onClick }: ActivityCardProps) {
   const t = useTranslations('activities.card');
 
-  const sportConfig = SPORT_TYPE_CONFIG[activity.type as keyof typeof SPORT_TYPE_CONFIG];
+  const sportConfig = SPORT_TYPE_CONFIG[activity.type as keyof typeof SPORT_TYPE_CONFIG] || {
+    icon: Activity,
+    color: 'text-gray-500',
+    label: 'activities.sportTypes.other',
+  };
   const Icon = sportConfig.icon;
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {

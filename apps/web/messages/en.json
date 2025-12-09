@@ -26,10 +26,15 @@
     }
   },
   "activities": {
+    "page": {
+      "title": "Activities",
+      "description": "View and analyze all your activities"
+    },
     "sportTypes": {
       "run": "Running",
       "ride": "Cycling",
-      "swim": "Swimming"
+      "swim": "Swimming",
+      "other": "Other"
     },
     "card": {
       "distance": "Distance",
