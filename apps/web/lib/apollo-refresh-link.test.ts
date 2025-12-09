@@ -106,8 +106,8 @@ const createTestClient = () => {
 describe('apollo-refresh-link', () => {
   let testClient: ReturnType<typeof createTestClient>;
   let originalLocation: Location;
-  let consoleErrorSpy: vi.SpyInstance;
-  let consoleWarnSpy: vi.SpyInstance;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+  let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { Activity as ActivityIcon, AlertCircle, RefreshCw } from 'lucide-react';
 import { Card, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
@@ -30,34 +30,42 @@ export function ActivityList({
 }: ActivityListProps) {
   const t = useTranslations('activities.list');
 
-  const observerTargetRef = useRef<HTMLDivElement>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
   const loadingRef = useRef(loading);
   const hasMoreRef = useRef(hasMore);
+  const onLoadMoreRef = useRef(onLoadMore);
 
   useEffect(() => {
     loadingRef.current = loading;
     hasMoreRef.current = hasMore;
-  }, [loading, hasMore]);
+    onLoadMoreRef.current = onLoadMore;
+  }, [loading, hasMore, onLoadMore]);
 
-  useEffect(() => {
-    if (!observerTargetRef.current || !hasMore || loading) return;
+  const observerTargetRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+        observerRef.current = null;
+      }
 
-    const observer = new IntersectionObserver(
-      entries => {
-        if (entries[0].isIntersecting && hasMoreRef.current && !loadingRef.current) {
-          void onLoadMore();
-        }
-      },
-      {
-        threshold: 0.1,
-        rootMargin: '100px',
-      },
-    );
+      if (node && hasMore && !loading) {
+        observerRef.current = new IntersectionObserver(
+          entries => {
+            if (entries[0].isIntersecting && hasMoreRef.current && !loadingRef.current) {
+              void onLoadMoreRef.current();
+            }
+          },
+          {
+            threshold: 0.1,
+            rootMargin: '100px',
+          },
+        );
 
-    observer.observe(observerTargetRef.current);
-
-    return () => observer.disconnect();
-  }, [hasMore, loading, onLoadMore]);
+        observerRef.current.observe(node);
+      }
+    },
+    [hasMore, loading],
+  );
 
   if (error) {
     return (
@@ -99,7 +107,7 @@ export function ActivityList({
     <div className="space-y-4" aria-live="polite" aria-busy={loading}>
       {activities.map(activity => (
         <ActivityCard
-          key={activity.stravaId.toString()}
+          key={activity.id}
           activity={activity}
           onClick={onActivityClick ? () => onActivityClick(activity) : undefined}
         />

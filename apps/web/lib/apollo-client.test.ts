@@ -41,7 +41,7 @@ const TEST_QUERY = gql`
 `;
 
 describe('apollo-client (SSR)', () => {
-  let consoleErrorSpy: vi.SpyInstance;
+  let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
   let originalEnv: string | undefined;
 
   beforeEach(() => {
@@ -217,7 +217,7 @@ describe('apollo-client (SSR)', () => {
       ).rejects.toThrow();
 
       expect(
-        consoleErrorSpy.mock.calls.some(call => {
+        consoleErrorSpy.mock.calls.some((call: unknown[]) => {
           const message = String(call[0]);
           return (
             message.includes('[GraphQL error]: Message: Test GraphQL error') &&
@@ -280,14 +280,14 @@ describe('apollo-client (SSR)', () => {
       ).rejects.toThrow();
 
       expect(
-        consoleErrorSpy.mock.calls.some(call => {
+        consoleErrorSpy.mock.calls.some((call: unknown[]) => {
           const message = String(call[0]);
           return message.includes('[GraphQL error]: Message: Error 1') && message.includes('Path: field1');
         }),
       ).toBe(true);
 
       expect(
-        consoleErrorSpy.mock.calls.some(call => {
+        consoleErrorSpy.mock.calls.some((call: unknown[]) => {
           const message = String(call[0]);
           return message.includes('[GraphQL error]: Message: Error 2') && message.includes('Path: field2');
         }),
