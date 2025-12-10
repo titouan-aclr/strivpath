@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event';
 import { NextIntlClientProvider } from 'next-intl';
 import { ActivitiesPageContent } from './activities-page-content';
 import { useActivities } from '@/lib/activities/use-activities';
-import { useRouter } from '@/i18n/navigation';
 import { MOCK_ACTIVITIES_ARRAY } from '@/mocks/fixtures/activity.fixture';
 import { OrderBy, OrderDirection } from '@/lib/activities/constants';
 import type { ActivityFilter } from '@/lib/activities/types';
@@ -12,7 +11,26 @@ import type { ActivityCardFragment } from '@/gql/graphql';
 import { ActivityType } from '@/gql/graphql';
 
 vi.mock('@/lib/activities/use-activities');
-vi.mock('@/i18n/navigation');
+
+const mockRouter = {
+  push: vi.fn(),
+  back: vi.fn(),
+  forward: vi.fn(),
+  refresh: vi.fn(),
+  replace: vi.fn(),
+  prefetch: vi.fn(),
+};
+
+vi.mock('next/navigation', () => ({
+  useRouter: () => mockRouter,
+  usePathname: vi.fn(),
+  useSearchParams: vi.fn(),
+}));
+
+vi.mock('@/i18n/navigation', () => ({
+  useRouter: () => mockRouter,
+}));
+
 interface MockActivityListProps {
   activities: ActivityCardFragment[];
   loading: boolean;
@@ -108,19 +126,9 @@ describe('ActivitiesPageContent', () => {
     refetch: vi.fn(),
   };
 
-  const mockRouter = {
-    push: vi.fn(),
-    back: vi.fn(),
-    forward: vi.fn(),
-    refresh: vi.fn(),
-    replace: vi.fn(),
-    prefetch: vi.fn(),
-  } as ReturnType<typeof useRouter>;
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(useActivities).mockReturnValue(mockUseActivities);
-    vi.mocked(useRouter).mockReturnValue(mockRouter);
   });
 
   describe('Rendering', () => {

@@ -24,12 +24,27 @@ export function createApolloClient() {
   return new ApolloClient({
     cache: new InMemoryCache({
       typePolicies: {
+        Query: {
+          fields: {
+            activities: {
+              keyArgs: ['filter', ['type']],
+              merge(existing: unknown[] = [], incoming: unknown[]): unknown[] {
+                return existing.length > 0 ? [...existing, ...incoming] : incoming;
+              },
+            },
+          },
+        },
         Activity: {
           keyFields: ['stravaId'],
         },
       },
     }),
     link: from([errorLink, httpLink]),
+    defaultOptions: {
+      watchQuery: {
+        fetchPolicy: 'cache-and-network',
+      },
+    },
   });
 }
 

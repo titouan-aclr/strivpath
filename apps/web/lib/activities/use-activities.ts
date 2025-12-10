@@ -31,10 +31,26 @@ export function useActivities(params?: UseActivitiesParams): UseActivitiesResult
   );
   const endDateString = useMemo(() => params?.filter?.endDate?.toISOString(), [params?.filter?.endDate?.getTime()]);
 
+  const filterKey = useMemo(
+    () =>
+      JSON.stringify({
+        type: params?.filter?.type,
+        startDate: startDateString,
+        endDate: endDateString,
+        orderBy: params?.filter?.orderBy,
+        orderDirection: params?.filter?.orderDirection,
+      }),
+    [params?.filter?.type, startDateString, endDateString, params?.filter?.orderBy, params?.filter?.orderDirection],
+  );
+
+  const [lastFilterKey, setLastFilterKey] = useState(filterKey);
+
+  const effectiveOffset = filterKey !== lastFilterKey ? 0 : currentOffset;
+
   const queryVariables = useMemo(
     () => ({
       filter: {
-        offset: currentOffset,
+        offset: effectiveOffset,
         limit: ACTIVITIES_PAGE_SIZE,
         type: params?.filter?.type,
         startDate: startDateString as unknown as Date | undefined,
@@ -44,7 +60,7 @@ export function useActivities(params?: UseActivitiesParams): UseActivitiesResult
       },
     }),
     [
-      currentOffset,
+      effectiveOffset,
       params?.filter?.type,
       startDateString,
       endDateString,
@@ -65,10 +81,18 @@ export function useActivities(params?: UseActivitiesParams): UseActivitiesResult
   });
 
   useEffect(() => {
+    if (filterKey !== lastFilterKey) {
+      setLastFilterKey(filterKey);
+      setCurrentOffset(0);
+      setAccumulatedActivities([]);
+    }
+  }, [filterKey, lastFilterKey]);
+
+  useEffect(() => {
     if (data?.activities) {
       const newActivities = data.activities.map(activity => getFragmentData(ActivityCardFragmentDoc, activity));
 
-      if (currentOffset === 0) {
+      if (effectiveOffset === 0) {
         setAccumulatedActivities(newActivities);
       } else {
         setAccumulatedActivities(prev => {
@@ -81,22 +105,16 @@ export function useActivities(params?: UseActivitiesParams): UseActivitiesResult
         });
       }
     }
-  }, [data?.activities, currentOffset]);
-
-  useEffect(() => {
-    setCurrentOffset(0);
-    setAccumulatedActivities([]);
-  }, [params?.filter?.type, startDateString, endDateString, params?.filter?.orderBy, params?.filter?.orderDirection]);
+  }, [data?.activities, effectiveOffset]);
 
   const hasMore = useMemo(() => {
     if (!data?.activities) return false;
     return data.activities.length === ACTIVITIES_PAGE_SIZE;
   }, [data?.activities]);
 
-  const loadMore = useCallback(() => {
+  const loadMore = useCallback(async () => {
     if (!hasMore || loading) return Promise.resolve();
     setCurrentOffset(prev => prev + ACTIVITIES_PAGE_SIZE);
-    return Promise.resolve();
   }, [hasMore, loading]);
 
   const refetch = useCallback(async () => {
