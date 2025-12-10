@@ -121,6 +121,31 @@ describe('ActivityFilters', () => {
         expect(onFilterChange).toHaveBeenCalledWith({ type: ActivityType.Run });
       });
 
+      it('should support space key for sport badges', async () => {
+        const user = userEvent.setup();
+        const onFilterChange = vi.fn();
+        renderWithIntl(<ActivityFilters filter={defaultFilter} onFilterChange={onFilterChange} />);
+
+        const runningBadge = screen.getByText('Running');
+        runningBadge.focus();
+        await user.keyboard(' ');
+
+        expect(onFilterChange).toHaveBeenCalledWith({ type: ActivityType.Run });
+      });
+
+      it('should support space key for "All Sports" badge', async () => {
+        const user = userEvent.setup();
+        const onFilterChange = vi.fn();
+        const filter: ActivityFilter = { type: ActivityType.Run };
+        renderWithIntl(<ActivityFilters filter={filter} onFilterChange={onFilterChange} />);
+
+        const allSportsBadge = screen.getByText('All Sports');
+        allSportsBadge.focus();
+        await user.keyboard(' ');
+
+        expect(onFilterChange).toHaveBeenCalledWith({ type: undefined });
+      });
+
       it('should deselect sport when "All Sports" is clicked', async () => {
         const user = userEvent.setup();
         const onFilterChange = vi.fn();
@@ -310,6 +335,77 @@ describe('ActivityFilters', () => {
         expect(onFilterChange).toHaveBeenCalledWith({});
       });
     });
+
+    it('should select "All Sports" badge in mobile sheet', async () => {
+      const user = userEvent.setup();
+      const onFilterChange = vi.fn();
+      const filter: ActivityFilter = { type: ActivityType.Run };
+      renderWithIntl(<ActivityFilters filter={filter} onFilterChange={onFilterChange} />);
+
+      const showFiltersButton = screen.getByRole('button', { name: 'Show filters' });
+      await user.click(showFiltersButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('All Sports')).toBeInTheDocument();
+      });
+
+      const allSportsBadge = screen.getByText('All Sports');
+      await user.click(allSportsBadge);
+
+      const applyButton = screen.getByRole('button', { name: 'Apply' });
+      await user.click(applyButton);
+
+      await waitFor(() => {
+        expect(onFilterChange).toHaveBeenCalledWith({ type: undefined });
+      });
+    });
+
+    it('should update date range in mobile sheet', async () => {
+      const user = userEvent.setup();
+      const onFilterChange = vi.fn();
+      renderWithIntl(<ActivityFilters filter={defaultFilter} onFilterChange={onFilterChange} />);
+
+      const showFiltersButton = screen.getByRole('button', { name: 'Show filters' });
+      await user.click(showFiltersButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('Date Range')).toBeInTheDocument();
+      });
+
+      const dateButton = screen.getByRole('button', { name: /All time/i });
+      await user.click(dateButton);
+
+      await waitFor(
+        () => {
+          expect(screen.getByText('Quick Select')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
+
+      const preset = screen.getByRole('button', { name: 'Last 7 days' });
+      await user.click(preset);
+
+      await waitFor(
+        () => {
+          const applyButton = screen.getByRole('button', { name: 'Apply' });
+          expect(applyButton).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
+
+      const applyButton = screen.getByRole('button', { name: 'Apply' });
+      await user.click(applyButton);
+
+      await waitFor(
+        () => {
+          expect(onFilterChange).toHaveBeenCalled();
+          const lastCall = onFilterChange.mock.calls[onFilterChange.mock.calls.length - 1][0];
+          expect(lastCall.startDate).toBeDefined();
+          expect(lastCall.endDate).toBeDefined();
+        },
+        { timeout: 10000 },
+      );
+    }, 30000);
   });
 
   describe('Accessibility', () => {

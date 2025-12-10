@@ -275,6 +275,7 @@ describe('useActivities', () => {
 
       await waitFor(() => {
         expect(result.current.hasMore).toBe(false);
+        expect(result.current.activities.length).toBe(10);
       });
 
       const activitiesBeforeLoadMore = result.current.activities.length;

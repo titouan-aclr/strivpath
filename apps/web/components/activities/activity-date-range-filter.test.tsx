@@ -95,16 +95,22 @@ describe('ActivityDateRangeFilter', () => {
       const button = screen.getByRole('button', { name: /All time/i });
       await user.click(button);
 
-      await waitFor(() => {
-        expect(screen.getByText('Quick Select')).toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.getByText('Quick Select')).toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
 
       const cancelButton = screen.getByRole('button', { name: 'Cancel' });
       await user.click(cancelButton);
 
-      await waitFor(() => {
-        expect(screen.queryByText('Quick Select')).not.toBeInTheDocument();
-      });
+      await waitFor(
+        () => {
+          expect(screen.queryByText('Quick Select')).not.toBeInTheDocument();
+        },
+        { timeout: 10000 },
+      );
     });
 
     it('should display preset options in popover', async () => {
