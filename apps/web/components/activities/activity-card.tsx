@@ -70,7 +70,7 @@ export function ActivityCard({ activity, onClick }: ActivityCardProps) {
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <p className="text-xs text-muted-foreground">{t('distance')}</p>
             <p className="font-semibold">{formatDistance(activity.distance)}</p>
@@ -85,17 +85,17 @@ export function ActivityCard({ activity, onClick }: ActivityCardProps) {
             <p className="text-xs text-muted-foreground">{t('elevation')}</p>
             <p className="font-semibold">{formatElevation(activity.totalElevationGain)}</p>
           </div>
-        </div>
 
-        <div className="mb-3">
-          <p className="text-xs text-muted-foreground">{isPaceMetric ? t('pace') : t('speed')}</p>
-          <p className="font-semibold">
-            {formatPace(activity.distance, activity.movingTime, activity.type as SportType)}
-          </p>
+          <div>
+            <p className="text-xs text-muted-foreground">{isPaceMetric ? t('pace') : t('speed')}</p>
+            <p className="font-semibold">
+              {formatPace(activity.distance, activity.movingTime, activity.type as SportType)}
+            </p>
+          </div>
         </div>
 
         {(activity.kudosCount > 0 || activity.maxHeartrate) && (
-          <div className="flex gap-4 pt-3 border-t text-sm text-muted-foreground">
+          <div className="flex gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
             {activity.kudosCount > 0 && (
               <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>
                 <Heart className="h-4 w-4" aria-hidden="true" />
