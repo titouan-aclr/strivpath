@@ -32,6 +32,10 @@ export class ActivityResolver {
       offset: filter?.offset,
       limit: filter?.limit,
       type: filter?.type,
+      startDate: filter?.startDate,
+      endDate: filter?.endDate,
+      orderBy: filter?.orderBy,
+      orderDirection: filter?.orderDirection,
     });
   }
 

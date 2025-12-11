@@ -4,6 +4,9 @@ import { SyncHistory } from '../sync-history/models/sync-history.model';
 import { SyncStatus } from '../sync-history/enums/sync-status.enum';
 import { SyncStage } from '../sync-history/enums/sync-stage.enum';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
+import { ActivityType } from './enums/activity-type.enum';
+import { OrderBy } from './enums/order-by.enum';
+import { OrderDirection } from './enums/order-direction.enum';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';
@@ -288,17 +291,50 @@ export class ActivityService {
     options?: {
       offset?: number;
       limit?: number;
-      type?: string;
+      type?: ActivityType;
+      startDate?: Date;
+      endDate?: Date;
+      orderBy?: OrderBy;
+      orderDirection?: OrderDirection;
     },
   ): Promise<Activity[]> {
-    const { offset = 0, limit = 30, type } = options ?? {};
+    const {
+      offset = 0,
+      limit = 30,
+      type,
+      startDate,
+      endDate,
+      orderBy = OrderBy.DATE,
+      orderDirection = OrderDirection.DESC,
+    } = options ?? {};
+
+    if (startDate && endDate && startDate > endDate) {
+      throw new BadRequestException('startDate must be before or equal to endDate');
+    }
+
+    const where: Prisma.ActivityWhereInput = {
+      userId,
+      ...(type && { type }),
+      ...((startDate || endDate) && {
+        startDate: {
+          ...(startDate && { gte: startDate }),
+          ...(endDate && { lte: endDate }),
+        },
+      }),
+    };
+
+    const orderByFieldMap: Record<OrderBy, keyof Prisma.ActivityOrderByWithRelationInput> = {
+      [OrderBy.DATE]: 'startDate',
+      [OrderBy.DISTANCE]: 'distance',
+      [OrderBy.DURATION]: 'movingTime',
+    };
+
+    const sortField = orderByFieldMap[orderBy];
+    const sortDirection = orderDirection.toLowerCase() as 'asc' | 'desc';
 
     const prismaActivities = await this.prisma.activity.findMany({
-      where: {
-        userId,
-        ...(type && { type }),
-      },
-      orderBy: { startDate: 'desc' },
+      where,
+      orderBy: { [sortField]: sortDirection },
       skip: offset,
       take: limit,
     });
