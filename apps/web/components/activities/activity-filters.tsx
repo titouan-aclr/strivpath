@@ -1,17 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useTranslations } from 'next-intl';
-import { Filter } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { ActivityDateRangeFilter } from './activity-date-range-filter';
-import { SPORT_TYPE_CONFIG, SORT_OPTIONS } from '@/lib/activities/constants';
-import type { ActivityFilter } from '@/lib/activities/types';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Sheet, SheetContent, SheetFooter, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import type { ActivityType } from '@/gql/graphql';
+import { SORT_OPTIONS, SPORT_TYPE_CONFIG } from '@/lib/activities/constants';
+import type { ActivityFilter } from '@/lib/activities/types';
+import { Filter } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { ActivityDateRangeFilter } from './activity-date-range-filter';
 
 interface ActivityFiltersProps {
   filter: ActivityFilter;
@@ -61,56 +61,9 @@ function ActivityFiltersDesktop({ filter, onFilterChange }: ActivityFiltersProps
   };
 
   return (
-    <div className="space-y-4">
-      <div>
-        <Label className="mb-3 block">{t('sportType.label')}</Label>
-        <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label={t('sportType.label')}>
-          <Badge
-            variant={!filter.type ? 'default' : 'outline'}
-            className="cursor-pointer"
-            onClick={() => onFilterChange({ ...filter, type: undefined })}
-            role="radio"
-            aria-checked={!filter.type}
-            tabIndex={0}
-            onKeyDown={e => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                onFilterChange({ ...filter, type: undefined });
-              }
-            }}
-          >
-            {t('sportType.all')}
-          </Badge>
-
-          {Object.entries(SPORT_TYPE_CONFIG).map(([sportType, config]) => {
-            const Icon = config.icon;
-            const isSelected = (filter.type as string) === sportType;
-            return (
-              <Badge
-                key={sportType}
-                variant={isSelected ? 'default' : 'outline'}
-                className="cursor-pointer"
-                onClick={() => onFilterChange({ ...filter, type: sportType as ActivityType })}
-                role="radio"
-                aria-checked={isSelected}
-                tabIndex={0}
-                onKeyDown={e => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.preventDefault();
-                    onFilterChange({ ...filter, type: sportType as ActivityType });
-                  }
-                }}
-              >
-                <Icon className="h-4 w-4 mr-1" aria-hidden="true" />
-                {tSport(config.label)}
-              </Badge>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="flex gap-4 flex-wrap">
-        <div className="flex-1 min-w-[200px]">
+    <div className="space-y-3">
+      <div className="flex items-end gap-4 flex-wrap">
+        <div className="min-w-[200px]">
           <Label className="mb-3 block">{t('dateRange.label')}</Label>
           <ActivityDateRangeFilter
             startDate={filter.startDate}
@@ -119,7 +72,54 @@ function ActivityFiltersDesktop({ filter, onFilterChange }: ActivityFiltersProps
           />
         </div>
 
-        <div className="flex-1 min-w-[200px]">
+        <div className="flex-1 min-w-[280px]">
+          <Label className="mb-3 block">{t('sportType.label')}</Label>
+          <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label={t('sportType.label')}>
+            <Badge
+              variant={!filter.type ? 'default' : 'outline'}
+              className="cursor-pointer py-1.5"
+              onClick={() => onFilterChange({ ...filter, type: undefined })}
+              role="radio"
+              aria-checked={!filter.type}
+              tabIndex={0}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  onFilterChange({ ...filter, type: undefined });
+                }
+              }}
+            >
+              {t('sportType.all')}
+            </Badge>
+
+            {Object.entries(SPORT_TYPE_CONFIG).map(([sportType, config]) => {
+              const Icon = config.icon;
+              const isSelected = (filter.type as string) === sportType;
+              return (
+                <Badge
+                  key={sportType}
+                  variant={isSelected ? 'default' : 'outline'}
+                  className="cursor-pointer py-1.5"
+                  onClick={() => onFilterChange({ ...filter, type: sportType as ActivityType })}
+                  role="radio"
+                  aria-checked={isSelected}
+                  tabIndex={0}
+                  onKeyDown={e => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      onFilterChange({ ...filter, type: sportType as ActivityType });
+                    }
+                  }}
+                >
+                  <Icon className="h-4 w-4 mr-1" aria-hidden="true" />
+                  {tSport(config.label)}
+                </Badge>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="min-w-[180px]">
           <Label className="mb-3 block">{t('sort.label')}</Label>
           <Select value={getCurrentSortValue()} onValueChange={handleSortChange}>
             <SelectTrigger className="w-full" aria-label={t('sort.label')}>
@@ -203,7 +203,7 @@ function ActivityFiltersMobile({ filter, onFilterChange }: ActivityFiltersProps)
               <div className="flex gap-2 flex-wrap" role="radiogroup" aria-label={t('sportType.label')}>
                 <Badge
                   variant={!tempFilter.type ? 'default' : 'outline'}
-                  className="cursor-pointer"
+                  className="cursor-pointer py-1.5"
                   onClick={() => setTempFilter({ ...tempFilter, type: undefined })}
                   role="radio"
                   aria-checked={!tempFilter.type}
@@ -218,7 +218,7 @@ function ActivityFiltersMobile({ filter, onFilterChange }: ActivityFiltersProps)
                     <Badge
                       key={sportType}
                       variant={isSelected ? 'default' : 'outline'}
-                      className="cursor-pointer"
+                      className="cursor-pointer py-1.5"
                       onClick={() => setTempFilter({ ...tempFilter, type: sportType as ActivityType })}
                       role="radio"
                       aria-checked={isSelected}
@@ -257,7 +257,7 @@ function ActivityFiltersMobile({ filter, onFilterChange }: ActivityFiltersProps)
             </div>
           </div>
 
-          <SheetFooter className="mt-6">
+          <SheetFooter className="mt-6 gap-3">
             <Button variant="outline" onClick={handleClear} className="flex-1">
               {t('clear')}
             </Button>
