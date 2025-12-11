@@ -3,14 +3,26 @@
 # ------------------------------------------------------
 
 input ActivitiesFilterInput {
+  """Filter activities up to this date"""
+  endDate: DateTime
+
   """Maximum number of items to return"""
   limit: Int
 
   """Number of items to skip"""
   offset: Int
 
+  """Field to sort by"""
+  orderBy: OrderBy = DATE
+
+  """Sort direction"""
+  orderDirection: OrderDirection = DESC
+
+  """Filter activities starting from this date"""
+  startDate: DateTime
+
   """Filter by activity type"""
-  type: String
+  type: ActivityType
 }
 
 type Activity {
@@ -37,6 +49,43 @@ type Activity {
   type: String!
   updatedAt: DateTime!
   userId: Int!
+}
+
+"""Types of activities supported by Strava"""
+enum ActivityType {
+  ALPINE_SKI
+  BACKCOUNTRY_SKI
+  CANOE
+  CROSSFIT
+  ELLIPTICAL
+  GOLF
+  HANDCYCLE
+  HIKE
+  INLINE_SKATE
+  KAYAK
+  KITESURF
+  NORDIC_SKI
+  RIDE
+  ROCK_CLIMB
+  ROLLER_SKI
+  ROWING
+  RUN
+  SNOWBOARD
+  SNOWSHOE
+  SOCCER
+  STAIR_STEPPER
+  STAND_UP_PADDLING
+  SURFING
+  SWIM
+  VELOMOBILE
+  VIRTUAL_RIDE
+  VIRTUAL_RUN
+  WALK
+  WEIGHT_TRAINING
+  WHEELCHAIR
+  WINDSURF
+  WORKOUT
+  YOGA
 }
 
 type AuthResponse {
@@ -71,6 +120,19 @@ type Mutation {
 
   """Update user preferences (sports, locale, theme)"""
   updateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
+}
+
+"""Field to order activities by"""
+enum OrderBy {
+  DATE
+  DISTANCE
+  DURATION
+}
+
+"""Sort direction for activity ordering"""
+enum OrderDirection {
+  ASC
+  DESC
 }
 
 type Query {

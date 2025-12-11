@@ -29,7 +29,7 @@ export function createApolloClient() {
             activities: {
               keyArgs: ['filter', ['type']],
               merge(existing: unknown[] = [], incoming: unknown[]): unknown[] {
-                return [...existing, ...incoming];
+                return existing.length > 0 ? [...existing, ...incoming] : incoming;
               },
             },
           },

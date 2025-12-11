@@ -25,6 +25,72 @@
       "swimming": "Swimming"
     }
   },
+  "activities": {
+    "page": {
+      "title": "Activities",
+      "description": "View and analyze all your activities"
+    },
+    "sportTypes": {
+      "run": "Running",
+      "ride": "Cycling",
+      "swim": "Swimming",
+      "other": "Other"
+    },
+    "card": {
+      "distance": "Distance",
+      "duration": "Duration",
+      "elevation": "Elevation",
+      "pace": "Pace",
+      "speed": "Speed",
+      "kudos": "kudos"
+    },
+    "list": {
+      "empty": {
+        "title": "No activities found",
+        "description": "Try adjusting your filters or date range"
+      },
+      "error": {
+        "title": "Failed to load activities",
+        "description": "Something went wrong while loading your activities. Please try again.",
+        "retry": "Retry"
+      },
+      "loading": "Loading activities...",
+      "loadingMore": "Loading more activities..."
+    },
+    "filters": {
+      "title": "Filters",
+      "showFilters": "Show filters",
+      "apply": "Apply",
+      "clear": "Clear filters",
+      "sportType": {
+        "label": "Sport Type",
+        "all": "All Sports"
+      },
+      "dateRange": {
+        "label": "Date Range",
+        "quickSelect": "Quick Select",
+        "customRange": "Custom Range",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "last7Days": "Last 7 days",
+        "last30Days": "Last 30 days",
+        "last90Days": "Last 90 days",
+        "thisYear": "This year",
+        "allTime": "All time"
+      },
+      "sort": {
+        "label": "Sort by"
+      }
+    },
+    "sort": {
+      "dateDesc": "Newest first",
+      "dateAsc": "Oldest first",
+      "distanceDesc": "Longest distance",
+      "distanceAsc": "Shortest distance",
+      "durationDesc": "Longest duration",
+      "durationAsc": "Shortest duration"
+    }
+  },
   "layout": {
     "userMenu": {
       "profile": "Profile",
