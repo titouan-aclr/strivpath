@@ -47,7 +47,7 @@ export function ActivityCard({ activity, onClick }: ActivityCardProps) {
       tabIndex={onClick ? 0 : -1}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={cn('transition-all', onClick && 'cursor-pointer hover:shadow-lg hover:border-primary/50')}
+      className={cn('transition-all', onClick && 'cursor-pointer hover:shadow-lg hover:border-strava-orange/50')}
       aria-label={
         onClick
           ? `${activity.name} - ${formatDate(activity.startDate)} - ${formatDistance(activity.distance)}`
@@ -56,8 +56,8 @@ export function ActivityCard({ activity, onClick }: ActivityCardProps) {
     >
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className={cn('p-2 rounded-lg', sportConfig.color)} aria-hidden="true">
-            <Icon className="h-5 w-5" />
+          <div className="p-2 rounded-lg bg-strava-orange/10" aria-hidden="true">
+            <Icon className="h-5 w-5 text-strava-orange" />
           </div>
 
           <div className="flex-1 min-w-0">
