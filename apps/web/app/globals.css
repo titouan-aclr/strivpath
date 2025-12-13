@@ -184,9 +184,38 @@
 
 .dark .bg-pattern-topo-subtle::before {
   filter: invert(1);
+  opacity: 0.12;
 }
 
 .bg-pattern-topo-subtle > * {
+  position: relative;
+  z-index: 1;
+}
+
+.bg-pattern-topo-bottom {
+  position: relative;
+}
+
+.bg-pattern-topo-bottom::before {
+  content: '';
+  position: absolute;
+  inset: 0 -1rem 0 -1rem;
+  background-image: url('/topographic-pattern-bottom.svg');
+  background-size: 100% auto;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  opacity: 0.2;
+  pointer-events: none;
+  z-index: 0;
+  filter: grayscale(100%) brightness(0);
+}
+
+.dark .bg-pattern-topo-bottom::before {
+  filter: invert(1);
+  opacity: 0.12;
+}
+
+.bg-pattern-topo-bottom > * {
   position: relative;
   z-index: 1;
 }
