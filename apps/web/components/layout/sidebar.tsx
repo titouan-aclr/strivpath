@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { UserMenu } from './user-menu';
+import { cn } from '@/lib/utils';
 
 const NAV_ITEMS = [
   { label: 'navigation.dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -42,13 +43,21 @@ export function Sidebar() {
 
       <Separator />
 
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex flex-col flex-1 space-y-1 p-4 bg-pattern-topo-bottom">
         {NAV_ITEMS.map(item => {
           const Icon = item.icon;
           const isActive = isActiveRoute(item.href);
 
           return (
-            <Button key={item.href} asChild variant={isActive ? 'secondary' : 'ghost'} className="w-full justify-start">
+            <Button
+              key={item.href}
+              asChild
+              variant="ghost"
+              className={cn(
+                'w-full justify-start',
+                isActive && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+              )}
+            >
               <Link href={item.href}>
                 <Icon className="mr-2 h-4 w-4" />
                 {t(item.label)}
@@ -70,11 +79,14 @@ export function Sidebar() {
                 <Button
                   key={sport.href}
                   asChild
-                  variant={isActive ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
+                  variant="ghost"
+                  className={cn(
+                    'w-full justify-start',
+                    isActive && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+                  )}
                 >
                   <Link href={sport.href}>
-                    <Icon className="mr-2 h-4 w-4" />
+                    <Icon className="mr-2 h-4 w-4" aria-hidden="true" />
                     {t(sport.label)}
                   </Link>
                 </Button>
@@ -85,7 +97,14 @@ export function Sidebar() {
 
         <Separator className="my-4" />
 
-        <Button asChild variant={isActiveRoute('/settings') ? 'secondary' : 'ghost'} className="w-full justify-start">
+        <Button
+          asChild
+          variant="ghost"
+          className={cn(
+            'w-full justify-start',
+            isActiveRoute('/settings') && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+          )}
+        >
           <Link href="/settings">
             <Settings className="mr-2 h-4 w-4" />
             {t('navigation.settings')}

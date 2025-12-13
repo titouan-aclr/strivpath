@@ -19,7 +19,7 @@ export function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const currentStepIndex = STEPS.findIndex(step => pathnameWithoutLocale === step.path);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-pattern-topo-subtle">
       <header className="flex items-center justify-between p-6">
         <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
         <ModeToggle />

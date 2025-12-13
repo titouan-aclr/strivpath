@@ -22,17 +22,17 @@ export interface SportTypeConfig {
 export const SPORT_TYPE_CONFIG: Record<SportType, SportTypeConfig> = {
   [SportType.Run]: {
     icon: Footprints,
-    color: 'text-blue-500',
+    color: 'text-strava-orange',
     label: 'activities.sportTypes.run',
   },
   [SportType.Ride]: {
     icon: Bike,
-    color: 'text-green-500',
+    color: 'text-strava-orange',
     label: 'activities.sportTypes.ride',
   },
   [SportType.Swim]: {
     icon: Waves,
-    color: 'text-cyan-500',
+    color: 'text-strava-orange',
     label: 'activities.sportTypes.swim',
   },
 };
