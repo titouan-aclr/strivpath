@@ -48,7 +48,7 @@ export function SyncStatusIndicator({ stage, currentStage, status }: SyncStatusI
         className={cn(
           'flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200',
           state === 'pending' && 'bg-muted text-muted-foreground',
-          state === 'active' && 'bg-primary text-primary-foreground animate-pulse-slow',
+          state === 'active' && 'bg-strava-orange text-white animate-pulse-slow',
           state === 'completed' && 'bg-green-500 text-white',
           state === 'failed' && 'bg-destructive text-destructive-foreground',
         )}
