@@ -30,7 +30,7 @@ describe('SyncStatusIndicator', () => {
       />,
     );
 
-    const icon = container.querySelector('.bg-primary');
+    const icon = container.querySelector('.bg-strava-orange');
     expect(icon).toBeInTheDocument();
   });
 

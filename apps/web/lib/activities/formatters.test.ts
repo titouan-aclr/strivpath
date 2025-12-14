@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest';
-import { formatDistance, formatDuration, formatPace, formatElevation, formatDate, formatTime } from './formatters';
+import {
+  formatDistance,
+  formatDuration,
+  formatPace,
+  formatElevation,
+  formatDate,
+  formatTime,
+  formatCalories,
+  formatAltitudeRange,
+  formatWatts,
+  formatSplitPace,
+} from './formatters';
 import { SportType } from '@/gql/graphql';
 
 describe('formatDistance', () => {
@@ -276,5 +287,118 @@ describe('formatTime', () => {
   it('should respect locale for time formatting', () => {
     const result = formatTime(testDate, 'en-US');
     expect(result).toMatch(/\d{1,2}:\d{2}/);
+  });
+});
+
+describe('formatCalories', () => {
+  it('should return em dash for null input', () => {
+    expect(formatCalories(null)).toBe('—');
+  });
+
+  it('should return em dash for undefined input', () => {
+    expect(formatCalories(undefined)).toBe('—');
+  });
+
+  it('should return em dash for NaN input', () => {
+    expect(formatCalories(NaN)).toBe('—');
+  });
+
+  it('should format zero calories', () => {
+    expect(formatCalories(0)).toBe('0 kcal');
+  });
+
+  it('should format calories as rounded integer', () => {
+    expect(formatCalories(245.4)).toBe('245 kcal');
+    expect(formatCalories(245.6)).toBe('246 kcal');
+    expect(formatCalories(500)).toBe('500 kcal');
+  });
+
+  it('should format large values with thousand separators', () => {
+    const result = formatCalories(1500);
+    expect(result).toMatch(/1[\s,]500 kcal/);
+  });
+});
+
+describe('formatAltitudeRange', () => {
+  it('should return em dash when high is null', () => {
+    expect(formatAltitudeRange(null, 100)).toBe('—');
+  });
+
+  it('should return em dash when low is null', () => {
+    expect(formatAltitudeRange(500, null)).toBe('—');
+  });
+
+  it('should return em dash when both are null', () => {
+    expect(formatAltitudeRange(null, null)).toBe('—');
+  });
+
+  it('should format altitude range correctly', () => {
+    expect(formatAltitudeRange(500, 100)).toBe('100 m → 500 m');
+  });
+
+  it('should round decimal values', () => {
+    expect(formatAltitudeRange(500.6, 100.4)).toBe('100 m → 501 m');
+  });
+
+  it('should handle same high and low values', () => {
+    expect(formatAltitudeRange(250, 250)).toBe('250 m → 250 m');
+  });
+});
+
+describe('formatWatts', () => {
+  it('should return em dash for null input', () => {
+    expect(formatWatts(null)).toBe('—');
+  });
+
+  it('should return em dash for undefined input', () => {
+    expect(formatWatts(undefined)).toBe('—');
+  });
+
+  it('should return em dash for NaN input', () => {
+    expect(formatWatts(NaN)).toBe('—');
+  });
+
+  it('should format zero watts', () => {
+    expect(formatWatts(0)).toBe('0 W');
+  });
+
+  it('should format watts as rounded integer', () => {
+    expect(formatWatts(245.4)).toBe('245 W');
+    expect(formatWatts(245.6)).toBe('246 W');
+    expect(formatWatts(180)).toBe('180 W');
+  });
+
+  it('should format large wattage values', () => {
+    expect(formatWatts(350)).toBe('350 W');
+    const result = formatWatts(1000);
+    expect(result).toMatch(/1[\s,]000 W/);
+  });
+});
+
+describe('formatSplitPace', () => {
+  it('should format running split pace in min/km', () => {
+    const split = { distance: 1000, movingTime: 300 };
+    expect(formatSplitPace(split, SportType.Run)).toBe('5:00 min/km');
+  });
+
+  it('should format cycling split as speed in km/h', () => {
+    const split = { distance: 1000, movingTime: 120 };
+    expect(formatSplitPace(split, SportType.Ride, 'en')).toBe('30.0 km/h');
+  });
+
+  it('should format swimming split pace in min/km', () => {
+    const split = { distance: 100, movingTime: 120 };
+    expect(formatSplitPace(split, SportType.Swim)).toBe('20:00 min/km');
+  });
+
+  it('should handle varying split distances', () => {
+    const split = { distance: 500, movingTime: 150 };
+    expect(formatSplitPace(split, SportType.Run)).toBe('5:00 min/km');
+  });
+
+  it('should respect locale for speed formatting', () => {
+    const split = { distance: 1000, movingTime: 120 };
+    const result = formatSplitPace(split, SportType.Ride, 'en-US');
+    expect(result).toBe('30.0 km/h');
   });
 });
