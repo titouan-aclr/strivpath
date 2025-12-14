@@ -29,18 +29,36 @@ type Activity {
   averageCadence: Float
   averageHeartrate: Float
   averageSpeed: Float
+
+  """Average power in watts"""
+  averageWatts: Float
+
+  """Calories burned"""
+  calories: Float
   createdAt: DateTime!
   deviceWatts: Boolean
   distance: Float!
   elapsedTime: Int!
+
+  """Maximum altitude in meters"""
+  elevHigh: Float
+
+  """Minimum altitude in meters"""
+  elevLow: Float
   hasKudoed: Boolean!
   id: ID!
   kilojoules: Float
   kudosCount: Int!
   maxHeartrate: Float
   maxSpeed: Float
+
+  """Maximum power in watts"""
+  maxWatts: Int
   movingTime: Int!
   name: String!
+
+  """Split data per kilometer"""
+  splits: [Split!]
   startDate: DateTime!
   startDateLocal: DateTime!
   stravaId: BigInt!
@@ -49,6 +67,9 @@ type Activity {
   type: String!
   updatedAt: DateTime!
   userId: Int!
+
+  """Weighted average power in watts"""
+  weightedAverageWatts: Float
 }
 
 """Types of activities supported by Strava"""
@@ -152,6 +173,24 @@ type Query {
   syncStatus: SyncHistory
   userByStravaId(stravaId: Int!): User
   users: [User!]!
+}
+
+"""Split data for a segment of the activity"""
+type Split {
+  """Average speed for this split in m/s"""
+  averageSpeed: Float!
+
+  """Distance of this split in meters"""
+  distance: Float!
+
+  """Elapsed time for this split in seconds"""
+  elapsedTime: Int!
+
+  """Elevation gain/loss in meters"""
+  elevationDifference: Int
+
+  """Moving time for this split in seconds"""
+  movingTime: Int!
 }
 
 """Available sport types for activity tracking"""

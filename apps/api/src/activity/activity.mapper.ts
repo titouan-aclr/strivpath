@@ -1,5 +1,6 @@
 import { Activity as PrismaActivity } from '@prisma/client';
 import { Activity as GraphQLActivity } from './models/activity.model';
+import { Split } from './types/split.type';
 
 export class ActivityMapper {
   static toGraphQL(prismaActivity: PrismaActivity): GraphQLActivity {
@@ -25,6 +26,13 @@ export class ActivityMapper {
       hasKudoed: prismaActivity.hasKudoed,
       kudosCount: prismaActivity.kudosCount,
       averageCadence: prismaActivity.averageCadence ?? undefined,
+      elevHigh: prismaActivity.elevHigh ?? undefined,
+      elevLow: prismaActivity.elevLow ?? undefined,
+      calories: prismaActivity.calories ?? undefined,
+      splits: prismaActivity.splits ? (prismaActivity.splits as unknown as Split[]) : undefined,
+      averageWatts: prismaActivity.averageWatts ?? undefined,
+      weightedAverageWatts: prismaActivity.weightedAverageWatts ?? undefined,
+      maxWatts: prismaActivity.maxWatts ?? undefined,
       createdAt: prismaActivity.createdAt,
       updatedAt: prismaActivity.updatedAt,
     };
