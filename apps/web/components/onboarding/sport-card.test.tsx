@@ -62,7 +62,7 @@ describe('SportCard', () => {
       render(<SportCard {...defaultProps} selected={true} />);
 
       const card = screen.getByRole('button');
-      expect(card).toHaveClass('ring-2', 'ring-primary', 'border-primary');
+      expect(card).toHaveClass('ring-2', 'ring-strava-orange', 'border-strava-orange');
     });
   });
 

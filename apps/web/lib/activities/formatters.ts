@@ -104,3 +104,26 @@ export function formatTime(date: Date | string | null | undefined, locale: strin
     minute: '2-digit',
   }).format(dateObj);
 }
+
+export function formatCalories(calories: number | null | undefined): string {
+  if (calories == null || isNaN(calories)) return '—';
+  return `${Math.round(calories).toLocaleString()} kcal`;
+}
+
+export function formatAltitudeRange(high: number | null | undefined, low: number | null | undefined): string {
+  if (high == null || low == null) return '—';
+  return `${Math.round(low)} m → ${Math.round(high)} m`;
+}
+
+export function formatWatts(watts: number | null | undefined): string {
+  if (watts == null || isNaN(watts)) return '—';
+  return `${Math.round(watts).toLocaleString()} W`;
+}
+
+export function formatSplitPace(
+  split: { distance: number; movingTime: number },
+  sportType: SportType,
+  locale: string = 'en',
+): string {
+  return formatPace(split.distance, split.movingTime, sportType, locale);
+}

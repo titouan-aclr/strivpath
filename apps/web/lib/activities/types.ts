@@ -13,3 +13,18 @@ export interface DateRangePreset {
   label: string;
   getValue: () => { start: Date | undefined; end: Date | undefined };
 }
+
+export interface Split {
+  distance: number;
+  movingTime: number;
+  elapsedTime: number;
+  averageSpeed: number;
+  elevationDifference?: number;
+}
+
+export interface ChartDataPoint {
+  km: number;
+  pace: number;
+  speed: number;
+  label: string;
+}
