@@ -192,6 +192,13 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
+          elevHigh: stravaActivity.elev_high,
+          elevLow: stravaActivity.elev_low,
+          calories: stravaActivity.calories,
+          splits: stravaActivity.splits_metric as unknown as Prisma.InputJsonValue,
+          averageWatts: stravaActivity.average_watts,
+          weightedAverageWatts: stravaActivity.weighted_average_watts,
+          maxWatts: stravaActivity.max_watts,
           raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
         update: {
@@ -213,6 +220,13 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
+          elevHigh: stravaActivity.elev_high,
+          elevLow: stravaActivity.elev_low,
+          calories: stravaActivity.calories,
+          splits: stravaActivity.splits_metric as unknown as Prisma.InputJsonValue,
+          averageWatts: stravaActivity.average_watts,
+          weightedAverageWatts: stravaActivity.weighted_average_watts,
+          maxWatts: stravaActivity.max_watts,
           raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
       });
@@ -342,10 +356,10 @@ export class ActivityService {
     return prismaActivities.map(activity => ActivityMapper.toGraphQL(activity));
   }
 
-  async findById(activityId: number, userId: number): Promise<Activity | null> {
+  async findByStravaId(stravaId: bigint, userId: number): Promise<Activity | null> {
     const prismaActivity = await this.prisma.activity.findFirst({
       where: {
-        id: activityId,
+        stravaId,
         userId,
       },
     });

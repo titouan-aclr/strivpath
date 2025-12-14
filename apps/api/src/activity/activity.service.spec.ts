@@ -551,13 +551,13 @@ describe('ActivityService', () => {
     });
   });
 
-  describe('findById', () => {
-    it('should return activity by id for user', async () => {
-      const activityId = 1;
+  describe('findByStravaId', () => {
+    it('should return activity by stravaId for user', async () => {
+      const stravaId = BigInt(123);
       const userId = 1;
       const mockActivity = {
-        id: activityId,
-        stravaId: BigInt(123),
+        id: 1,
+        stravaId,
         userId,
         name: 'Morning Run',
         type: 'Run',
@@ -584,21 +584,21 @@ describe('ActivityService', () => {
 
       mockPrismaService.activity.findFirst.mockResolvedValue(mockActivity);
 
-      const result = await service.findById(activityId, userId);
+      const result = await service.findByStravaId(stravaId, userId);
 
       expect(prismaService.activity.findFirst).toHaveBeenCalledWith({
-        where: { id: activityId, userId },
+        where: { stravaId, userId },
       });
       expect(result?.name).toBe('Morning Run');
     });
 
     it('should return null if activity not found', async () => {
-      const activityId = 999;
+      const stravaId = BigInt(999);
       const userId = 1;
 
       mockPrismaService.activity.findFirst.mockResolvedValue(null);
 
-      const result = await service.findById(activityId, userId);
+      const result = await service.findByStravaId(stravaId, userId);
 
       expect(result).toBeNull();
     });

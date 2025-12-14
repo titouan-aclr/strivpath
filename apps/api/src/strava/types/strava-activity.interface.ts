@@ -60,4 +60,15 @@ export interface StravaActivitySummary {
   total_photo_count: number;
   has_kudoed: boolean;
   suffer_score?: number;
+  calories?: number;
+  max_watts?: number;
+  splits_metric?: StravaSplit[];
+}
+
+export interface StravaSplit {
+  distance: number;
+  moving_time: number;
+  elapsed_time: number;
+  average_speed: number;
+  elevation_difference?: number;
 }

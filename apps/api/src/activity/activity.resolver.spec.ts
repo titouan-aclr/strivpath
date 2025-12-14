@@ -17,7 +17,7 @@ describe('ActivityResolver', () => {
   const mockActivityService = {
     syncActivities: jest.fn(),
     findAll: jest.fn(),
-    findById: jest.fn(),
+    findByStravaId: jest.fn(),
   };
 
   const mockSyncHistoryService = {
@@ -120,21 +120,21 @@ describe('ActivityResolver', () => {
   });
 
   describe('activity', () => {
-    it('should return a single activity by id', async () => {
-      const activityId = 1;
-      mockActivityService.findById.mockResolvedValue(mockActivity);
+    it('should return a single activity by stravaId', async () => {
+      const stravaId = '123';
+      mockActivityService.findByStravaId.mockResolvedValue(mockActivity);
 
-      const result = await resolver.activity(mockTokenPayload, activityId);
+      const result = await resolver.activity(mockTokenPayload, stravaId);
 
-      expect(activityService.findById).toHaveBeenCalledWith(activityId, mockTokenPayload.sub);
+      expect(activityService.findByStravaId).toHaveBeenCalledWith(BigInt(stravaId), mockTokenPayload.sub);
       expect(result).toEqual(mockActivity);
     });
 
     it('should return null if activity not found', async () => {
-      const activityId = 999;
-      mockActivityService.findById.mockResolvedValue(null);
+      const stravaId = '999';
+      mockActivityService.findByStravaId.mockResolvedValue(null);
 
-      const result = await resolver.activity(mockTokenPayload, activityId);
+      const result = await resolver.activity(mockTokenPayload, stravaId);
 
       expect(result).toBeNull();
     });
