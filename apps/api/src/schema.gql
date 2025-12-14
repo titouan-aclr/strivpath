@@ -139,8 +139,8 @@ type Query {
   """Get activities with optional filtering and pagination"""
   activities(filter: ActivitiesFilterInput): [Activity!]!
 
-  """Get a single activity by ID"""
-  activity(id: Int!): Activity
+  """Get a single activity by Strava ID"""
+  activity(stravaId: String!): Activity
 
   """Get current authenticated user"""
   currentUser: User

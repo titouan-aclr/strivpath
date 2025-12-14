@@ -77,6 +77,13 @@ model Activity {
   hasKudoed            Boolean  @default(false)
   kudosCount           Int      @default(0)
   averageCadence       Float?
+  elevHigh             Float?
+  elevLow              Float?
+  calories             Float?
+  splits               Json?
+  averageWatts         Float?
+  weightedAverageWatts Float?
+  maxWatts             Int?
   raw                  Json
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
