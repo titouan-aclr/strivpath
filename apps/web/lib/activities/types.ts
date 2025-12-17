@@ -19,7 +19,7 @@ export interface Split {
   movingTime: number;
   elapsedTime: number;
   averageSpeed: number;
-  elevationDifference?: number;
+  elevationDifference?: number | null;
 }
 
 export interface ChartDataPoint {
