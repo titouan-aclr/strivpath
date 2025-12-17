@@ -89,6 +89,29 @@
       "distanceAsc": "Shortest distance",
       "durationDesc": "Longest duration",
       "durationAsc": "Shortest duration"
+    },
+    "detail": {
+      "stats": {
+        "distance": "Distance",
+        "duration": "Duration",
+        "elevation": "Elevation",
+        "pace": "Pace",
+        "speed": "Speed",
+        "elapsed": "Elapsed",
+        "avgHr": "Avg Heart Rate",
+        "maxHr": "Max Heart Rate",
+        "cadence": "Cadence",
+        "altitude": "Altitude Range",
+        "calories": "Calories",
+        "power": "Power"
+      },
+      "splits": {
+        "title": "Splits Analysis",
+        "description": "Pace per kilometer",
+        "kmLabel": "Kilometer",
+        "paceLabel": "Pace (min/km)",
+        "speedLabel": "Speed (km/h)"
+      }
     }
   },
   "layout": {
