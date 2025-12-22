@@ -192,19 +192,19 @@ type Query {
 """Split data for a segment of the activity"""
 type Split {
   """Average speed for this split in m/s"""
-  averageSpeed: Float!
+  averageSpeed: Float
 
   """Distance of this split in meters"""
-  distance: Float!
+  distance: Float
 
   """Elapsed time for this split in seconds"""
-  elapsedTime: Int!
+  elapsedTime: Int
 
   """Elevation gain/loss in meters"""
-  elevationDifference: Int
+  elevationDifference: Float
 
   """Moving time for this split in seconds"""
-  movingTime: Int!
+  movingTime: Int
 }
 
 """Available sport types for activity tracking"""

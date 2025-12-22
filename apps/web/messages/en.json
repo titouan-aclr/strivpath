@@ -125,9 +125,13 @@
       "splits": {
         "title": "Splits Analysis",
         "description": "Pace evolution per kilometer",
+        "loading": "Loading splits data...",
         "kmLabel": "Kilometer",
         "paceLabel": "Pace (min/km)",
         "speedLabel": "Speed (km/h)"
+      },
+      "description": {
+        "title": "Description"
       },
       "sportTypes": {
         "run": "Run",

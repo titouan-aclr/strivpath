@@ -1,8 +1,8 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useQuery } from '@/lib/graphql';
-import { ActivityDocument, ActivityDetailFragmentDoc } from '@/gql/graphql';
+import { useMemo, useEffect } from 'react';
+import { useQuery, useMutation } from '@/lib/graphql';
+import { ActivityDocument, ActivityDetailFragmentDoc, FetchActivityDetailsDocument } from '@/gql/graphql';
 import { getFragmentData } from '@/gql/fragment-masking';
 import type { ActivityDetail } from './activity-types';
 
@@ -16,6 +16,8 @@ interface UseActivityDetailResult {
   error: Error | undefined;
   refetch: () => Promise<unknown>;
   isValidId: boolean;
+  detailsLoading: boolean;
+  detailsLoaded: boolean;
 }
 
 export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseActivityDetailResult {
@@ -35,17 +37,34 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
     nextFetchPolicy: 'cache-and-network',
   });
 
+  const [fetchDetails, { loading: loadingDetails }] = useMutation(FetchActivityDetailsDocument, {
+    refetchQueries: ['Activity'],
+    awaitRefetchQueries: true,
+  });
+
   const activity = useMemo(() => {
     if (!data?.activity) return null;
 
     return getFragmentData(ActivityDetailFragmentDoc, data.activity) as ActivityDetail;
   }, [data?.activity]);
 
+  const shouldFetchDetails = activity && !activity.detailsFetched && isValidId;
+
+  useEffect(() => {
+    if (shouldFetchDetails && !loadingDetails) {
+      void fetchDetails({
+        variables: { stravaId },
+      });
+    }
+  }, [shouldFetchDetails, loadingDetails, fetchDetails, stravaId]);
+
   return {
     activity,
-    loading,
+    loading: loading || loadingDetails,
     error: error as Error | undefined,
     refetch,
     isValidId,
+    detailsLoading: loadingDetails,
+    detailsLoaded: activity?.detailsFetched ?? false,
   };
 }

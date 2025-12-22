@@ -1,0 +1,5 @@
+mutation FetchActivityDetails($stravaId: BigInt!) {
+  fetchActivityDetails(stravaId: $stravaId) {
+    ...ActivityDetail
+  }
+}
