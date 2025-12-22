@@ -18,6 +18,7 @@ describe('ActivityResolver', () => {
     syncActivities: jest.fn(),
     findAll: jest.fn(),
     findByStravaId: jest.fn(),
+    fetchActivityDetails: jest.fn(),
   };
 
   const mockSyncHistoryService = {
@@ -46,6 +47,7 @@ describe('ActivityResolver', () => {
     maxSpeed: 4.5,
     hasKudoed: false,
     kudosCount: 0,
+    detailsFetched: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

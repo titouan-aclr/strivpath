@@ -269,4 +269,75 @@ describe('StravaService', () => {
       await expect(service.getActivities(userId)).rejects.toThrow(tokenError);
     });
   });
+
+  describe('getActivityDetail', () => {
+    it('should fetch activity detail from Strava API', async () => {
+      const userId = 1;
+      const activityId = 123456;
+      const mockAccessToken = 'valid-access-token';
+      const mockActivityDetail = {
+        id: activityId,
+        name: 'Morning Run',
+        type: 'Run',
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: '2025-01-01T08:00:00Z',
+        start_date_local: '2025-01-01T09:00:00Z',
+        timezone: 'Europe/Paris',
+        calories: 350,
+        description: 'Great morning run in the park',
+        splits_metric: [
+          {
+            distance: 1000,
+            elapsed_time: 360,
+            moving_time: 360,
+            split: 1,
+            average_speed: 2.78,
+          },
+        ],
+      };
+
+      mockStravaTokenService.getValidAccessToken.mockResolvedValue(mockAccessToken);
+      mockHttpService.get.mockReturnValue(
+        of({
+          data: mockActivityDetail,
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: {} as any,
+        }),
+      );
+
+      const result = await service.getActivityDetail(userId, activityId);
+
+      expect(result).toEqual(mockActivityDetail);
+      expect(stravaTokenService.getValidAccessToken).toHaveBeenCalledWith(userId);
+      expect(httpService.get).toHaveBeenCalledWith(`https://www.strava.com/api/v3/activities/${activityId}`, {
+        headers: { Authorization: `Bearer ${mockAccessToken}` },
+      });
+    });
+
+    it('should refresh token if expired when fetching detail', async () => {
+      const userId = 1;
+      const activityId = 123456;
+      const mockAccessToken = 'refreshed-access-token';
+
+      mockStravaTokenService.getValidAccessToken.mockResolvedValue(mockAccessToken);
+      mockHttpService.get.mockReturnValue(
+        of({
+          data: { id: activityId },
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          config: {} as any,
+        }),
+      );
+
+      await service.getActivityDetail(userId, activityId);
+
+      expect(stravaTokenService.getValidAccessToken).toHaveBeenCalledWith(userId);
+    });
+  });
 });

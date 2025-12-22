@@ -88,6 +88,15 @@ export class Activity {
   @Field(() => Int, { nullable: true, description: 'Maximum power in watts' })
   maxWatts?: number;
 
+  @Field({ nullable: true, description: 'Activity description or notes' })
+  description?: string;
+
+  @Field({ description: 'Whether detailed data has been fetched from Strava' })
+  detailsFetched!: boolean;
+
+  @Field({ nullable: true, description: 'Timestamp when details were fetched' })
+  detailsFetchedAt?: Date;
+
   @Field()
   createdAt!: Date;
 

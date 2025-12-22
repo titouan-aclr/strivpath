@@ -33,6 +33,9 @@ export class ActivityMapper {
       averageWatts: prismaActivity.averageWatts ?? undefined,
       weightedAverageWatts: prismaActivity.weightedAverageWatts ?? undefined,
       maxWatts: prismaActivity.maxWatts ?? undefined,
+      description: prismaActivity.description ?? undefined,
+      detailsFetched: prismaActivity.detailsFetched,
+      detailsFetchedAt: prismaActivity.detailsFetchedAt ?? undefined,
       createdAt: prismaActivity.createdAt,
       updatedAt: prismaActivity.updatedAt,
     };

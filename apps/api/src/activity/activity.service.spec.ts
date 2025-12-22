@@ -25,11 +25,13 @@ describe('ActivityService', () => {
       findMany: jest.fn(),
       findFirst: jest.fn(),
       upsert: jest.fn(),
+      update: jest.fn(),
     },
   };
 
   const mockStravaService = {
     getActivities: jest.fn(),
+    getActivityDetail: jest.fn(),
   };
 
   const mockSyncHistoryService = {
@@ -601,6 +603,154 @@ describe('ActivityService', () => {
       const result = await service.findByStravaId(stravaId, userId);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('fetchActivityDetails', () => {
+    it('should fetch and store activity details from Strava', async () => {
+      const userId = 1;
+      const stravaId = BigInt(123456);
+      const mockExistingActivity = {
+        id: 1,
+        stravaId,
+        userId,
+        name: 'Morning Run',
+        type: 'Run',
+        distance: 5000,
+        movingTime: 1800,
+        elapsedTime: 1900,
+        totalElevationGain: 50,
+        startDate: new Date(),
+        startDateLocal: new Date(),
+        timezone: 'Europe/Paris',
+        detailsFetched: false,
+        detailsFetchedAt: null,
+        calories: null,
+        splits: null,
+        description: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+      const mockStravaDetail = {
+        id: Number(stravaId),
+        name: 'Morning Run',
+        type: 'Run',
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: '2025-01-01T08:00:00Z',
+        start_date_local: '2025-01-01T09:00:00Z',
+        timezone: 'Europe/Paris',
+        calories: 350,
+        description: 'Great morning run',
+        splits_metric: [
+          {
+            distance: 1000,
+            elapsed_time: 360,
+            moving_time: 360,
+            split: 1,
+            average_speed: 2.78,
+          },
+        ],
+      };
+      const mockUpdatedActivity = {
+        ...mockExistingActivity,
+        calories: 350,
+        description: 'Great morning run',
+        splits: mockStravaDetail.splits_metric,
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockExistingActivity);
+      mockStravaService.getActivityDetail.mockResolvedValue(mockStravaDetail);
+      mockPrismaService.activity.update.mockResolvedValue(mockUpdatedActivity);
+
+      const result = await service.fetchActivityDetails(userId, stravaId);
+
+      expect(prismaService.activity.findFirst).toHaveBeenCalledWith({
+        where: { stravaId, userId },
+      });
+      expect(stravaService.getActivityDetail).toHaveBeenCalledWith(userId, Number(stravaId));
+      expect(prismaService.activity.update).toHaveBeenCalledWith({
+        where: { id: mockExistingActivity.id },
+        data: {
+          calories: mockStravaDetail.calories,
+          splits: mockStravaDetail.splits_metric,
+          description: mockStravaDetail.description,
+          detailsFetched: true,
+          detailsFetchedAt: expect.any(Date),
+        },
+      });
+      expect(result.calories).toBe(350);
+      expect(result.description).toBe('Great morning run');
+    });
+
+    it('should return cached details if already fetched', async () => {
+      const userId = 1;
+      const stravaId = BigInt(123456);
+      const mockExistingActivity = {
+        id: 1,
+        stravaId,
+        userId,
+        name: 'Morning Run',
+        type: 'Run',
+        distance: 5000,
+        movingTime: 1800,
+        elapsedTime: 1900,
+        totalElevationGain: 50,
+        startDate: new Date(),
+        startDateLocal: new Date(),
+        timezone: 'Europe/Paris',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+        calories: 350,
+        description: 'Great morning run',
+        splits: [{ distance: 1000, elapsed_time: 360 }],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockExistingActivity);
+
+      const result = await service.fetchActivityDetails(userId, stravaId);
+
+      expect(prismaService.activity.findFirst).toHaveBeenCalledWith({
+        where: { stravaId, userId },
+      });
+      expect(stravaService.getActivityDetail).not.toHaveBeenCalled();
+      expect(prismaService.activity.update).not.toHaveBeenCalled();
+      expect(result.calories).toBe(350);
+    });
+
+    it('should throw BadRequestException if activity not found', async () => {
+      const userId = 1;
+      const stravaId = BigInt(999999);
+
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+
+      await expect(service.fetchActivityDetails(userId, stravaId)).rejects.toThrow(BadRequestException);
+      await expect(service.fetchActivityDetails(userId, stravaId)).rejects.toThrow(
+        `Activity with stravaId ${stravaId} not found`,
+      );
+    });
+
+    it('should handle Strava API errors', async () => {
+      const userId = 1;
+      const stravaId = BigInt(123456);
+      const mockExistingActivity = {
+        id: 1,
+        stravaId,
+        userId,
+        detailsFetched: false,
+      };
+
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockExistingActivity);
+      mockStravaService.getActivityDetail.mockRejectedValue(new Error('Strava API error'));
+
+      await expect(service.fetchActivityDetails(userId, stravaId)).rejects.toThrow('Strava API error');
+      expect(prismaService.activity.update).not.toHaveBeenCalled();
     });
   });
 });
