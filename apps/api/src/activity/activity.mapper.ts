@@ -2,7 +2,25 @@ import { Activity as PrismaActivity } from '@prisma/client';
 import { Activity as GraphQLActivity } from './models/activity.model';
 import { Split } from './types/split.type';
 
+interface StravaSplitRaw {
+  distance?: number;
+  moving_time?: number;
+  elapsed_time?: number;
+  average_speed?: number;
+  elevation_difference?: number;
+}
+
 export class ActivityMapper {
+  private static mapSplit(this: void, rawSplit: StravaSplitRaw): Split {
+    return {
+      distance: rawSplit.distance,
+      movingTime: rawSplit.moving_time,
+      elapsedTime: rawSplit.elapsed_time,
+      averageSpeed: rawSplit.average_speed,
+      elevationDifference: rawSplit.elevation_difference,
+    };
+  }
+
   static toGraphQL(prismaActivity: PrismaActivity): GraphQLActivity {
     return {
       id: prismaActivity.id,
@@ -29,7 +47,9 @@ export class ActivityMapper {
       elevHigh: prismaActivity.elevHigh ?? undefined,
       elevLow: prismaActivity.elevLow ?? undefined,
       calories: prismaActivity.calories ?? undefined,
-      splits: prismaActivity.splits ? (prismaActivity.splits as unknown as Split[]) : undefined,
+      splits: prismaActivity.splits
+        ? (prismaActivity.splits as unknown as StravaSplitRaw[]).map(ActivityMapper.mapSplit)
+        : undefined,
       averageWatts: prismaActivity.averageWatts ?? undefined,
       weightedAverageWatts: prismaActivity.weightedAverageWatts ?? undefined,
       maxWatts: prismaActivity.maxWatts ?? undefined,

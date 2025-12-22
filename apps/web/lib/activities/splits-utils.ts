@@ -6,26 +6,37 @@ export function prepareSplitsForChart(splits: Split[] | null | undefined, sportT
 
   const isPaceMetric = sportType === SportType.Run || sportType === SportType.Swim;
 
-  return splits.map((split, index) => {
-    const distanceKm = split.distance / 1000;
-    const timeMinutes = split.movingTime / 60;
+  return splits
+    .filter(
+      (split): split is Split & { distance: number; movingTime: number; averageSpeed: number } =>
+        split.distance != null && split.movingTime != null && split.averageSpeed != null,
+    )
+    .map((split, index) => {
+      const distanceKm = split.distance / 1000;
+      const timeMinutes = split.movingTime / 60;
 
-    const pace = isPaceMetric ? timeMinutes / distanceKm : distanceKm / (split.movingTime / 3600);
+      const pace = isPaceMetric ? timeMinutes / distanceKm : distanceKm / (split.movingTime / 3600);
 
-    return {
-      km: index + 1,
-      pace,
-      speed: split.averageSpeed * 3.6,
-      label: `Km ${index + 1}`,
-    };
-  });
+      return {
+        km: index + 1,
+        pace,
+        speed: split.averageSpeed * 3.6,
+        label: `Km ${index + 1}`,
+      };
+    });
 }
 
 export function calculateAveragePace(splits: Split[]): number {
   if (splits.length === 0) return 0;
 
-  const totalDistance = splits.reduce((sum, split) => sum + split.distance, 0);
-  const totalTime = splits.reduce((sum, split) => sum + split.movingTime, 0);
+  const validSplits = splits.filter(
+    (split): split is Split & { distance: number; movingTime: number } =>
+      split.distance != null && split.movingTime != null,
+  );
+  if (validSplits.length === 0) return 0;
+
+  const totalDistance = validSplits.reduce((sum, split) => sum + split.distance, 0);
+  const totalTime = validSplits.reduce((sum, split) => sum + split.movingTime, 0);
 
   return totalTime / 60 / (totalDistance / 1000);
 }

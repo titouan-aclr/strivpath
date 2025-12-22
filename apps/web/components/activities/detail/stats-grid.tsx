@@ -3,6 +3,8 @@
 import { useTranslations } from 'next-intl';
 import { Route, Timer, TrendingUp, Gauge, Heart, Activity, Footprints, Mountain, Flame, Zap } from 'lucide-react';
 import { StatCard } from './stat-card';
+import { Card } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   formatDistance,
   formatDuration,
@@ -71,11 +73,12 @@ export function StatsGrid({ activity }: StatsGridProps) {
         value: formatAltitudeRange(activity.elevHigh, activity.elevLow),
         icon: Mountain,
       },
-    activity.calories && {
-      label: t('stats.calories'),
-      value: formatCalories(activity.calories),
-      icon: Flame,
-    },
+    activity.detailsFetched &&
+      activity.calories && {
+        label: t('stats.calories'),
+        value: formatCalories(activity.calories),
+        icon: Flame,
+      },
     activity.averageWatts && {
       label: t('stats.power'),
       value: formatWatts(activity.averageWatts),
@@ -89,6 +92,8 @@ export function StatsGrid({ activity }: StatsGridProps) {
     subValue?: string;
   }>;
 
+  const showCaloriesSkeleton = !activity.detailsFetched;
+
   return (
     <div className="space-y-6">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -97,11 +102,17 @@ export function StatsGrid({ activity }: StatsGridProps) {
         ))}
       </div>
 
-      {secondaryStats.length > 0 && (
+      {(secondaryStats.length > 0 || showCaloriesSkeleton) && (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {secondaryStats.map(stat => (
             <StatCard key={stat.label} {...stat} />
           ))}
+          {showCaloriesSkeleton && (
+            <Card className="p-6">
+              <Skeleton className="h-4 w-20 mb-2" />
+              <Skeleton className="h-8 w-32" />
+            </Card>
+          )}
         </div>
       )}
     </div>

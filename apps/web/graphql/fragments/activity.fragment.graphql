@@ -36,6 +36,9 @@ fragment ActivityDetail on Activity {
     averageSpeed
     elevationDifference
   }
+  description
+  detailsFetched
+  detailsFetchedAt
   createdAt
   updatedAt
 }

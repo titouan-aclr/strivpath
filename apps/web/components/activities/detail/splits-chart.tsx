@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from 'recharts';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
 import { prepareSplitsForChart, formatPaceValue } from '@/lib/activities/splits-utils';
 import { SportType } from '@/gql/graphql';
@@ -14,6 +15,20 @@ interface SplitsChartProps {
 
 export function SplitsChart({ activity }: SplitsChartProps) {
   const t = useTranslations('activities.detail');
+
+  if (!activity.detailsFetched) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>{t('splits.title')}</CardTitle>
+          <CardDescription>{t('splits.loading')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-[300px] w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!activity.splits || activity.splits.length === 0) {
     return null;

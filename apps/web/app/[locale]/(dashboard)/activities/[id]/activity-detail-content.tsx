@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { ActivityHeader } from '@/components/activities/detail/activity-header';
 import { StatsGrid } from '@/components/activities/detail/stats-grid';
 import { SplitsChart } from '@/components/activities/detail/splits-chart';
+import { ActivityDescription } from '@/components/activities/detail/activity-description';
 import { ActivityDetailSkeleton } from '@/components/activities/detail/activity-detail-skeleton';
 import { useActivityDetail } from '@/lib/activities/use-activity-detail';
 
@@ -107,6 +108,7 @@ export function ActivityDetailContent({ stravaId }: ActivityDetailContentProps) 
 
       <ActivityHeader activity={activity} />
       <StatsGrid activity={activity} />
+      <ActivityDescription activity={activity} />
       <SplitsChart activity={activity} />
     </div>
   );
