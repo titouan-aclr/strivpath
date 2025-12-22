@@ -85,6 +85,9 @@ model Activity {
   weightedAverageWatts Float?
   maxWatts             Int?
   raw                  Json
+  description          String?
+  detailsFetched       Boolean  @default(false)
+  detailsFetchedAt     DateTime?
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
