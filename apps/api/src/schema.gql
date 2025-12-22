@@ -36,6 +36,15 @@ type Activity {
   """Calories burned"""
   calories: Float
   createdAt: DateTime!
+
+  """Activity description or notes"""
+  description: String
+
+  """Whether detailed data has been fetched from Strava"""
+  detailsFetched: Boolean!
+
+  """Timestamp when details were fetched"""
+  detailsFetchedAt: DateTime
   deviceWatts: Boolean
   distance: Float!
   elapsedTime: Int!
@@ -130,6 +139,11 @@ enum LocaleType {
 }
 
 type Mutation {
+  """
+  Fetch detailed activity data from Strava on-demand (calories, splits, description)
+  """
+  fetchActivityDetails(stravaId: BigInt!): Activity!
+
   """Logout and revoke refresh token"""
   logout: Boolean!
 

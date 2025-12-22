@@ -1,5 +1,6 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { GraphQLBigInt } from 'graphql-scalars';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { TokenPayload } from '../auth/types';
@@ -52,5 +53,16 @@ export class ActivityResolver {
   @UseGuards(GqlAuthGuard)
   async syncStatus(@CurrentUser() tokenPayload: TokenPayload): Promise<SyncHistory | null> {
     return this.syncHistoryService.findLatestForUser(tokenPayload.sub);
+  }
+
+  @Mutation(() => Activity, {
+    description: 'Fetch detailed activity data from Strava on-demand (calories, splits, description)',
+  })
+  @UseGuards(GqlAuthGuard)
+  async fetchActivityDetails(
+    @Args('stravaId', { type: () => GraphQLBigInt }) stravaId: bigint,
+    @CurrentUser() tokenPayload: TokenPayload,
+  ): Promise<Activity> {
+    return this.activityService.fetchActivityDetails(tokenPayload.sub, stravaId);
   }
 }

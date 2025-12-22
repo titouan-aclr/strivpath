@@ -70,6 +70,8 @@ describe('ActivityMapper', () => {
         averageWatts: null,
         weightedAverageWatts: null,
         maxWatts: null,
+        description: null,
+        detailsFetchedAt: null,
       });
 
       const result = ActivityMapper.toGraphQL(prismaActivity);
@@ -88,6 +90,8 @@ describe('ActivityMapper', () => {
       expect(result.averageWatts).toBeUndefined();
       expect(result.weightedAverageWatts).toBeUndefined();
       expect(result.maxWatts).toBeUndefined();
+      expect(result.description).toBeUndefined();
+      expect(result.detailsFetchedAt).toBeUndefined();
     });
 
     it('should map numeric fields with correct precision', () => {
@@ -179,6 +183,16 @@ describe('ActivityMapper', () => {
         hasKudoed: false,
         kudosCount: 25,
         averageCadence: 90,
+        elevHigh: 850.0,
+        elevLow: 320.0,
+        calories: 1250.5,
+        averageWatts: 210.0,
+        weightedAverageWatts: 225.0,
+        maxWatts: 750,
+        description: 'Amazing ride through the mountains',
+        detailsFetched: true,
+        detailsFetchedAt: new Date('2024-05-10T10:00:00Z'),
+        splits: [{ distance: 1000, moving_time: 300 }] as any,
         createdAt: new Date('2024-05-10'),
         updatedAt: new Date('2024-05-11'),
       });
@@ -207,6 +221,16 @@ describe('ActivityMapper', () => {
         hasKudoed: false,
         kudosCount: 25,
         averageCadence: 90,
+        elevHigh: 850.0,
+        elevLow: 320.0,
+        calories: 1250.5,
+        splits: [{ distance: 1000, moving_time: 300 }],
+        averageWatts: 210.0,
+        weightedAverageWatts: 225.0,
+        maxWatts: 750,
+        description: 'Amazing ride through the mountains',
+        detailsFetched: true,
+        detailsFetchedAt: new Date('2024-05-10T10:00:00Z'),
         createdAt: new Date('2024-05-10'),
         updatedAt: new Date('2024-05-11'),
       });
@@ -360,6 +384,34 @@ describe('ActivityMapper', () => {
       expect(result.averageWatts).toBe(180.5);
       expect(result.weightedAverageWatts).toBe(195.0);
       expect(result.maxWatts).toBe(650);
+    });
+
+    it('should map detail fields correctly', () => {
+      const prismaActivity = createMockPrismaActivity({
+        description: 'Amazing morning run with great weather',
+        detailsFetched: true,
+        detailsFetchedAt: new Date('2024-05-15T10:30:00Z'),
+      });
+
+      const result = ActivityMapper.toGraphQL(prismaActivity);
+
+      expect(result.description).toBe('Amazing morning run with great weather');
+      expect(result.detailsFetched).toBe(true);
+      expect(result.detailsFetchedAt).toEqual(new Date('2024-05-15T10:30:00Z'));
+    });
+
+    it('should handle detailsFetched false with no description', () => {
+      const prismaActivity = createMockPrismaActivity({
+        description: null,
+        detailsFetched: false,
+        detailsFetchedAt: null,
+      });
+
+      const result = ActivityMapper.toGraphQL(prismaActivity);
+
+      expect(result.description).toBeUndefined();
+      expect(result.detailsFetched).toBe(false);
+      expect(result.detailsFetchedAt).toBeUndefined();
     });
   });
 });
