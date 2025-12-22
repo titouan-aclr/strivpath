@@ -44,7 +44,6 @@ export interface StravaActivitySummary {
   average_speed: number;
   max_speed: number;
   average_cadence?: number;
-  average_temp?: number;
   average_watts?: number;
   weighted_average_watts?: number;
   kilojoules?: number;
@@ -60,15 +59,5 @@ export interface StravaActivitySummary {
   total_photo_count: number;
   has_kudoed: boolean;
   suffer_score?: number;
-  calories?: number;
   max_watts?: number;
-  splits_metric?: StravaSplit[];
-}
-
-export interface StravaSplit {
-  distance: number;
-  moving_time: number;
-  elapsed_time: number;
-  average_speed: number;
-  elevation_difference?: number;
 }
