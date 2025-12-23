@@ -19,9 +19,10 @@ import type { ActivityDetail } from '@/lib/activities/activity-types';
 
 interface StatsGridProps {
   activity: ActivityDetail;
+  detailsLoading: boolean;
 }
 
-export function StatsGrid({ activity }: StatsGridProps) {
+export function StatsGrid({ activity, detailsLoading }: StatsGridProps) {
   const t = useTranslations('activities.detail');
 
   const activityType = activity.type as SportType;
@@ -92,7 +93,7 @@ export function StatsGrid({ activity }: StatsGridProps) {
     subValue?: string;
   }>;
 
-  const showCaloriesSkeleton = !activity.detailsFetched;
+  const showCaloriesSkeleton = detailsLoading;
 
   return (
     <div className="space-y-6">

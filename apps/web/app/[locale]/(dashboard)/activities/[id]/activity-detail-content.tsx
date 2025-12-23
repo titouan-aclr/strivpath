@@ -18,7 +18,8 @@ interface ActivityDetailContentProps {
 
 export function ActivityDetailContent({ stravaId }: ActivityDetailContentProps) {
   const t = useTranslations('activities.detail');
-  const { activity, loading, error, refetch, isValidId } = useActivityDetail({ stravaId });
+  const { activity, loading, error, refetch, isValidId, detailsLoading, detailsError, retryDetails } =
+    useActivityDetail({ stravaId });
 
   if (!isValidId) {
     return (
@@ -107,7 +108,26 @@ export function ActivityDetailContent({ stravaId }: ActivityDetailContentProps) 
       </Button>
 
       <ActivityHeader activity={activity} />
-      <StatsGrid activity={activity} />
+
+      {detailsError && (
+        <Card className="border-warning">
+          <CardContent className="py-4">
+            <div className="flex items-center gap-3">
+              <AlertCircle className="h-5 w-5 text-warning" aria-hidden="true" />
+              <div className="flex-1">
+                <p className="text-sm font-medium">{t('details.error.title')}</p>
+                <p className="text-xs text-muted-foreground">{t('details.error.description')}</p>
+              </div>
+              <Button onClick={retryDetails} variant="outline" size="sm">
+                <RefreshCw className="mr-2 h-4 w-4" />
+                {t('details.error.retry')}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      <StatsGrid activity={activity} detailsLoading={detailsLoading} />
       <ActivityDescription activity={activity} />
       <SplitsChart activity={activity} />
     </div>

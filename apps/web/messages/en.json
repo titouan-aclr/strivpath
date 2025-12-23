@@ -133,6 +133,13 @@
       "description": {
         "title": "Description"
       },
+      "details": {
+        "error": {
+          "title": "Failed to load activity details",
+          "description": "Some details (calories, splits) could not be loaded from Strava.",
+          "retry": "Retry"
+        }
+      },
       "sportTypes": {
         "run": "Run",
         "ride": "Ride",
