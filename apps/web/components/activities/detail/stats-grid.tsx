@@ -25,7 +25,7 @@ interface StatsGridProps {
 export function StatsGrid({ activity, detailsLoading }: StatsGridProps) {
   const t = useTranslations('activities.detail');
 
-  const activityType = activity.type as SportType;
+  const activityType = activity.type.toUpperCase() as SportType;
   const isPaceMetric = activityType === SportType.Run || activityType === SportType.Swim;
 
   const primaryStats = [

@@ -15,7 +15,7 @@ interface ActivityHeaderProps {
 export function ActivityHeader({ activity }: ActivityHeaderProps) {
   const t = useTranslations('activities.detail');
 
-  const activityType = activity.type as SportType;
+  const activityType = activity.type.toUpperCase() as SportType;
   const sportConfig = SPORT_TYPE_CONFIG[activityType];
   const Icon = sportConfig?.icon;
 
@@ -40,7 +40,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
             </span>
           </div>
         </div>
-        <Badge className="bg-strava-orange hover:bg-strava-orange/90">
+        <Badge className="bg-strava-orange hover:bg-strava-orange/90 px-3 py-1.5">
           {t(`sportTypes.${activity.type.toLowerCase()}`)}
         </Badge>
       </div>

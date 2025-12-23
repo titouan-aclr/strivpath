@@ -37,6 +37,9 @@ const mockActivity: ActivityDetail = {
   weightedAverageWatts: null,
   maxWatts: null,
   splits: null,
+  description: null,
+  detailsFetched: true,
+  detailsFetchedAt: new Date('2025-01-15T08:35:00Z'),
   createdAt: new Date('2025-01-15T08:30:00Z'),
   updatedAt: new Date('2025-01-15T08:30:00Z'),
 };
