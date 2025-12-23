@@ -224,7 +224,7 @@ describe('ActivityMapper', () => {
         elevHigh: 850.0,
         elevLow: 320.0,
         calories: 1250.5,
-        splits: [{ distance: 1000, moving_time: 300 }],
+        splits: [{ distance: 1000, movingTime: 300 }],
         averageWatts: 210.0,
         weightedAverageWatts: 225.0,
         maxWatts: 750,
@@ -347,10 +347,10 @@ describe('ActivityMapper', () => {
       expect(result.splits).toHaveLength(2);
       expect(result.splits![0]).toEqual({
         distance: 1000,
-        moving_time: 300,
-        elapsed_time: 305,
-        average_speed: 3.33,
-        elevation_difference: 5,
+        movingTime: 300,
+        elapsedTime: 305,
+        averageSpeed: 3.33,
+        elevationDifference: 5,
       });
     });
 
@@ -412,6 +412,79 @@ describe('ActivityMapper', () => {
       expect(result.description).toBeUndefined();
       expect(result.detailsFetched).toBe(false);
       expect(result.detailsFetchedAt).toBeUndefined();
+    });
+
+    it('should handle null splits gracefully', () => {
+      const prismaActivityWithNullSplits = createMockPrismaActivity({
+        splits: null,
+      });
+
+      const resultNull = ActivityMapper.toGraphQL(prismaActivityWithNullSplits);
+      expect(resultNull.splits).toBeUndefined();
+    });
+
+    it('should handle malformed splits with missing fields', () => {
+      const prismaActivityWithMalformedSplits = createMockPrismaActivity({
+        splits: [{ invalid: 'data' }] as any,
+      });
+
+      const resultMalformed = ActivityMapper.toGraphQL(prismaActivityWithMalformedSplits);
+      expect(resultMalformed.splits).toBeDefined();
+      expect(resultMalformed.splits).toHaveLength(1);
+      expect(resultMalformed.splits![0].distance).toBeUndefined();
+      expect(resultMalformed.splits![0].movingTime).toBeUndefined();
+      expect(resultMalformed.splits![0].elapsedTime).toBeUndefined();
+      expect(resultMalformed.splits![0].averageSpeed).toBeUndefined();
+      expect(resultMalformed.splits![0].elevationDifference).toBeUndefined();
+    });
+
+    it('should transform empty splits array correctly', () => {
+      const prismaActivity = createMockPrismaActivity({
+        splits: [] as any,
+      });
+
+      const result = ActivityMapper.toGraphQL(prismaActivity);
+
+      expect(result.splits).toBeDefined();
+      expect(Array.isArray(result.splits)).toBe(true);
+      expect(result.splits).toHaveLength(0);
+    });
+
+    it('should handle splits with missing optional fields', () => {
+      const minimalSplits = [
+        {
+          distance: 1000,
+          moving_time: 300,
+        },
+        {
+          distance: 1000,
+          moving_time: 310,
+          average_speed: 3.23,
+        },
+      ];
+
+      const prismaActivity = createMockPrismaActivity({
+        splits: minimalSplits as any,
+      });
+
+      const result = ActivityMapper.toGraphQL(prismaActivity);
+
+      expect(result.splits).toBeDefined();
+      expect(result.splits).toHaveLength(2);
+      expect(result.splits![0]).toEqual({
+        distance: 1000,
+        movingTime: 300,
+        elapsedTime: undefined,
+        averageSpeed: undefined,
+        elevationDifference: undefined,
+      });
+      expect(result.splits![1]).toEqual({
+        distance: 1000,
+        movingTime: 310,
+        elapsedTime: undefined,
+        averageSpeed: 3.23,
+        elevationDifference: undefined,
+      });
     });
   });
 });
