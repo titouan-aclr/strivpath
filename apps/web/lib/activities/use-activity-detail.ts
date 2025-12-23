@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useCallback } from 'react';
 import { useQuery, useMutation } from '@/lib/graphql';
 import { ActivityDocument, ActivityDetailFragmentDoc, FetchActivityDetailsDocument } from '@/gql/graphql';
 import { getFragmentData } from '@/gql/fragment-masking';
@@ -18,6 +18,8 @@ interface UseActivityDetailResult {
   isValidId: boolean;
   detailsLoading: boolean;
   detailsLoaded: boolean;
+  detailsError: Error | undefined;
+  retryDetails: () => void;
 }
 
 export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseActivityDetailResult {
@@ -37,7 +39,7 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
     nextFetchPolicy: 'cache-and-network',
   });
 
-  const [fetchDetails, { loading: loadingDetails }] = useMutation(FetchActivityDetailsDocument, {
+  const [fetchDetails, { loading: loadingDetails, error: detailsError }] = useMutation(FetchActivityDetailsDocument, {
     refetchQueries: ['Activity'],
     awaitRefetchQueries: true,
   });
@@ -50,13 +52,21 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
 
   const shouldFetchDetails = activity && !activity.detailsFetched && isValidId;
 
+  const retryDetails = useCallback(() => {
+    if (activity && !activity.detailsFetched && isValidId) {
+      void fetchDetails({
+        variables: { stravaId },
+      });
+    }
+  }, [activity, fetchDetails, isValidId, stravaId]);
+
   useEffect(() => {
     if (shouldFetchDetails && !loadingDetails) {
       void fetchDetails({
         variables: { stravaId },
       });
     }
-  }, [shouldFetchDetails, loadingDetails, fetchDetails, stravaId]);
+  }, [shouldFetchDetails, loadingDetails, fetchDetails]);
 
   return {
     activity,
@@ -66,5 +76,7 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
     isValidId,
     detailsLoading: loadingDetails,
     detailsLoaded: activity?.detailsFetched ?? false,
+    detailsError: detailsError as Error | undefined,
+    retryDetails,
   };
 }
