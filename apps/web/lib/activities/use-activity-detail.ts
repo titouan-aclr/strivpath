@@ -55,7 +55,7 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
   const retryDetails = useCallback(() => {
     if (activity && !activity.detailsFetched && isValidId) {
       void fetchDetails({
-        variables: { stravaId },
+        variables: { stravaId: BigInt(stravaId) },
       });
     }
   }, [activity, fetchDetails, isValidId, stravaId]);
@@ -63,10 +63,10 @@ export function useActivityDetail({ stravaId }: UseActivityDetailOptions): UseAc
   useEffect(() => {
     if (shouldFetchDetails && !loadingDetails) {
       void fetchDetails({
-        variables: { stravaId },
+        variables: { stravaId: BigInt(stravaId) },
       });
     }
-  }, [shouldFetchDetails, loadingDetails, fetchDetails]);
+  }, [shouldFetchDetails, loadingDetails, fetchDetails, stravaId]);
 
   return {
     activity,

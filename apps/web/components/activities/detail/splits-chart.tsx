@@ -34,7 +34,7 @@ export function SplitsChart({ activity }: SplitsChartProps) {
     return null;
   }
 
-  const activityType = activity.type as SportType;
+  const activityType = activity.type.toUpperCase() as SportType;
   const chartData = prepareSplitsForChart(activity.splits, activityType);
   const isPaceMetric = activityType === SportType.Run || activityType === SportType.Swim;
 

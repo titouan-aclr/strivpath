@@ -38,6 +38,13 @@ vi.mock('@/components/activities/detail/activity-detail-skeleton', () => ({
   ActivityDetailSkeleton: () => <div data-testid="skeleton">Loading...</div>,
 }));
 
+const mockUseActivityDetailDefaults = {
+  detailsLoading: false,
+  detailsLoaded: true,
+  detailsError: undefined,
+  retryDetails: vi.fn(),
+};
+
 const mockActivity: ActivityDetail = {
   __typename: 'Activity',
   id: '1',
@@ -67,6 +74,9 @@ const mockActivity: ActivityDetail = {
   weightedAverageWatts: null,
   maxWatts: null,
   splits: null,
+  description: null,
+  detailsFetched: true,
+  detailsFetchedAt: new Date('2025-01-15T08:35:00Z'),
   createdAt: new Date('2025-01-15T08:30:00Z'),
   updatedAt: new Date('2025-01-15T08:30:00Z'),
 };
@@ -85,6 +95,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: false,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="abc" />);
@@ -102,6 +113,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: false,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="-123" />);
@@ -117,6 +129,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: false,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="0" />);
@@ -134,6 +147,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
@@ -153,6 +167,7 @@ describe('ActivityDetailContent', () => {
         error: new Error('Network error'),
         refetch: mockRefetch,
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
@@ -175,6 +190,7 @@ describe('ActivityDetailContent', () => {
         error: new Error('Network error'),
         refetch: mockRefetch,
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
@@ -196,6 +212,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
@@ -216,6 +233,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
@@ -235,6 +253,7 @@ describe('ActivityDetailContent', () => {
         error: undefined,
         refetch: vi.fn(),
         isValidId: true,
+        ...mockUseActivityDetailDefaults,
       });
 
       render(<ActivityDetailContent stravaId="123456" />);
