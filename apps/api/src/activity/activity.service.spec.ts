@@ -753,4 +753,500 @@ describe('ActivityService', () => {
       expect(prismaService.activity.update).not.toHaveBeenCalled();
     });
   });
+
+  describe('syncActivities - Pagination Edge Cases', () => {
+    it('should throw ActivitySyncLimitExceededException when historical sync exceeds MAX_PAGES', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+
+      const mockActivities = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1,
+        type: 'Run',
+        name: `Run ${i + 1}`,
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: new Date().toISOString(),
+        start_date_local: new Date().toISOString(),
+        timezone: 'Europe/Paris',
+      }));
+
+      mockStravaService.getActivities.mockResolvedValue(mockActivities);
+
+      await expect(service.syncActivities(userId)).rejects.toThrow('Activity sync limit exceeded for user 1');
+      await expect(service.syncActivities(userId)).rejects.toThrow('during historical sync');
+    });
+
+    it('should throw ActivitySyncLimitExceededException when recent sync exceeds MAX_PAGES', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+      const mockLastActivity = {
+        id: 1,
+        stravaId: BigInt(100),
+        userId,
+        startDate: new Date('2024-01-01'),
+      };
+      const existingActivities = [{ type: 'Run' }, { type: 'TrailRun' }];
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockLastActivity);
+      mockPrismaService.activity.findMany.mockResolvedValue(existingActivities as any);
+
+      const mockActivities = Array.from({ length: 100 }, (_, i) => ({
+        id: i + 1000,
+        type: 'Run',
+        name: `Run ${i + 1000}`,
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: new Date().toISOString(),
+        start_date_local: new Date().toISOString(),
+        timezone: 'Europe/Paris',
+      }));
+
+      mockStravaService.getActivities.mockResolvedValue(mockActivities);
+
+      await expect(service.syncActivities(userId)).rejects.toThrow('Activity sync limit exceeded for user 1');
+      await expect(service.syncActivities(userId)).rejects.toThrow('during recent sync');
+    });
+
+    it('should handle just under MAX_PAGES limit without error', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+      mockSyncHistoryService.findById.mockResolvedValue({} as any);
+
+      let callCount = 0;
+      mockStravaService.getActivities.mockImplementation(() => {
+        callCount++;
+        if (callCount <= 19) {
+          return Promise.resolve(
+            Array.from({ length: 100 }, (_, i) => ({
+              id: (callCount - 1) * 100 + i + 1,
+              type: 'Run',
+              name: `Run ${i + 1}`,
+              distance: 5000,
+              moving_time: 1800,
+              elapsed_time: 1900,
+              total_elevation_gain: 50,
+              start_date: new Date().toISOString(),
+              start_date_local: new Date().toISOString(),
+              timezone: 'Europe/Paris',
+            })),
+          );
+        }
+        return Promise.resolve([]);
+      });
+
+      await expect(service.syncActivities(userId)).resolves.not.toThrow();
+    });
+
+    it('should correctly detect last page when receiving exactly per_page activities', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+      const existingActivities = [{ type: 'Run' }];
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+      mockPrismaService.activity.findMany.mockResolvedValue(existingActivities as any);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+      mockSyncHistoryService.findById.mockResolvedValue({} as any);
+
+      let callCount = 0;
+      mockStravaService.getActivities.mockImplementation(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.resolve(
+            Array.from({ length: 100 }, (_, i) => ({
+              id: i + 1,
+              type: 'Run',
+              name: `Run ${i + 1}`,
+              distance: 5000,
+              moving_time: 1800,
+              elapsed_time: 1900,
+              total_elevation_gain: 50,
+              start_date: new Date().toISOString(),
+              start_date_local: new Date().toISOString(),
+              timezone: 'Europe/Paris',
+            })),
+          );
+        }
+        return Promise.resolve([]);
+      });
+
+      await service.syncActivities(userId);
+
+      expect(stravaService.getActivities).toHaveBeenCalledTimes(2);
+    });
+
+    it('should update progress at 10-activity intervals during storage', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+
+      const mockActivities = Array.from({ length: 25 }, (_, i) => ({
+        id: i + 1,
+        type: 'Run',
+        name: `Run ${i + 1}`,
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: new Date().toISOString(),
+        start_date_local: new Date().toISOString(),
+        timezone: 'Europe/Paris',
+      }));
+
+      mockStravaService.getActivities.mockResolvedValueOnce(mockActivities).mockResolvedValueOnce([]);
+
+      await service.syncActivities(userId);
+
+      const progressUpdateCalls = mockSyncHistoryService.update.mock.calls.filter(
+        call => call[1].processedActivities !== undefined,
+      );
+
+      expect(progressUpdateCalls.length).toBeGreaterThanOrEqual(3);
+      expect(progressUpdateCalls.some(call => call[1].processedActivities === 10)).toBe(true);
+      expect(progressUpdateCalls.some(call => call[1].processedActivities === 20)).toBe(true);
+      expect(progressUpdateCalls.some(call => call[1].processedActivities === 25)).toBe(true);
+    });
+
+    it('should update progress for last activity even if not multiple of 10', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(null);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+
+      const mockActivities = Array.from({ length: 7 }, (_, i) => ({
+        id: i + 1,
+        type: 'Run',
+        name: `Run ${i + 1}`,
+        distance: 5000,
+        moving_time: 1800,
+        elapsed_time: 1900,
+        total_elevation_gain: 50,
+        start_date: new Date().toISOString(),
+        start_date_local: new Date().toISOString(),
+        timezone: 'Europe/Paris',
+      }));
+
+      mockStravaService.getActivities.mockResolvedValueOnce(mockActivities).mockResolvedValueOnce([]);
+
+      await service.syncActivities(userId);
+
+      const progressUpdateCalls = mockSyncHistoryService.update.mock.calls.filter(
+        call => call[1].processedActivities !== undefined,
+      );
+
+      expect(progressUpdateCalls.some(call => call[1].processedActivities === 7)).toBe(true);
+    });
+  });
+
+  describe('syncActivities - Sport Selection Edge Cases', () => {
+    it('should sync only newly selected sports when user adds sport after initial sync', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN, SportType.RIDE],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+      const mockLastRunActivity = {
+        id: 1,
+        stravaId: BigInt(100),
+        userId,
+        type: 'Run',
+        startDate: new Date('2024-01-01'),
+      };
+      const existingRunActivities = [{ type: 'Run' }];
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockLastRunActivity);
+      mockPrismaService.activity.findMany.mockResolvedValue(existingRunActivities as any);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+      mockSyncHistoryService.findById.mockResolvedValue({} as any);
+
+      const mockHistoricalRides = Array.from({ length: 10 }, (_, i) => ({
+        id: 200 + i,
+        type: 'Ride',
+        name: `Historical Ride ${i + 1}`,
+        distance: 20000,
+        moving_time: 3600,
+        elapsed_time: 3700,
+        total_elevation_gain: 200,
+        start_date: new Date('2023-12-01').toISOString(),
+        start_date_local: new Date('2023-12-01').toISOString(),
+        timezone: 'Europe/Paris',
+      }));
+
+      mockStravaService.getActivities
+        .mockResolvedValueOnce(mockHistoricalRides)
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([]);
+
+      await service.syncActivities(userId);
+
+      expect(stravaService.getActivities).toHaveBeenCalledWith(
+        userId,
+        expect.objectContaining({ page: 1, per_page: 100 }),
+      );
+    });
+
+    it('should not re-fetch historical activities for already synced sports', async () => {
+      const userId = 1;
+      const mockPreferences = {
+        id: 1,
+        userId,
+        selectedSports: [SportType.RUN],
+        onboardingCompleted: true,
+        locale: 'en',
+        theme: 'system',
+      };
+      const mockSync = {
+        id: 1,
+        userId,
+        status: SyncStatus.IN_PROGRESS,
+        stage: SyncStage.FETCHING,
+        startedAt: new Date(),
+      };
+      const mockLastRunActivity = {
+        id: 1,
+        stravaId: BigInt(100),
+        userId,
+        type: 'Run',
+        startDate: new Date('2024-01-01'),
+      };
+      const existingRunActivities = [{ type: 'Run' }];
+
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
+      mockSyncHistoryService.create.mockResolvedValue(mockSync);
+      mockPrismaService.activity.findFirst.mockResolvedValue(mockLastRunActivity);
+      mockPrismaService.activity.findMany.mockResolvedValue(existingRunActivities as any);
+      mockPrismaService.activity.upsert.mockResolvedValue({} as any);
+      mockSyncHistoryService.update.mockResolvedValue({} as any);
+      mockSyncHistoryService.findById.mockResolvedValue({} as any);
+
+      mockStravaService.getActivities.mockResolvedValueOnce([]).mockResolvedValueOnce([]);
+
+      await service.syncActivities(userId);
+
+      expect(stravaService.getActivities).toHaveBeenCalledTimes(1);
+      expect(stravaService.getActivities).toHaveBeenCalledWith(
+        userId,
+        expect.objectContaining({ after: expect.any(Number) }),
+      );
+    });
+  });
+
+  describe('findAll - Edge Cases', () => {
+    it('should handle empty result set with filters applied', async () => {
+      const userId = 1;
+      const options = {
+        offset: 0,
+        limit: 30,
+        type: ActivityType.RUN,
+        startDate: new Date('2024-01-01'),
+        endDate: new Date('2024-12-31'),
+      };
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, options);
+
+      expect(result).toEqual([]);
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          type: ActivityType.RUN,
+          startDate: {
+            gte: new Date('2024-01-01'),
+            lte: new Date('2024-12-31'),
+          },
+        },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 30,
+      });
+    });
+
+    it('should pass through very large offset values to Prisma', async () => {
+      const userId = 1;
+      const options = {
+        offset: 999999,
+        limit: 30,
+      };
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, options);
+
+      expect(result).toEqual([]);
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        orderBy: { startDate: 'desc' },
+        skip: 999999,
+        take: 30,
+      });
+    });
+
+    it('should pass through negative offset to Prisma', async () => {
+      const userId = 1;
+      const options = {
+        offset: -10,
+        limit: 30,
+      };
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, options);
+
+      expect(result).toEqual([]);
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        orderBy: { startDate: 'desc' },
+        skip: -10,
+        take: 30,
+      });
+    });
+
+    it('should pass through large limit values to Prisma without capping', async () => {
+      const userId = 1;
+      const options = {
+        offset: 0,
+        limit: 200,
+      };
+
+      mockPrismaService.activity.findMany.mockResolvedValue([]);
+
+      const result = await service.findAll(userId, options);
+
+      expect(result).toEqual([]);
+      expect(prismaService.activity.findMany).toHaveBeenCalledWith({
+        where: { userId },
+        orderBy: { startDate: 'desc' },
+        skip: 0,
+        take: 200,
+      });
+    });
+  });
 });
