@@ -133,7 +133,7 @@ describe('StatsGrid', () => {
   });
 
   it('should render calories when available', () => {
-    const activityWithCalories = { ...baseActivity, calories: 450 };
+    const activityWithCalories = { ...baseActivity, detailsFetched: true, calories: 450 };
     render(<StatsGrid activity={activityWithCalories} detailsLoading={false} />);
 
     expect(screen.getByText('stats.calories')).toBeInTheDocument();
@@ -160,6 +160,7 @@ describe('StatsGrid', () => {
   it('should render all secondary stats when available', () => {
     const fullActivity: ActivityDetail = {
       ...baseActivity,
+      detailsFetched: true,
       averageHeartrate: 145,
       maxHeartrate: 165,
       averageCadence: 85,

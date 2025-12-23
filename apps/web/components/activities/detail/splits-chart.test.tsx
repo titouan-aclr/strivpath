@@ -79,20 +79,21 @@ const baseActivity: ActivityDetail = {
 
 describe('SplitsChart', () => {
   it('should not render when splits is null', () => {
-    const { container } = render(<SplitsChart activity={baseActivity} />);
+    const activityWithoutSplits = { ...baseActivity, detailsFetched: true, splits: null };
+    const { container } = render(<SplitsChart activity={activityWithoutSplits} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should not render when splits is empty array', () => {
-    const activityWithEmptySplits = { ...baseActivity, splits: [] };
+    const activityWithEmptySplits = { ...baseActivity, detailsFetched: true, splits: [] };
     const { container } = render(<SplitsChart activity={activityWithEmptySplits} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render chart card when splits are available', () => {
-    const activityWithSplits = { ...baseActivity, splits: mockSplits };
+    const activityWithSplits = { ...baseActivity, detailsFetched: true, splits: mockSplits };
     render(<SplitsChart activity={activityWithSplits} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();
@@ -100,7 +101,7 @@ describe('SplitsChart', () => {
   });
 
   it('should render chart with correct data for Run', () => {
-    const activityWithSplits = { ...baseActivity, splits: mockSplits };
+    const activityWithSplits = { ...baseActivity, detailsFetched: true, splits: mockSplits };
     const { container } = render(<SplitsChart activity={activityWithSplits} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();
@@ -109,7 +110,7 @@ describe('SplitsChart', () => {
   });
 
   it('should render chart with correct data for Ride', () => {
-    const rideActivity = { ...baseActivity, type: SportType.Ride, splits: mockSplits };
+    const rideActivity = { ...baseActivity, detailsFetched: true, type: SportType.Ride, splits: mockSplits };
     const { container } = render(<SplitsChart activity={rideActivity} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();
@@ -118,7 +119,7 @@ describe('SplitsChart', () => {
   });
 
   it('should render chart with correct data for Swim', () => {
-    const swimActivity = { ...baseActivity, type: SportType.Swim, splits: mockSplits };
+    const swimActivity = { ...baseActivity, detailsFetched: true, type: SportType.Swim, splits: mockSplits };
     const { container } = render(<SplitsChart activity={swimActivity} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();
@@ -127,7 +128,7 @@ describe('SplitsChart', () => {
   });
 
   it('should render ChartContainer with correct dimensions', () => {
-    const activityWithSplits = { ...baseActivity, splits: mockSplits };
+    const activityWithSplits = { ...baseActivity, detailsFetched: true, splits: mockSplits };
     const { container } = render(<SplitsChart activity={activityWithSplits} />);
 
     const chartContainer = container.querySelector('.h-\\[300px\\]');
@@ -135,7 +136,7 @@ describe('SplitsChart', () => {
   });
 
   it('should handle single split', () => {
-    const activityWithOneSplit = { ...baseActivity, splits: [mockSplits[0]] };
+    const activityWithOneSplit = { ...baseActivity, detailsFetched: true, splits: [mockSplits[0]] };
     render(<SplitsChart activity={activityWithOneSplit} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();
@@ -144,7 +145,7 @@ describe('SplitsChart', () => {
 
   it('should handle many splits', () => {
     const manySplits = Array(20).fill(mockSplits[0]);
-    const activityWithManySplits = { ...baseActivity, splits: manySplits };
+    const activityWithManySplits = { ...baseActivity, detailsFetched: true, splits: manySplits };
     render(<SplitsChart activity={activityWithManySplits} />);
 
     expect(screen.getByText('splits.title')).toBeInTheDocument();

@@ -209,8 +209,8 @@ describe('formatElevation', () => {
 });
 
 describe('formatDate', () => {
-  const testDate = new Date('2025-01-15T14:30:00Z');
-  const testISOString = '2025-01-15T14:30:00Z';
+  const testDate = new Date('2025-01-15T00:00:00Z');
+  const testISOString = '2025-01-15T00:00:00Z';
 
   it('should return em dash for null input', () => {
     expect(formatDate(null)).toBe('—');
@@ -259,8 +259,8 @@ describe('formatDate', () => {
 });
 
 describe('formatTime', () => {
-  const testDate = new Date('2025-01-15T14:30:00Z');
-  const testISOString = '2025-01-15T14:30:00Z';
+  const testDate = new Date('2025-01-15T00:00:00Z');
+  const testISOString = '2025-01-15T00:00:00Z';
 
   it('should return em dash for null input', () => {
     expect(formatTime(null)).toBe('—');
