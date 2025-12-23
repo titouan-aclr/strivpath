@@ -160,4 +160,65 @@ describe('ActivityResolver', () => {
       expect(result).toBeNull();
     });
   });
+
+  describe('fetchActivityDetails', () => {
+    it('should call service.fetchActivityDetails with correct parameters', async () => {
+      const stravaId = BigInt(123456);
+      const mockActivityWithDetails = {
+        ...mockActivity,
+        stravaId,
+        calories: 350,
+        description: 'Great morning run',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockActivityWithDetails);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, stravaId);
+      expect(result).toEqual(mockActivityWithDetails);
+    });
+
+    it('should return updated activity after fetch', async () => {
+      const stravaId = BigInt(789012);
+      const mockUpdatedActivity = {
+        ...mockActivity,
+        stravaId,
+        calories: 450,
+        splits: [
+          {
+            distance: 1000,
+            movingTime: 300,
+            elapsedTime: 305,
+            averageSpeed: 3.33,
+            elevationDifference: 5,
+          },
+        ],
+        description: 'Afternoon run with hills',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockUpdatedActivity);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(result.calories).toBe(450);
+      expect(result.description).toBe('Afternoon run with hills');
+      expect(result.splits).toHaveLength(1);
+      expect(result.detailsFetched).toBe(true);
+    });
+
+    it('should propagate errors from service', async () => {
+      const stravaId = BigInt(999999);
+      const error = new Error('Activity not found');
+
+      mockActivityService.fetchActivityDetails.mockRejectedValue(error);
+
+      await expect(resolver.fetchActivityDetails(stravaId, mockTokenPayload)).rejects.toThrow('Activity not found');
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, stravaId);
+    });
+  });
 });
