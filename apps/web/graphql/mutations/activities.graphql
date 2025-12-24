@@ -1,4 +1,4 @@
-mutation FetchActivityDetails($stravaId: BigInt!) {
+mutation FetchActivityDetails($stravaId: String!) {
   fetchActivityDetails(stravaId: $stravaId) {
     ...ActivityDetail
   }

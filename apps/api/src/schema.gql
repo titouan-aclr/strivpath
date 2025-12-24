@@ -142,7 +142,7 @@ type Mutation {
   """
   Fetch detailed activity data from Strava on-demand (calories, splits, description)
   """
-  fetchActivityDetails(stravaId: BigInt!): Activity!
+  fetchActivityDetails(stravaId: String!): Activity!
 
   """Logout and revoke refresh token"""
   logout: Boolean!

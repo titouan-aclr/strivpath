@@ -163,10 +163,10 @@ describe('ActivityResolver', () => {
 
   describe('fetchActivityDetails', () => {
     it('should call service.fetchActivityDetails with correct parameters', async () => {
-      const stravaId = BigInt(123456);
+      const stravaId = '123456';
       const mockActivityWithDetails = {
         ...mockActivity,
-        stravaId,
+        stravaId: BigInt(123456),
         calories: 350,
         description: 'Great morning run',
         detailsFetched: true,
@@ -177,15 +177,15 @@ describe('ActivityResolver', () => {
 
       const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
 
-      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, stravaId);
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
       expect(result).toEqual(mockActivityWithDetails);
     });
 
     it('should return updated activity after fetch', async () => {
-      const stravaId = BigInt(789012);
+      const stravaId = '789012';
       const mockUpdatedActivity = {
         ...mockActivity,
-        stravaId,
+        stravaId: BigInt(789012),
         calories: 450,
         splits: [
           {
@@ -212,13 +212,13 @@ describe('ActivityResolver', () => {
     });
 
     it('should propagate errors from service', async () => {
-      const stravaId = BigInt(999999);
+      const stravaId = '999999';
       const error = new Error('Activity not found');
 
       mockActivityService.fetchActivityDetails.mockRejectedValue(error);
 
       await expect(resolver.fetchActivityDetails(stravaId, mockTokenPayload)).rejects.toThrow('Activity not found');
-      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, stravaId);
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
     });
   });
 });
