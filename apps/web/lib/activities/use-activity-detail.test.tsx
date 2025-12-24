@@ -38,6 +38,9 @@ const MOCK_ACTIVITY = {
   weightedAverageWatts: null,
   maxWatts: null,
   splits: null,
+  description: null,
+  detailsFetched: false,
+  detailsFetchedAt: null,
   createdAt: '2025-01-15T08:00:00Z',
   updatedAt: '2025-01-15T08:00:00Z',
 };
@@ -197,6 +200,135 @@ describe('useActivityDetail', () => {
       });
 
       expect(result.current.refetch).toBeInstanceOf(Function);
+    });
+  });
+
+  describe('Progressive Loading', () => {
+    it('should handle detail fetch failure without breaking basic view', async () => {
+      const activityWithoutDetails = {
+        ...MOCK_ACTIVITY,
+        detailsFetched: false,
+        calories: null,
+      };
+
+      server.use(
+        graphql.query('Activity', () => {
+          return HttpResponse.json({
+            data: { activity: activityWithoutDetails },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useActivityDetail({ stravaId: '123456' }), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.activity).toBeTruthy();
+      });
+
+      expect(result.current.activity?.name).toBe('Morning Run');
+      expect(result.current.activity?.distance).toBe(5000);
+      expect(result.current.detailsLoaded).toBe(false);
+      expect(result.current.activity).toBeTruthy();
+      expect(result.current.error).toBeUndefined();
+    });
+
+    it('should indicate when details are already loaded', async () => {
+      const activityWithDetails = {
+        ...MOCK_ACTIVITY,
+        detailsFetched: true,
+        calories: 450,
+      };
+
+      server.use(
+        graphql.query('Activity', () => {
+          return HttpResponse.json({
+            data: { activity: activityWithDetails },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useActivityDetail({ stravaId: '123456' }), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.activity).toBeTruthy();
+      });
+
+      expect(result.current.detailsLoaded).toBe(true);
+      expect(result.current.activity?.calories).toBe(450);
+    });
+
+    it('should provide retry function for failed detail fetches', async () => {
+      const { result } = renderHook(() => useActivityDetail({ stravaId: '123456' }), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.activity).toBeTruthy();
+      });
+
+      expect(result.current.retryDetails).toBeInstanceOf(Function);
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle activity deletion (404 from server)', async () => {
+      server.use(
+        graphql.query('Activity', () => {
+          return HttpResponse.json({
+            data: { activity: null },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useActivityDetail({ stravaId: '123456' }), {
+        wrapper: Wrapper,
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.activity).toBeNull();
+      expect(result.current.error).toBeUndefined();
+    });
+
+    it('should validate stravaId format before making request', () => {
+      const invalidIds = ['', '  ', 'abc', '12.34', '-456', '0', '1e10'];
+
+      invalidIds.forEach(id => {
+        const { result } = renderHook(() => useActivityDetail({ stravaId: id }), {
+          wrapper: Wrapper,
+        });
+
+        expect(result.current.isValidId).toBe(false);
+        expect(result.current.loading).toBe(false);
+        expect(result.current.activity).toBeNull();
+      });
+    });
+
+    it('should handle large stravaId values', () => {
+      const largeId = '9007199254740991';
+
+      const { result } = renderHook(() => useActivityDetail({ stravaId: largeId }), {
+        wrapper: Wrapper,
+      });
+
+      expect(result.current.isValidId).toBe(true);
+      expect(result.current.loading).toBe(true);
+    });
+
+    it('should not fetch for empty string IDs', () => {
+      const { result } = renderHook(() => useActivityDetail({ stravaId: '' }), {
+        wrapper: Wrapper,
+      });
+
+      expect(result.current.isValidId).toBe(false);
+      expect(result.current.loading).toBe(false);
+      expect(result.current.activity).toBeNull();
     });
   });
 });
