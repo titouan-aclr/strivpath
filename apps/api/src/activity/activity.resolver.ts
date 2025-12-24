@@ -1,6 +1,5 @@
 import { UseGuards } from '@nestjs/common';
 import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
-import { GraphQLBigInt } from 'graphql-scalars';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { TokenPayload } from '../auth/types';
@@ -60,9 +59,9 @@ export class ActivityResolver {
   })
   @UseGuards(GqlAuthGuard)
   async fetchActivityDetails(
-    @Args('stravaId', { type: () => GraphQLBigInt }) stravaId: bigint,
+    @Args('stravaId', { type: () => String }) stravaId: string,
     @CurrentUser() tokenPayload: TokenPayload,
   ): Promise<Activity> {
-    return this.activityService.fetchActivityDetails(tokenPayload.sub, stravaId);
+    return this.activityService.fetchActivityDetails(tokenPayload.sub, BigInt(stravaId));
   }
 }

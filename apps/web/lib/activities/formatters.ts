@@ -35,7 +35,7 @@ export function formatDuration(seconds: number | null | undefined): string {
 export function formatPace(
   distanceMeters: number | null | undefined,
   timeSeconds: number | null | undefined,
-  sportType: SportType,
+  sportType: SportType | string,
   locale: string = 'en',
 ): string {
   if (
@@ -49,7 +49,8 @@ export function formatPace(
     return '—';
   }
 
-  const isRunOrSwim = sportType === SportType.Run || sportType === SportType.Swim;
+  const typeStr = typeof sportType === 'string' ? sportType : String(sportType);
+  const isRunOrSwim = typeStr === 'Run' || typeStr === 'RUN' || typeStr === 'Swim' || typeStr === 'SWIM';
 
   if (isRunOrSwim) {
     const distanceInKm = distanceMeters / 1000;
@@ -122,7 +123,7 @@ export function formatWatts(watts: number | null | undefined): string {
 
 export function formatSplitPace(
   split: { distance: number; movingTime: number },
-  sportType: SportType,
+  sportType: SportType | string,
   locale: string = 'en',
 ): string {
   return formatPace(split.distance, split.movingTime, sportType, locale);

@@ -168,6 +168,19 @@ describe('formatPace', () => {
     expect(formatPace(20000, 3600, SportType.Ride, 'en-US')).toBe('20.0 km/h');
     expect(formatPace(20000, 3600, SportType.Ride, 'fr-FR')).toContain('20');
   });
+
+  it('should format pace when sportType is string "Run"', () => {
+    expect(formatPace(5000, 1500, 'Run')).toBe('5:00 min/km');
+    expect(formatPace(5000, 1620, 'Run')).toBe('5:24 min/km');
+  });
+
+  it('should format pace when sportType is string "Swim"', () => {
+    expect(formatPace(1000, 1200, 'Swim')).toBe('20:00 min/km');
+  });
+
+  it('should format speed when sportType is string "Ride"', () => {
+    expect(formatPace(20000, 3600, 'Ride', 'en')).toBe('20.0 km/h');
+  });
 });
 
 describe('formatElevation', () => {
