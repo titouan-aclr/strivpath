@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ApolloClient, InMemoryCache, HttpLink, from } from '@apollo/client';
 import { ApolloProvider } from '@apollo/client/react';
@@ -78,10 +78,6 @@ describe('useActivities', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     testClient = createTestApolloClient();
-  });
-
-  afterEach(async () => {
-    await testClient.clearStore();
   });
 
   describe('Initial Load', () => {
@@ -565,6 +561,108 @@ describe('useActivities', () => {
       });
 
       expect(result.current.activities).toHaveLength(20);
+    });
+  });
+
+  describe('Cache Behavior', () => {
+    it('should handle duplicate activities in response', async () => {
+      const { result } = renderHook(() => useActivities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      const activityIds = result.current.activities.map(a => a.stravaId);
+      const uniqueIds = new Set(activityIds);
+      expect(activityIds.length).toBe(uniqueIds.size);
+    });
+  });
+
+  describe('Race Conditions', () => {
+    it('should handle rapid filter changes', async () => {
+      const { result, rerender } = renderHook(
+        (props: { filter?: ActivityFilter }) => useActivities({ filter: props.filter }),
+        {
+          wrapper: createWrapper(),
+          initialProps: {},
+        },
+      );
+
+      await waitFor(() => {
+        expect(result.current.activities.length).toBeGreaterThan(0);
+      });
+
+      rerender({ filter: { type: ActivityType.Run } });
+      rerender({ filter: { type: ActivityType.Ride } });
+      rerender({ filter: { type: ActivityType.Run } });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.activities.every(a => a.type === (ActivityType.Run as string))).toBe(true);
+    });
+  });
+
+  describe('Network Resilience', () => {
+    it('should handle partial failure during pagination', async () => {
+      let pageCount = 0;
+
+      server.use(
+        graphql.query('Activities', ({ variables }) => {
+          const filter = variables.filter as ActivitiesFilterInput | undefined;
+          const offset = filter?.offset ?? 0;
+
+          pageCount++;
+
+          if (offset === 0) {
+            return HttpResponse.json({
+              data: {
+                activities: MOCK_ACTIVITIES_ARRAY.slice(0, 20).map(serializeActivity),
+              },
+            });
+          }
+
+          if (offset === 20) {
+            return HttpResponse.json({
+              errors: [
+                {
+                  message: 'Temporary server error',
+                  extensions: { code: 'INTERNAL_SERVER_ERROR' },
+                },
+              ],
+              data: null,
+            });
+          }
+
+          return HttpResponse.json({
+            data: {
+              activities: MOCK_ACTIVITIES_ARRAY.slice(offset, offset + 20).map(serializeActivity),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useActivities(), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.activities).toHaveLength(20);
+      });
+
+      await act(async () => {
+        await result.current.loadMore();
+      });
+
+      await waitFor(() => {
+        expect(result.current.error).toBeDefined();
+      });
+
+      expect(result.current.activities).toHaveLength(20);
+      expect(pageCount).toBe(2);
     });
   });
 });
