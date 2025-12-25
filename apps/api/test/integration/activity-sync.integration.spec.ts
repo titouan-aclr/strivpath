@@ -514,10 +514,10 @@ describe('Activity Sync Integration', () => {
         name: 'Test Activity',
       });
 
-      const activity = await activityService.findById(createdActivity.id, user.id);
+      const activity = await activityService.findByStravaId(createdActivity.stravaId, user.id);
 
       expect(activity).toBeDefined();
-      expect(activity?.id).toBe(createdActivity.id);
+      expect(activity?.stravaId).toBe(createdActivity.stravaId);
       expect(activity?.name).toBe('Test Activity');
     });
 
@@ -529,7 +529,7 @@ describe('Activity Sync Integration', () => {
         stravaId: BigInt(12001),
       });
 
-      const activity = await activityService.findById(user1Activity.id, user2.id);
+      const activity = await activityService.findByStravaId(user1Activity.stravaId, user2.id);
 
       expect(activity).toBeNull();
     });

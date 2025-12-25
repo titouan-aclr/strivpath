@@ -1,13 +1,13 @@
-import { Resolver, Query, Mutation, Args, Int } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
-import { Activity } from './models/activity.model';
-import { SyncHistory } from '../sync-history/models/sync-history.model';
-import { ActivitiesFilterInput } from './dto/activity.input';
-import { ActivityService } from './activity.service';
-import { SyncHistoryService } from '../sync-history/sync-history.service';
-import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
+import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { TokenPayload } from '../auth/types';
+import { SyncHistory } from '../sync-history/models/sync-history.model';
+import { SyncHistoryService } from '../sync-history/sync-history.service';
+import { ActivityService } from './activity.service';
+import { ActivitiesFilterInput } from './dto/activity.input';
+import { Activity } from './models/activity.model';
 
 @Resolver(() => Activity)
 export class ActivityResolver {
@@ -39,18 +39,29 @@ export class ActivityResolver {
     });
   }
 
-  @Query(() => Activity, { nullable: true, description: 'Get a single activity by ID' })
+  @Query(() => Activity, { nullable: true, description: 'Get a single activity by Strava ID' })
   @UseGuards(GqlAuthGuard)
   async activity(
     @CurrentUser() tokenPayload: TokenPayload,
-    @Args('id', { type: () => Int }) id: number,
+    @Args('stravaId', { type: () => String }) stravaId: string,
   ): Promise<Activity | null> {
-    return this.activityService.findById(id, tokenPayload.sub);
+    return this.activityService.findByStravaId(BigInt(stravaId), tokenPayload.sub);
   }
 
   @Query(() => SyncHistory, { nullable: true, description: 'Get the latest sync status' })
   @UseGuards(GqlAuthGuard)
   async syncStatus(@CurrentUser() tokenPayload: TokenPayload): Promise<SyncHistory | null> {
     return this.syncHistoryService.findLatestForUser(tokenPayload.sub);
+  }
+
+  @Mutation(() => Activity, {
+    description: 'Fetch detailed activity data from Strava on-demand (calories, splits, description)',
+  })
+  @UseGuards(GqlAuthGuard)
+  async fetchActivityDetails(
+    @Args('stravaId', { type: () => String }) stravaId: string,
+    @CurrentUser() tokenPayload: TokenPayload,
+  ): Promise<Activity> {
+    return this.activityService.fetchActivityDetails(tokenPayload.sub, BigInt(stravaId));
   }
 }

@@ -4,8 +4,8 @@ query Activities($filter: ActivitiesFilterInput) {
   }
 }
 
-query Activity($id: Int!) {
-  activity(id: $id) {
+query Activity($stravaId: String!) {
+  activity(stravaId: $stravaId) {
     ...ActivityDetail
   }
 }

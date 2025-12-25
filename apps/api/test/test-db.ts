@@ -206,11 +206,8 @@ export const generateTestAccessToken = (userId: number, stravaId: number): strin
     stravaId,
   };
 
-  const secret = process.env.JWT_ACCESS_TOKEN_SECRET || 'test-access-secret';
-  const expiresIn = process.env.JWT_ACCESS_TOKEN_EXPIRATION || '15m';
-
-  return jwtService.sign(payload, {
-    secret,
-    expiresIn,
+  return jwtService.sign(payload as any, {
+    secret: process.env.JWT_ACCESS_TOKEN_SECRET || 'test-access-secret',
+    expiresIn: (process.env.JWT_ACCESS_TOKEN_EXPIRATION || '15m') as any,
   });
 };

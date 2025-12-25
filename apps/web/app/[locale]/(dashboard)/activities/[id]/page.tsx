@@ -1,29 +1,26 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { setRequestLocale } from 'next-intl/server';
+import { ActivityDetailContent } from './activity-detail-content';
 
 type Props = {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{
+    locale: string;
+    id: string;
+  }>;
 };
 
 export default async function ActivityDetailPage({ params }: Props) {
   const { locale, id } = await params;
+
   setRequestLocale(locale);
 
-  return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold">Activity Details</h2>
-        <p className="text-muted-foreground">Activity ID: {id}</p>
-      </div>
+  return <ActivityDetailContent stravaId={id} />;
+}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Activity Information</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">Activity detail page will be implemented in next steps</p>
-        </CardContent>
-      </Card>
-    </div>
-  );
+export async function generateMetadata({ params }: Props) {
+  const { id } = await params;
+
+  return {
+    title: 'Activity Details | Stravanalytics',
+    description: `View detailed statistics and analysis for activity ${id}`,
+  };
 }

@@ -29,18 +29,45 @@ type Activity {
   averageCadence: Float
   averageHeartrate: Float
   averageSpeed: Float
+
+  """Average power in watts"""
+  averageWatts: Float
+
+  """Calories burned"""
+  calories: Float
   createdAt: DateTime!
+
+  """Activity description or notes"""
+  description: String
+
+  """Whether detailed data has been fetched from Strava"""
+  detailsFetched: Boolean!
+
+  """Timestamp when details were fetched"""
+  detailsFetchedAt: DateTime
   deviceWatts: Boolean
   distance: Float!
   elapsedTime: Int!
+
+  """Maximum altitude in meters"""
+  elevHigh: Float
+
+  """Minimum altitude in meters"""
+  elevLow: Float
   hasKudoed: Boolean!
   id: ID!
   kilojoules: Float
   kudosCount: Int!
   maxHeartrate: Float
   maxSpeed: Float
+
+  """Maximum power in watts"""
+  maxWatts: Int
   movingTime: Int!
   name: String!
+
+  """Split data per kilometer"""
+  splits: [Split!]
   startDate: DateTime!
   startDateLocal: DateTime!
   stravaId: BigInt!
@@ -49,6 +76,9 @@ type Activity {
   type: String!
   updatedAt: DateTime!
   userId: Int!
+
+  """Weighted average power in watts"""
+  weightedAverageWatts: Float
 }
 
 """Types of activities supported by Strava"""
@@ -109,6 +139,11 @@ enum LocaleType {
 }
 
 type Mutation {
+  """
+  Fetch detailed activity data from Strava on-demand (calories, splits, description)
+  """
+  fetchActivityDetails(stravaId: String!): Activity!
+
   """Logout and revoke refresh token"""
   logout: Boolean!
 
@@ -139,8 +174,8 @@ type Query {
   """Get activities with optional filtering and pagination"""
   activities(filter: ActivitiesFilterInput): [Activity!]!
 
-  """Get a single activity by ID"""
-  activity(id: Int!): Activity
+  """Get a single activity by Strava ID"""
+  activity(stravaId: String!): Activity
 
   """Get current authenticated user"""
   currentUser: User
@@ -152,6 +187,24 @@ type Query {
   syncStatus: SyncHistory
   userByStravaId(stravaId: Int!): User
   users: [User!]!
+}
+
+"""Split data for a segment of the activity"""
+type Split {
+  """Average speed for this split in m/s"""
+  averageSpeed: Float
+
+  """Distance of this split in meters"""
+  distance: Float
+
+  """Elapsed time for this split in seconds"""
+  elapsedTime: Int
+
+  """Elevation gain/loss in meters"""
+  elevationDifference: Float
+
+  """Moving time for this split in seconds"""
+  movingTime: Int
 }
 
 """Available sport types for activity tracking"""

@@ -23,6 +23,22 @@ fragment ActivityDetail on Activity {
   deviceWatts
   hasKudoed
   averageCadence
+  calories
+  elevHigh
+  elevLow
+  averageWatts
+  weightedAverageWatts
+  maxWatts
+  splits {
+    distance
+    movingTime
+    elapsedTime
+    averageSpeed
+    elevationDifference
+  }
+  description
+  detailsFetched
+  detailsFetchedAt
   createdAt
   updatedAt
 }

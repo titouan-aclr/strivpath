@@ -35,7 +35,7 @@ export function formatDuration(seconds: number | null | undefined): string {
 export function formatPace(
   distanceMeters: number | null | undefined,
   timeSeconds: number | null | undefined,
-  sportType: SportType,
+  sportType: SportType | string,
   locale: string = 'en',
 ): string {
   if (
@@ -49,7 +49,8 @@ export function formatPace(
     return '—';
   }
 
-  const isRunOrSwim = sportType === SportType.Run || sportType === SportType.Swim;
+  const typeStr = typeof sportType === 'string' ? sportType : String(sportType);
+  const isRunOrSwim = typeStr === 'Run' || typeStr === 'RUN' || typeStr === 'Swim' || typeStr === 'SWIM';
 
   if (isRunOrSwim) {
     const distanceInKm = distanceMeters / 1000;
@@ -103,4 +104,27 @@ export function formatTime(date: Date | string | null | undefined, locale: strin
     hour: '2-digit',
     minute: '2-digit',
   }).format(dateObj);
+}
+
+export function formatCalories(calories: number | null | undefined): string {
+  if (calories == null || isNaN(calories)) return '—';
+  return `${Math.round(calories).toLocaleString()} kcal`;
+}
+
+export function formatAltitudeRange(high: number | null | undefined, low: number | null | undefined): string {
+  if (high == null || low == null) return '—';
+  return `${Math.round(low)} m → ${Math.round(high)} m`;
+}
+
+export function formatWatts(watts: number | null | undefined): string {
+  if (watts == null || isNaN(watts)) return '—';
+  return `${Math.round(watts).toLocaleString()} W`;
+}
+
+export function formatSplitPace(
+  split: { distance: number; movingTime: number },
+  sportType: SportType | string,
+  locale: string = 'en',
+): string {
+  return formatPace(split.distance, split.movingTime, sportType, locale);
 }

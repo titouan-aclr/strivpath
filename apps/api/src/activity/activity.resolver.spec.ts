@@ -17,7 +17,8 @@ describe('ActivityResolver', () => {
   const mockActivityService = {
     syncActivities: jest.fn(),
     findAll: jest.fn(),
-    findById: jest.fn(),
+    findByStravaId: jest.fn(),
+    fetchActivityDetails: jest.fn(),
   };
 
   const mockSyncHistoryService = {
@@ -46,6 +47,7 @@ describe('ActivityResolver', () => {
     maxSpeed: 4.5,
     hasKudoed: false,
     kudosCount: 0,
+    detailsFetched: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -120,21 +122,21 @@ describe('ActivityResolver', () => {
   });
 
   describe('activity', () => {
-    it('should return a single activity by id', async () => {
-      const activityId = 1;
-      mockActivityService.findById.mockResolvedValue(mockActivity);
+    it('should return a single activity by stravaId', async () => {
+      const stravaId = '123';
+      mockActivityService.findByStravaId.mockResolvedValue(mockActivity);
 
-      const result = await resolver.activity(mockTokenPayload, activityId);
+      const result = await resolver.activity(mockTokenPayload, stravaId);
 
-      expect(activityService.findById).toHaveBeenCalledWith(activityId, mockTokenPayload.sub);
+      expect(activityService.findByStravaId).toHaveBeenCalledWith(BigInt(stravaId), mockTokenPayload.sub);
       expect(result).toEqual(mockActivity);
     });
 
     it('should return null if activity not found', async () => {
-      const activityId = 999;
-      mockActivityService.findById.mockResolvedValue(null);
+      const stravaId = '999';
+      mockActivityService.findByStravaId.mockResolvedValue(null);
 
-      const result = await resolver.activity(mockTokenPayload, activityId);
+      const result = await resolver.activity(mockTokenPayload, stravaId);
 
       expect(result).toBeNull();
     });
@@ -156,6 +158,67 @@ describe('ActivityResolver', () => {
       const result = await resolver.syncStatus(mockTokenPayload);
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('fetchActivityDetails', () => {
+    it('should call service.fetchActivityDetails with correct parameters', async () => {
+      const stravaId = '123456';
+      const mockActivityWithDetails = {
+        ...mockActivity,
+        stravaId: BigInt(123456),
+        calories: 350,
+        description: 'Great morning run',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockActivityWithDetails);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
+      expect(result).toEqual(mockActivityWithDetails);
+    });
+
+    it('should return updated activity after fetch', async () => {
+      const stravaId = '789012';
+      const mockUpdatedActivity = {
+        ...mockActivity,
+        stravaId: BigInt(789012),
+        calories: 450,
+        splits: [
+          {
+            distance: 1000,
+            movingTime: 300,
+            elapsedTime: 305,
+            averageSpeed: 3.33,
+            elevationDifference: 5,
+          },
+        ],
+        description: 'Afternoon run with hills',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockUpdatedActivity);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(result.calories).toBe(450);
+      expect(result.description).toBe('Afternoon run with hills');
+      expect(result.splits).toHaveLength(1);
+      expect(result.detailsFetched).toBe(true);
+    });
+
+    it('should propagate errors from service', async () => {
+      const stravaId = '999999';
+      const error = new Error('Activity not found');
+
+      mockActivityService.fetchActivityDetails.mockRejectedValue(error);
+
+      await expect(resolver.fetchActivityDetails(stravaId, mockTokenPayload)).rejects.toThrow('Activity not found');
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
     });
   });
 });

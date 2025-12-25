@@ -13,6 +13,7 @@ import { StravaService } from '../strava/strava.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { ActivityMapper } from './activity.mapper';
 import { StravaActivitySummary } from '../strava/types';
+import { StravaActivityDetail } from '../strava/types/strava-activity-detail.interface';
 import { ActivitySyncLimitExceededException } from './exceptions/activity-sync-limit-exceeded.exception';
 
 const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
@@ -192,6 +193,11 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
+          elevHigh: stravaActivity.elev_high,
+          elevLow: stravaActivity.elev_low,
+          averageWatts: stravaActivity.average_watts,
+          weightedAverageWatts: stravaActivity.weighted_average_watts,
+          maxWatts: stravaActivity.max_watts,
           raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
         update: {
@@ -213,6 +219,11 @@ export class ActivityService {
           hasKudoed: stravaActivity.has_kudoed,
           kudosCount: stravaActivity.kudos_count,
           averageCadence: stravaActivity.average_cadence,
+          elevHigh: stravaActivity.elev_high,
+          elevLow: stravaActivity.elev_low,
+          averageWatts: stravaActivity.average_watts,
+          weightedAverageWatts: stravaActivity.weighted_average_watts,
+          maxWatts: stravaActivity.max_watts,
           raw: stravaActivity as unknown as Prisma.InputJsonValue,
         },
       });
@@ -342,14 +353,43 @@ export class ActivityService {
     return prismaActivities.map(activity => ActivityMapper.toGraphQL(activity));
   }
 
-  async findById(activityId: number, userId: number): Promise<Activity | null> {
+  async findByStravaId(stravaId: bigint, userId: number): Promise<Activity | null> {
     const prismaActivity = await this.prisma.activity.findFirst({
       where: {
-        id: activityId,
+        stravaId,
         userId,
       },
     });
 
     return prismaActivity ? ActivityMapper.toGraphQL(prismaActivity) : null;
+  }
+
+  async fetchActivityDetails(userId: number, stravaId: bigint): Promise<Activity> {
+    const existingActivity = await this.prisma.activity.findFirst({
+      where: { stravaId, userId },
+    });
+
+    if (!existingActivity) {
+      throw new BadRequestException(`Activity with stravaId ${stravaId} not found`);
+    }
+
+    if (existingActivity.detailsFetched) {
+      return ActivityMapper.toGraphQL(existingActivity);
+    }
+
+    const stravaDetail: StravaActivityDetail = await this.stravaService.getActivityDetail(userId, Number(stravaId));
+
+    const updatedActivity = await this.prisma.activity.update({
+      where: { id: existingActivity.id },
+      data: {
+        calories: stravaDetail.calories,
+        splits: stravaDetail.splits_metric as unknown as Prisma.InputJsonValue,
+        description: stravaDetail.description,
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      },
+    });
+
+    return ActivityMapper.toGraphQL(updatedActivity);
   }
 }

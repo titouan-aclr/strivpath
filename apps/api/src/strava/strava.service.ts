@@ -4,6 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { firstValueFrom, catchError, throwError } from 'rxjs';
 import { AxiosResponse } from 'axios';
 import { StravaTokenResponse, StravaAthleteResponse, StravaActivitySummary } from './types';
+import { StravaActivityDetail } from './types/strava-activity-detail.interface';
 import { HttpError } from '../common/types';
 import { StravaTokenService } from './strava-token.service';
 
@@ -69,6 +70,20 @@ export class StravaService {
         })
         .pipe(this.handleStravaError('activities fetch')),
     )) as AxiosResponse<StravaActivitySummary[]>;
+
+    return response.data;
+  }
+
+  async getActivityDetail(userId: number, activityId: number): Promise<StravaActivityDetail> {
+    const accessToken = await this.stravaTokenService.getValidAccessToken(userId);
+
+    const response = (await firstValueFrom(
+      this.httpService
+        .get<StravaActivityDetail>(`${this.STRAVA_API_BASE}/api/v3/activities/${activityId}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        })
+        .pipe(this.handleStravaError('activity detail fetch')),
+    )) as AxiosResponse<StravaActivityDetail>;
 
     return response.data;
   }
