@@ -34,7 +34,7 @@ function generateSupportId(error: unknown): string {
     hash = (hash * 33) ^ errorString.charCodeAt(i);
   }
 
-  return `E-${Math.abs(hash).toString(36).toUpperCase().substring(0, 6)}`;
+  return `E-${Math.abs(hash).toString(36).toUpperCase().padStart(6, '0').substring(0, 6)}`;
 }
 
 function extractErrorCode(error: unknown): string | undefined {

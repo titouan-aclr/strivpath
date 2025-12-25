@@ -89,6 +89,67 @@
       "distanceAsc": "Shortest distance",
       "durationDesc": "Longest duration",
       "durationAsc": "Shortest duration"
+    },
+    "detail": {
+      "backButton": "Back to Activities",
+      "invalidId": {
+        "title": "Invalid Activity ID",
+        "description": "The provided activity ID is not valid. Please check the URL and try again.",
+        "backButton": "Back to Activities"
+      },
+      "error": {
+        "title": "Failed to load activity",
+        "description": "An error occurred while fetching activity details. Please try again.",
+        "retry": "Retry",
+        "backButton": "Back to Activities"
+      },
+      "notFound": {
+        "title": "Activity not found",
+        "description": "This activity does not exist or you do not have access to it.",
+        "backButton": "Back to Activities"
+      },
+      "stats": {
+        "distance": "Distance",
+        "duration": "Duration",
+        "elevation": "Elevation Gain",
+        "pace": "Pace",
+        "speed": "Speed",
+        "elapsed": "Elapsed",
+        "avgHr": "Avg Heart Rate",
+        "maxHr": "Max Heart Rate",
+        "cadence": "Cadence",
+        "altitude": "Altitude Range",
+        "calories": "Calories",
+        "power": "Avg Power"
+      },
+      "splits": {
+        "title": "Splits Analysis",
+        "description": "Pace evolution per kilometer",
+        "loading": "Loading splits data...",
+        "kmLabel": "Kilometer",
+        "paceLabel": "Pace (min/km)",
+        "speedLabel": "Speed (km/h)"
+      },
+      "description": {
+        "title": "Description"
+      },
+      "details": {
+        "error": {
+          "title": "Failed to load activity details",
+          "description": "Some details (calories, splits) could not be loaded from Strava.",
+          "retry": "Retry"
+        }
+      },
+      "sportTypes": {
+        "run": "Run",
+        "ride": "Ride",
+        "swim": "Swim",
+        "walk": "Walk",
+        "hike": "Hike",
+        "alpineski": "Alpine Ski",
+        "backcountryski": "Backcountry Ski",
+        "nordicski": "Nordic Ski"
+      }
     }
   },
   "layout": {

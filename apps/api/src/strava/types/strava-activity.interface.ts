@@ -44,7 +44,6 @@ export interface StravaActivitySummary {
   average_speed: number;
   max_speed: number;
   average_cadence?: number;
-  average_temp?: number;
   average_watts?: number;
   weighted_average_watts?: number;
   kilojoules?: number;
@@ -60,4 +59,5 @@ export interface StravaActivitySummary {
   total_photo_count: number;
   has_kudoed: boolean;
   suffer_score?: number;
+  max_watts?: number;
 }

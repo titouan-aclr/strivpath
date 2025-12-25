@@ -86,7 +86,7 @@ describe('ActivityCard', () => {
 
     it('should render sport icon', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} />);
-      const iconContainer = container.querySelector('.text-blue-500');
+      const iconContainer = container.querySelector('.text-strava-orange');
       expect(iconContainer).toBeInTheDocument();
     });
   });
