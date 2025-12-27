@@ -23,7 +23,7 @@ export async function AuthProvider({ children }: AuthProviderProps) {
     if (refreshToken) {
       return children(null);
     } else {
-      redirectToLoginServer(AUTH_CONFIG.redirectReasons.sessionExpired);
+      await redirectToLoginServer(AUTH_CONFIG.redirectReasons.sessionExpired);
     }
   }
 }

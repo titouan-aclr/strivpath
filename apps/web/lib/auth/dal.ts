@@ -13,13 +13,13 @@ export async function requireAuth(errorReason?: string): Promise<void> {
   const refreshToken = cookieStore.get('RefreshToken');
 
   if (!authToken && !refreshToken) {
-    redirectToLoginServer(errorReason);
+    await redirectToLoginServer(errorReason);
   }
 }
 
 export async function redirectIfAuthenticated(): Promise<void> {
   const isAuthenticated = await verifyAuth();
   if (isAuthenticated) {
-    redirectToDashboard();
+    await redirectToDashboard();
   }
 }
