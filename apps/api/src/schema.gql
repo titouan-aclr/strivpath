@@ -181,7 +181,7 @@ type Query {
   currentUser: User
 
   """Generate Strava OAuth authorization URL"""
-  stravaAuthUrl: String!
+  stravaAuthUrl(redirect: String): String!
 
   """Get the latest sync status"""
   syncStatus: SyncHistory

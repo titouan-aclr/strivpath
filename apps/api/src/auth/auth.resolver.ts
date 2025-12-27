@@ -1,4 +1,4 @@
-import { Resolver, Query, Mutation, Context } from '@nestjs/graphql';
+import { Resolver, Query, Mutation, Context, Args } from '@nestjs/graphql';
 import { UseGuards, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
@@ -24,12 +24,19 @@ export class AuthResolver {
   ) {}
 
   @Query(() => String, { description: 'Generate Strava OAuth authorization URL' })
-  stravaAuthUrl(): string {
+  stravaAuthUrl(@Args('redirect', { type: () => String, nullable: true }) redirect?: string): string {
     const clientId = this.configService.getOrThrow<string>('STRAVA_CLIENT_ID');
     const redirectUri = this.configService.getOrThrow<string>('STRAVA_REDIRECT_URI');
     const scope = 'read_all,activity:read_all,profile:read_all';
 
-    return `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
+    let authUrl = `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}`;
+
+    if (redirect) {
+      const state = Buffer.from(JSON.stringify({ redirect })).toString('base64url');
+      authUrl += `&state=${state}`;
+    }
+
+    return authUrl;
   }
 
   @Query(() => User, { nullable: true, description: 'Get current authenticated user' })

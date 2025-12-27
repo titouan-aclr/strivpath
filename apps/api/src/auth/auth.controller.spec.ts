@@ -66,9 +66,9 @@ describe('AuthController', () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
 
-      await controller.callback(code, null as any, null as any, mockResponse as Response);
+      await controller.callback(code, null as any, null as any, null as any, mockResponse as Response);
 
-      expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code);
+      expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code, undefined);
       expect(authCookieService.setAccessTokenCookie).toHaveBeenCalledWith(mockResponse, 'access-token');
       expect(authCookieService.setRefreshTokenCookie).toHaveBeenCalledWith(mockResponse, 'refresh-token');
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/dashboard');
@@ -85,7 +85,7 @@ describe('AuthController', () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
 
-      await controller.callback('code', null as any, null as any, mockResponse as Response);
+      await controller.callback('code', null as any, null as any, null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/onboarding');
     });
@@ -93,7 +93,7 @@ describe('AuthController', () => {
     it('should redirect to error page when error parameter present', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(null as any, 'access_denied', null as any, mockResponse as Response);
+      await controller.callback(null as any, 'access_denied', null as any, null as any, mockResponse as Response);
 
       expect(authService.handleOAuthCallback).not.toHaveBeenCalled();
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=access_denied');
@@ -102,29 +102,25 @@ describe('AuthController', () => {
     it('should redirect to error page when code missing', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(null as any, null as any, null as any, mockResponse as Response);
+      await controller.callback(null as any, null as any, null as any, null as any, mockResponse as Response);
 
       expect(authService.handleOAuthCallback).not.toHaveBeenCalled();
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=missing_code');
     });
 
     it('should redirect to error page on OAuth processing failure', async () => {
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
       mockConfigService.get.mockReturnValue('http://localhost:3000');
       mockAuthService.handleOAuthCallback.mockRejectedValue(new Error('OAuth failed'));
 
-      await controller.callback('code', null as any, null as any, mockResponse as Response);
+      await controller.callback('code', null as any, null as any, null as any, mockResponse as Response);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith('OAuth callback error:', expect.any(Error));
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=auth_failed');
-
-      consoleErrorSpy.mockRestore();
     });
 
     it('should use default frontend URL if not configured', async () => {
       mockConfigService.get.mockImplementation((key: string, defaultValue?: string) => defaultValue);
 
-      await controller.callback(null as any, 'error', null as any, mockResponse as Response);
+      await controller.callback(null as any, 'error', null as any, null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/auth/error?error=error');
     });
@@ -132,15 +128,73 @@ describe('AuthController', () => {
     it('should use custom frontend URL from configuration', async () => {
       mockConfigService.get.mockReturnValue('https://app.example.com');
 
-      await controller.callback(null as any, 'error', null as any, mockResponse as Response);
+      await controller.callback(null as any, 'error', null as any, null as any, mockResponse as Response);
 
       expect(mockResponse.redirect).toHaveBeenCalledWith('https://app.example.com/auth/error?error=error');
+    });
+
+    it('should decode state parameter and pass intendedRedirect to handleOAuthCallback', async () => {
+      const code = 'test-oauth-code';
+      const intendedRedirect = '/activities';
+      const state = Buffer.from(JSON.stringify({ redirect: intendedRedirect })).toString('base64url');
+      const mockResult = {
+        user: { id: 1, stravaId: 12345 },
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        redirectPath: intendedRedirect,
+      };
+
+      mockConfigService.get.mockReturnValue('http://localhost:3000');
+      mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
+
+      await controller.callback(code, null as any, null as any, state, mockResponse as Response);
+
+      expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code, intendedRedirect);
+      expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/activities');
+    });
+
+    it('should use default redirect when state parameter is invalid JSON', async () => {
+      const code = 'test-oauth-code';
+      const invalidState = 'invalid-base64';
+      const mockResult = {
+        user: { id: 1, stravaId: 12345 },
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        redirectPath: '/dashboard',
+      };
+
+      mockConfigService.get.mockReturnValue('http://localhost:3000');
+      mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
+
+      await controller.callback(code, null as any, null as any, invalidState, mockResponse as Response);
+
+      expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code, undefined);
+      expect(mockResponse.redirect).toHaveBeenCalledWith('http://localhost:3000/dashboard');
+    });
+
+    it('should validate redirect from state parameter before passing to handleOAuthCallback', async () => {
+      const code = 'test-oauth-code';
+      const maliciousRedirect = 'https://evil.com';
+      const state = Buffer.from(JSON.stringify({ redirect: maliciousRedirect })).toString('base64url');
+      const mockResult = {
+        user: { id: 1, stravaId: 12345 },
+        accessToken: 'access-token',
+        refreshToken: 'refresh-token',
+        redirectPath: '/dashboard',
+      };
+
+      mockConfigService.get.mockReturnValue('http://localhost:3000');
+      mockAuthService.handleOAuthCallback.mockResolvedValue(mockResult);
+
+      await controller.callback(code, null as any, null as any, state, mockResponse as Response);
+
+      expect(authService.handleOAuthCallback).toHaveBeenCalledWith(code, '/dashboard');
     });
 
     it('should not set cookies when error parameter present', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(null as any, 'access_denied', null as any, mockResponse as Response);
+      await controller.callback(null as any, 'access_denied', null as any, null as any, mockResponse as Response);
 
       expect(authCookieService.setAccessTokenCookie).not.toHaveBeenCalled();
       expect(authCookieService.setRefreshTokenCookie).not.toHaveBeenCalled();
@@ -149,7 +203,7 @@ describe('AuthController', () => {
     it('should not set cookies when code is missing', async () => {
       mockConfigService.get.mockReturnValue('http://localhost:3000');
 
-      await controller.callback(null as any, null as any, null as any, mockResponse as Response);
+      await controller.callback(null as any, null as any, null as any, null as any, mockResponse as Response);
 
       expect(authCookieService.setAccessTokenCookie).not.toHaveBeenCalled();
       expect(authCookieService.setRefreshTokenCookie).not.toHaveBeenCalled();

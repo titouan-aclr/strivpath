@@ -84,7 +84,7 @@ describe('AuthResolver', () => {
   });
 
   describe('stravaAuthUrl', () => {
-    it('should return Strava OAuth URL', () => {
+    it('should return Strava OAuth URL without state when no redirect provided', () => {
       mockConfigService.getOrThrow.mockReturnValueOnce('test-client-id');
       mockConfigService.getOrThrow.mockReturnValueOnce('http://localhost:3000/auth/callback');
 
@@ -94,6 +94,47 @@ describe('AuthResolver', () => {
       expect(result).toContain('client_id=test-client-id');
       expect(result).toContain('redirect_uri=http://localhost:3000/auth/callback');
       expect(result).toContain('scope=read_all,activity:read_all,profile:read_all');
+      expect(result).not.toContain('state=');
+    });
+
+    it('should encode redirect in state parameter as base64url', () => {
+      mockConfigService.getOrThrow.mockReturnValueOnce('test-client-id');
+      mockConfigService.getOrThrow.mockReturnValueOnce('http://localhost:3000/auth/callback');
+      const redirect = '/activities';
+
+      const result = resolver.stravaAuthUrl(redirect);
+
+      const expectedState = Buffer.from(JSON.stringify({ redirect })).toString('base64url');
+      expect(result).toContain(`state=${expectedState}`);
+    });
+
+    it('should include state parameter in OAuth URL when redirect provided', () => {
+      mockConfigService.getOrThrow.mockReturnValueOnce('test-client-id');
+      mockConfigService.getOrThrow.mockReturnValueOnce('http://localhost:3000/auth/callback');
+      const redirect = '/dashboard';
+
+      const result = resolver.stravaAuthUrl(redirect);
+
+      expect(result).toContain('state=');
+      expect(result).toContain('https://www.strava.com/oauth/authorize');
+      expect(result).toContain('client_id=test-client-id');
+    });
+
+    it('should correctly decode state parameter back to original redirect', () => {
+      mockConfigService.getOrThrow.mockReturnValueOnce('test-client-id');
+      mockConfigService.getOrThrow.mockReturnValueOnce('http://localhost:3000/auth/callback');
+      const redirect = '/onboarding/step2';
+
+      const result = resolver.stravaAuthUrl(redirect);
+
+      const stateMatch = result.match(/state=([^&]+)/);
+      expect(stateMatch).toBeTruthy();
+
+      if (stateMatch) {
+        const state = stateMatch[1];
+        const decoded = JSON.parse(Buffer.from(state, 'base64url').toString('utf-8'));
+        expect(decoded.redirect).toBe(redirect);
+      }
     });
   });
 
