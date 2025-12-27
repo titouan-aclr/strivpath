@@ -4,7 +4,6 @@ import { useTranslations } from 'next-intl';
 import { AuthContextProvider } from '@/lib/auth/context';
 import { AuthErrorBoundary } from '@/components/auth/auth-error-boundary';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
-import { useAuthToast } from '@/lib/auth/use-auth-toast';
 import { AuthLoadingFallback } from '@/components/auth/auth-loading-fallback';
 import { useCurrentUser } from '@/lib/auth/use-current-user';
 import type { User } from '@/lib/graphql';
@@ -16,8 +15,6 @@ interface DashboardClientLayoutProps {
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const t = useTranslations('auth.error');
-
-  useAuthToast();
 
   const translations = {
     title: t('title'),
