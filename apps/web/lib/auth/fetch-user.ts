@@ -3,18 +3,22 @@ import { CurrentUserDocument, UserFullInfoFragmentDoc } from '@/gql/graphql';
 import { getFragmentData, type User } from '@/lib/graphql';
 import { isNetworkError, isUnauthenticatedError } from './token-refresh-shared';
 import { getServerRequestContext, type ApolloServerContext } from '../apollo-ssr-context';
-
-export const MAX_RETRY_ATTEMPTS = 3;
-export const INITIAL_RETRY_DELAY = 1000;
+import { AUTH_CONFIG } from './auth.config';
 
 export const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+function isUser(value: unknown): value is User {
+  if (!value || typeof value !== 'object') return false;
+  const user = value as Record<string, unknown>;
+  return typeof user.id === 'string' && typeof user.username === 'string';
+}
 
 export async function fetchCurrentUserWithRetry(context?: ApolloServerContext): Promise<User | null> {
   let lastError: unknown;
 
   const apolloContext = context ?? (await getServerRequestContext());
 
-  for (let attempt = 1; attempt <= MAX_RETRY_ATTEMPTS; attempt++) {
+  for (let attempt = 1; attempt <= AUTH_CONFIG.retry.maxAttempts; attempt++) {
     try {
       const { data } = await getClient().query({
         query: CurrentUserDocument,
@@ -24,40 +28,24 @@ export async function fetchCurrentUserWithRetry(context?: ApolloServerContext): 
 
       const userFragment = data?.currentUser ? getFragmentData(UserFullInfoFragmentDoc, data.currentUser) : null;
 
-      return userFragment as User | null;
+      if (userFragment && isUser(userFragment)) {
+        return userFragment;
+      }
+
+      return null;
     } catch (error) {
       lastError = error;
 
       if (isUnauthenticatedError(error)) {
-        console.info('[SSR Auth] Access token expired - deferring to client-side refresh', {
-          attempt,
-          message: error instanceof Error ? error.message : 'Unauthorized',
-        });
         return null;
       }
 
       if (isNetworkError(error)) {
-        if (attempt < MAX_RETRY_ATTEMPTS) {
-          const delay = INITIAL_RETRY_DELAY * Math.pow(2, attempt - 1);
-          console.warn('[SSR Auth] Network error - retrying', {
-            attempt,
-            nextAttempt: attempt + 1,
-            delayMs: delay,
-          });
+        if (attempt < AUTH_CONFIG.retry.maxAttempts) {
+          const delay = AUTH_CONFIG.retry.initialDelay * Math.pow(2, attempt - 1);
           await sleep(delay);
           continue;
-        } else {
-          console.error('[SSR Auth] Network error - max retries exceeded', {
-            attempt,
-            error: error instanceof Error ? error.message : 'Unknown',
-          });
         }
-      } else {
-        console.error('[SSR Auth] Unexpected error', {
-          attempt,
-          type: error instanceof Error ? error.constructor.name : typeof error,
-          message: error instanceof Error ? error.message : 'Unknown',
-        });
       }
 
       throw error;

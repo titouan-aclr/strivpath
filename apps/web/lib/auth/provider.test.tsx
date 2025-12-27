@@ -1,7 +1,10 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { GraphQLError } from 'graphql';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
-import { fetchCurrentUserWithRetry, MAX_RETRY_ATTEMPTS, INITIAL_RETRY_DELAY } from './fetch-user';
+import { fetchCurrentUserWithRetry } from './fetch-user';
+import { AUTH_CONFIG } from './auth.config';
+
+const { maxAttempts: MAX_RETRY_ATTEMPTS, initialDelay: INITIAL_RETRY_DELAY } = AUTH_CONFIG.retry;
 
 const { mockQuery, mockGetClient } = vi.hoisted(() => {
   const mockQuery = vi.fn();
