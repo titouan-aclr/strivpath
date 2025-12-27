@@ -1,8 +1,12 @@
 'use client';
 
 import { ApolloLink, Observable, FetchResult } from '@apollo/client';
+import { print } from 'graphql';
+import { RefreshTokenDocument } from '@/gql/graphql';
 import { isUnauthenticatedError, isRefreshTokenOperation, isValidRefreshResponse } from './auth/token-refresh-shared';
 import { redirectToLogin } from './auth/redirect-to-login';
+
+const REFRESH_TOKEN_QUERY = print(RefreshTokenDocument);
 
 interface RefreshLinkContext {
   isRefreshing: boolean;
@@ -28,20 +32,7 @@ const performTokenRefresh = async (): Promise<boolean> => {
       },
       credentials: 'include',
       body: JSON.stringify({
-        query: `
-          mutation RefreshToken {
-            refreshToken {
-              user {
-                id
-                username
-                firstname
-                lastname
-                profile
-                profileMedium
-              }
-            }
-          }
-        `,
+        query: REFRESH_TOKEN_QUERY,
         operationName: 'RefreshToken',
       }),
     });
