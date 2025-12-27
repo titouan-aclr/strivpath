@@ -6,22 +6,29 @@ import { AlertCircle } from 'lucide-react';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { getClient } from '@/lib/apollo-client';
 import { StravaAuthUrlDocument, type StravaAuthUrlQuery } from '@/gql/graphql';
+import { validateRedirect } from '@/lib/auth/redirect-to-login';
+import { redirectIfAuthenticated } from '@/lib/auth/dal';
 
 type Props = {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; redirect?: string }>;
 };
 
 export default async function LoginPage({ params, searchParams }: Props) {
+  await redirectIfAuthenticated();
+
   const { locale } = await params;
-  const { error } = await searchParams;
+  const { error, redirect } = await searchParams;
   setRequestLocale(locale);
 
   const t = await getTranslations('auth.login');
 
+  const validatedRedirect = redirect ? validateRedirect(redirect) : undefined;
+
   const client = getClient();
   const { data } = await client.query<StravaAuthUrlQuery>({
     query: StravaAuthUrlDocument,
+    variables: { redirect: validatedRedirect },
   });
 
   return (

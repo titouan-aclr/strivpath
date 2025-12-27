@@ -492,6 +492,88 @@ describe('AuthService', () => {
 
       expect(result.redirectPath).toBe('/onboarding');
     });
+
+    it('should use intendedRedirect when provided instead of default redirect', async () => {
+      const mockCode = 'test-oauth-code';
+      const intendedRedirect = '/activities';
+      const mockAccessToken = 'mock-access-token';
+      const mockRefreshToken = 'mock-refresh-token';
+      const mockStravaTokens = {
+        token_type: 'Bearer',
+        expires_at: 1234567890,
+        expires_in: 21600,
+        refresh_token: 'strava-refresh',
+        access_token: 'strava-access',
+        athlete: {
+          id: 12345,
+          username: 'testathlete',
+          firstname: 'Test',
+          lastname: 'Athlete',
+        },
+      };
+
+      mockStravaService.exchangeCodeForToken.mockResolvedValue(mockStravaTokens);
+      mockUserService.upsertFromStrava.mockResolvedValue(mockUser);
+      mockConfigService.getOrThrow.mockReturnValue('secret');
+      mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
+      mockJwtService.sign.mockReturnValueOnce(mockAccessToken).mockReturnValueOnce(mockRefreshToken);
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId: mockUser.id,
+        onboardingCompleted: true,
+        selectedSports: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.handleOAuthCallback(mockCode, intendedRedirect);
+
+      expect(result).toEqual({
+        user: mockUser,
+        accessToken: mockAccessToken,
+        refreshToken: mockRefreshToken,
+        redirectPath: intendedRedirect,
+      });
+      expect(result.redirectPath).toBe(intendedRedirect);
+    });
+
+    it('should prioritize intendedRedirect over onboarding check', async () => {
+      const mockCode = 'test-oauth-code';
+      const intendedRedirect = '/settings';
+      const mockAccessToken = 'mock-access-token';
+      const mockRefreshToken = 'mock-refresh-token';
+      const mockStravaTokens = {
+        token_type: 'Bearer',
+        expires_at: 1234567890,
+        expires_in: 21600,
+        refresh_token: 'strava-refresh',
+        access_token: 'strava-access',
+        athlete: {
+          id: 12345,
+          username: 'testathlete',
+          firstname: 'Test',
+          lastname: 'Athlete',
+        },
+      };
+
+      mockStravaService.exchangeCodeForToken.mockResolvedValue(mockStravaTokens);
+      mockUserService.upsertFromStrava.mockResolvedValue(mockUser);
+      mockConfigService.getOrThrow.mockReturnValue('secret');
+      mockConfigService.get.mockReturnValueOnce('15m').mockReturnValueOnce('7d').mockReturnValueOnce('7d');
+      mockJwtService.sign.mockReturnValueOnce(mockAccessToken).mockReturnValueOnce(mockRefreshToken);
+      mockPrismaService.refreshToken.create.mockResolvedValue({});
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId: mockUser.id,
+        onboardingCompleted: false,
+        selectedSports: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      const result = await service.handleOAuthCallback(mockCode, intendedRedirect);
+
+      expect(result.redirectPath).toBe(intendedRedirect);
+    });
   });
 
   describe('revokeAllUserRefreshTokens', () => {

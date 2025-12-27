@@ -60,6 +60,7 @@ export class AuthService {
 
   async handleOAuthCallback(
     code: string,
+    intendedRedirect?: string,
   ): Promise<{ user: User; accessToken: string; refreshToken: string; redirectPath: string }> {
     const stravaTokens = await this.stravaService.exchangeCodeForToken(code);
     const athlete = stravaTokens.athlete;
@@ -72,7 +73,7 @@ export class AuthService {
       where: { userId: user.id },
     });
 
-    const redirectPath = preferences?.onboardingCompleted ? '/dashboard' : '/onboarding';
+    const redirectPath = intendedRedirect || (preferences?.onboardingCompleted ? '/dashboard' : '/onboarding');
 
     return { user, accessToken, refreshToken, redirectPath };
   }
