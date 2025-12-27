@@ -5,6 +5,8 @@ import { print } from 'graphql';
 import { RefreshTokenDocument } from '@/gql/graphql';
 import { isUnauthenticatedError, isRefreshTokenOperation, isValidRefreshResponse } from './auth/token-refresh-shared';
 import { redirectToLogin } from './auth/redirect-to-login';
+import { refreshStateManager } from './auth/use-refresh-state';
+import { AUTH_CONFIG } from './auth/auth.config';
 
 const REFRESH_TOKEN_QUERY = print(RefreshTokenDocument);
 
@@ -21,11 +23,12 @@ const refreshContext: RefreshLinkContext = {
 export const __resetRefreshContextForTests = () => {
   refreshContext.isRefreshing = false;
   refreshContext.pendingRequests = [];
+  refreshStateManager.reset();
 };
 
 const performTokenRefresh = async (): Promise<boolean> => {
   try {
-    const response = await fetch(process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql', {
+    const response = await fetch(AUTH_CONFIG.graphqlUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -38,24 +41,17 @@ const performTokenRefresh = async (): Promise<boolean> => {
     });
 
     if (!response.ok) {
-      console.warn('[RefreshLink] Refresh failed', {
-        status: response.status,
-      });
       return false;
     }
 
     const result: unknown = await response.json();
 
     if (!isValidRefreshResponse(result)) {
-      console.error('[RefreshLink] Invalid refresh response format');
       return false;
     }
 
     return true;
-  } catch (error) {
-    console.error('[RefreshLink] Token refresh failed', {
-      error: error instanceof Error ? error.message : 'Unknown',
-    });
+  } catch {
     return false;
   }
 };
@@ -68,6 +64,7 @@ const handleTokenRefresh = async (): Promise<boolean> => {
   }
 
   refreshContext.isRefreshing = true;
+  refreshStateManager.setRefreshing(true);
 
   try {
     const success = await performTokenRefresh();
@@ -76,15 +73,13 @@ const handleTokenRefresh = async (): Promise<boolean> => {
     refreshContext.pendingRequests = [];
 
     return success;
-  } catch (error) {
-    console.error('[RefreshLink] Exception during token refresh', {
-      error: error instanceof Error ? error.message : 'Unknown',
-    });
+  } catch {
     refreshContext.pendingRequests.forEach(callback => callback(false));
     refreshContext.pendingRequests = [];
     return false;
   } finally {
     refreshContext.isRefreshing = false;
+    refreshStateManager.setRefreshing(false);
   }
 };
 
@@ -115,20 +110,12 @@ export const createRefreshLink = () => {
                   if (refreshSuccess) {
                     attemptRequest(true);
                   } else {
-                    console.error('[RefreshLink] Refresh failed - redirecting to login');
-                    redirectToLogin('session_expired');
-                    observer.next(result);
-                    observer.complete();
+                    redirectToLogin(AUTH_CONFIG.redirectReasons.sessionExpired);
                   }
                 })
-                .catch(refreshError => {
+                .catch(() => {
                   isAwaitingRefresh = false;
-                  console.error('[RefreshLink] Refresh error - redirecting to login', {
-                    error: refreshError instanceof Error ? refreshError.message : 'Unknown',
-                  });
-                  redirectToLogin('session_expired');
-                  observer.next(result);
-                  observer.complete();
+                  redirectToLogin(AUTH_CONFIG.redirectReasons.sessionExpired);
                 });
               return;
             }
@@ -147,23 +134,17 @@ export const createRefreshLink = () => {
                   if (refreshSuccess) {
                     attemptRequest(true);
                   } else {
-                    console.error('[RefreshLink] Refresh failed - redirecting to login');
-                    redirectToLogin('session_expired');
-                    observer.error(error as unknown);
+                    redirectToLogin(AUTH_CONFIG.redirectReasons.sessionExpired);
                   }
                 })
-                .catch(refreshError => {
+                .catch(() => {
                   isAwaitingRefresh = false;
-                  console.error('[RefreshLink] Refresh error - redirecting to login', {
-                    error: refreshError instanceof Error ? refreshError.message : 'Unknown',
-                  });
-                  redirectToLogin('session_expired');
-                  observer.error(error as unknown);
+                  redirectToLogin(AUTH_CONFIG.redirectReasons.sessionExpired);
                 });
               return;
             }
 
-            observer.error(error as unknown);
+            observer.error(error);
           },
           complete: () => {
             if (!isAwaitingRefresh) {
