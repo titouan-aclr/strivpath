@@ -29,7 +29,7 @@ export async function fetchCurrentUserWithRetry(context?: ApolloServerContext): 
       lastError = error;
 
       if (isUnauthenticatedError(error)) {
-        console.warn('[SSR Auth] Access token expired - deferring to client refresh', {
+        console.info('[SSR Auth] Access token expired - deferring to client-side refresh', {
           attempt,
           message: error instanceof Error ? error.message : 'Unauthorized',
         });
