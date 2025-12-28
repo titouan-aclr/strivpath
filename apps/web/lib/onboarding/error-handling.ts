@@ -143,14 +143,6 @@ export function classifyOnboardingError(error: unknown, t: (key: string) => stri
 }
 
 export function logOnboardingError(context: LogOnboardingErrorContext): void {
-  console.error(`[Onboarding] Error in ${context.location}`, {
-    errorType: context.errorType,
-    errorCode: context.errorCode,
-    supportId: context.supportId,
-    userId: context.userId,
-    syncHistoryId: context.syncHistoryId,
-    timestamp: new Date().toISOString(),
-    message: context.rawError instanceof Error ? context.rawError.message : 'Unknown',
-    stack: context.rawError instanceof Error ? context.rawError.stack : undefined,
-  });
+  // TODO: Implement centralized logging system
+  void context;
 }

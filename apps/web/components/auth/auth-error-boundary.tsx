@@ -4,6 +4,7 @@ import React, { Component, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle } from 'lucide-react';
+import { redirectToLogin } from '@/lib/auth/redirect-to-login';
 
 export interface AuthErrorBoundaryTranslations {
   title?: string;
@@ -56,25 +57,8 @@ export class AuthErrorBoundary extends Component<AuthErrorBoundaryProps, AuthErr
     }
 
     if (this.errorCount >= this.MAX_ERRORS) {
-      console.error('[AuthErrorBoundary] Error loop detected - stopping retries', {
-        errorCount: this.errorCount,
-        error: error.message,
-      });
       return;
     }
-
-    console.error('[AuthErrorBoundary] Error caught', {
-      error: {
-        message: error.message,
-        name: error.name,
-        stack: error.stack,
-      },
-      errorInfo: {
-        componentStack: errorInfo.componentStack,
-      },
-      timestamp: new Date().toISOString(),
-      errorCount: this.errorCount,
-    });
 
     this.props.onError?.(error, errorInfo);
   }
@@ -84,7 +68,7 @@ export class AuthErrorBoundary extends Component<AuthErrorBoundaryProps, AuthErr
   };
 
   handleGoToLogin = () => {
-    window.location.href = '/login';
+    redirectToLogin();
   };
 
   render() {

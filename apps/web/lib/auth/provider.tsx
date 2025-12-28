@@ -1,7 +1,9 @@
-import { redirect } from 'next/navigation';
 import { requireAuth } from './dal';
+import { redirectToLoginServer } from './redirect-server';
 import { fetchCurrentUserWithRetry } from './fetch-user';
+import { AUTH_CONFIG } from './auth.config';
 import type { User } from '@/lib/graphql';
+import { cookies } from 'next/headers';
 
 interface AuthProviderProps {
   children: (user: User | null) => React.ReactNode;
@@ -10,21 +12,18 @@ interface AuthProviderProps {
 export async function AuthProvider({ children }: AuthProviderProps) {
   await requireAuth();
 
-  try {
-    const user = await fetchCurrentUserWithRetry();
+  const user = await fetchCurrentUserWithRetry();
 
-    if (user) {
-      console.info('[SSR Auth] Provider initialized with user', { userId: user.id });
-    } else {
-      console.warn('[SSR Auth] Provider initialized without user - client will refresh');
-    }
-
+  if (user) {
     return children(user);
-  } catch (error) {
-    console.error('[SSR Auth] Critical error during initialization', {
-      error: error instanceof Error ? error.message : 'Unknown',
-      stack: error instanceof Error ? error.stack : undefined,
-    });
-    redirect('/login?error=network_error');
+  } else {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('RefreshToken');
+
+    if (refreshToken) {
+      return children(null);
+    } else {
+      await redirectToLoginServer(AUTH_CONFIG.redirectReasons.sessionExpired);
+    }
   }
 }

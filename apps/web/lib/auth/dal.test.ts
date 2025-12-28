@@ -1,10 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { verifyAuth, requireAuth, redirectIfAuthenticated } from './dal';
 
-const { mockCookies, mockRedirect } = vi.hoisted(() => ({
+const { mockCookies, mockRedirect, mockGetLocale } = vi.hoisted(() => ({
   mockCookies: vi.fn(),
-  mockRedirect: vi.fn((url: string) => {
-    throw new Error(`NEXT_REDIRECT: ${url}`);
+  mockGetLocale: vi.fn().mockResolvedValue('en'),
+  mockRedirect: vi.fn((params: { href: string; locale: string }) => {
+    throw new Error(`NEXT_REDIRECT: ${params.href}`);
   }),
 }));
 
@@ -12,8 +13,12 @@ vi.mock('next/headers', () => ({
   cookies: mockCookies,
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   redirect: mockRedirect,
+}));
+
+vi.mock('next-intl/server', () => ({
+  getLocale: mockGetLocale,
 }));
 
 const createMockCookieStore = (hasAuthCookie: boolean) => ({
@@ -82,7 +87,7 @@ describe('Server-side Auth DAL', () => {
 
       await expect(requireAuth()).rejects.toThrow('NEXT_REDIRECT: /login');
 
-      expect(mockRedirect).toHaveBeenCalledWith('/login');
+      expect(mockRedirect).toHaveBeenCalledWith({ href: '/login', locale: 'en' });
       expect(mockRedirect).toHaveBeenCalledTimes(1);
     });
 
@@ -93,7 +98,7 @@ describe('Server-side Auth DAL', () => {
 
       await expect(requireAuth(errorReason)).rejects.toThrow('NEXT_REDIRECT: /login?error=session_expired');
 
-      expect(mockRedirect).toHaveBeenCalledWith('/login?error=session_expired');
+      expect(mockRedirect).toHaveBeenCalledWith({ href: '/login?error=session_expired', locale: 'en' });
       expect(mockRedirect).toHaveBeenCalledTimes(1);
     });
 
@@ -122,7 +127,7 @@ describe('Server-side Auth DAL', () => {
 
       await expect(requireAuth(errorReason)).rejects.toThrow();
 
-      expect(mockRedirect).toHaveBeenCalledWith(`/login?error=${errorReason}`);
+      expect(mockRedirect).toHaveBeenCalledWith({ href: `/login?error=${errorReason}`, locale: 'en' });
     });
 
     it('should not append error param when errorReason is empty string', async () => {
@@ -131,7 +136,7 @@ describe('Server-side Auth DAL', () => {
 
       await expect(requireAuth('')).rejects.toThrow('NEXT_REDIRECT: /login');
 
-      expect(mockRedirect).toHaveBeenCalledWith('/login');
+      expect(mockRedirect).toHaveBeenCalledWith({ href: '/login', locale: 'en' });
     });
   });
 
@@ -142,7 +147,7 @@ describe('Server-side Auth DAL', () => {
 
       await expect(redirectIfAuthenticated()).rejects.toThrow('NEXT_REDIRECT: /dashboard');
 
-      expect(mockRedirect).toHaveBeenCalledWith('/dashboard');
+      expect(mockRedirect).toHaveBeenCalledWith({ href: '/dashboard', locale: 'en' });
       expect(mockRedirect).toHaveBeenCalledTimes(1);
     });
 
@@ -162,7 +167,7 @@ describe('Server-side Auth DAL', () => {
       try {
         await redirectIfAuthenticated();
       } catch {
-        expect(mockRedirect).toHaveBeenCalledWith('/dashboard');
+        expect(mockRedirect).toHaveBeenCalledWith({ href: '/dashboard', locale: 'en' });
       }
     });
 

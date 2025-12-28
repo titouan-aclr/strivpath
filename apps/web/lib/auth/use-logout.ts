@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useMutation } from '@/lib/graphql';
 import { LogoutDocument, type LogoutMutation } from '@/gql/graphql';
+import { AUTH_CONFIG } from './auth.config';
 
 interface UseLogoutResult {
   logout: () => Promise<void>;
@@ -24,12 +25,11 @@ export function useLogout(): UseLogoutResult {
 
     try {
       await logoutMutation();
-      router.push('/login');
+      router.push(AUTH_CONFIG.routes.login);
       router.refresh();
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Logout failed');
       setError(error);
-      console.error('Logout error:', error.message);
       toast.error('Failed to logout', {
         description: 'Please try again or refresh the page.',
       });

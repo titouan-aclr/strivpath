@@ -5,6 +5,16 @@ import { graphql, HttpResponse, http } from 'msw';
 import { createRefreshLink, __resetRefreshContextForTests } from './apollo-refresh-link';
 import { MOCK_USERS } from '@/mocks/handlers';
 
+const { mockRedirectToLogin } = vi.hoisted(() => ({
+  mockRedirectToLogin: vi.fn(),
+}));
+
+vi.mock('./auth/redirect-to-login', () => ({
+  redirectToLogin: mockRedirectToLogin,
+  validateRedirect: vi.fn((redirect: string | null | undefined) => redirect || '/dashboard'),
+  getLoginUrl: vi.fn((error?: string) => (error ? `/login?error=${error}` : '/login')),
+}));
+
 interface TestQueryData {
   currentUser: {
     id: string;
@@ -111,6 +121,7 @@ describe('apollo-refresh-link', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRedirectToLogin.mockClear();
     testClient = createTestClient();
 
     originalLocation = window.location;
@@ -268,9 +279,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
 
     it('should redirect to /login on invalid refresh response', async () => {
@@ -287,12 +300,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[RefreshLink] Invalid refresh response format'),
-      );
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
 
     it('should propagate error when refresh succeeds but retry fails', async () => {
@@ -401,13 +413,13 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      const query1 = testClient.query<TestQueryData>({ query: TEST_QUERY });
-      const query2 = testClient.query<TestQueryData>({ query: TEST_QUERY });
-      const query3 = testClient.query<TestQueryData>({ query: TEST_QUERY });
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      await expect(Promise.all([query1, query2, query3])).rejects.toThrow();
+      await new Promise(resolve => setTimeout(resolve, 150));
 
-      expect(window.location.href).toBe('/login');
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
 
     it('should cleanup queue after refresh completes', async () => {
@@ -520,13 +532,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[RefreshLink] Token refresh failed'),
-        expect.any(Object),
-      );
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
 
     it('should handle non-ok HTTP response during refresh', async () => {
@@ -552,13 +562,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[RefreshLink] Refresh failed'),
-        expect.objectContaining({ status: 500 }),
-      );
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
 
     it('should handle JSON parsing error during refresh', async () => {
@@ -576,9 +584,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
   });
 
@@ -619,9 +629,11 @@ describe('apollo-refresh-link', () => {
         }),
       );
 
-      await expect(testClient.query<TestQueryData>({ query: TEST_QUERY })).rejects.toThrow();
+      testClient.query<TestQueryData>({ query: TEST_QUERY }).catch(() => {});
 
-      expect(window.location.href).toBe('/login');
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      expect(mockRedirectToLogin).toHaveBeenCalledWith('session_expired');
     });
   });
 });

@@ -12,14 +12,14 @@ export default function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const pathnameWithoutLocale = pathname.replace(/^\/en/, '') || '/';
   const authToken = request.cookies.get('Authentication')?.value;
-  const isAuthenticated = !!authToken;
+  const refreshToken = request.cookies.get('RefreshToken')?.value;
+  const isAuthenticated = !!authToken || !!refreshToken;
   const isProtectedRoute =
     ONBOARDING_ROUTES.some(route => pathnameWithoutLocale.startsWith(route)) ||
     DASHBOARD_ROUTES.some(route => pathnameWithoutLocale.startsWith(route));
 
   if (isProtectedRoute && !isAuthenticated) {
-    const locale = pathname.split('/')[1];
-    const loginUrl = new URL(`/${locale}/login`, request.url);
+    const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathnameWithoutLocale);
     return NextResponse.redirect(loginUrl);
   }

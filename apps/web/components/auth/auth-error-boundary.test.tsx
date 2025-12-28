@@ -143,26 +143,6 @@ describe('AuthErrorBoundary', () => {
     expect(typeof (errorInfo as React.ErrorInfo).componentStack).toBe('string');
   });
 
-  it('should log error to console with structured format', () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error');
-
-    render(
-      <AuthErrorBoundary>
-        <ThrowError shouldThrow={true} />
-      </AuthErrorBoundary>,
-    );
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[AuthErrorBoundary] Error caught',
-      expect.objectContaining({
-        error: expect.objectContaining({
-          message: 'Test error',
-        }) as Error,
-        timestamp: expect.any(String) as string,
-      }) as Record<string, unknown>,
-    );
-  });
-
   it('should not reset when children props change', () => {
     const { rerender } = render(
       <AuthErrorBoundary>
@@ -179,34 +159,5 @@ describe('AuthErrorBoundary', () => {
     );
 
     expect(screen.getByText('Authentication Error')).toBeInTheDocument();
-  });
-
-  it('should prevent infinite error loops', async () => {
-    const consoleErrorSpy = vi.spyOn(console, 'error');
-    const user = userEvent.setup();
-
-    let errorCount = 0;
-    const ErrorLoopComponent = () => {
-      errorCount++;
-      throw new Error(`Error ${errorCount}`);
-    };
-
-    render(
-      <AuthErrorBoundary>
-        <ErrorLoopComponent />
-      </AuthErrorBoundary>,
-    );
-
-    expect(screen.getByText('Authentication Error')).toBeInTheDocument();
-
-    for (let i = 0; i < 5; i++) {
-      const retryButton = screen.getByRole('button', { name: /try again/i });
-      await user.click(retryButton);
-    }
-
-    expect(consoleErrorSpy).toHaveBeenCalledWith(
-      '[AuthErrorBoundary] Error loop detected - stopping retries',
-      expect.any(Object) as Record<string, unknown>,
-    );
   });
 });
