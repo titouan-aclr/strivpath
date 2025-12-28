@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
+import { redirectToLoginServer, redirectToDashboard } from './redirect-server';
 
 export async function verifyAuth(): Promise<boolean> {
   const cookieStore = await cookies();
@@ -8,16 +8,18 @@ export async function verifyAuth(): Promise<boolean> {
 }
 
 export async function requireAuth(errorReason?: string): Promise<void> {
-  const isAuthenticated = await verifyAuth();
-  if (!isAuthenticated) {
-    const errorParam = errorReason ? `?error=${errorReason}` : '';
-    redirect(`/login${errorParam}`);
+  const cookieStore = await cookies();
+  const authToken = cookieStore.get('Authentication');
+  const refreshToken = cookieStore.get('RefreshToken');
+
+  if (!authToken && !refreshToken) {
+    await redirectToLoginServer(errorReason);
   }
 }
 
 export async function redirectIfAuthenticated(): Promise<void> {
   const isAuthenticated = await verifyAuth();
   if (isAuthenticated) {
-    redirect('/dashboard');
+    await redirectToDashboard();
   }
 }

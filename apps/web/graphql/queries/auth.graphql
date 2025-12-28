@@ -4,6 +4,6 @@ query CurrentUser {
   }
 }
 
-query StravaAuthUrl {
-  stravaAuthUrl
+query StravaAuthUrl($redirect: String) {
+  stravaAuthUrl(redirect: $redirect)
 }

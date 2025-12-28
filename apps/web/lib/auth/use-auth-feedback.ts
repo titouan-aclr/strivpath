@@ -1,16 +1,13 @@
 'use client';
 
-import { useDeferredValue } from 'react';
-import { useAuth } from './context';
+import { useRefreshState } from './use-refresh-state';
 
 export function useAuthFeedback() {
-  const { isLoading, isRefreshing, error } = useAuth();
-
-  const deferredIsRefreshing = useDeferredValue(isRefreshing);
+  const { isRefreshing } = useRefreshState();
 
   return {
-    isLoading,
-    showRefreshing: deferredIsRefreshing,
-    error,
+    isLoading: false,
+    showRefreshing: isRefreshing,
+    error: null,
   };
 }

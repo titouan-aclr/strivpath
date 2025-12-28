@@ -1,23 +1,10 @@
-import { ApolloClient, HttpLink, InMemoryCache, from } from '@apollo/client';
+import { ApolloClient, HttpLink, InMemoryCache } from '@apollo/client';
 import { registerApolloClient } from '@apollo/client-integration-nextjs';
-import { CombinedGraphQLErrors } from '@apollo/client/errors';
-import { ErrorLink } from '@apollo/client/link/error';
-
-const errorLink = new ErrorLink(({ error }) => {
-  if (CombinedGraphQLErrors.is(error)) {
-    error.errors.forEach(({ message, locations, path }) => {
-      console.error(
-        `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(locations)}, Path: ${String(path)}`,
-      );
-    });
-  } else {
-    console.error('[Network error]:', error);
-  }
-});
+import { AUTH_CONFIG } from './auth/auth.config';
 
 export function createApolloClient() {
   const httpLink = new HttpLink({
-    uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
+    uri: AUTH_CONFIG.graphqlUrl,
     credentials: 'include',
   });
 
@@ -39,7 +26,7 @@ export function createApolloClient() {
         },
       },
     }),
-    link: from([errorLink, httpLink]),
+    link: httpLink,
     defaultOptions: {
       watchQuery: {
         fetchPolicy: 'cache-and-network',
