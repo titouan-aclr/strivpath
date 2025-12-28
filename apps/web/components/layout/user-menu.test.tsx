@@ -43,10 +43,7 @@ describe('UserMenu', () => {
   it('should not render when user is null', () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: null,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -67,10 +64,7 @@ describe('UserMenu', () => {
   it('should render user menu with avatar and name', () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -91,10 +85,7 @@ describe('UserMenu', () => {
   it('should display refresh badge when showRefreshing is true', () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -116,10 +107,7 @@ describe('UserMenu', () => {
   it('should not display refresh badge when showRefreshing is false', () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -141,10 +129,7 @@ describe('UserMenu', () => {
   it('should display tooltip on refresh badge', () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -167,10 +152,7 @@ describe('UserMenu', () => {
     const userWithoutFirstname = { ...mockUser, firstname: null };
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: userWithoutFirstname,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -192,10 +174,7 @@ describe('UserMenu', () => {
   it('should show loading state on logout button when isLoading', async () => {
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,
@@ -223,10 +202,7 @@ describe('UserMenu', () => {
     const mockLogout = vi.fn();
     vi.mocked(authContext.useAuth).mockReturnValue({
       user: mockUser,
-      isLoading: false,
-      isRefreshing: false,
-      error: null,
-      refetch: vi.fn(),
+      setUser: vi.fn(),
     });
     vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
       isLoading: false,

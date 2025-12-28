@@ -1,13 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { CombinedGraphQLErrors } from '@apollo/client/errors';
 import { GraphQLError } from 'graphql';
-import {
-  classifyOnboardingError,
-  isStravaTokenExpired,
-  isRateLimitError,
-  isSyncFailedError,
-  logOnboardingError,
-} from './error-handling';
+import { classifyOnboardingError, isStravaTokenExpired, isRateLimitError, isSyncFailedError } from './error-handling';
 
 const mockT = (key: string) => {
   const translations: Record<string, string> = {
@@ -221,76 +215,6 @@ describe('classifyOnboardingError', () => {
     const result = classifyOnboardingError(error, mockT);
 
     expect(result.rawError).toBe(error);
-  });
-});
-
-describe('logOnboardingError', () => {
-  it('should log error with structured context', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-    const error = new Error('Test error');
-
-    logOnboardingError({
-      location: 'test-location',
-      errorType: 'network',
-      errorCode: 'TEST_CODE',
-      supportId: 'E-ABC123',
-      userId: 42,
-      syncHistoryId: 100,
-      rawError: error,
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Onboarding] Error in test-location',
-      expect.objectContaining({
-        errorType: 'network',
-        errorCode: 'TEST_CODE',
-        supportId: 'E-ABC123',
-        userId: 42,
-        syncHistoryId: 100,
-        message: 'Test error',
-        timestamp: expect.any(String) as string,
-        stack: expect.any(String) as string,
-      }),
-    );
-
-    consoleSpy.mockRestore();
-  });
-
-  it('should handle non-Error objects in rawError', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    logOnboardingError({
-      location: 'test-location',
-      errorType: 'unknown',
-      supportId: 'E-DEF456',
-      rawError: 'string error',
-    });
-
-    expect(consoleSpy).toHaveBeenCalledWith(
-      '[Onboarding] Error in test-location',
-      expect.objectContaining({
-        message: 'Unknown',
-        stack: undefined,
-      }),
-    );
-
-    consoleSpy.mockRestore();
-  });
-
-  it('should format timestamp as ISO string', () => {
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-
-    logOnboardingError({
-      location: 'test-location',
-      errorType: 'network',
-      supportId: 'E-GHI789',
-      rawError: new Error('Test'),
-    });
-
-    const loggedData = consoleSpy.mock.calls[0]?.[1] as { timestamp: string } | undefined;
-    expect(loggedData?.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
-
-    consoleSpy.mockRestore();
   });
 });
 
