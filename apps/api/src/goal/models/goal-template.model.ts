@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, Float } from '@nestjs/graphql';
 import { GoalTargetType } from '../enums/goal-target-type.enum';
 import { GoalPeriodType } from '../enums/goal-period-type.enum';
+import { SportType } from '../../user-preferences/enums/sport-type.enum';
 
 @ObjectType({
   description: 'A preset goal template with localized title and description',
@@ -20,11 +21,11 @@ export class GoalTemplate {
   })
   periodType!: GoalPeriodType;
 
-  @Field({
+  @Field(() => SportType, {
     nullable: true,
     description: 'Suggested sport type (Run, Ride, Swim, or null for all sports)',
   })
-  sportType?: string;
+  sportType?: SportType;
 
   @Field({
     description: 'Template category (beginner, intermediate, advanced, challenge)',

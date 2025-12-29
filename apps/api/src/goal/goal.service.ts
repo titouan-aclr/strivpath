@@ -4,9 +4,9 @@ import { GoalMapper } from './goal.mapper';
 import { Goal } from './models/goal.model';
 import { CreateGoalInput, UpdateGoalInput } from './dto/goal.input';
 import { GoalPeriodHelper } from './helpers/goal-period.helper';
-import { GoalTargetType } from './enums/goal-target-type.enum';
 import { GoalStatus } from './enums/goal-status.enum';
 import { Prisma } from '@prisma/client';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 @Injectable()
 export class GoalService {
@@ -30,6 +30,8 @@ export class GoalService {
         periodType: input.periodType,
         startDate,
         endDate,
+        isRecurring: input.isRecurring ?? false,
+        recurrenceEndDate: input.recurrenceEndDate ? new Date(input.recurrenceEndDate) : null,
         sportType: input.sportType,
         status: GoalStatus.ACTIVE,
         currentValue: 0,
@@ -108,11 +110,13 @@ export class GoalService {
     userId: number,
     options?: {
       status?: GoalStatus;
-      sportType?: string;
+      sportType?: SportType;
       includeArchived?: boolean;
     },
   ): Promise<Goal[]> {
-    const { status, sportType, includeArchived = false } = options ?? {};
+    const status: GoalStatus | undefined = options?.status;
+    const sportType: SportType | undefined = options?.sportType;
+    const includeArchived: boolean = options?.includeArchived ?? false;
 
     const where: Prisma.GoalWhereInput = {
       userId,
@@ -153,9 +157,8 @@ export class GoalService {
 
     const currentValue = await this.calculateProgress(goal);
 
-    const shouldComplete = currentValue >= goal.targetValue && (goal.status as GoalStatus) === GoalStatus.ACTIVE;
-    const shouldFail =
-      new Date() > goal.endDate && currentValue < goal.targetValue && (goal.status as GoalStatus) === GoalStatus.ACTIVE;
+    const shouldComplete = currentValue >= goal.targetValue && goal.status === 'ACTIVE';
+    const shouldFail = new Date() > goal.endDate && currentValue < goal.targetValue && goal.status === 'ACTIVE';
 
     await this.prisma.goal.update({
       where: { id: goalId },
@@ -188,8 +191,8 @@ export class GoalService {
       ...(goal.sportType && { type: goal.sportType }),
     };
 
-    switch (goal.targetType as GoalTargetType) {
-      case GoalTargetType.DISTANCE: {
+    switch (goal.targetType) {
+      case 'DISTANCE': {
         const result = await this.prisma.activity.aggregate({
           where: activityFilter,
           _sum: { distance: true },
@@ -197,7 +200,7 @@ export class GoalService {
         return (result._sum.distance ?? 0) / 1000;
       }
 
-      case GoalTargetType.DURATION: {
+      case 'DURATION': {
         const result = await this.prisma.activity.aggregate({
           where: activityFilter,
           _sum: { movingTime: true },
@@ -205,7 +208,7 @@ export class GoalService {
         return (result._sum.movingTime ?? 0) / 3600;
       }
 
-      case GoalTargetType.ELEVATION: {
+      case 'ELEVATION': {
         const result = await this.prisma.activity.aggregate({
           where: activityFilter,
           _sum: { totalElevationGain: true },
@@ -213,7 +216,7 @@ export class GoalService {
         return result._sum.totalElevationGain ?? 0;
       }
 
-      case GoalTargetType.FREQUENCY: {
+      case 'FREQUENCY': {
         const count = await this.prisma.activity.count({
           where: activityFilter,
         });
@@ -228,7 +231,7 @@ export class GoalService {
   private async findByIdOrThrow(id: number, userId: number): Promise<Goal> {
     const goal = await this.findById(id, userId);
     if (!goal) {
-      throw new NotFoundException(`Goal with ID ${id} not found or does not belong to user ${userId}`);
+      throw new NotFoundException(`Goal with ID ${id} not found`);
     }
     return goal;
   }
