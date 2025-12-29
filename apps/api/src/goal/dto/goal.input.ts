@@ -1,7 +1,18 @@
 import { InputType, Field, Int, Float } from '@nestjs/graphql';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, IsDateString, Min, MinLength } from 'class-validator';
+import {
+  IsEnum,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsDateString,
+  IsBoolean,
+  Min,
+  MinLength,
+} from 'class-validator';
 import { GoalTargetType } from '../enums/goal-target-type.enum';
 import { GoalPeriodType } from '../enums/goal-period-type.enum';
+import { SportType } from '../../user-preferences/enums/sport-type.enum';
 
 @InputType({ description: 'Input for creating a new goal' })
 export class CreateGoalInput {
@@ -44,11 +55,28 @@ export class CreateGoalInput {
 
   @Field({
     nullable: true,
+    defaultValue: false,
+    description: 'Whether this goal repeats automatically each period',
+  })
+  @IsOptional()
+  @IsBoolean()
+  isRecurring?: boolean;
+
+  @Field({
+    nullable: true,
+    description: 'End date for recurring goals (null = repeats indefinitely)',
+  })
+  @IsOptional()
+  @IsDateString()
+  recurrenceEndDate?: string;
+
+  @Field(() => SportType, {
+    nullable: true,
     description: 'Sport type filter (Run, Ride, Swim) or null for all sports',
   })
   @IsOptional()
-  @IsString()
-  sportType?: string;
+  @IsEnum(SportType)
+  sportType?: SportType;
 }
 
 @InputType({ description: 'Input for updating an existing goal' })

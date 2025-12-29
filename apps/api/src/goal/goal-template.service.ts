@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { UserPreferencesService } from '../user-preferences/user-preferences.service';
 import { GoalTemplateMapper } from './goal-template.mapper';
 import { GoalTemplate } from './models/goal-template.model';
 import { Goal } from './models/goal.model';
@@ -11,7 +12,10 @@ import { GoalPeriodType } from './enums/goal-period-type.enum';
 
 @Injectable()
 export class GoalTemplateService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly userPreferencesService: UserPreferencesService,
+  ) {}
 
   async findAll(locale = 'en'): Promise<GoalTemplate[]> {
     const prismaTemplates = await this.prisma.goalTemplate.findMany({
@@ -41,13 +45,7 @@ export class GoalTemplateService {
     return prismaTemplates.map(template => GoalTemplateMapper.toGraphQL(template, locale));
   }
 
-  async createFromTemplate(
-    templateId: number,
-    userId: number,
-    startDate: string,
-    locale = 'en',
-    customTitle?: string,
-  ): Promise<Goal> {
+  async createFromTemplate(templateId: number, userId: number, startDate: string, customTitle?: string): Promise<Goal> {
     const prismaTemplate = await this.prisma.goalTemplate.findUnique({
       where: { id: templateId },
       include: { translations: true },
@@ -60,6 +58,9 @@ export class GoalTemplateService {
     if (prismaTemplate.translations.length === 0) {
       throw new BadRequestException(`Template ${templateId} has no translations`);
     }
+
+    const userPreferences = await this.userPreferencesService.findByUserId(userId);
+    const locale = userPreferences?.locale ?? 'en';
 
     const { title, description } = TranslationHelper.selectTranslation(prismaTemplate.translations, locale);
 

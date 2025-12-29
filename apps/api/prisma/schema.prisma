@@ -160,27 +160,30 @@ model GoalTemplateTranslation {
 }
 
 model Goal {
-  id           Int       @id @default(autoincrement())
-  userId       Int
-  title        String
-  description  String?
-  targetType   String
-  targetValue  Float
-  periodType   String
-  startDate    DateTime
-  endDate      DateTime
-  templateId   Int?
-  sportType    String?
-  status       String    @default("ACTIVE")
-  currentValue Float     @default(0)
-  completedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
+  id                Int       @id @default(autoincrement())
+  userId            Int
+  title             String
+  description       String?
+  targetType        String
+  targetValue       Float
+  periodType        String
+  startDate         DateTime
+  endDate           DateTime
+  isRecurring       Boolean   @default(false)
+  recurrenceEndDate DateTime?
+  templateId        Int?
+  sportType         String?
+  status            String    @default("ACTIVE")
+  currentValue      Float     @default(0)
+  completedAt       DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
 
   user     User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   template GoalTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
 
   @@index([userId, status])
   @@index([userId, endDate])
+  @@index([userId, sportType])
   @@index([templateId])
 }

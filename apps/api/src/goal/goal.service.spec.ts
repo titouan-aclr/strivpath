@@ -6,6 +6,7 @@ import { GoalPeriodType } from './enums/goal-period-type.enum';
 import { GoalStatus } from './enums/goal-status.enum';
 import { NotFoundException } from '@nestjs/common';
 import { Goal as PrismaGoal } from '@prisma/client';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 const createMockPrismaService = () => ({
   goal: {
@@ -32,6 +33,8 @@ const createMockPrismaGoal = (overrides?: Partial<PrismaGoal>): PrismaGoal => ({
   periodType: 'MONTHLY',
   startDate: new Date('2025-01-01'),
   endDate: new Date('2025-01-31'),
+  isRecurring: false,
+  recurrenceEndDate: null,
   templateId: null,
   sportType: 'Run',
   status: 'ACTIVE',
@@ -71,7 +74,7 @@ describe('GoalService', () => {
         targetValue: 50,
         periodType: GoalPeriodType.MONTHLY,
         startDate: '2025-01-15',
-        sportType: 'Run',
+        sportType: SportType.RUN,
       };
 
       const createdGoal = createMockPrismaGoal({
@@ -273,12 +276,12 @@ describe('GoalService', () => {
       const userId = 42;
       prisma.goal.findMany.mockResolvedValue([]);
 
-      await service.findAll(userId, { sportType: 'Run' });
+      await service.findAll(userId, { sportType: SportType.RUN });
 
       expect(prisma.goal.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            sportType: 'Run',
+            sportType: SportType.RUN,
           }),
         }),
       );
