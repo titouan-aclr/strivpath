@@ -10,6 +10,7 @@ import { UserPreferencesModule } from './user-preferences/user-preferences.modul
 import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
 import { ActivityModule } from './activity/activity.module';
+import { GoalModule } from './goal/goal.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
@@ -50,6 +51,7 @@ import { GraphQLBigInt } from 'graphql-scalars';
     UserPreferencesModule,
     StravaModule,
     ActivityModule,
+    GoalModule,
   ],
   controllers: [AppController],
   providers: [AppService],
