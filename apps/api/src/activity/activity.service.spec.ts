@@ -3,6 +3,7 @@ import { ActivityService } from './activity.service';
 import { PrismaService } from '../database/prisma.service';
 import { StravaService } from '../strava/strava.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
+import { GoalProgressUpdateService } from '../goal/goal-progress-update.service';
 import { BadRequestException } from '@nestjs/common';
 import { SyncStatus } from '../sync-history/enums/sync-status.enum';
 import { SyncStage } from '../sync-history/enums/sync-stage.enum';
@@ -16,6 +17,7 @@ describe('ActivityService', () => {
   let prismaService: PrismaService;
   let stravaService: StravaService;
   let syncHistoryService: SyncHistoryService;
+  let goalProgressUpdateService: GoalProgressUpdateService;
 
   const mockPrismaService = {
     userPreferences: {
@@ -40,6 +42,15 @@ describe('ActivityService', () => {
     findById: jest.fn(),
   };
 
+  const mockGoalProgressUpdateService = {
+    updateAllGoalsForUser: jest.fn().mockResolvedValue({
+      totalGoals: 0,
+      successCount: 0,
+      failureCount: 0,
+      errors: [],
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -47,6 +58,7 @@ describe('ActivityService', () => {
         { provide: PrismaService, useValue: mockPrismaService },
         { provide: StravaService, useValue: mockStravaService },
         { provide: SyncHistoryService, useValue: mockSyncHistoryService },
+        { provide: GoalProgressUpdateService, useValue: mockGoalProgressUpdateService },
       ],
     }).compile();
 
@@ -54,6 +66,7 @@ describe('ActivityService', () => {
     prismaService = module.get<PrismaService>(PrismaService);
     stravaService = module.get<StravaService>(StravaService);
     syncHistoryService = module.get<SyncHistoryService>(SyncHistoryService);
+    goalProgressUpdateService = module.get<GoalProgressUpdateService>(GoalProgressUpdateService);
   });
 
   afterEach(() => {

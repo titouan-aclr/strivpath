@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { Activity } from './models/activity.model';
 import { SyncHistory } from '../sync-history/models/sync-history.model';
 import { SyncStatus } from '../sync-history/enums/sync-status.enum';
@@ -15,6 +15,7 @@ import { ActivityMapper } from './activity.mapper';
 import { StravaActivitySummary } from '../strava/types';
 import { StravaActivityDetail } from '../strava/types/strava-activity-detail.interface';
 import { ActivitySyncLimitExceededException } from './exceptions/activity-sync-limit-exceeded.exception';
+import { GoalProgressUpdateService } from '../goal/goal-progress-update.service';
 
 const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
   [SportType.RUN]: new Set(['Run', 'TrailRun', 'VirtualRun']),
@@ -31,10 +32,13 @@ const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
 
 @Injectable()
 export class ActivityService {
+  private readonly logger = new Logger(ActivityService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly stravaService: StravaService,
     private readonly syncHistoryService: SyncHistoryService,
+    private readonly goalProgressUpdateService: GoalProgressUpdateService,
   ) {}
 
   private getActivitySportType(stravaType: string): SportType | null {
@@ -276,6 +280,34 @@ export class ActivityService {
       await this.syncHistoryService.update(sync.id, {
         stage: SyncStage.COMPUTING,
       });
+
+      const earliestActivityDate = allActivities.reduce(
+        (earliest, activity) => {
+          const activityDate = new Date(activity.start_date);
+          return !earliest || activityDate < earliest ? activityDate : earliest;
+        },
+        null as Date | null,
+      );
+
+      try {
+        const goalUpdateResult = await this.goalProgressUpdateService.updateAllGoalsForUser(
+          userId,
+          earliestActivityDate ?? undefined,
+        );
+
+        if (goalUpdateResult.failureCount > 0) {
+          this.logger.warn(
+            `Goal progress update completed with ${goalUpdateResult.failureCount} failures for user ${userId}`,
+            { errors: goalUpdateResult.errors },
+          );
+        } else if (goalUpdateResult.successCount > 0) {
+          this.logger.log(`Successfully updated ${goalUpdateResult.successCount} goals for user ${userId}`);
+        }
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const errorStack = error instanceof Error ? error.stack : undefined;
+        this.logger.error(`Failed to update goal progress for user ${userId}: ${errorMessage}`, errorStack);
+      }
 
       await this.syncHistoryService.update(sync.id, {
         status: SyncStatus.COMPLETED,
