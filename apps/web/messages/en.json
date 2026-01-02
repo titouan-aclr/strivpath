@@ -273,6 +273,117 @@
     },
     "refreshing": "Refreshing session..."
   },
+  "goals": {
+    "title": "My Goals",
+    "description": "Track your progress and achieve your objectives",
+    "newGoal": "New Goal",
+    "meta": {
+      "title": "Goals - Stravanalytics",
+      "description": "Set and track your sports goals"
+    },
+    "filters": {
+      "showFilters": "Filters",
+      "title": "Filter Goals",
+      "clear": "Clear",
+      "apply": "Apply",
+      "moreFilters": "More Filters",
+      "sport": {
+        "label": "Sport Type",
+        "all": "All Sports",
+        "run": "Running",
+        "ride": "Cycling",
+        "swim": "Swimming"
+      },
+      "status": {
+        "label": "Status",
+        "all": "All",
+        "active": "Active",
+        "completed": "Completed",
+        "failed": "Failed",
+        "archived": "Archived"
+      },
+      "period": {
+        "label": "Period",
+        "all": "All Periods",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "custom": "Custom"
+      },
+      "target": {
+        "label": "Type",
+        "all": "All Types",
+        "distance": "Distance",
+        "duration": "Duration",
+        "elevation": "Elevation",
+        "frequency": "Frequency"
+      },
+      "sort": {
+        "label": "Sort by",
+        "progressDesc": "Progress (High to Low)",
+        "progressAsc": "Progress (Low to High)",
+        "deadlineAsc": "Deadline (Nearest First)",
+        "deadlineDesc": "Deadline (Farthest First)",
+        "createdDesc": "Recently Created",
+        "createdAsc": "Oldest First"
+      }
+    },
+    "status": {
+      "active": "In Progress",
+      "completed": "Completed",
+      "failed": "Expired",
+      "archived": "Archived"
+    },
+    "progress": {
+      "label": "{current} of {target} {unit}"
+    },
+    "daysRemaining": {
+      "expired": "Expired",
+      "today": "Ends today",
+      "tomorrow": "1 day left",
+      "days": "{count} days left"
+    },
+    "actions": {
+      "menu": "Goal actions",
+      "edit": "Edit",
+      "archive": "Archive",
+      "delete": "Delete",
+      "archiveSuccess": "Goal archived successfully",
+      "deleteSuccess": "Goal deleted successfully"
+    },
+    "deleteDialog": {
+      "title": "Delete Goal",
+      "description": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "empty": {
+      "title": "No goals yet",
+      "description": "Create your first goal to start tracking your progress",
+      "createButton": "Create Goal"
+    },
+    "error": {
+      "title": "Failed to load goals",
+      "description": "An error occurred while loading your goals. Please try again.",
+      "retry": "Retry"
+    },
+    "create": {
+      "success": "Goal created successfully",
+      "error": "Failed to create goal"
+    },
+    "update": {
+      "success": "Goal updated successfully",
+      "error": "Failed to update goal"
+    },
+    "delete": {
+      "success": "Goal deleted successfully",
+      "error": "Failed to delete goal"
+    },
+    "archive": {
+      "success": "Goal archived successfully",
+      "error": "Failed to archive goal"
+    }
+  },
   "errors": {
     "notFound": {
       "title": "Page not found",
