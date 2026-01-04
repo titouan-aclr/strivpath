@@ -2,12 +2,7 @@
 
 import { useMemo, useCallback } from 'react';
 import { useQuery, useMutation } from '@/lib/graphql';
-import {
-  GoalDocument,
-  GoalDetailFragmentDoc,
-  RefreshGoalProgressDocument,
-  type GoalDetailFragment,
-} from '@/gql/graphql';
+import { GoalDocument, GoalDetailFragmentDoc, RefreshGoalProgressDocument, type Goal } from '@/gql/graphql';
 import { getFragmentData } from '@/gql/fragment-masking';
 
 interface UseGoalDetailOptions {
@@ -15,7 +10,7 @@ interface UseGoalDetailOptions {
 }
 
 interface UseGoalDetailResult {
-  goal: GoalDetailFragment | null;
+  goal: Goal | null;
   loading: boolean;
   error: Error | undefined;
   refetch: () => Promise<unknown>;
@@ -46,7 +41,7 @@ export function useGoalDetail({ id }: UseGoalDetailOptions): UseGoalDetailResult
 
   const goal = useMemo(() => {
     if (!data?.goal) return null;
-    return getFragmentData(GoalDetailFragmentDoc, data.goal);
+    return getFragmentData(GoalDetailFragmentDoc, data.goal) as Goal;
   }, [data?.goal]);
 
   const refreshProgress = useCallback(async () => {
