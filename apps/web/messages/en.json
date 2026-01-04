@@ -484,6 +484,46 @@
       "run": "Running",
       "ride": "Cycling",
       "swim": "Swimming"
+    },
+    "detail": {
+      "progress": "Progress",
+      "information": "Information",
+      "period": "Period",
+      "daysRemaining": "Days Remaining",
+      "daysRemainingValue": "{days, plural, =0 {Last day!} =1 {1 day left} other {# days left}}",
+      "target": "Target",
+      "sport": "Sport",
+      "allSports": "All Sports",
+      "createdAt": "Created",
+      "updatedAt": "Last updated",
+      "backButton": "Back to Goals",
+      "actions": {
+        "title": "Actions",
+        "edit": "Edit Goal",
+        "editComingSoon": "Edit feature coming in next update",
+        "archive": "Archive Goal",
+        "delete": "Delete Goal",
+        "deleteConfirm": {
+          "title": "Are you sure?",
+          "description": "This action cannot be undone. This will permanently delete your goal.",
+          "cancel": "Cancel",
+          "confirm": "Delete"
+        }
+      },
+      "completed": {
+        "title": "Congratulations! 🎉",
+        "message": "You've successfully completed this goal. Keep up the great work!"
+      },
+      "failed": {
+        "title": "Goal Not Reached",
+        "message": "Don't be discouraged! Every attempt is a step forward. Set a new goal and try again.",
+        "createNew": "Create New Goal"
+      },
+      "error": {
+        "title": "Goal Not Found",
+        "description": "The goal you're looking for doesn't exist or has been deleted.",
+        "goBack": "Back to Goals"
+      }
     }
   },
   "errors": {

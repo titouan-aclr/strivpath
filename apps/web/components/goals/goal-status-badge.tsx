@@ -15,7 +15,7 @@ export function GoalStatusBadge({ status }: GoalStatusBadgeProps) {
     [GoalStatus.Active]: {
       variant: 'default' as const,
       label: t('active'),
-      className: 'bg-strava-orange text-white',
+      className: 'bg-goal-progress text-white hover:bg-goal-progress/90',
     },
     [GoalStatus.Completed]: {
       variant: 'default' as const,
@@ -28,9 +28,9 @@ export function GoalStatusBadge({ status }: GoalStatusBadgeProps) {
       className: '',
     },
     [GoalStatus.Archived]: {
-      variant: 'secondary' as const,
+      variant: 'default' as const,
       label: t('archived'),
-      className: '',
+      className: 'bg-strava-orange text-white hover:bg-strava-orange/90',
     },
   }[status];
 
