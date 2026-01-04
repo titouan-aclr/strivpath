@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GoalCard } from './goal-card';
@@ -79,6 +79,11 @@ describe('GoalCard', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.setSystemTime(new Date('2026-01-02T12:00:00Z'));
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it('renders goal information correctly', () => {

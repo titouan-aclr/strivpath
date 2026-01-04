@@ -369,7 +369,92 @@
     },
     "create": {
       "success": "Goal created successfully",
-      "error": "Failed to create goal"
+      "error": "Failed to create goal",
+      "steps": {
+        "template": "Template",
+        "details": "Details"
+      },
+      "templateSelector": {
+        "title": "Create a Goal",
+        "description": "Choose a preset template or create a custom goal",
+        "custom": {
+          "title": "Custom Goal",
+          "description": "Create your own goal with all parameters"
+        },
+        "categories": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced",
+          "challenge": "Challenge"
+        },
+        "recurring": "Recurring"
+      },
+      "form": {
+        "title": "Goal Details",
+        "description": "Fill in your goal information",
+        "validationError": "Please fix errors before continuing",
+        "sections": {
+          "basic": "Basic Information",
+          "target": "Target",
+          "period": "Period"
+        },
+        "fields": {
+          "optional": "(optional)",
+          "title": {
+            "label": "Title",
+            "placeholder": "e.g., Run 50km this month"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Describe your goal..."
+          },
+          "sportType": {
+            "label": "Sport",
+            "allSports": "All sports"
+          },
+          "targetType": {
+            "label": "Goal Type"
+          },
+          "targetValue": {
+            "label": "Target Value"
+          },
+          "periodType": {
+            "label": "Period"
+          },
+          "startDate": {
+            "label": "Start Date",
+            "placeholder": "Select a date"
+          },
+          "endDate": {
+            "label": "End Date",
+            "placeholder": "Select a date"
+          },
+          "isRecurring": {
+            "label": "Recurring Goal",
+            "description": "Automatically create a new goal each period"
+          }
+        },
+        "hints": {
+          "distance": "Total distance to cover",
+          "duration": "Total activity time",
+          "frequency": "Number of sessions to complete",
+          "elevation": "Cumulative elevation gain"
+        },
+        "errors": {
+          "titleRequired": "Title is required",
+          "titleTooLong": "Title must be 100 characters or less",
+          "targetValuePositive": "Target value must be greater than 0",
+          "targetValueTooHigh": "Value must be {limit} or less",
+          "startDateRequired": "Start date is required",
+          "startDatePast": "Start date cannot be in the past",
+          "endDateRequired": "End date is required for custom period",
+          "endDateAfterStart": "End date must be after start date"
+        },
+        "actions": {
+          "back": "Back",
+          "create": "Create Goal"
+        }
+      }
     },
     "update": {
       "success": "Goal updated successfully",
@@ -382,6 +467,23 @@
     "archive": {
       "success": "Goal archived successfully",
       "error": "Failed to archive goal"
+    },
+    "targetTypes": {
+      "distance": "Distance",
+      "duration": "Duration",
+      "frequency": "Frequency",
+      "elevation": "Elevation"
+    },
+    "periodTypes": {
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "custom": "Custom"
+    },
+    "sportTypes": {
+      "run": "Running",
+      "ride": "Cycling",
+      "swim": "Swimming"
     }
   },
   "errors": {
