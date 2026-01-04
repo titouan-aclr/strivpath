@@ -35,7 +35,7 @@ describe('UserPreferencesService', () => {
     it('should return user preferences when found', async () => {
       const mockPreferences = createMockPrismaUserPreferences({
         userId: 1,
-        selectedSports: ['Run', 'Ride'],
+        selectedSports: ['RUN', 'RIDE'],
         onboardingCompleted: true,
         locale: 'fr',
         theme: 'dark',
@@ -47,7 +47,7 @@ describe('UserPreferencesService', () => {
 
       expect(result).toBeDefined();
       expect(result?.userId).toBe(1);
-      expect(result?.selectedSports).toEqual(['Run', 'Ride']);
+      expect(result?.selectedSports).toEqual([SportType.RUN, SportType.RIDE]);
       expect(result?.onboardingCompleted).toBe(true);
       expect(result?.locale).toBe('fr');
       expect(result?.theme).toBe(ThemeType.DARK);
@@ -82,7 +82,7 @@ describe('UserPreferencesService', () => {
 
       const updatedPreferences = createMockPrismaUserPreferences({
         userId: 1,
-        selectedSports: ['Run', 'Ride'],
+        selectedSports: ['RUN', 'RIDE'],
         onboardingCompleted: true,
         locale: 'en',
         theme: 'system',
@@ -99,7 +99,7 @@ describe('UserPreferencesService', () => {
       expect(prisma.userPreferences.update).toHaveBeenCalledWith({
         where: { userId: 1 },
         data: {
-          selectedSports: ['Run', 'Ride'],
+          selectedSports: ['RUN', 'RIDE'],
           onboardingCompleted: true,
         },
       });
@@ -108,7 +108,7 @@ describe('UserPreferencesService', () => {
     it('should update locale without changing onboarding status', async () => {
       const completedPreferences = createMockPrismaUserPreferences({
         userId: 1,
-        selectedSports: ['Run'],
+        selectedSports: ['RUN'],
         onboardingCompleted: true,
         locale: 'en',
         theme: 'system',
@@ -163,7 +163,7 @@ describe('UserPreferencesService', () => {
 
       const updatedPreferences = createMockPrismaUserPreferences({
         userId: 1,
-        selectedSports: ['Swim'],
+        selectedSports: ['SWIM'],
         onboardingCompleted: true,
         locale: 'fr',
         theme: 'light',
@@ -184,7 +184,7 @@ describe('UserPreferencesService', () => {
       expect(prisma.userPreferences.update).toHaveBeenCalledWith({
         where: { userId: 1 },
         data: {
-          selectedSports: ['Swim'],
+          selectedSports: ['SWIM'],
           locale: 'fr',
           theme: 'light',
           onboardingCompleted: true,
@@ -195,7 +195,7 @@ describe('UserPreferencesService', () => {
     it('should not mark onboarding as completed if already completed', async () => {
       const completedPreferences = createMockPrismaUserPreferences({
         userId: 1,
-        selectedSports: ['Run'],
+        selectedSports: ['RUN'],
         onboardingCompleted: true,
       });
 
@@ -203,7 +203,7 @@ describe('UserPreferencesService', () => {
 
       const updatedPreferences = createMockPrismaUserPreferences({
         ...completedPreferences,
-        selectedSports: ['Run', 'Ride'],
+        selectedSports: ['RUN', 'RIDE'],
       });
 
       prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
@@ -215,7 +215,7 @@ describe('UserPreferencesService', () => {
       expect(prisma.userPreferences.update).toHaveBeenCalledWith({
         where: { userId: 1 },
         data: {
-          selectedSports: ['Run', 'Ride'],
+          selectedSports: ['RUN', 'RIDE'],
         },
       });
     });
