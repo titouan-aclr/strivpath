@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { Loader2, Footprints, Bike, Waves, Activity } from 'lucide-react';
 import { toast } from 'sonner';
@@ -13,22 +13,52 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { DatePicker } from './date-picker';
 import { GoalTargetType, GoalPeriodType, SportType } from '@/gql/graphql';
-import { validateGoalField, validateGoalForm, type GoalFormData } from '@/lib/goals/validation';
+import {
+  validateGoalField,
+  validateGoalForm,
+  validateGoalFormForEdit,
+  type GoalFormData,
+} from '@/lib/goals/validation';
 import { getTargetTypeConfig } from '@/lib/goals/form-utils';
 
 interface GoalFormProps {
+  mode: 'create' | 'edit';
   initialData: GoalFormData;
   onSubmit: (data: GoalFormData) => Promise<void>;
   onBack: () => void;
   loading: boolean;
 }
 
-export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormProps) {
+export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalFormProps) {
   const t = useTranslations('goals');
+  const isEditMode = mode === 'edit';
 
   const [formData, setFormData] = useState<GoalFormData>(initialData);
   const [errors, setErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof GoalFormData, boolean>>>({});
+
+  const areValuesEqual = (a: unknown, b: unknown): boolean => {
+    if (a === b) return true;
+    if (a == null || b == null) return false;
+
+    if (a instanceof Date && b instanceof Date) {
+      return a.getTime() === b.getTime();
+    }
+
+    if (typeof a !== 'object' && typeof b !== 'object') {
+      return a === b;
+    }
+
+    return false;
+  };
+
+  const isDirty = useMemo(() => {
+    if (mode === 'create') return true;
+
+    const fieldsToCheck: (keyof GoalFormData)[] = ['title', 'description', 'targetValue', 'endDate'];
+
+    return fieldsToCheck.some(field => !areValuesEqual(formData[field], initialData[field]));
+  }, [formData, initialData, mode]);
 
   const updateField = <K extends keyof GoalFormData>(field: K, value: GoalFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -47,7 +77,7 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validationErrors = validateGoalForm(formData, t);
+    const validationErrors = isEditMode ? validateGoalFormForEdit(formData, t) : validateGoalForm(formData, t);
     setErrors(validationErrors);
     setTouched({
       title: true,
@@ -79,8 +109,10 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
       className="space-y-8"
     >
       <div>
-        <h1 className="text-3xl font-bold">{t('create.form.title')}</h1>
-        <p className="mt-2 text-muted-foreground">{t('create.form.description')}</p>
+        <h1 className="text-3xl font-bold">{isEditMode ? t('edit.form.title') : t('create.form.title')}</h1>
+        <p className="mt-2 text-muted-foreground">
+          {isEditMode ? t('edit.form.description') : t('create.form.description')}
+        </p>
       </div>
 
       <Card>
@@ -117,11 +149,16 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="sportType">{t('create.form.fields.sportType.label')}</Label>
+            <Label htmlFor="sportType">
+              {t('create.form.fields.sportType.label')}
+              {isEditMode && (
+                <span className="text-xs text-muted-foreground ml-2">{t('edit.form.fields.readOnly')}</span>
+              )}
+            </Label>
             <Select
               value={formData.sportType || 'all'}
               onValueChange={value => updateField('sportType', value === 'all' ? null : (value as SportType))}
-              disabled={loading}
+              disabled={loading || isEditMode}
             >
               <SelectTrigger id="sportType">
                 <SelectValue />
@@ -153,6 +190,7 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
                 </SelectItem>
               </SelectContent>
             </Select>
+            {isEditMode && <p className="text-sm text-muted-foreground">{t('edit.form.fields.cannotChangeSport')}</p>}
           </div>
         </CardContent>
       </Card>
@@ -163,11 +201,16 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="targetType">{t('create.form.fields.targetType.label')}</Label>
+            <Label htmlFor="targetType">
+              {t('create.form.fields.targetType.label')}
+              {isEditMode && (
+                <span className="text-xs text-muted-foreground ml-2">{t('edit.form.fields.readOnly')}</span>
+              )}
+            </Label>
             <Select
               value={formData.targetType}
               onValueChange={value => updateField('targetType', value as GoalTargetType)}
-              disabled={loading}
+              disabled={loading || isEditMode}
             >
               <SelectTrigger id="targetType">
                 <SelectValue />
@@ -180,6 +223,9 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
                 ))}
               </SelectContent>
             </Select>
+            {isEditMode && (
+              <p className="text-sm text-muted-foreground">{t('edit.form.fields.cannotChangeTargetType')}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -214,7 +260,12 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="periodType">{t('create.form.fields.periodType.label')}</Label>
+            <Label htmlFor="periodType">
+              {t('create.form.fields.periodType.label')}
+              {isEditMode && (
+                <span className="text-xs text-muted-foreground ml-2">{t('edit.form.fields.readOnly')}</span>
+              )}
+            </Label>
             <Select
               value={formData.periodType}
               onValueChange={value => {
@@ -224,7 +275,7 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
                   updateField('endDate', null);
                 }
               }}
-              disabled={loading}
+              disabled={loading || isEditMode}
             >
               <SelectTrigger id="periodType">
                 <SelectValue />
@@ -237,18 +288,27 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
                 ))}
               </SelectContent>
             </Select>
+            {isEditMode && <p className="text-sm text-muted-foreground">{t('edit.form.fields.cannotChangePeriod')}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="startDate">{t('create.form.fields.startDate.label')}</Label>
+            <Label htmlFor="startDate">
+              {t('create.form.fields.startDate.label')}
+              {isEditMode && (
+                <span className="text-xs text-muted-foreground ml-2">{t('edit.form.fields.readOnly')}</span>
+              )}
+            </Label>
             <DatePicker
               id="startDate"
               date={formData.startDate}
               onDateChange={date => updateField('startDate', date || new Date())}
-              disabled={loading}
+              disabled={loading || isEditMode}
               placeholder={t('create.form.fields.startDate.placeholder')}
             />
             {touched.startDate && errors.startDate && <p className="text-sm text-destructive">{errors.startDate}</p>}
+            {isEditMode && (
+              <p className="text-sm text-muted-foreground">{t('edit.form.fields.cannotChangeStartDate')}</p>
+            )}
           </div>
 
           {showEndDate && (
@@ -267,16 +327,24 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
 
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="isRecurring">{t('create.form.fields.isRecurring.label')}</Label>
+              <Label htmlFor="isRecurring">
+                {t('create.form.fields.isRecurring.label')}
+                {isEditMode && (
+                  <span className="text-xs text-muted-foreground ml-2">{t('edit.form.fields.readOnly')}</span>
+                )}
+              </Label>
               <p className="text-sm text-muted-foreground">{t('create.form.fields.isRecurring.description')}</p>
             </div>
             <Switch
               id="isRecurring"
               checked={formData.isRecurring}
               onCheckedChange={checked => updateField('isRecurring', checked)}
-              disabled={loading}
+              disabled={loading || isEditMode}
             />
           </div>
+          {isEditMode && formData.isRecurring && (
+            <p className="text-sm text-muted-foreground">{t('edit.form.fields.recurringGoalNote')}</p>
+          )}
         </CardContent>
       </Card>
 
@@ -284,11 +352,15 @@ export function GoalForm({ initialData, onSubmit, onBack, loading }: GoalFormPro
         <Button type="button" variant="outline" onClick={onBack} disabled={loading} className="flex-1">
           {t('create.form.actions.back')}
         </Button>
-        <Button type="submit" disabled={loading} className="flex-1">
+        <Button type="submit" disabled={loading || (isEditMode && !isDirty)} className="flex-1">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {t('create.form.actions.create')}
+          {isEditMode ? t('edit.form.actions.save') : t('create.form.actions.create')}
         </Button>
       </div>
+
+      {isEditMode && !isDirty && (
+        <p className="text-sm text-muted-foreground text-center">{t('edit.form.noChanges')}</p>
+      )}
     </form>
   );
 }

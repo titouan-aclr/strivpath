@@ -1,4 +1,4 @@
-import { GoalTargetType, GoalPeriodType, type CreateGoalInput } from '@/gql/graphql';
+import { GoalTargetType, GoalPeriodType, type CreateGoalInput, type UpdateGoalInput } from '@/gql/graphql';
 import type { GoalFormData } from './validation';
 
 export interface TargetTypeConfig {
@@ -44,4 +44,18 @@ export function transformFormDataToInput(formData: GoalFormData): CreateGoalInpu
     endDate:
       formData.periodType === GoalPeriodType.Custom && formData.endDate ? formData.endDate.toISOString() : undefined,
   };
+}
+
+export function transformFormDataToUpdateInput(formData: GoalFormData): UpdateGoalInput {
+  const input: UpdateGoalInput = {
+    title: formData.title.trim(),
+    description: formData.description?.trim() || undefined,
+    targetValue: formData.targetValue,
+  };
+
+  if (formData.periodType === GoalPeriodType.Custom && formData.endDate) {
+    input.endDate = formData.endDate.toISOString();
+  }
+
+  return input;
 }

@@ -456,6 +456,24 @@
         }
       }
     },
+    "edit": {
+      "form": {
+        "title": "Edit Goal",
+        "description": "Modify your goal details. Some fields cannot be changed after creation.",
+        "fields": {
+          "readOnly": "(read-only)",
+          "cannotChangeSport": "Sport type cannot be changed after goal creation",
+          "cannotChangeTargetType": "Target type cannot be changed after goal creation",
+          "cannotChangePeriod": "Period type cannot be changed after goal creation",
+          "cannotChangeStartDate": "Start date cannot be changed after goal creation",
+          "recurringGoalNote": "This is a recurring goal. Modifications will only affect this instance."
+        },
+        "actions": {
+          "save": "Save Changes"
+        },
+        "noChanges": "No changes detected. Make some changes to save."
+      }
+    },
     "update": {
       "success": "Goal updated successfully",
       "error": "Failed to update goal"

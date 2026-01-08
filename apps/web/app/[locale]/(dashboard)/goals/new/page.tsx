@@ -75,7 +75,13 @@ export default function NewGoalPage() {
       )}
 
       {currentStep === 2 && (
-        <GoalForm initialData={formData} onSubmit={handleSubmit} onBack={handleBack} loading={createLoading} />
+        <GoalForm
+          mode="create"
+          initialData={formData}
+          onSubmit={handleSubmit}
+          onBack={handleBack}
+          loading={createLoading}
+        />
       )}
     </div>
   );
