@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { MoreVertical, Edit, Archive, Trash2 } from 'lucide-react';
 import type { Goal } from '@/gql/graphql';
 import { GoalStatus } from '@/gql/graphql';
@@ -24,6 +25,8 @@ interface GoalDetailHeaderProps {
 
 export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
   const t = useTranslations('goals');
+  const router = useRouter();
+  const locale = useLocale();
   const SportIcon = getSportIcon(goal.sportType);
 
   const { archiveGoal, loading: archiving } = useArchiveGoal();
@@ -49,6 +52,11 @@ export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
     setShowDeleteDialog(false);
   };
 
+  const handleEdit = () => {
+    router.push(`/${locale}/goals/${goal.id}/edit`);
+  };
+
+  const canEdit = goal.status === GoalStatus.Active;
   const canArchive = goal.status === GoalStatus.Active;
 
   return (
@@ -75,7 +83,7 @@ export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem disabled title={t('detail.actions.editComingSoon')}>
+            <DropdownMenuItem onClick={handleEdit} disabled={!canEdit}>
               <Edit className="mr-2 h-4 w-4" />
               {t('actions.edit')}
             </DropdownMenuItem>

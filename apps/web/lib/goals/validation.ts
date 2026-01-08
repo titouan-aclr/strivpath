@@ -113,3 +113,20 @@ export function validateGoalForm(formData: GoalFormData, t: TranslationFunction)
 
   return errors;
 }
+
+export function validateGoalFormForEdit(formData: GoalFormData, t: TranslationFunction): ValidationErrors {
+  const errors: ValidationErrors = {};
+
+  const titleError = validateGoalField('title', formData.title, formData, t);
+  if (titleError) errors.title = titleError;
+
+  const targetValueError = validateGoalField('targetValue', formData.targetValue, formData, t);
+  if (targetValueError) errors.targetValue = targetValueError;
+
+  if (formData.periodType === GoalPeriodType.Custom) {
+    const endDateError = validateGoalField('endDate', formData.endDate, formData, t);
+    if (endDateError) errors.endDate = endDateError;
+  }
+
+  return errors;
+}

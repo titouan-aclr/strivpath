@@ -49,7 +49,15 @@ describe('GoalForm', () => {
 
   describe('Rendering', () => {
     it('should render all form sections', () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       expect(screen.getByText('goals.create.form.sections.basic')).toBeInTheDocument();
       expect(screen.getByText('goals.create.form.sections.target')).toBeInTheDocument();
@@ -57,7 +65,15 @@ describe('GoalForm', () => {
     });
 
     it('should render all basic info fields', () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       expect(screen.getByLabelText(/goals.create.form.fields.title.label/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/goals.create.form.fields.description.label/i)).toBeInTheDocument();
@@ -65,14 +81,30 @@ describe('GoalForm', () => {
     });
 
     it('should render all target fields', () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       expect(screen.getByLabelText(/goals.create.form.fields.targetType.label/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/goals.create.form.fields.targetValue.label/i)).toBeInTheDocument();
     });
 
     it('should render all period fields', () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       expect(screen.getByLabelText(/goals.create.form.fields.periodType.label/i)).toBeInTheDocument();
       expect(screen.getByLabelText(/goals.create.form.fields.startDate.label/i)).toBeInTheDocument();
@@ -82,6 +114,7 @@ describe('GoalForm', () => {
     it('should display unit based on target type', () => {
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -95,6 +128,7 @@ describe('GoalForm', () => {
     it('should display hint based on target type', () => {
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -120,7 +154,15 @@ describe('GoalForm', () => {
         endDate: null,
       };
 
-      render(<GoalForm initialData={initialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={initialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       expect(screen.getByDisplayValue('Test Goal')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Test Description')).toBeInTheDocument();
@@ -132,6 +174,7 @@ describe('GoalForm', () => {
     it('should not show endDate field for non-CUSTOM period', () => {
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, periodType: GoalPeriodType.Weekly }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -145,6 +188,7 @@ describe('GoalForm', () => {
     it('should show endDate field for CUSTOM period', () => {
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, periodType: GoalPeriodType.Custom }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -160,6 +204,7 @@ describe('GoalForm', () => {
 
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -185,7 +230,15 @@ describe('GoalForm', () => {
 
   describe('Validation', () => {
     it('should show error for empty title on blur', async () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
       fireEvent.focus(titleInput);
@@ -199,6 +252,7 @@ describe('GoalForm', () => {
     it('should show error for zero target value', async () => {
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, targetValue: 0 }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -218,7 +272,15 @@ describe('GoalForm', () => {
     it('should clear error when field becomes valid', async () => {
       const user = userEvent.setup();
 
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
       fireEvent.focus(titleInput);
@@ -240,6 +302,7 @@ describe('GoalForm', () => {
 
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, title: '', targetValue: 0 }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -273,7 +336,9 @@ describe('GoalForm', () => {
         endDate: null,
       };
 
-      render(<GoalForm initialData={validData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm mode="create" initialData={validData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
 
       const submitButton = screen.getByText('goals.create.form.actions.create');
       await user.click(submitButton);
@@ -292,7 +357,15 @@ describe('GoalForm', () => {
     it('should call onBack when back button is clicked', async () => {
       const user = userEvent.setup();
 
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       const backButton = screen.getByText('goals.create.form.actions.back');
       await user.click(backButton);
@@ -303,7 +376,15 @@ describe('GoalForm', () => {
 
   describe('Loading State', () => {
     it('should disable all inputs when loading', () => {
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={true} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={true}
+        />,
+      );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
       const submitButton = screen.getByText('goals.create.form.actions.create');
@@ -316,7 +397,13 @@ describe('GoalForm', () => {
 
     it('should show loading indicator on submit button when loading', () => {
       const { container } = render(
-        <GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={true} />,
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={true}
+        />,
       );
 
       // Loader2 from lucide-react renders an SVG with animate-spin class
@@ -331,6 +418,7 @@ describe('GoalForm', () => {
 
       render(
         <GoalForm
+          mode="create"
           initialData={{ ...defaultInitialData, sportType: SportType.Run }}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
@@ -356,7 +444,15 @@ describe('GoalForm', () => {
     it('should allow selecting specific sport', async () => {
       const user = userEvent.setup();
 
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       const sportTypeSelect = screen.getByLabelText(/goals.create.form.fields.sportType.label/i);
       await user.click(sportTypeSelect);
@@ -376,7 +472,15 @@ describe('GoalForm', () => {
     it('should toggle recurring goal checkbox', async () => {
       const user = userEvent.setup();
 
-      render(<GoalForm initialData={defaultInitialData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />);
+      render(
+        <GoalForm
+          mode="create"
+          initialData={defaultInitialData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
 
       const recurringSwitch = screen.getByLabelText(/goals.create.form.fields.isRecurring.label/i);
       expect(recurringSwitch).not.toBeChecked();
@@ -386,6 +490,286 @@ describe('GoalForm', () => {
       await waitFor(() => {
         expect(recurringSwitch).toBeChecked();
       });
+    });
+  });
+
+  describe('Edit Mode', () => {
+    const editModeData: GoalFormData = {
+      title: 'Run 50km',
+      description: 'Monthly running goal',
+      targetType: GoalTargetType.Distance,
+      targetValue: 50,
+      periodType: GoalPeriodType.Monthly,
+      sportType: SportType.Run,
+      isRecurring: false,
+      startDate: new Date('2025-02-01'),
+      endDate: null,
+    };
+
+    it('should display edit mode title', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      expect(screen.getByText('goals.edit.form.title')).toBeInTheDocument();
+      expect(screen.getByText('goals.edit.form.description')).toBeInTheDocument();
+    });
+
+    it('should display save button text', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      expect(screen.getByText('goals.edit.form.actions.save')).toBeInTheDocument();
+    });
+
+    it('should disable sportType in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const sportTypeSelect = screen.getByLabelText(/goals.create.form.fields.sportType.label/i);
+      expect(sportTypeSelect).toBeDisabled();
+    });
+
+    it('should disable targetType in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const targetTypeSelect = screen.getByLabelText(/goals.create.form.fields.targetType.label/i);
+      expect(targetTypeSelect).toBeDisabled();
+    });
+
+    it('should disable periodType in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const periodTypeSelect = screen.getByLabelText(/goals.create.form.fields.periodType.label/i);
+      expect(periodTypeSelect).toBeDisabled();
+    });
+
+    it('should disable startDate in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const startDateButton = screen.getByRole('button', { name: /goals.create.form.fields.startDate.label/i });
+      expect(startDateButton).toBeDisabled();
+    });
+
+    it('should disable isRecurring switch in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const recurringSwitch = screen.getByLabelText(/goals.create.form.fields.isRecurring.label/i);
+      expect(recurringSwitch).toBeDisabled();
+    });
+
+    it('should show read-only indicators', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const readOnlyLabels = screen.getAllByText('goals.edit.form.fields.readOnly');
+      expect(readOnlyLabels.length).toBeGreaterThan(0);
+    });
+
+    it('should show help messages for immutable fields', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      expect(screen.getByText('goals.edit.form.fields.cannotChangeSport')).toBeInTheDocument();
+      expect(screen.getByText('goals.edit.form.fields.cannotChangeTargetType')).toBeInTheDocument();
+      expect(screen.getByText('goals.edit.form.fields.cannotChangePeriod')).toBeInTheDocument();
+      expect(screen.getByText('goals.edit.form.fields.cannotChangeStartDate')).toBeInTheDocument();
+    });
+
+    it('should keep title editable in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      expect(titleInput).not.toBeDisabled();
+    });
+
+    it('should keep description editable in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const descriptionTextarea = screen.getByLabelText(/goals.create.form.fields.description.label/i);
+      expect(descriptionTextarea).not.toBeDisabled();
+    });
+
+    it('should keep targetValue editable in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
+      expect(targetValueInput).not.toBeDisabled();
+    });
+
+    it('should show recurring goal note when goal is recurring', () => {
+      const recurringData = { ...editModeData, isRecurring: true };
+      render(
+        <GoalForm
+          mode="edit"
+          initialData={recurringData}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
+
+      expect(screen.getByText('goals.edit.form.fields.recurringGoalNote')).toBeInTheDocument();
+    });
+  });
+
+  describe('Dirty Checking', () => {
+    const editData: GoalFormData = {
+      title: 'Run 50km',
+      description: 'Monthly goal',
+      targetType: GoalTargetType.Distance,
+      targetValue: 50,
+      periodType: GoalPeriodType.Monthly,
+      sportType: SportType.Run,
+      isRecurring: false,
+      startDate: new Date('2025-02-01'),
+      endDate: null,
+    };
+
+    it('should disable submit button when no changes in edit mode', () => {
+      render(
+        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).toBeDisabled();
+      expect(screen.getByText('goals.edit.form.noChanges')).toBeInTheDocument();
+    });
+
+    it('should enable submit button when title is modified', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Run 60km');
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    it('should enable submit button when description is modified', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const descriptionTextarea = screen.getByLabelText(/goals.create.form.fields.description.label/i);
+      await user.clear(descriptionTextarea);
+      await user.type(descriptionTextarea, 'Updated description');
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    it('should enable submit button when targetValue is modified', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
+      await user.clear(targetValueInput);
+      await user.type(targetValueInput, '60');
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).not.toBeDisabled();
+    });
+
+    it('should disable button again when changes are reverted', async () => {
+      const user = userEvent.setup();
+
+      render(
+        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Run 60km');
+      expect(submitButton).not.toBeDisabled();
+
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Run 50km');
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('should correctly compare Date objects for endDate', () => {
+      const dataWithEndDate = {
+        ...editData,
+        periodType: GoalPeriodType.Custom,
+        endDate: new Date('2025-02-28'),
+      };
+
+      render(
+        <GoalForm
+          mode="edit"
+          initialData={dataWithEndDate}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).toBeDisabled();
+    });
+
+    it('should always enable submit in create mode', () => {
+      render(
+        <GoalForm mode="create" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+      );
+
+      const submitButton = screen.getByRole('button', { name: /goals.create.form.actions.create/i });
+      expect(submitButton).not.toBeDisabled();
+      expect(screen.queryByText('goals.edit.form.noChanges')).not.toBeInTheDocument();
+    });
+
+    it('should handle null description correctly', async () => {
+      const user = userEvent.setup();
+      const dataWithNullDescription = { ...editData, description: '' };
+
+      render(
+        <GoalForm
+          mode="edit"
+          initialData={dataWithNullDescription}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
+      );
+
+      const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
+      expect(submitButton).toBeDisabled();
+
+      const descriptionTextarea = screen.getByLabelText(/goals.create.form.fields.description.label/i);
+      await user.type(descriptionTextarea, 'New description');
+
+      expect(submitButton).not.toBeDisabled();
     });
   });
 });
