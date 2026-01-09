@@ -19,12 +19,14 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
   const getBarColor = () => {
     if (status === GoalStatus.Completed) return 'bg-green-500';
     if (status === GoalStatus.Failed) return 'bg-destructive';
+    if (status === GoalStatus.Archived) return 'bg-strava-orange';
     return 'bg-goal-progress';
   };
 
   const getBackgroundColor = () => {
     if (status === GoalStatus.Completed) return 'bg-green-500/10';
     if (status === GoalStatus.Failed) return 'bg-destructive/10';
+    if (status === GoalStatus.Archived) return 'bg-strava-orange/10';
     return 'bg-goal-progress/10';
   };
 
@@ -34,7 +36,7 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
     <div className={cn('space-y-2', className)}>
       <div className="flex items-center justify-between text-sm">
         <span className="font-medium">
-          {formatValue(current, unit)} / {formatValue(target, unit)}
+          {formatValue(current, unit)} / {formatValue(target, unit)} {unit}
         </span>
         <span
           className={cn(
@@ -42,6 +44,7 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
             status === GoalStatus.Completed && 'text-green-500',
             status === GoalStatus.Failed && 'text-destructive',
             status === GoalStatus.Active && 'text-goal-progress',
+            status === GoalStatus.Archived && 'text-strava-orange',
           )}
         >
           {percentage.toFixed(1)}%
@@ -64,8 +67,5 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
 }
 
 function formatValue(value: number, unit: string): string {
-  if (unit === 'km' || unit === 'hours') {
-    return value.toFixed(1);
-  }
-  return Math.round(value).toString();
+  return unit === 'km' || unit === 'hours' ? value.toFixed(1) : Math.round(value).toString();
 }

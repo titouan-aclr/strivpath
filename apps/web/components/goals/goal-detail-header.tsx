@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { MoreVertical, Edit, Archive, Trash2 } from 'lucide-react';
 import type { Goal } from '@/gql/graphql';
 import { GoalStatus } from '@/gql/graphql';
@@ -26,7 +26,6 @@ interface GoalDetailHeaderProps {
 export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
   const t = useTranslations('goals');
   const router = useRouter();
-  const locale = useLocale();
   const SportIcon = getSportIcon(goal.sportType);
 
   const { archiveGoal, loading: archiving } = useArchiveGoal();
@@ -53,7 +52,7 @@ export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
   };
 
   const handleEdit = () => {
-    router.push(`/${locale}/goals/${goal.id}/edit`);
+    router.push(`/goals/${goal.id}/edit`);
   };
 
   const canEdit = goal.status === GoalStatus.Active;

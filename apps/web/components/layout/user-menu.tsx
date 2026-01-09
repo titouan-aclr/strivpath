@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Settings, LogOut, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/context';
 import { useAuthFeedback } from '@/lib/auth/use-auth-feedback';

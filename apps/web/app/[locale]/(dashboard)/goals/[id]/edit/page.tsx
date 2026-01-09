@@ -1,8 +1,8 @@
 'use client';
 
 import { use } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { Loader2 } from 'lucide-react';
 import { GoalForm } from '@/components/goals/goal-form';
 import { useGoalDetail } from '@/lib/goals/use-goal-detail';
@@ -19,7 +19,6 @@ interface EditGoalPageProps {
 
 export default function EditGoalPage({ params }: EditGoalPageProps) {
   const unwrappedParams = use(params);
-  const locale = useLocale();
   const router = useRouter();
   const t = useTranslations('goals');
 
@@ -28,7 +27,7 @@ export default function EditGoalPage({ params }: EditGoalPageProps) {
   const { updateGoal, loading: updating } = useUpdateGoal();
 
   const handleBack = () => {
-    router.push(`/${locale}/goals/${goalId}`);
+    router.push(`/goals/${goalId}`);
   };
 
   const handleSubmit = async (formData: GoalFormData) => {
@@ -36,7 +35,7 @@ export default function EditGoalPage({ params }: EditGoalPageProps) {
     const result = await updateGoal(goalId, input);
 
     if (result) {
-      router.push(`/${locale}/goals/${goalId}`);
+      router.push(`/goals/${goalId}`);
     }
   };
 

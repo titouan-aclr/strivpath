@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
 import { useMutation } from '@/lib/graphql';
 import { LogoutDocument, type LogoutMutation } from '@/gql/graphql';

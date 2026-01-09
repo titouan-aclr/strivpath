@@ -54,7 +54,7 @@ const { mockRouterPush, mockRouterRefresh, mockToast, mockUseTranslations } = vi
   mockUseTranslations: vi.fn(() => (key: string) => key),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: mockRouterPush, refresh: mockRouterRefresh }),
 }));
 
