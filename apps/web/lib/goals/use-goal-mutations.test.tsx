@@ -15,7 +15,7 @@ import {
   useArchiveGoal,
 } from './use-goal-mutations';
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),

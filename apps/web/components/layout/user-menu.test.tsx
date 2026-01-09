@@ -9,7 +9,7 @@ import * as useLogoutHook from '@/lib/auth/use-logout';
 vi.mock('@/lib/auth/context');
 vi.mock('@/lib/auth/use-auth-feedback');
 vi.mock('@/lib/auth/use-logout');
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({
     push: vi.fn(),
   }),
