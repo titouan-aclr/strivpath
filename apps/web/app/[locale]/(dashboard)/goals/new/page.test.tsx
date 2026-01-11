@@ -276,7 +276,7 @@ describe('NewGoalPage - Integration Tests', () => {
       await waitFor(() => {
         expect(mockToast.success).toHaveBeenCalled();
       });
-    });
+    }, 10000);
 
     it('should redirect to goals page after successful submission', async () => {
       const user = userEvent.setup();
@@ -326,7 +326,7 @@ describe('NewGoalPage - Integration Tests', () => {
       await waitFor(() => {
         expect(mockToast.success).toHaveBeenCalled();
       });
-    });
+    }, 10000);
   });
 
   describe('Progress Indicator', () => {

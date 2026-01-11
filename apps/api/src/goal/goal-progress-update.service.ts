@@ -7,6 +7,8 @@ export interface GoalProgressUpdateResult {
   totalGoals: number;
   successCount: number;
   failureCount: number;
+  completedGoalIds: number[];
+  failedGoalIds: number[];
   errors: Array<{ goalId: number; error: string }>;
 }
 
@@ -26,6 +28,8 @@ export class GoalProgressUpdateService {
       totalGoals: goalIds.length,
       successCount: 0,
       failureCount: 0,
+      completedGoalIds: [],
+      failedGoalIds: [],
       errors: [],
     };
 
@@ -35,11 +39,17 @@ export class GoalProgressUpdateService {
 
     for (let i = 0; i < goalIds.length; i += this.BATCH_SIZE) {
       const batch = goalIds.slice(i, i + this.BATCH_SIZE);
-      const batchResults = await Promise.allSettled(batch.map(id => this.goalService.updateGoalProgress(id)));
+      const batchResults = await Promise.allSettled(batch.map(id => this.updateGoalProgressWithStatusTracking(id)));
 
       batchResults.forEach((batchResult, index) => {
         if (batchResult.status === 'fulfilled') {
           result.successCount++;
+          const statusChange = batchResult.value;
+          if (statusChange === 'completed') {
+            result.completedGoalIds.push(batch[index]);
+          } else if (statusChange === 'failed') {
+            result.failedGoalIds.push(batch[index]);
+          }
         } else {
           result.failureCount++;
           const errorMessage =
@@ -55,6 +65,38 @@ export class GoalProgressUpdateService {
     }
 
     return result;
+  }
+
+  private async updateGoalProgressWithStatusTracking(goalId: number): Promise<'completed' | 'failed' | 'none'> {
+    const goalBefore = await this.prisma.goal.findUnique({
+      where: { id: goalId },
+      select: { status: true },
+    });
+
+    if (!goalBefore) {
+      throw new Error(`Goal with ID ${goalId} not found`);
+    }
+
+    await this.goalService.updateGoalProgress(goalId);
+
+    const goalAfter = await this.prisma.goal.findUnique({
+      where: { id: goalId },
+      select: { status: true },
+    });
+
+    if (!goalAfter) {
+      throw new Error(`Goal with ID ${goalId} not found after update`);
+    }
+
+    if (goalBefore.status === 'ACTIVE' && goalAfter.status === 'COMPLETED') {
+      return 'completed';
+    }
+
+    if (goalBefore.status === 'ACTIVE' && goalAfter.status === 'FAILED') {
+      return 'failed';
+    }
+
+    return 'none';
   }
 
   private async getActiveGoalsInDateRange(userId: number, earliestActivityDate?: Date): Promise<number[]> {

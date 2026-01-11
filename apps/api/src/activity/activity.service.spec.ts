@@ -47,6 +47,8 @@ describe('ActivityService', () => {
       totalGoals: 0,
       successCount: 0,
       failureCount: 0,
+      completedGoalIds: [],
+      failedGoalIds: [],
       errors: [],
     }),
   };

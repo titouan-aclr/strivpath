@@ -289,19 +289,28 @@ export class ActivityService {
         null as Date | null,
       );
 
+      let goalUpdateResult:
+        | Awaited<ReturnType<typeof this.goalProgressUpdateService.updateAllGoalsForUser>>
+        | undefined;
       try {
-        const goalUpdateResult = await this.goalProgressUpdateService.updateAllGoalsForUser(
+        goalUpdateResult = await this.goalProgressUpdateService.updateAllGoalsForUser(
           userId,
           earliestActivityDate ?? undefined,
         );
 
-        if (goalUpdateResult.failureCount > 0) {
+        if (goalUpdateResult && goalUpdateResult.failureCount > 0) {
           this.logger.warn(
             `Goal progress update completed with ${goalUpdateResult.failureCount} failures for user ${userId}`,
             { errors: goalUpdateResult.errors },
           );
-        } else if (goalUpdateResult.successCount > 0) {
+        } else if (goalUpdateResult && goalUpdateResult.successCount > 0) {
           this.logger.log(`Successfully updated ${goalUpdateResult.successCount} goals for user ${userId}`);
+        }
+
+        if (goalUpdateResult && goalUpdateResult.completedGoalIds.length > 0) {
+          this.logger.log(
+            `${goalUpdateResult.completedGoalIds.length} goal(s) completed for user ${userId}: ${goalUpdateResult.completedGoalIds.join(', ')}`,
+          );
         }
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -315,7 +324,18 @@ export class ActivityService {
         completedAt: new Date(),
       });
 
-      return this.syncHistoryService.findById(sync.id) as Promise<SyncHistory>;
+      const syncHistory = await this.syncHistoryService.findById(sync.id);
+
+      if (!goalUpdateResult) {
+        return syncHistory as SyncHistory;
+      }
+
+      return {
+        ...syncHistory,
+        goalsUpdatedCount: goalUpdateResult.successCount,
+        goalsCompletedCount: goalUpdateResult.completedGoalIds.length,
+        completedGoalIds: goalUpdateResult.completedGoalIds,
+      } as SyncHistory;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error during sync';
 

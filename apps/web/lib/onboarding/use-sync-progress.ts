@@ -9,6 +9,7 @@ import { SyncActivitiesDocument, SyncStatusDocument, type SyncHistory, SyncStatu
 import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS, REDIRECT_DELAY_MS, ONBOARDING_TOAST_CONFIG } from './constants';
 import { classifyOnboardingError, logOnboardingError, type OnboardingError } from './error-handling';
 import { useAuth } from '@/lib/auth/context';
+import { useGoalSyncNotifications } from '@/lib/goals/use-goal-sync-notifications';
 
 interface UseSyncProgressResult {
   syncStatus: SyncHistory | null;
@@ -22,6 +23,7 @@ export function useSyncProgress(): UseSyncProgressResult {
   const router = useRouter();
   const t = useTranslations('onboarding.sync');
   const { user } = useAuth();
+  const { notifyGoalUpdates } = useGoalSyncNotifications();
   const [isRedirecting, setIsRedirecting] = useState(false);
   const [error, setError] = useState<OnboardingError | null>(null);
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -141,6 +143,14 @@ export function useSyncProgress(): UseSyncProgressResult {
       stopPolling();
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
+      if (syncStatus.goalsUpdatedCount || syncStatus.goalsCompletedCount) {
+        notifyGoalUpdates({
+          goalsUpdatedCount: syncStatus.goalsUpdatedCount ?? undefined,
+          goalsCompletedCount: syncStatus.goalsCompletedCount ?? undefined,
+          completedGoalIds: syncStatus.completedGoalIds ?? undefined,
+        });
+      }
+
       setIsRedirecting(true);
       setTimeout(() => {
         router.push('/onboarding-complete');
@@ -162,7 +172,7 @@ export function useSyncProgress(): UseSyncProgressResult {
       });
       setError(onboardingError);
     }
-  }, [syncStatus, stopPolling, t, user?.id]);
+  }, [syncStatus, stopPolling, t, user?.id, notifyGoalUpdates]);
 
   const handleRetry = useCallback(() => {
     setError(null);

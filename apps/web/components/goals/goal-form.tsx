@@ -129,8 +129,14 @@ export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalF
               onBlur={() => handleBlur('title')}
               placeholder={t('create.form.fields.title.placeholder')}
               disabled={loading}
+              aria-invalid={touched.title && !!errors.title}
+              aria-describedby={touched.title && errors.title ? 'title-error' : undefined}
             />
-            {touched.title && errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
+            {touched.title && errors.title && (
+              <p id="title-error" className="text-sm text-destructive" role="alert">
+                {errors.title}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -241,13 +247,17 @@ export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalF
                 onBlur={() => handleBlur('targetValue')}
                 disabled={loading}
                 className="flex-1"
+                aria-invalid={touched.targetValue && !!errors.targetValue}
+                aria-describedby={touched.targetValue && errors.targetValue ? 'targetValue-error' : undefined}
               />
               <div className="flex items-center px-3 border rounded-md bg-muted text-muted-foreground min-w-[60px] justify-center">
                 {targetConfig.unit}
               </div>
             </div>
             {touched.targetValue && errors.targetValue && (
-              <p className="text-sm text-destructive">{errors.targetValue}</p>
+              <p id="targetValue-error" className="text-sm text-destructive" role="alert">
+                {errors.targetValue}
+              </p>
             )}
             <p className="text-sm text-muted-foreground">{t(targetConfig.hintKey)}</p>
           </div>
@@ -352,7 +362,7 @@ export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalF
         <Button type="button" variant="outline" onClick={onBack} disabled={loading} className="flex-1">
           {t('create.form.actions.back')}
         </Button>
-        <Button type="submit" disabled={loading || (isEditMode && !isDirty)} className="flex-1">
+        <Button type="submit" disabled={loading || (isEditMode && !isDirty)} className="flex-1" aria-busy={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {isEditMode ? t('edit.form.actions.save') : t('create.form.actions.create')}
         </Button>

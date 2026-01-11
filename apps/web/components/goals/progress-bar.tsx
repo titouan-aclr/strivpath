@@ -59,6 +59,7 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
           aria-valuenow={current}
           aria-valuemin={0}
           aria-valuemax={target}
+          aria-valuetext={`${percentage.toFixed(1)}% - ${formatValue(current, unit)} of ${formatValue(target, unit)} ${unit}`}
           aria-label={t('label', { current, target, unit })}
         />
       </div>

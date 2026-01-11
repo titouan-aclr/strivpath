@@ -3,8 +3,9 @@
 import { use } from 'react';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
-import { Loader2 } from 'lucide-react';
+import { AlertCircle, Loader2 } from 'lucide-react';
 import { GoalForm } from '@/components/goals/goal-form';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useGoalDetail } from '@/lib/goals/use-goal-detail';
 import { useUpdateGoal } from '@/lib/goals/use-goal-mutations';
 import { transformFormDataToUpdateInput } from '@/lib/goals/form-utils';
@@ -23,6 +24,19 @@ export default function EditGoalPage({ params }: EditGoalPageProps) {
   const t = useTranslations('goals');
 
   const goalId = parseInt(unwrappedParams.id, 10);
+
+  if (isNaN(goalId) || goalId <= 0) {
+    return (
+      <div className="container py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t('detail.error.title')}</AlertTitle>
+          <AlertDescription>{t('detail.error.description')}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   const { goal, loading: loadingGoal, error: goalError } = useGoalDetail({ id: goalId });
   const { updateGoal, loading: updating } = useUpdateGoal();
 
