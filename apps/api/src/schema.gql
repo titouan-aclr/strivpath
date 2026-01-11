@@ -423,7 +423,10 @@ enum SportType {
 
 type SyncHistory {
   completedAt: DateTime
+  completedGoalIds: [Int!]
   errorMessage: String
+  goalsCompletedCount: Int
+  goalsUpdatedCount: Int
   id: ID!
   processedActivities: Int!
   stage: SyncStage

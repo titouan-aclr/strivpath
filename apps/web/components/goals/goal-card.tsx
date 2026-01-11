@@ -156,7 +156,11 @@ function formatPeriod(startDate: Date | string, endDate: Date | string, locale: 
 function getDaysRemaining(endDate: Date | string, t: (key: string, values?: Record<string, number>) => string): string {
   const end = endDate instanceof Date ? endDate : new Date(endDate);
   const now = new Date();
-  const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+
+  const endNormalized = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+  const nowNormalized = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+  const diff = Math.ceil((endNormalized.getTime() - nowNormalized.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diff < 0) return t('daysRemaining.expired');
   if (diff === 0) return t('daysRemaining.today');

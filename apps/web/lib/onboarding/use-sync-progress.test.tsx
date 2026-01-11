@@ -50,6 +50,7 @@ const { mockRouterPush, mockRouterRefresh, mockToast, mockUseTranslations } = vi
   mockToast: {
     error: vi.fn(),
     info: vi.fn(),
+    success: vi.fn(),
   },
   mockUseTranslations: vi.fn(() => (key: string) => key),
 }));

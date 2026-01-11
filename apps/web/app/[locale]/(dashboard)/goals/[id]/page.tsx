@@ -7,10 +7,11 @@ import { GoalDetailSkeleton } from '@/components/goals/goal-detail-skeleton';
 import { GoalDetailsCard } from '@/components/goals/goal-details-card';
 import { GoalFailedMessage } from '@/components/goals/goal-failed-message';
 import { GoalProgressCard } from '@/components/goals/goal-progress-card';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { GoalStatus } from '@/gql/graphql';
 import { useGoalDetail } from '@/lib/goals/use-goal-detail';
-import { ArrowLeft } from 'lucide-react';
+import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { use, useEffect, useRef, useState } from 'react';
@@ -29,6 +30,19 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
   const locale = useLocale();
   const t = useTranslations('goals.detail');
   const goalId = parseInt(unwrappedParams.id, 10);
+
+  if (isNaN(goalId) || goalId <= 0) {
+    return (
+      <div className="container py-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>{t('error.title')}</AlertTitle>
+          <AlertDescription>{t('error.description')}</AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
+
   const { goal, loading, error } = useGoalDetail({ id: goalId });
   const { width, height } = useWindowSize();
   const [showConfetti, setShowConfetti] = useState(false);
@@ -38,7 +52,10 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
     if (goal?.status === GoalStatus.Completed && !hasCelebrated.current) {
       setShowConfetti(true);
       hasCelebrated.current = true;
-      setTimeout(() => setShowConfetti(false), 5000);
+
+      const timer = setTimeout(() => setShowConfetti(false), 5000);
+
+      return () => clearTimeout(timer);
     }
   }, [goal?.status]);
 
