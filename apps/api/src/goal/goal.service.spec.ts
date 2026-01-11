@@ -109,6 +109,131 @@ describe('GoalService', () => {
       expect(result.status).toBe(GoalStatus.ACTIVE);
     });
 
+    it('should create a goal with calculated end date for WEEKLY period (mid-week start)', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Run 20km this week',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 20,
+        periodType: GoalPeriodType.WEEKLY,
+        startDate: '2025-01-08',
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        periodType: 'WEEKLY',
+        startDate: new Date('2025-01-08'),
+        endDate: new Date('2025-01-14T23:59:59.999Z'),
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            periodType: GoalPeriodType.WEEKLY,
+            startDate: new Date('2025-01-08'),
+          }),
+        }),
+      );
+    });
+
+    it('should create a goal with calculated end date for WEEKLY period (Sunday start)', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Run 20km this week',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 20,
+        periodType: GoalPeriodType.WEEKLY,
+        startDate: '2025-01-05',
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        periodType: 'WEEKLY',
+        startDate: new Date('2025-01-05'),
+        endDate: new Date('2025-01-11T23:59:59.999Z'),
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            periodType: GoalPeriodType.WEEKLY,
+          }),
+        }),
+      );
+    });
+
+    it('should create a goal with calculated end date for YEARLY period', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Run 1000km this year',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 1000,
+        periodType: GoalPeriodType.YEARLY,
+        startDate: '2025-03-15',
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        periodType: 'YEARLY',
+        startDate: new Date('2025-03-15'),
+        endDate: new Date('2025-12-31T23:59:59.999Z'),
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            periodType: GoalPeriodType.YEARLY,
+          }),
+        }),
+      );
+    });
+
+    it('should create a goal with calculated end date for YEARLY period in leap year', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Run 1000km this year',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 1000,
+        periodType: GoalPeriodType.YEARLY,
+        startDate: '2024-02-15',
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        periodType: 'YEARLY',
+        startDate: new Date('2024-02-15'),
+        endDate: new Date('2024-12-31T23:59:59.999Z'),
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            periodType: GoalPeriodType.YEARLY,
+          }),
+        }),
+      );
+    });
+
     it('should use custom end date for CUSTOM period', async () => {
       const userId = 42;
       const input = {
@@ -139,6 +264,74 @@ describe('GoalService', () => {
           }),
         }),
       );
+    });
+
+    it('should create a recurring goal with recurrenceEndDate', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Weekly 20km (recurring)',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 20,
+        periodType: GoalPeriodType.WEEKLY,
+        startDate: '2025-01-01',
+        isRecurring: true,
+        recurrenceEndDate: '2025-12-31',
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        isRecurring: true,
+        recurrenceEndDate: new Date('2025-12-31'),
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      const result = await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isRecurring: true,
+            recurrenceEndDate: new Date('2025-12-31'),
+          }),
+        }),
+      );
+      expect(result.isRecurring).toBe(true);
+    });
+
+    it('should create a recurring goal without recurrenceEndDate', async () => {
+      const userId = 42;
+      const input = {
+        title: 'Weekly 20km (recurring forever)',
+        targetType: GoalTargetType.DISTANCE,
+        targetValue: 20,
+        periodType: GoalPeriodType.WEEKLY,
+        startDate: '2025-01-01',
+        isRecurring: true,
+      };
+
+      const createdGoal = createMockPrismaGoal({
+        isRecurring: true,
+        recurrenceEndDate: null,
+      });
+
+      prisma.goal.create.mockResolvedValue(createdGoal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 0 } });
+      prisma.goal.findUnique.mockResolvedValue(createdGoal);
+
+      const result = await service.create(userId, input);
+
+      expect(prisma.goal.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            isRecurring: true,
+            recurrenceEndDate: null,
+          }),
+        }),
+      );
+      expect(result.isRecurring).toBe(true);
+      expect(result.recurrenceEndDate).toBeUndefined();
     });
   });
 
@@ -286,6 +479,27 @@ describe('GoalService', () => {
         }),
       );
     });
+
+    it('should include archived goals when includeArchived is true', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE' }),
+        createMockPrismaGoal({ id: 2, status: 'ARCHIVED' }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findAll(userId, { includeArchived: true });
+
+      expect(prisma.goal.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.not.objectContaining({
+            status: { not: GoalStatus.ARCHIVED },
+          }),
+        }),
+      );
+      expect(result).toHaveLength(2);
+    });
   });
 
   describe('updateGoalProgress', () => {
@@ -417,6 +631,207 @@ describe('GoalService', () => {
 
       await expect(service.updateGoalProgress(999)).rejects.toThrow(NotFoundException);
     });
+
+    it('should handle null aggregate result (no activities)', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 0,
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: null } });
+
+      await service.updateGoalProgress(1);
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: expect.objectContaining({
+          currentValue: 0,
+        }),
+      });
+    });
+
+    it('should count activities on exact startDate boundary', async () => {
+      const startDate = new Date('2025-01-01T00:00:00.000Z');
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        startDate,
+        endDate: new Date('2025-01-31T23:59:59.999Z'),
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 10000 } });
+
+      await service.updateGoalProgress(1);
+
+      const callArg = (prisma.activity.aggregate as jest.Mock).mock.calls[0][0];
+      expect(callArg.where.startDate.gte).toEqual(startDate);
+    });
+
+    it('should count activities on exact endDate boundary', async () => {
+      const endDate = new Date('2025-01-31T23:59:59.999Z');
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        startDate: new Date('2025-01-01'),
+        endDate,
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 10000 } });
+
+      await service.updateGoalProgress(1);
+
+      const callArg = (prisma.activity.aggregate as jest.Mock).mock.calls[0][0];
+      expect(callArg.where.startDate.lte).toEqual(endDate);
+    });
+
+    it('should filter by specific sportType when goal has sportType set', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        sportType: 'Run',
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 20000 } });
+
+      await service.updateGoalProgress(1);
+
+      expect(prisma.activity.aggregate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: 'Run',
+          }),
+        }),
+      );
+    });
+
+    it('should include all sports when sportType is null', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        sportType: null,
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 20000 } });
+
+      await service.updateGoalProgress(1);
+
+      expect(prisma.activity.aggregate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.not.objectContaining({
+            type: expect.anything(),
+          }),
+        }),
+      );
+    });
+
+    it('should not transition from COMPLETED to FAILED', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 55,
+        status: 'COMPLETED',
+        completedAt: new Date('2025-01-15T10:00:00Z'),
+        endDate: new Date('2024-12-31'),
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 55000 } });
+
+      await service.updateGoalProgress(1);
+
+      const callArg = (prisma.goal.update as jest.Mock).mock.calls[0][0];
+      expect(callArg.data).toEqual({ currentValue: 55 });
+      expect(callArg.data.status).toBeUndefined();
+    });
+
+    it('should not transition from FAILED to COMPLETED', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 30,
+        status: 'FAILED',
+        endDate: new Date('2024-12-31'),
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 55000 } });
+
+      await service.updateGoalProgress(1);
+
+      const callArg = (prisma.goal.update as jest.Mock).mock.calls[0][0];
+      expect(callArg.data).toEqual({ currentValue: 55 });
+      expect(callArg.data.status).toBeUndefined();
+    });
+
+    it('should not transition from ARCHIVED status', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 30,
+        status: 'ARCHIVED',
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 55000 } });
+
+      await service.updateGoalProgress(1);
+
+      const callArg = (prisma.goal.update as jest.Mock).mock.calls[0][0];
+      expect(callArg.data).toEqual({ currentValue: 55 });
+      expect(callArg.data.status).toBeUndefined();
+    });
+
+    it('should set completedAt only once when goal is first completed', async () => {
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 45,
+        status: 'ACTIVE',
+        completedAt: null,
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 52000 } });
+
+      await service.updateGoalProgress(1);
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: expect.objectContaining({
+          status: GoalStatus.COMPLETED,
+          completedAt: expect.any(Date),
+        }),
+      });
+    });
+
+    it('should preserve completedAt when goal was already completed', async () => {
+      const originalCompletedAt = new Date('2025-01-15T10:00:00Z');
+      const goal = createMockPrismaGoal({
+        targetType: 'DISTANCE',
+        targetValue: 50,
+        currentValue: 52,
+        status: 'COMPLETED',
+        completedAt: originalCompletedAt,
+      });
+
+      prisma.goal.findUnique.mockResolvedValue(goal);
+      prisma.activity.aggregate.mockResolvedValue({ _sum: { distance: 60000 } });
+
+      await service.updateGoalProgress(1);
+
+      expect(prisma.goal.update).toHaveBeenCalledWith({
+        where: { id: 1 },
+        data: expect.not.objectContaining({
+          completedAt: expect.anything(),
+        }),
+      });
+    });
   });
 
   describe('findActiveGoals', () => {
@@ -457,6 +872,18 @@ describe('GoalService', () => {
         orderBy: { createdAt: 'desc' },
       });
       expect(result).toHaveLength(2);
+    });
+
+    it('should return empty array when no goals found for template', async () => {
+      const userId = 42;
+      const templateId = 999;
+
+      prisma.goal.findMany.mockResolvedValue([]);
+
+      const result = await service.findByTemplate(templateId, userId);
+
+      expect(result).toHaveLength(0);
+      expect(result).toEqual([]);
     });
   });
 });
