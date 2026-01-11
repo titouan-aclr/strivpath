@@ -197,5 +197,148 @@ describe('GoalProgressUpdateService', () => {
 
       expect(result.errors[0].error).toBe('Unknown error');
     });
+
+    it('should populate completedGoalIds when goals transition to COMPLETED', async () => {
+      const userId = 1;
+      const goals = [{ id: 1 }, { id: 2 }, { id: 3 }];
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      goalService.updateGoalProgress.mockResolvedValue(undefined);
+
+      const callCounts = { 1: 0, 2: 0, 3: 0 };
+      (prisma.goal.findUnique.mockImplementation as any)(async ({ where }: any) => {
+        const id = where.id;
+        callCounts[id]++;
+
+        if (id === 2 && callCounts[id] === 2) {
+          return { id: 2, status: 'COMPLETED' } as any;
+        }
+
+        return { id, status: 'ACTIVE' } as any;
+      });
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(result.completedGoalIds).toEqual([2]);
+      expect(result.successCount).toBe(3);
+    });
+
+    it('should populate failedGoalIds when goals transition to FAILED', async () => {
+      const userId = 1;
+      const goals = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      goalService.updateGoalProgress.mockResolvedValue(undefined);
+
+      const callCounts = { 1: 0, 2: 0, 3: 0, 4: 0 };
+      (prisma.goal.findUnique.mockImplementation as any)(async ({ where }: any) => {
+        const id = where.id;
+        callCounts[id]++;
+
+        if (id === 2 && callCounts[id] === 2) {
+          return { id: 2, status: 'FAILED' } as any;
+        }
+
+        if (id === 4 && callCounts[id] === 2) {
+          return { id: 4, status: 'FAILED' } as any;
+        }
+
+        return { id, status: 'ACTIVE' } as any;
+      });
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(result.failedGoalIds).toEqual([2, 4]);
+      expect(result.successCount).toBe(4);
+    });
+
+    it('should populate both completedGoalIds and failedGoalIds correctly', async () => {
+      const userId = 1;
+      const goals = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }];
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      goalService.updateGoalProgress.mockResolvedValue(undefined);
+
+      const callCounts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+      (prisma.goal.findUnique.mockImplementation as any)(async ({ where }: any) => {
+        const id = where.id;
+        callCounts[id]++;
+
+        if (id === 2 && callCounts[id] === 2) {
+          return { id: 2, status: 'COMPLETED' } as any;
+        }
+
+        if (id === 3 && callCounts[id] === 2) {
+          return { id: 3, status: 'FAILED' } as any;
+        }
+
+        if (id === 4 && callCounts[id] === 2) {
+          return { id: 4, status: 'COMPLETED' } as any;
+        }
+
+        return { id, status: 'ACTIVE' } as any;
+      });
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(result.completedGoalIds).toEqual([2, 4]);
+      expect(result.failedGoalIds).toEqual([3]);
+      expect(result.successCount).toBe(5);
+      expect(result.failureCount).toBe(0);
+    });
+
+    it('should handle large batch of 50 goals', async () => {
+      const userId = 1;
+      const goals = Array.from({ length: 50 }, (_, i) => ({ id: i + 1 }));
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      prisma.goal.findUnique.mockResolvedValue({ status: 'ACTIVE' } as any);
+      goalService.updateGoalProgress.mockResolvedValue(undefined);
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(goalService.updateGoalProgress).toHaveBeenCalledTimes(50);
+      expect(result.totalGoals).toBe(50);
+      expect(result.successCount).toBe(50);
+      expect(result.failureCount).toBe(0);
+    });
+
+    it('should handle large batch of 100 goals', async () => {
+      const userId = 1;
+      const goals = Array.from({ length: 100 }, (_, i) => ({ id: i + 1 }));
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      prisma.goal.findUnique.mockResolvedValue({ status: 'ACTIVE' } as any);
+      goalService.updateGoalProgress.mockResolvedValue(undefined);
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(goalService.updateGoalProgress).toHaveBeenCalledTimes(100);
+      expect(result.totalGoals).toBe(100);
+      expect(result.successCount).toBe(100);
+      expect(result.failureCount).toBe(0);
+    });
+
+    it('should handle large batch with mixed success and failures', async () => {
+      const userId = 1;
+      const goals = Array.from({ length: 50 }, (_, i) => ({ id: i + 1 }));
+
+      prisma.goal.findMany.mockResolvedValue(goals as any);
+      prisma.goal.findUnique.mockResolvedValue({ status: 'ACTIVE' } as any);
+
+      goalService.updateGoalProgress.mockImplementation(async (goalId: number) => {
+        if (goalId % 5 === 0) {
+          throw new Error('Processing error');
+        }
+        return Promise.resolve();
+      });
+
+      const result = await service.updateAllGoalsForUser(userId);
+
+      expect(result.totalGoals).toBe(50);
+      expect(result.successCount).toBe(40);
+      expect(result.failureCount).toBe(10);
+      expect(result.errors).toHaveLength(10);
+    });
   });
 });
