@@ -151,6 +151,204 @@ describe('useGoalDetail', () => {
 
       expect(result.current.refreshError).toBeUndefined();
     });
+
+    it('should set refreshing state during refresh', async () => {
+      const updatedGoal = {
+        ...MOCK_GOAL_DETAIL_RUN_50K,
+        currentValue: 35,
+        progressPercentage: 70,
+      };
+
+      server.use(
+        graphql.query('Goal', () => {
+          return HttpResponse.json({
+            data: { goal: MOCK_GOAL_DETAIL_RUN_50K },
+          });
+        }),
+        graphql.mutation('RefreshGoalProgress', async () => {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          return HttpResponse.json({
+            data: { refreshGoalProgress: updatedGoal },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useGoalDetail({ id: 1 }), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.refreshing).toBe(false);
+
+      const refreshPromise = result.current.refreshProgress();
+
+      await waitFor(() => {
+        expect(result.current.refreshing).toBe(true);
+      });
+
+      await refreshPromise;
+
+      await waitFor(() => {
+        expect(result.current.refreshing).toBe(false);
+      });
+    });
+
+    it('should handle multiple refresh calls', async () => {
+      const updatedGoal1 = {
+        ...MOCK_GOAL_DETAIL_RUN_50K,
+        currentValue: 30,
+        progressPercentage: 60,
+      };
+
+      const updatedGoal2 = {
+        ...MOCK_GOAL_DETAIL_RUN_50K,
+        currentValue: 40,
+        progressPercentage: 80,
+      };
+
+      let refreshCount = 0;
+
+      server.use(
+        graphql.query('Goal', () => {
+          return HttpResponse.json({
+            data: { goal: MOCK_GOAL_DETAIL_RUN_50K },
+          });
+        }),
+        graphql.mutation('RefreshGoalProgress', () => {
+          refreshCount++;
+          const goalToReturn = refreshCount === 1 ? updatedGoal1 : updatedGoal2;
+          return HttpResponse.json({
+            data: { refreshGoalProgress: goalToReturn },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useGoalDetail({ id: 1 }), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      await result.current.refreshProgress();
+
+      await waitFor(() => {
+        expect(result.current.refreshing).toBe(false);
+      });
+
+      await result.current.refreshProgress();
+
+      await waitFor(() => {
+        expect(result.current.refreshing).toBe(false);
+      });
+
+      expect(refreshCount).toBe(2);
+    });
+
+    it('should clear previous refresh error on successful refresh', async () => {
+      server.use(
+        graphql.query('Goal', () => {
+          return HttpResponse.json({
+            data: { goal: MOCK_GOAL_DETAIL_RUN_50K },
+          });
+        }),
+      );
+
+      let failFirstTime = true;
+
+      server.use(
+        graphql.mutation('RefreshGoalProgress', () => {
+          if (failFirstTime) {
+            failFirstTime = false;
+            return HttpResponse.json({
+              errors: [
+                {
+                  message: 'Failed to refresh progress',
+                  extensions: { code: 'INTERNAL_ERROR' },
+                },
+              ],
+              data: null,
+            });
+          }
+
+          return HttpResponse.json({
+            data: { refreshGoalProgress: MOCK_GOAL_DETAIL_RUN_50K },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useGoalDetail({ id: 1 }), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      try {
+        await result.current.refreshProgress();
+      } catch {
+        // Expected error
+      }
+
+      await waitFor(() => {
+        expect(result.current.refreshError).toBeDefined();
+      });
+
+      await result.current.refreshProgress();
+
+      await waitFor(() => {
+        expect(result.current.refreshing).toBe(false);
+      });
+
+      await waitFor(() => {
+        expect(result.current.refreshError).toBeUndefined();
+      });
+    });
+  });
+
+  describe('ID Validation Edge Cases', () => {
+    it('should handle zero ID', () => {
+      const { result } = renderHook(() => useGoalDetail({ id: 0 }), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.goal).toBeNull();
+    });
+
+    it('should handle very large ID', async () => {
+      server.use(
+        graphql.query('Goal', () => {
+          return HttpResponse.json({
+            data: { goal: null },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useGoalDetail({ id: 999999999 }), {
+        wrapper: createWrapper(),
+      });
+
+      await waitFor(() => {
+        expect(result.current.loading).toBe(false);
+      });
+
+      expect(result.current.goal).toBeNull();
+    });
+
+    it('should handle fractional ID', () => {
+      const { result } = renderHook(() => useGoalDetail({ id: 1.5 }), {
+        wrapper: createWrapper(),
+      });
+
+      expect(result.current.loading).toBe(false);
+      expect(result.current.goal).toBeNull();
+    });
   });
 
   describe('Error handling', () => {

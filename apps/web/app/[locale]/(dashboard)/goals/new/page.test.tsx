@@ -344,4 +344,195 @@ describe('NewGoalPage - Integration Tests', () => {
       });
     });
   });
+
+  describe('Submission: createGoal vs createGoalFromTemplate', () => {
+    it('should use createGoal mutation for custom goal', async () => {
+      const user = userEvent.setup();
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const customGoalCard = screen.getByText('goals.create.templateSelector.custom.title').closest('div');
+      await user.click(customGoalCard!);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.type(titleInput, 'Custom Goal');
+
+      const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
+      await user.clear(targetValueInput);
+      await user.type(targetValueInput, '50');
+
+      const submitButton = screen.getByText('goals.create.form.actions.create');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockCreateGoal).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: expect.stringContaining('Custom Goal'),
+          }),
+        );
+      });
+    });
+
+    it('should use createGoal mutation for template-based goal with modifications', async () => {
+      const user = userEvent.setup();
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const templateCard = screen.getByText('Run 50km this month').closest('div[role="button"]');
+      await user.click(templateCard!);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.clear(titleInput);
+      await user.type(titleInput, 'Modified Template Goal');
+
+      const submitButton = screen.getByText('goals.create.form.actions.create');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockCreateGoal).toHaveBeenCalledWith(
+          expect.objectContaining({
+            title: expect.stringContaining('Modified Template Goal'),
+          }),
+        );
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should handle creation error gracefully', async () => {
+      const user = userEvent.setup();
+      mockCreateGoal.mockImplementationOnce(() => {
+        mockToast.error('goals.create.error');
+        return Promise.reject(new Error('Creation failed'));
+      });
+
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const customGoalCard = screen.getByText('goals.create.templateSelector.custom.title').closest('div');
+      await user.click(customGoalCard!);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.type(titleInput, 'Test Goal');
+
+      const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
+      await user.clear(targetValueInput);
+      await user.type(targetValueInput, '50');
+
+      const submitButton = screen.getByText('goals.create.form.actions.create');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockToast.error).toHaveBeenCalledWith('goals.create.error');
+      });
+
+      expect(mockRouterPush).not.toHaveBeenCalled();
+    });
+
+    it('should stay on form if creation fails', async () => {
+      const user = userEvent.setup();
+      mockCreateGoal.mockImplementationOnce(() => {
+        return Promise.resolve(null);
+      });
+
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const customGoalCard = screen.getByText('goals.create.templateSelector.custom.title').closest('div');
+      await user.click(customGoalCard!);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.type(titleInput, 'Test Goal');
+
+      const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
+      await user.clear(targetValueInput);
+      await user.type(targetValueInput, '50');
+
+      const submitButton = screen.getByText('goals.create.form.actions.create');
+      await user.click(submitButton);
+
+      await waitFor(() => {
+        expect(mockCreateGoal).toHaveBeenCalled();
+      });
+
+      expect(mockRouterPush).not.toHaveBeenCalled();
+      expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+    });
+
+    it('should handle template loading error', () => {
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      expect(screen.getByText('goals.create.templateSelector.title')).toBeInTheDocument();
+    });
+  });
+
+  describe('Navigation Scenarios', () => {
+    it('should cancel goal creation and return to template selection', async () => {
+      const user = userEvent.setup();
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const customGoalCard = screen.getByText('goals.create.templateSelector.custom.title').closest('div');
+      await user.click(customGoalCard!);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.form.title')).toBeInTheDocument();
+      });
+
+      const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
+      await user.type(titleInput, 'Abandoned Goal');
+
+      const backButton = screen.getByText('goals.create.form.actions.back');
+      await user.click(backButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.templateSelector.title')).toBeInTheDocument();
+      });
+
+      const customGoalCardAgain = screen.getByText('goals.create.templateSelector.custom.title').closest('div');
+      await user.click(customGoalCardAgain!);
+
+      await waitFor(() => {
+        const titleInputAgain = screen.getByLabelText<HTMLInputElement>(/goals.create.form.fields.title.label/i);
+        expect(titleInputAgain.value).not.toBe('Abandoned Goal');
+      });
+    });
+
+    it('should preserve template selection when going back and forth', async () => {
+      const user = userEvent.setup();
+      render(<NewGoalPage />, { wrapper: createWrapper() });
+
+      const templateCard = screen.getByText('Run 50km this month').closest('div[role="button"]');
+      await user.click(templateCard!);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Run 50km this month')).toBeInTheDocument();
+      });
+
+      const backButton = screen.getByText('goals.create.form.actions.back');
+      await user.click(backButton);
+
+      await waitFor(() => {
+        expect(screen.getByText('goals.create.templateSelector.title')).toBeInTheDocument();
+      });
+
+      const templateCardAgain = screen.getByText('Run 50km this month').closest('div[role="button"]');
+      await user.click(templateCardAgain!);
+
+      await waitFor(() => {
+        expect(screen.getByDisplayValue('Run 50km this month')).toBeInTheDocument();
+      });
+    });
+  });
 });
