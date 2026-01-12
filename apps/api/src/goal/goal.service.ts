@@ -175,6 +175,15 @@ export class GoalService {
     });
   }
 
+  private getStravaTypesForSport(sportType: string): string[] {
+    const mapping: Record<string, string[]> = {
+      RUN: ['Run', 'TrailRun', 'VirtualRun'],
+      RIDE: ['Ride', 'MountainBikeRide', 'VirtualRide', 'EBikeRide', 'EMountainBikeRide', 'Velomobile'],
+      SWIM: ['Swim'],
+    };
+    return mapping[sportType] || [];
+  }
+
   private async calculateProgress(goal: {
     userId: number;
     targetType: string;
@@ -188,7 +197,7 @@ export class GoalService {
         gte: goal.startDate,
         lte: goal.endDate,
       },
-      ...(goal.sportType && { type: goal.sportType }),
+      ...(goal.sportType && { type: { in: this.getStravaTypesForSport(goal.sportType) } }),
     };
 
     switch (goal.targetType) {

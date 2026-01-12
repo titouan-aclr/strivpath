@@ -18,19 +18,21 @@ describe('Goal Auto-Update on Activity Sync', () => {
   let prisma: ReturnType<typeof getTestPrismaClient>;
 
   const getTestDates = () => {
-    const now = new Date();
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-    const testActivityDate = new Date(now.getFullYear(), now.getMonth(), 15);
+    const startOfMonth = new Date('2026-06-01T00:00:00.000Z');
+    const endOfMonth = new Date('2026-06-30T23:59:59.999Z');
+    const testActivityDate = '2026-06-15T10:00:00.000Z';
 
     return {
       startOfMonth,
       endOfMonth,
-      testActivityDate: testActivityDate.toISOString(),
+      testActivityDate,
     };
   };
 
   const createMockStravaActivity = (id: number, overrides?: Partial<StravaActivitySummary>): StravaActivitySummary => {
+    const defaultDate = '2026-06-15T10:00:00.000Z';
+    const startDate = overrides?.start_date || defaultDate;
+
     return {
       id,
       resource_state: 2,
@@ -45,10 +47,10 @@ describe('Goal Auto-Update on Activity Sync', () => {
       type: 'Run',
       sport_type: 'Run',
       workout_type: null,
-      start_date: '2025-01-15T10:00:00Z',
-      start_date_local: '2025-01-15T11:00:00+01:00',
-      timezone: '(GMT+01:00) Europe/Paris',
-      utc_offset: 3600,
+      start_date: startDate,
+      start_date_local: startDate,
+      timezone: '(GMT+00:00) UTC',
+      utc_offset: 0,
       location_city: 'Test City',
       location_state: null,
       location_country: 'Test Country',
@@ -306,9 +308,8 @@ describe('Goal Auto-Update on Activity Sync', () => {
       data: { selectedSports: [SportType.RUN] },
     });
 
-    const now = new Date();
-    const lastMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    const lastMonthStart = new Date('2026-05-01T00:00:00.000Z');
+    const lastMonthEnd = new Date('2026-05-31T23:59:59.999Z');
 
     const expiredGoal = await prisma.goal.create({
       data: {
@@ -317,8 +318,8 @@ describe('Goal Auto-Update on Activity Sync', () => {
         targetType: GoalTargetType.DISTANCE,
         targetValue: 50,
         periodType: GoalPeriodType.CUSTOM,
-        startDate: lastMonth,
-        endDate: endOfLastMonth,
+        startDate: lastMonthStart,
+        endDate: lastMonthEnd,
         isRecurring: false,
         sportType: SportType.RUN,
         status: GoalStatus.ACTIVE,
@@ -326,7 +327,7 @@ describe('Goal Auto-Update on Activity Sync', () => {
       },
     });
 
-    const futureEnd = new Date(now.getFullYear(), now.getMonth() + 2, 0, 23, 59, 59);
+    const futureEnd = new Date('2026-08-31T23:59:59.999Z');
 
     const activeGoal = await prisma.goal.create({
       data: {

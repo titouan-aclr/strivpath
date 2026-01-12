@@ -52,5 +52,44 @@ describe('TranslationHelper', () => {
     it('should throw error when no translations available', () => {
       expect(() => TranslationHelper.selectTranslation([], 'en')).toThrow('No translations available');
     });
+
+    it('should handle partial language match (fr-CA → fr)', () => {
+      const result = TranslationHelper.selectTranslation(mockTranslations, 'fr-CA');
+      expect(result.title).toBe('Courir 50km');
+      expect(result.description).toBe('Compléter 50km de course');
+    });
+
+    it('should handle custom fallback locale', () => {
+      const customTranslations = [
+        { locale: 'es', title: 'Correr 50km', description: 'Completar 50km corriendo' },
+        { locale: 'fr', title: 'Courir 50km', description: 'Compléter 50km de course' },
+      ];
+
+      const result = TranslationHelper.selectTranslation(customTranslations, 'de', 'es');
+      expect(result.title).toBe('Correr 50km');
+      expect(result.description).toBe('Completar 50km corriendo');
+    });
+
+    it('should handle title-only translation (no description)', () => {
+      const titleOnlyTranslations = [
+        { locale: 'en', title: 'Run 50km', description: null },
+        { locale: 'fr', title: 'Courir 50km', description: null },
+      ];
+
+      const result = TranslationHelper.selectTranslation(titleOnlyTranslations, 'en');
+      expect(result.title).toBe('Run 50km');
+      expect(result.description).toBeUndefined();
+    });
+
+    it('should handle description-only translation', () => {
+      const descriptionOnlyTranslations = [
+        { locale: 'en', title: '', description: 'Complete 50km of running' },
+        { locale: 'fr', title: '', description: 'Compléter 50km de course' },
+      ];
+
+      const result = TranslationHelper.selectTranslation(descriptionOnlyTranslations, 'en');
+      expect(result.title).toBe('');
+      expect(result.description).toBe('Complete 50km of running');
+    });
   });
 });
