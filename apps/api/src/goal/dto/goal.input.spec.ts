@@ -87,6 +87,32 @@ describe('CreateGoalInput', () => {
     const errors = await validate(input);
     expect(errors).toHaveLength(0);
   });
+
+  it('should pass validation with minimum valid targetValue', async () => {
+    const input = plainToClass(CreateGoalInput, {
+      title: 'Minimal goal',
+      targetType: GoalTargetType.DISTANCE,
+      targetValue: 0.01,
+      periodType: GoalPeriodType.MONTHLY,
+      startDate: '2025-01-01T00:00:00Z',
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should pass validation with title containing spaces', async () => {
+    const input = plainToClass(CreateGoalInput, {
+      title: '  Valid Title  ',
+      targetType: GoalTargetType.DISTANCE,
+      targetValue: 50,
+      periodType: GoalPeriodType.MONTHLY,
+      startDate: '2025-01-01T00:00:00Z',
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
+  });
 });
 
 describe('UpdateGoalInput', () => {
@@ -122,6 +148,35 @@ describe('UpdateGoalInput', () => {
   it('should pass validation when only updating endDate', async () => {
     const input = plainToClass(UpdateGoalInput, {
       endDate: '2025-12-31T23:59:59Z',
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should pass validation when updating multiple fields together', async () => {
+    const input = plainToClass(UpdateGoalInput, {
+      title: 'Updated title',
+      targetValue: 75,
+      description: 'Updated description',
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should pass validation with minimum valid targetValue', async () => {
+    const input = plainToClass(UpdateGoalInput, {
+      targetValue: 0.01,
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
+  });
+
+  it('should pass validation with title containing spaces', async () => {
+    const input = plainToClass(UpdateGoalInput, {
+      title: '  Updated Title  ',
     });
 
     const errors = await validate(input);
@@ -194,5 +249,16 @@ describe('CreateGoalFromTemplateInput', () => {
     const errors = await validate(input);
     expect(errors.length).toBeGreaterThan(0);
     expect(errors[0].property).toBe('customTitle');
+  });
+
+  it('should pass validation with customTitle containing spaces', async () => {
+    const input = plainToClass(CreateGoalFromTemplateInput, {
+      templateId: 1,
+      startDate: '2025-01-01T00:00:00Z',
+      customTitle: '  Custom Title  ',
+    });
+
+    const errors = await validate(input);
+    expect(errors).toHaveLength(0);
   });
 });

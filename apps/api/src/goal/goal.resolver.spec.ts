@@ -341,5 +341,59 @@ describe('GoalResolver', () => {
       const result = resolver.daysRemaining(expiredGoal);
       expect(result).toBeNull();
     });
+
+    it('should return null for goals with negative days remaining', () => {
+      const expiredGoal = {
+        ...mockGoal,
+        endDate: new Date(Date.now() - 10 * 86400000),
+      };
+      const result = resolver.daysRemaining(expiredGoal);
+      expect(result).toBeNull();
+    });
+
+    it('should return 0 for goals expiring today', () => {
+      const todayEnd = new Date();
+      todayEnd.setHours(23, 59, 59, 999);
+      const todayGoal = {
+        ...mockGoal,
+        endDate: todayEnd,
+      };
+      const result = resolver.daysRemaining(todayGoal);
+      expect(result).toBeGreaterThanOrEqual(0);
+      expect(result).toBeLessThanOrEqual(1);
+    });
+  });
+
+  describe('isExpired', () => {
+    it('should return true for goal with exact end date in the past', () => {
+      const exactlyExpiredGoal = {
+        ...mockGoal,
+        endDate: new Date(Date.now() - 1),
+      };
+      const result = resolver.isExpired(exactlyExpiredGoal);
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('progressPercentage', () => {
+    it('should handle division by zero gracefully', () => {
+      const zeroTargetGoal = {
+        ...mockGoal,
+        targetValue: 0,
+        currentValue: 10,
+      };
+      const result = resolver.progressPercentage(zeroTargetGoal);
+      expect(result).toBe(0);
+    });
+
+    it('should round to 2 decimal places', () => {
+      const preciseGoal = {
+        ...mockGoal,
+        targetValue: 3,
+        currentValue: 1,
+      };
+      const result = resolver.progressPercentage(preciseGoal);
+      expect(result).toBe(33.33);
+    });
   });
 });

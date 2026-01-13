@@ -36,7 +36,7 @@ const createMockPrismaGoal = (overrides?: Partial<PrismaGoal>): PrismaGoal => ({
   isRecurring: false,
   recurrenceEndDate: null,
   templateId: null,
-  sportType: 'Run',
+  sportType: null,
   status: 'ACTIVE',
   currentValue: 0,
   completedAt: null,
@@ -692,7 +692,7 @@ describe('GoalService', () => {
       const goal = createMockPrismaGoal({
         targetType: 'DISTANCE',
         targetValue: 50,
-        sportType: 'Run',
+        sportType: SportType.RUN,
       });
 
       prisma.goal.findUnique.mockResolvedValue(goal);
@@ -703,7 +703,7 @@ describe('GoalService', () => {
       expect(prisma.activity.aggregate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            type: 'Run',
+            type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
           }),
         }),
       );

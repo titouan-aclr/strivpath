@@ -6,7 +6,7 @@ import type { Goal } from '@/gql/graphql';
 
 const mockUseLocale = () => 'en-US';
 
-const mockUseTranslations = (namespace?: string) => (key: string) => {
+const mockUseTranslations = (namespace?: string) => (key: string, values?: Record<string, unknown>) => {
   const translations: Record<string, string> = {
     'goals.detail.information': 'Goal Information',
     'goals.detail.period': 'Period',
@@ -22,7 +22,13 @@ const mockUseTranslations = (namespace?: string) => (key: string) => {
     'goals.sportTypes.swim': 'Swimming',
   };
   const fullKey = namespace ? `${namespace}.${key}` : key;
-  return translations[fullKey] || key;
+  let translation = translations[fullKey] || key;
+
+  if (values?.days !== undefined && typeof values.days === 'number') {
+    translation = translation.replace('{days}', values.days.toString());
+  }
+
+  return translation;
 };
 
 vi.mock('next-intl', () => ({
@@ -87,7 +93,7 @@ describe('GoalDetailsCard', () => {
       render(<GoalDetailsCard goal={goal} />);
 
       expect(screen.getByText('Days Remaining')).toBeInTheDocument();
-      expect(screen.getByText('{days} days left')).toBeInTheDocument();
+      expect(screen.getByText(/10 days left/i)).toBeInTheDocument();
     });
 
     it('should not display days remaining when goal is expired', () => {
