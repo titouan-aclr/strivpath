@@ -127,10 +127,187 @@ The `BigInt` scalar type represents non-fractional signed whole numeric values.
 """
 scalar BigInt
 
+"""Input for creating a goal from a preset template"""
+input CreateGoalFromTemplateInput {
+  """Optional custom title (overrides template title)"""
+  customTitle: String
+
+  """Start date for the goal (ISO 8601 format)"""
+  startDate: String!
+
+  """ID of the template to use"""
+  templateId: Int!
+}
+
+"""Input for creating a new goal"""
+input CreateGoalInput {
+  """Optional goal description"""
+  description: String
+
+  """End date (required for CUSTOM period, auto-calculated for others)"""
+  endDate: String
+
+  """Whether this goal repeats automatically each period"""
+  isRecurring: Boolean = false
+
+  """Time period type"""
+  periodType: GoalPeriodType!
+
+  """End date for recurring goals (null = repeats indefinitely)"""
+  recurrenceEndDate: String
+
+  """Sport type filter (Run, Ride, Swim) or null for all sports"""
+  sportType: SportType
+
+  """Start date of the goal period (ISO 8601 format)"""
+  startDate: String!
+
+  """Type of metric to track"""
+  targetType: GoalTargetType!
+
+  """Target value to achieve (must be positive)"""
+  targetValue: Float!
+
+  """Goal title"""
+  title: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
+
+"""A user goal for tracking progress over a defined period"""
+type Goal {
+  """Timestamp when the goal was completed"""
+  completedAt: DateTime
+
+  """Timestamp when the goal was created"""
+  createdAt: DateTime!
+
+  """Current progress value (updated automatically from activities)"""
+  currentValue: Float!
+
+  """Number of days remaining until goal end date (null if expired)"""
+  daysRemaining: Int
+
+  """Optional description or notes about the goal"""
+  description: String
+
+  """End date of the goal period"""
+  endDate: DateTime!
+  id: ID!
+
+  """Whether the goal end date has passed"""
+  isExpired: Boolean!
+
+  """
+  Whether this goal repeats automatically (creates new instances each period)
+  """
+  isRecurring: Boolean!
+
+  """Time period type for this goal"""
+  periodType: GoalPeriodType!
+
+  """Calculated progress percentage (0-100+)"""
+  progressPercentage: Float!
+
+  """End date for recurring goals (null = repeats indefinitely)"""
+  recurrenceEndDate: DateTime
+
+  """Sport type filter (Run, Ride, Swim, or null for all sports)"""
+  sportType: SportType
+
+  """Start date of the goal period"""
+  startDate: DateTime!
+
+  """Current status of the goal"""
+  status: GoalStatus!
+
+  """Type of metric being tracked"""
+  targetType: GoalTargetType!
+
+  """Target value to achieve (e.g., 50 for 50km)"""
+  targetValue: Float!
+
+  """ID of the template this goal was created from (if any)"""
+  templateId: Int
+
+  """Goal title (e.g., "Run 50km this month")"""
+  title: String!
+
+  """Timestamp when the goal was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user who owns this goal"""
+  userId: Int!
+}
+
+"""
+Time period for goal tracking (weekly from Monday, monthly, yearly, or custom date range)
+"""
+enum GoalPeriodType {
+  CUSTOM
+  MONTHLY
+  WEEKLY
+  YEARLY
+}
+
+"""
+Current status of a goal (active, completed when target reached, failed when expired, or archived by user)
+"""
+enum GoalStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  FAILED
+}
+
+"""
+Type of metric to track for a goal (distance, duration, elevation gain, or activity frequency)
+"""
+enum GoalTargetType {
+  DISTANCE
+  DURATION
+  ELEVATION
+  FREQUENCY
+}
+
+"""A preset goal template with localized title and description"""
+type GoalTemplate {
+  """Template category (beginner, intermediate, advanced, challenge)"""
+  category: String!
+
+  """Timestamp when the template was created"""
+  createdAt: DateTime!
+
+  """
+  Localized description (resolved by field resolver based on user locale)
+  """
+  description: String
+  id: ID!
+
+  """Whether this is a system preset template"""
+  isPreset: Boolean!
+
+  """Recommended period type for this template"""
+  periodType: GoalPeriodType!
+
+  """Suggested sport type (Run, Ride, Swim, or null for all sports)"""
+  sportType: SportType
+
+  """Type of metric to track"""
+  targetType: GoalTargetType!
+
+  """Target value for the goal"""
+  targetValue: Float!
+
+  """Localized title (resolved by field resolver based on user locale)"""
+  title: String!
+
+  """Timestamp when the template was last updated"""
+  updatedAt: DateTime!
+}
 
 """Available locale options"""
 enum LocaleType {
@@ -139,6 +316,18 @@ enum LocaleType {
 }
 
 type Mutation {
+  """Archive a goal (soft delete, can be restored)"""
+  archiveGoal(id: Int!): Goal!
+
+  """Create a new custom goal"""
+  createGoal(input: CreateGoalInput!): Goal!
+
+  """Create a goal from a preset template"""
+  createGoalFromTemplate(input: CreateGoalFromTemplateInput!): Goal!
+
+  """Delete a goal permanently"""
+  deleteGoal(id: Int!): Boolean!
+
   """
   Fetch detailed activity data from Strava on-demand (calories, splits, description)
   """
@@ -147,11 +336,17 @@ type Mutation {
   """Logout and revoke refresh token"""
   logout: Boolean!
 
+  """Manually refresh goal progress calculation"""
+  refreshGoalProgress(id: Int!): Goal!
+
   """Refresh access token using refresh token cookie"""
   refreshToken: AuthResponse!
 
   """Synchronize activities from Strava"""
   syncActivities: SyncHistory!
+
+  """Update an existing goal"""
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
 
   """Update user preferences (sports, locale, theme)"""
   updateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
@@ -171,6 +366,9 @@ enum OrderDirection {
 }
 
 type Query {
+  """Get all active goals for the current user"""
+  activeGoals: [Goal!]!
+
   """Get activities with optional filtering and pagination"""
   activities(filter: ActivitiesFilterInput): [Activity!]!
 
@@ -179,6 +377,15 @@ type Query {
 
   """Get current authenticated user"""
   currentUser: User
+
+  """Get a single goal by ID (user-scoped)"""
+  goal(id: Int!): Goal
+
+  """Get all preset goal templates with localized content"""
+  goalTemplates(category: String, locale: String = "en"): [GoalTemplate!]!
+
+  """Get all goals for the current user with optional filtering"""
+  goals(includeArchived: Boolean = false, sportType: SportType, status: GoalStatus): [Goal!]!
 
   """Generate Strava OAuth authorization URL"""
   stravaAuthUrl(redirect: String): String!
@@ -216,7 +423,10 @@ enum SportType {
 
 type SyncHistory {
   completedAt: DateTime
+  completedGoalIds: [Int!]
   errorMessage: String
+  goalsCompletedCount: Int
+  goalsUpdatedCount: Int
   id: ID!
   processedActivities: Int!
   stage: SyncStage
@@ -247,6 +457,21 @@ enum ThemeType {
   DARK
   LIGHT
   SYSTEM
+}
+
+"""Input for updating an existing goal"""
+input UpdateGoalInput {
+  """Updated goal description"""
+  description: String
+
+  """Updated end date (for extending or shortening the goal period)"""
+  endDate: String
+
+  """Updated target value (must be positive)"""
+  targetValue: Float
+
+  """Updated goal title"""
+  title: String
 }
 
 input UpdateUserPreferencesInput {

@@ -14,7 +14,7 @@ const { mockRouterPush, mockRouterRefresh, mockToastError } = vi.hoisted(() => (
   mockToastError: vi.fn(),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({
     push: mockRouterPush,
     refresh: mockRouterRefresh,

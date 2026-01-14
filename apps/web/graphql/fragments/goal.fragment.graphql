@@ -1,0 +1,40 @@
+fragment GoalCard on Goal {
+  id
+  title
+  description
+  targetType
+  targetValue
+  periodType
+  startDate
+  endDate
+  isRecurring
+  sportType
+  status
+  currentValue
+  progressPercentage
+  isExpired
+  daysRemaining
+  createdAt
+}
+
+fragment GoalDetail on Goal {
+  ...GoalCard
+  userId
+  templateId
+  recurrenceEndDate
+  completedAt
+  updatedAt
+}
+
+fragment GoalTemplateInfo on GoalTemplate {
+  id
+  title
+  description
+  category
+  targetType
+  targetValue
+  periodType
+  sportType
+  isPreset
+  createdAt
+}

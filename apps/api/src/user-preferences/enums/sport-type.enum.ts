@@ -1,9 +1,9 @@
 import { registerEnumType } from '@nestjs/graphql';
 
 export enum SportType {
-  RUN = 'Run',
-  RIDE = 'Ride',
-  SWIM = 'Swim',
+  RUN = 'RUN',
+  RIDE = 'RIDE',
+  SWIM = 'SWIM',
 }
 
 registerEnumType(SportType, {
