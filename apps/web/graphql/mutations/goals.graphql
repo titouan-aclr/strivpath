@@ -1,0 +1,33 @@
+mutation CreateGoal($input: CreateGoalInput!) {
+  createGoal(input: $input) {
+    ...GoalDetail
+  }
+}
+
+mutation CreateGoalFromTemplate($input: CreateGoalFromTemplateInput!) {
+  createGoalFromTemplate(input: $input) {
+    ...GoalDetail
+  }
+}
+
+mutation UpdateGoal($id: Int!, $input: UpdateGoalInput!) {
+  updateGoal(id: $id, input: $input) {
+    ...GoalDetail
+  }
+}
+
+mutation DeleteGoal($id: Int!) {
+  deleteGoal(id: $id)
+}
+
+mutation ArchiveGoal($id: Int!) {
+  archiveGoal(id: $id) {
+    ...GoalDetail
+  }
+}
+
+mutation RefreshGoalProgress($id: Int!) {
+  refreshGoalProgress(id: $id) {
+    ...GoalDetail
+  }
+}

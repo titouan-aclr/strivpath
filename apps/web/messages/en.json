@@ -273,7 +273,290 @@
     },
     "refreshing": "Refreshing session..."
   },
+  "goals": {
+    "title": "My Goals",
+    "description": "Track your progress and achieve your objectives",
+    "newGoal": "New Goal",
+    "meta": {
+      "title": "Goals - Stravanalytics",
+      "description": "Set and track your sports goals"
+    },
+    "filters": {
+      "showFilters": "Filters",
+      "title": "Filter Goals",
+      "clear": "Clear",
+      "apply": "Apply",
+      "moreFilters": "More Filters",
+      "sport": {
+        "label": "Sport Type",
+        "all": "All Sports",
+        "run": "Running",
+        "ride": "Cycling",
+        "swim": "Swimming"
+      },
+      "status": {
+        "label": "Status",
+        "all": "All",
+        "active": "Active",
+        "completed": "Completed",
+        "failed": "Failed",
+        "archived": "Archived"
+      },
+      "period": {
+        "label": "Period",
+        "all": "All Periods",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "custom": "Custom"
+      },
+      "target": {
+        "label": "Type",
+        "all": "All Types",
+        "distance": "Distance",
+        "duration": "Duration",
+        "elevation": "Elevation",
+        "frequency": "Frequency"
+      },
+      "sort": {
+        "label": "Sort by",
+        "progressDesc": "Progress (High to Low)",
+        "progressAsc": "Progress (Low to High)",
+        "deadlineAsc": "Deadline (Nearest First)",
+        "deadlineDesc": "Deadline (Farthest First)",
+        "createdDesc": "Recently Created",
+        "createdAsc": "Oldest First"
+      }
+    },
+    "status": {
+      "active": "In Progress",
+      "completed": "Completed",
+      "failed": "Expired",
+      "archived": "Archived"
+    },
+    "progress": {
+      "label": "{current} of {target} {unit}"
+    },
+    "daysRemaining": {
+      "expired": "Expired",
+      "today": "Ends today",
+      "tomorrow": "1 day left",
+      "days": "{count} days left"
+    },
+    "actions": {
+      "menu": "Goal actions",
+      "edit": "Edit",
+      "archive": "Archive",
+      "delete": "Delete",
+      "archiveSuccess": "Goal archived successfully",
+      "deleteSuccess": "Goal deleted successfully"
+    },
+    "deleteDialog": {
+      "title": "Delete Goal",
+      "description": "Are you sure you want to delete \"{title}\"? This action cannot be undone.",
+      "cancel": "Cancel",
+      "confirm": "Delete"
+    },
+    "empty": {
+      "title": "No goals yet",
+      "description": "Create your first goal to start tracking your progress",
+      "createButton": "Create Goal"
+    },
+    "error": {
+      "title": "Failed to load goals",
+      "description": "An error occurred while loading your goals. Please try again.",
+      "retry": "Retry"
+    },
+    "create": {
+      "success": "Goal created successfully",
+      "error": "Failed to create goal",
+      "steps": {
+        "template": "Template",
+        "details": "Details"
+      },
+      "templateSelector": {
+        "title": "Create a Goal",
+        "description": "Choose a preset template or create a custom goal",
+        "custom": {
+          "title": "Custom Goal",
+          "description": "Create your own goal with all parameters"
+        },
+        "categories": {
+          "beginner": "Beginner",
+          "intermediate": "Intermediate",
+          "advanced": "Advanced",
+          "challenge": "Challenge"
+        },
+        "recurring": "Recurring"
+      },
+      "form": {
+        "title": "Goal Details",
+        "description": "Fill in your goal information",
+        "validationError": "Please fix errors before continuing",
+        "sections": {
+          "basic": "Basic Information",
+          "target": "Target",
+          "period": "Period"
+        },
+        "fields": {
+          "optional": "(optional)",
+          "title": {
+            "label": "Title",
+            "placeholder": "e.g., Run 50km this month"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Describe your goal..."
+          },
+          "sportType": {
+            "label": "Sport",
+            "allSports": "All sports"
+          },
+          "targetType": {
+            "label": "Goal Type"
+          },
+          "targetValue": {
+            "label": "Target Value"
+          },
+          "periodType": {
+            "label": "Period"
+          },
+          "startDate": {
+            "label": "Start Date",
+            "placeholder": "Select a date"
+          },
+          "endDate": {
+            "label": "End Date",
+            "placeholder": "Select a date"
+          },
+          "isRecurring": {
+            "label": "Recurring Goal",
+            "description": "Automatically create a new goal each period"
+          }
+        },
+        "hints": {
+          "distance": "Total distance to cover",
+          "duration": "Total activity time",
+          "frequency": "Number of sessions to complete",
+          "elevation": "Cumulative elevation gain"
+        },
+        "errors": {
+          "titleRequired": "Title is required",
+          "titleTooLong": "Title must be 100 characters or less",
+          "targetValuePositive": "Target value must be greater than 0",
+          "targetValueTooHigh": "Value must be {limit} or less",
+          "startDateRequired": "Start date is required",
+          "startDatePast": "Start date cannot be in the past",
+          "endDateRequired": "End date is required for custom period",
+          "endDateAfterStart": "End date must be after start date"
+        },
+        "actions": {
+          "back": "Back",
+          "create": "Create Goal"
+        }
+      }
+    },
+    "edit": {
+      "form": {
+        "title": "Edit Goal",
+        "description": "Modify your goal details. Some fields cannot be changed after creation.",
+        "fields": {
+          "readOnly": "(read-only)",
+          "cannotChangeSport": "Sport type cannot be changed after goal creation",
+          "cannotChangeTargetType": "Target type cannot be changed after goal creation",
+          "cannotChangePeriod": "Period type cannot be changed after goal creation",
+          "cannotChangeStartDate": "Start date cannot be changed after goal creation",
+          "recurringGoalNote": "This is a recurring goal. Modifications will only affect this instance."
+        },
+        "actions": {
+          "save": "Save Changes"
+        },
+        "noChanges": "No changes detected. Make some changes to save."
+      }
+    },
+    "update": {
+      "success": "Goal updated successfully",
+      "error": "Failed to update goal"
+    },
+    "delete": {
+      "success": "Goal deleted successfully",
+      "error": "Failed to delete goal"
+    },
+    "archive": {
+      "success": "Goal archived successfully",
+      "error": "Failed to archive goal"
+    },
+    "sync": {
+      "goalsUpdated": "{count, plural, =0 {No goals updated} =1 {1 goal updated} other {# goals updated}}",
+      "goalCompleted": "🎉 Goal completed: {goalTitle}",
+      "goalsCompleted": "🎉 {count, plural, =1 {1 goal completed} other {# goals completed}}!",
+      "viewGoals": "View Goals"
+    },
+    "targetTypes": {
+      "distance": "Distance",
+      "duration": "Duration",
+      "frequency": "Frequency",
+      "elevation": "Elevation"
+    },
+    "periodTypes": {
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "custom": "Custom"
+    },
+    "sportTypes": {
+      "run": "Running",
+      "ride": "Cycling",
+      "swim": "Swimming"
+    },
+    "detail": {
+      "progress": "Progress",
+      "information": "Information",
+      "period": "Period",
+      "daysRemaining": "Days Remaining",
+      "daysRemainingValue": "{days, plural, =0 {Last day!} =1 {1 day left} other {# days left}}",
+      "target": "Target",
+      "sport": "Sport",
+      "allSports": "All Sports",
+      "createdAt": "Created",
+      "updatedAt": "Last updated",
+      "backButton": "Back to Goals",
+      "actions": {
+        "title": "Actions",
+        "edit": "Edit Goal",
+        "editComingSoon": "Edit feature coming in next update",
+        "archive": "Archive Goal",
+        "delete": "Delete Goal",
+        "deleteConfirm": {
+          "title": "Are you sure?",
+          "description": "This action cannot be undone. This will permanently delete your goal.",
+          "cancel": "Cancel",
+          "confirm": "Delete"
+        }
+      },
+      "completed": {
+        "title": "Congratulations! 🎉",
+        "message": "You've successfully completed this goal. Keep up the great work!"
+      },
+      "failed": {
+        "title": "Goal Not Reached",
+        "message": "Don't be discouraged! Every attempt is a step forward. Set a new goal and try again.",
+        "createNew": "Create New Goal"
+      },
+      "error": {
+        "title": "Goal Not Found",
+        "description": "The goal you're looking for doesn't exist or has been deleted.",
+        "goBack": "Back to Goals"
+      }
+    }
+  },
   "errors": {
+    "unexpected": {
+      "title": "Something went wrong",
+      "description": "An unexpected error occurred. Please try again.",
+      "retry": "Try Again",
+      "goHome": "Go to Goals"
+    },
     "notFound": {
       "title": "Page not found",
       "description": "The page you are looking for does not exist",

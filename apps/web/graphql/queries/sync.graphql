@@ -9,5 +9,8 @@ query SyncStatus {
     startedAt
     completedAt
     errorMessage
+    goalsUpdatedCount
+    goalsCompletedCount
+    completedGoalIds
   }
 }

@@ -19,10 +19,33 @@ export function createApolloClient() {
                 return existing.length > 0 ? [...existing, ...incoming] : incoming;
               },
             },
+            goals: {
+              keyArgs: ['status', 'sportType', 'includeArchived'],
+              merge(_: unknown[], incoming: unknown[]): unknown[] {
+                return incoming;
+              },
+            },
+            activeGoals: {
+              merge(_: unknown[], incoming: unknown[]): unknown[] {
+                return incoming;
+              },
+            },
+            goalTemplates: {
+              keyArgs: ['category', 'locale'],
+              merge(_: unknown[], incoming: unknown[]): unknown[] {
+                return incoming;
+              },
+            },
           },
         },
         Activity: {
           keyFields: ['stravaId'],
+        },
+        Goal: {
+          keyFields: ['id'],
+        },
+        GoalTemplate: {
+          keyFields: ['id'],
         },
       },
     }),

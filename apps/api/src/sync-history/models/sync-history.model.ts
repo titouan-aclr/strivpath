@@ -30,4 +30,13 @@ export class SyncHistory {
 
   @Field({ nullable: true })
   completedAt?: Date;
+
+  @Field(() => Int, { nullable: true })
+  goalsUpdatedCount?: number;
+
+  @Field(() => Int, { nullable: true })
+  goalsCompletedCount?: number;
+
+  @Field(() => [Int], { nullable: true })
+  completedGoalIds?: number[];
 }

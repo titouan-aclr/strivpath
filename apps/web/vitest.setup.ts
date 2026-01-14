@@ -6,6 +6,35 @@ import { server } from './mocks/server';
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
 
+  global.ResizeObserver = class ResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+
+  if (typeof Element !== 'undefined') {
+    if (!Element.prototype.hasPointerCapture) {
+      Element.prototype.hasPointerCapture = function () {
+        return false;
+      };
+    }
+    if (!Element.prototype.setPointerCapture) {
+      Element.prototype.setPointerCapture = function () {
+        // noop
+      };
+    }
+    if (!Element.prototype.releasePointerCapture) {
+      Element.prototype.releasePointerCapture = function () {
+        // noop
+      };
+    }
+    if (!Element.prototype.scrollIntoView) {
+      Element.prototype.scrollIntoView = function () {
+        // noop
+      };
+    }
+  }
+
   const originalUnhandledRejection = process.listeners('unhandledRejection');
   process.removeAllListeners('unhandledRejection');
 

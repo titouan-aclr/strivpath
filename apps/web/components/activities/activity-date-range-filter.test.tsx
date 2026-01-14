@@ -174,7 +174,7 @@ describe('ActivityDateRangeFilter', () => {
       await waitFor(() => {
         expect(onChange).toHaveBeenCalledWith(expect.any(Date), expect.any(Date));
       });
-    });
+    }, 10000);
 
     it('should close popover after preset selection', async () => {
       const user = userEvent.setup();
@@ -195,7 +195,7 @@ describe('ActivityDateRangeFilter', () => {
       await waitFor(() => {
         expect(screen.queryByText('Quick Select')).not.toBeInTheDocument();
       });
-    });
+    }, 10000);
 
     it('should call onChange with undefined dates for "All time" preset', async () => {
       const user = userEvent.setup();

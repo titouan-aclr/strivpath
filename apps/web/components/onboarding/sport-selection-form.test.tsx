@@ -53,7 +53,7 @@ const { mockRouterPush, mockToast, mockUseTranslations } = vi.hoisted(() => ({
   mockUseTranslations: vi.fn(() => (key: string) => key),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => ({ push: mockRouterPush }),
 }));
 

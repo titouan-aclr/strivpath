@@ -14,6 +14,9 @@ export const createMockSyncHistory = (overrides?: Partial<SyncHistory>): SyncHis
     errorMessage: null,
     startedAt: now,
     completedAt: null,
+    goalsUpdatedCount: null,
+    goalsCompletedCount: null,
+    completedGoalIds: null,
     ...overrides,
   };
 };
@@ -48,6 +51,9 @@ export const MOCK_SYNC_HISTORIES = {
     totalActivities: 100,
     processedActivities: 100,
     completedAt: new Date(),
+    goalsUpdatedCount: 3,
+    goalsCompletedCount: 1,
+    completedGoalIds: [1],
   }),
 
   failed: createMockSyncHistory({
