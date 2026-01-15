@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -11,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
 import { ActivityModule } from './activity/activity.module';
 import { GoalModule } from './goal/goal.module';
+import { HealthModule } from './health/health.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
@@ -52,8 +51,7 @@ import { GraphQLBigInt } from 'graphql-scalars';
     StravaModule,
     ActivityModule,
     GoalModule,
+    HealthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
