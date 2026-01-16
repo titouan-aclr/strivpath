@@ -50,6 +50,9 @@ RUN pnpm --filter api exec prisma generate
 # Build the NestJS application
 RUN pnpm --filter api build
 
+# Compile the seed script separately (not included in nest build)
+RUN pnpm --filter api exec tsc prisma/seed.ts --outDir dist/prisma --esModuleInterop --skipLibCheck
+
 # -----------------------------------------------------------------------------
 # Stage 3: Production Dependencies - Install only production deps
 # -----------------------------------------------------------------------------
