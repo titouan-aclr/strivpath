@@ -1,5 +1,9 @@
+const isServer = typeof window === 'undefined';
+
 export const AUTH_CONFIG = {
-  graphqlUrl: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
+  graphqlUrl: isServer
+    ? process.env.GRAPHQL_URL_INTERNAL || process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql'
+    : process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:3011/graphql',
 
   retry: {
     maxAttempts: 3,
