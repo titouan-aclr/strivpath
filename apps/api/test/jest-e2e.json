@@ -10,5 +10,6 @@
     "^@/(.*)$": "<rootDir>/src/$1"
   },
   "setupFilesAfterEnv": ["<rootDir>/test/setup-e2e.ts"],
-  "testTimeout": 30000
+  "testTimeout": 30000,
+  "maxWorkers": 1
 }
