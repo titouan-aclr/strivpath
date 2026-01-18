@@ -20,7 +20,7 @@ on:
   pull_request:
     branches: [develop, main]
   push:
-    branches: [develop, feature/ci-cd]
+    branches: [develop]
     tags-ignore:
       - "v*"
 
