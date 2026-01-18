@@ -1,0 +1,129 @@
+# =============================================================================
+# Stravanalytics - Docker Compose for Local Testing
+# =============================================================================
+#
+# This compose file builds images locally from Dockerfiles for testing
+# the full stack before pushing to production.
+#
+# Prerequisites:
+#   - Copy .env.local.example to .env and fill in the values
+#   - Strava OAuth credentials configured
+#
+# Usage:
+#   docker compose -f docker-compose.local.yml up -d --build
+#
+# Access:
+#   - Web: http://localhost:3000
+#   - API: http://localhost:3011
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
+      POSTGRES_DB: ${POSTGRES_DB:-stravanalytics}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-stravanalytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # NestJS API Backend
+  # ---------------------------------------------------------------------------
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3011:3011"
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-stravanalytics}
+      # JWT
+      JWT_ACCESS_TOKEN_SECRET: ${JWT_ACCESS_TOKEN_SECRET:-local-dev-jwt-secret-min-32-chars}
+      JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:-local-dev-refresh-secret-min-32}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-15m}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-7d}
+      # Strava OAuth
+      STRAVA_CLIENT_ID: ${STRAVA_CLIENT_ID:?STRAVA_CLIENT_ID is required}
+      STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET:?STRAVA_CLIENT_SECRET is required}
+      STRAVA_REDIRECT_URI: http://localhost:3011/v1/auth/strava/callback
+      # CORS
+      FRONTEND_URL: http://localhost:3000
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Next.js Web Frontend
+  # ---------------------------------------------------------------------------
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args:
+        NEXT_PUBLIC_GRAPHQL_URL: http://localhost:3011/graphql
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:3011/graphql
+      GRAPHQL_URL_INTERNAL: http://api:3011/graphql
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
