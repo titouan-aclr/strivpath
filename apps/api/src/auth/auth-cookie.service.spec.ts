@@ -12,7 +12,7 @@ describe('AuthCookieService', () => {
     get: jest.fn((key: string, defaultValue?: any) => {
       const config: Record<string, any> = {
         COOKIES_SAME_SITE: 'lax',
-        COOKIES_SECURE: false,
+        COOKIES_SECURE: 'false',
         JWT_ACCESS_TOKEN_EXPIRATION: '15m',
         JWT_REFRESH_TOKEN_EXPIRATION: '7d',
         NODE_ENV: 'development',
@@ -163,7 +163,7 @@ describe('AuthCookieService', () => {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'none',
-            COOKIES_SECURE: true,
+            COOKIES_SECURE: 'true',
             JWT_ACCESS_TOKEN_EXPIRATION: '15m',
             JWT_REFRESH_TOKEN_EXPIRATION: '7d',
           };
@@ -185,7 +185,7 @@ describe('AuthCookieService', () => {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'none',
-            COOKIES_SECURE: false,
+            COOKIES_SECURE: 'false',
             JWT_ACCESS_TOKEN_EXPIRATION: '15m',
             JWT_REFRESH_TOKEN_EXPIRATION: '7d',
           };
@@ -207,7 +207,7 @@ describe('AuthCookieService', () => {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'invalid',
-            COOKIES_SECURE: false,
+            COOKIES_SECURE: 'false',
             JWT_ACCESS_TOKEN_EXPIRATION: '15m',
             JWT_REFRESH_TOKEN_EXPIRATION: '7d',
           };
@@ -222,32 +222,12 @@ describe('AuthCookieService', () => {
       ).rejects.toThrow('Invalid COOKIES_SAME_SITE value: "invalid". Expected one of: lax, none, strict.');
     });
 
-    it('should throw error when COOKIES_SECURE is not boolean', async () => {
-      const invalidMockConfigService = {
-        get: jest.fn((key: string, defaultValue?: any) => {
-          const config: Record<string, any> = {
-            COOKIES_SAME_SITE: 'lax',
-            COOKIES_SECURE: 'yes',
-            JWT_ACCESS_TOKEN_EXPIRATION: '15m',
-            JWT_REFRESH_TOKEN_EXPIRATION: '7d',
-          };
-          return config[key] ?? defaultValue;
-        }),
-      };
-
-      await expect(
-        Test.createTestingModule({
-          providers: [AuthCookieService, { provide: ConfigService, useValue: invalidMockConfigService }],
-        }).compile(),
-      ).rejects.toThrow('Invalid COOKIES_SECURE value: "yes". Expected boolean (true or false).');
-    });
-
     it('should reject uppercase/mixed case COOKIES_SAME_SITE values', async () => {
       const caseMockConfigService = {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'Lax',
-            COOKIES_SECURE: false,
+            COOKIES_SECURE: 'false',
             JWT_ACCESS_TOKEN_EXPIRATION: '15m',
             JWT_REFRESH_TOKEN_EXPIRATION: '7d',
           };
@@ -269,7 +249,7 @@ describe('AuthCookieService', () => {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'lax',
-            COOKIES_SECURE: false,
+            COOKIES_SECURE: 'false',
             JWT_ACCESS_TOKEN_EXPIRATION: '30m',
             JWT_REFRESH_TOKEN_EXPIRATION: '7d',
           };
@@ -302,7 +282,7 @@ describe('AuthCookieService', () => {
         get: jest.fn((key: string, defaultValue?: any) => {
           const config: Record<string, any> = {
             COOKIES_SAME_SITE: 'lax',
-            COOKIES_SECURE: false,
+            COOKIES_SECURE: 'false',
             JWT_ACCESS_TOKEN_EXPIRATION: '15m',
             JWT_REFRESH_TOKEN_EXPIRATION: '14d',
           };

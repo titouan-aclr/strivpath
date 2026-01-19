@@ -16,6 +16,7 @@
 #   - JWT_REFRESH_TOKEN_SECRET: Min 32 chars
 #   - STRAVA_CLIENT_ID: From Strava API settings
 #   - STRAVA_CLIENT_SECRET: From Strava API settings
+#   - COOKIES_DOMAIN: Parent domain for cookies (e.g., .example.com)
 #
 # =============================================================================
 
@@ -72,6 +73,10 @@ services:
       STRAVA_REDIRECT_URI: https://api.${DOMAIN}/v1/auth/strava/callback
       # CORS
       FRONTEND_URL: https://${DOMAIN}
+      # Cookies (cross-subdomain)
+      COOKIES_SECURE: ${COOKIES_SECURE:-true}
+      COOKIES_SAME_SITE: ${COOKIES_SAME_SITE:-lax}
+      COOKIES_DOMAIN: ${COOKIES_DOMAIN:?COOKIES_DOMAIN is required}
     labels:
       # Traefik configuration
       - "traefik.enable=true"

@@ -7,12 +7,14 @@ import { parseJwtExpirationToMs } from './utils/jwt-expiration.utils';
 export class AuthCookieService {
   private readonly sameSite: 'lax' | 'none' | 'strict';
   private readonly secure: boolean;
+  private readonly domain: string | undefined;
   private readonly accessTokenMaxAge: number;
   private readonly refreshTokenMaxAge: number;
 
   constructor(private readonly configService: ConfigService) {
     this.sameSite = this.configService.get<'lax' | 'none' | 'strict'>('COOKIES_SAME_SITE', 'lax');
-    this.secure = this.configService.get<boolean>('COOKIES_SECURE', false);
+    this.secure = this.configService.get<string>('COOKIES_SECURE', 'false') === 'true';
+    this.domain = this.configService.get<string>('COOKIES_DOMAIN');
 
     const accessTokenExp = this.configService.get<string>('JWT_ACCESS_TOKEN_EXPIRATION', '15m');
     const refreshTokenExp = this.configService.get<string>('JWT_REFRESH_TOKEN_EXPIRATION', '7d');
@@ -33,10 +35,6 @@ export class AuthCookieService {
       );
     }
 
-    if (typeof this.secure !== 'boolean') {
-      throw new Error(`Invalid COOKIES_SECURE value: "${String(this.secure)}". Expected boolean (true or false).`);
-    }
-
     if (this.sameSite === 'none' && !this.secure) {
       throw new Error(
         'Invalid cookie configuration: sameSite="none" requires secure=true. ' +
@@ -46,13 +44,19 @@ export class AuthCookieService {
   }
 
   private getCookieOptions(maxAge: number): CookieOptions {
-    return {
+    const options: CookieOptions = {
       httpOnly: true,
       secure: this.secure,
       sameSite: this.sameSite,
       maxAge,
       path: '/',
     };
+
+    if (this.domain) {
+      options.domain = this.domain;
+    }
+
+    return options;
   }
 
   setAccessTokenCookie(res: Response, accessToken: string): void {
@@ -64,21 +68,26 @@ export class AuthCookieService {
   }
 
   clearAccessTokenCookie(res: Response): void {
-    res.clearCookie('Authentication', {
-      httpOnly: true,
-      secure: this.secure,
-      sameSite: this.sameSite,
-      path: '/',
-    });
+    res.clearCookie('Authentication', this.getClearCookieOptions());
   }
 
   clearRefreshTokenCookie(res: Response): void {
-    res.clearCookie('RefreshToken', {
+    res.clearCookie('RefreshToken', this.getClearCookieOptions());
+  }
+
+  private getClearCookieOptions(): CookieOptions {
+    const options: CookieOptions = {
       httpOnly: true,
       secure: this.secure,
       sameSite: this.sameSite,
       path: '/',
-    });
+    };
+
+    if (this.domain) {
+      options.domain = this.domain;
+    }
+
+    return options;
   }
 
   clearAllAuthCookies(res: Response): void {
