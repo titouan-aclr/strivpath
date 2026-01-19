@@ -220,8 +220,8 @@ describe('UserPreferences GraphQL (e2e)', () => {
           where: { userId: user2.id },
         });
 
-        expect(prefs1?.selectedSports).toEqual(['Run']);
-        expect(prefs2?.selectedSports).toEqual(['Ride']);
+        expect(prefs1?.selectedSports).toEqual(['RUN']);
+        expect(prefs2?.selectedSports).toEqual(['RIDE']);
       });
     });
 
@@ -259,7 +259,7 @@ describe('UserPreferences GraphQL (e2e)', () => {
         const dbPreferences = await prisma.userPreferences.findUnique({
           where: { userId: user.id },
         });
-        expect(dbPreferences?.selectedSports).toEqual(['Run', 'Ride']);
+        expect(dbPreferences?.selectedSports).toEqual(['RUN', 'RIDE']);
       });
 
       it('should update locale successfully', async () => {

@@ -47,6 +47,11 @@
       "cache": false,
       "outputs": ["playwright-report/**", "test-results/**"],
       "env": ["PORT", "CI"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["DATABASE_URL", "CI"]
     }
   }
 }

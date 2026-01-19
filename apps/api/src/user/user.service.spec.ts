@@ -4,6 +4,7 @@ import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUser, createMockStravaToken } from '../../test/mocks/factories';
 import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 describe('UserService', () => {
   let service: UserService;
@@ -286,7 +287,7 @@ describe('UserService', () => {
           },
           preferences: {
             create: {
-              selectedSports: ['Run'],
+              selectedSports: [SportType.RUN],
               onboardingCompleted: false,
               locale: 'en',
               theme: 'system',

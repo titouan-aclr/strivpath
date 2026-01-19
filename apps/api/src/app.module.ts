@@ -1,6 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
@@ -11,11 +9,14 @@ import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
 import { ActivityModule } from './activity/activity.module';
 import { GoalModule } from './goal/goal.module';
+import { HealthModule } from './health/health.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { GraphQLContext } from './common/types';
 import { GraphQLBigInt } from 'graphql-scalars';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
@@ -33,12 +34,14 @@ import { GraphQLBigInt } from 'graphql-scalars';
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
-      playground: {
-        settings: {
-          'request.credentials': 'include',
-        },
-      },
+      autoSchemaFile: isProduction ? true : join(process.cwd(), 'src/schema.gql'),
+      playground: isProduction
+        ? false
+        : {
+            settings: {
+              'request.credentials': 'include',
+            },
+          },
       sortSchema: true,
       context: ({ req, res }: GraphQLContext): GraphQLContext => ({ req, res }),
       resolvers: {
@@ -52,8 +55,7 @@ import { GraphQLBigInt } from 'graphql-scalars';
     StravaModule,
     ActivityModule,
     GoalModule,
+    HealthModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

@@ -22,7 +22,11 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('v1', {
-    exclude: [{ path: 'graphql', method: RequestMethod.ALL }],
+    exclude: [
+      { path: 'graphql', method: RequestMethod.ALL },
+      { path: 'health', method: RequestMethod.GET },
+      { path: 'health/ready', method: RequestMethod.GET },
+    ],
   });
 
   await app.listen(process.env.PORT ?? 3011);

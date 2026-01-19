@@ -1,0 +1,183 @@
+# =============================================================================
+# Stravanalytics - Continuous Integration Workflow
+# =============================================================================
+#
+# This workflow runs on pull requests and pushes to develop branch.
+# It performs linting, building, unit tests, and integration tests.
+#
+# Jobs:
+#   - lint: ESLint checks across all packages
+#   - build: Build all packages with Turborepo
+#   - test-unit: Run unit tests for API (Jest) and Web (Vitest)
+#   - test-integration: Run API integration tests with PostgreSQL
+#
+# =============================================================================
+
+name: CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [develop, main]
+  push:
+    branches: [develop]
+    tags-ignore:
+      - "v*"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.8.1"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Lint - ESLint checks
+  # ---------------------------------------------------------------------------
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate GraphQL types
+        run: pnpm --filter web codegen
+
+      - name: Run lint
+        run: pnpm lint
+
+  # ---------------------------------------------------------------------------
+  # Build - Build all packages
+  # ---------------------------------------------------------------------------
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm build
+
+  # ---------------------------------------------------------------------------
+  # Unit Tests - API (Jest) and Web (Vitest)
+  # ---------------------------------------------------------------------------
+  test-unit:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate GraphQL types
+        run: pnpm --filter web codegen
+
+      - name: Run API unit tests
+        run: pnpm --filter api test:cov
+
+      - name: Run Web unit tests
+        run: pnpm --filter web test:cov
+
+  # ---------------------------------------------------------------------------
+  # Integration Tests - API only with PostgreSQL
+  # ---------------------------------------------------------------------------
+  test-integration:
+    name: Integration Tests
+    runs-on: ubuntu-latest
+    needs: build
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: stravanalytics_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter api generate
+
+      - name: Run database migrations
+        run: pnpm --filter api db:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_test
+
+      - name: Seed database
+        run: pnpm --filter api db:seed
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_test
+
+      - name: Run integration tests
+        run: pnpm --filter api test:integration
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_test
