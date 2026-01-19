@@ -174,7 +174,7 @@ jobs:
             ${{ env.API_IMAGE }}:latest
           cache-from: type=gha,scope=api
           cache-to: type=gha,mode=max,scope=api
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
       - name: Build and push Web image
         uses: docker/build-push-action@v6
@@ -189,7 +189,7 @@ jobs:
             NEXT_PUBLIC_GRAPHQL_URL=https://api.stravanalytics.${{ secrets.MY_DOMAIN }}/graphql
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
-          platforms: linux/amd64
+          platforms: linux/amd64,linux/arm64
 
   # ---------------------------------------------------------------------------
   # Deploy - Trigger Dokploy deployment
@@ -206,7 +206,7 @@ jobs:
           VERSION="${{ needs.build-and-push.outputs.version }}"
           echo "Triggering deployment for version $VERSION"
 
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X POST "${{ secrets.DOKPLOY_URL }}/api/compose.deploy" \
+          RESPONSE=$(curl -sL -w "\n%{http_code}" -X POST "${{ secrets.DOKPLOY_URL }}/api/compose.deploy" \
             -H "x-api-key: ${{ secrets.DOKPLOY_TOKEN }}" \
             -H "Content-Type: application/json" \
             -d "{\"composeId\": \"${{ secrets.DOKPLOY_COMPOSE_ID }}\", \"title\": \"v${VERSION}\", \"description\": \"Deployed from GitHub Actions (commit: ${{ github.sha }})\"}")
