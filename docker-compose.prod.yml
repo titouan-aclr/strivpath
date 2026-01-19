@@ -1,0 +1,164 @@
+# =============================================================================
+# Stravanalytics - Docker Compose for Production (Dokploy)
+# =============================================================================
+#
+# This compose file is designed to work with Dokploy and Traefik reverse proxy.
+# It uses pre-built images from GitHub Container Registry (GHCR).
+#
+# Prerequisites:
+#   - Configure environment variables in Dokploy UI
+#   - Point DNS A records to your server
+#
+# Required environment variables (configure in Dokploy):
+#   - DOMAIN: Your base domain
+#   - POSTGRES_PASSWORD: Secure database password
+#   - JWT_ACCESS_TOKEN_SECRET: Min 32 chars
+#   - JWT_REFRESH_TOKEN_SECRET: Min 32 chars
+#   - STRAVA_CLIENT_ID: From Strava API settings
+#   - STRAVA_CLIENT_SECRET: From Strava API settings
+#   - COOKIES_DOMAIN: Parent domain for cookies (e.g., .example.com)
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL Database
+  # ---------------------------------------------------------------------------
+  # NOT exposed externally - accessible only via internal Docker network
+  # ---------------------------------------------------------------------------
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-stravanalytics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:-stravanalytics}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stravanalytics} -d ${POSTGRES_DB:-stravanalytics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - internal
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # NestJS API Backend
+  # ---------------------------------------------------------------------------
+  api:
+    image: ghcr.io/titouan-aclr/stravanalytics-api:${API_TAG:-latest}
+    pull_policy: always
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3011
+      # Database (internal Docker network)
+      DATABASE_URL: postgresql://${POSTGRES_USER:-stravanalytics}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-stravanalytics}
+      # JWT
+      JWT_ACCESS_TOKEN_SECRET: ${JWT_ACCESS_TOKEN_SECRET:?JWT_ACCESS_TOKEN_SECRET is required}
+      JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:?JWT_REFRESH_TOKEN_SECRET is required}
+      JWT_ACCESS_TOKEN_EXPIRATION: ${JWT_ACCESS_TOKEN_EXPIRATION:-15m}
+      JWT_REFRESH_TOKEN_EXPIRATION: ${JWT_REFRESH_TOKEN_EXPIRATION:-7d}
+      # Strava OAuth
+      STRAVA_CLIENT_ID: ${STRAVA_CLIENT_ID:?STRAVA_CLIENT_ID is required}
+      STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET:?STRAVA_CLIENT_SECRET is required}
+      STRAVA_REDIRECT_URI: https://api.${DOMAIN}/v1/auth/strava/callback
+      # CORS
+      FRONTEND_URL: https://${DOMAIN}
+      # Cookies (cross-subdomain)
+      COOKIES_SECURE: ${COOKIES_SECURE:-true}
+      COOKIES_SAME_SITE: ${COOKIES_SAME_SITE:-lax}
+      COOKIES_DOMAIN: ${COOKIES_DOMAIN:?COOKIES_DOMAIN is required}
+    labels:
+      # Traefik configuration
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      # Router configuration
+      - "traefik.http.routers.strava-api.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.strava-api.entrypoints=websecure"
+      - "traefik.http.routers.strava-api.tls.certresolver=letsencrypt"
+      # Service configuration
+      - "traefik.http.services.strava-api.loadbalancer.server.port=3011"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 40s
+      retries: 3
+    networks:
+      - internal
+      - dokploy-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ---------------------------------------------------------------------------
+  # Next.js Web Frontend
+  # ---------------------------------------------------------------------------
+  web:
+    image: ghcr.io/titouan-aclr/stravanalytics-web:${WEB_TAG:-latest}
+    pull_policy: always
+    restart: unless-stopped
+    depends_on:
+      api:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      # GraphQL URL for browser (external, via Traefik)
+      NEXT_PUBLIC_GRAPHQL_URL: https://api.${DOMAIN}/graphql
+      # GraphQL URL for SSR (internal Docker network)
+      GRAPHQL_URL_INTERNAL: http://api:3011/graphql
+    labels:
+      # Traefik configuration
+      - "traefik.enable=true"
+      - "traefik.docker.network=dokploy-network"
+      # Router configuration
+      - "traefik.http.routers.strava-web.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.strava-web.entrypoints=websecure"
+      - "traefik.http.routers.strava-web.tls.certresolver=letsencrypt"
+      # Service configuration
+      - "traefik.http.services.strava-web.loadbalancer.server.port=3000"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+    networks:
+      - internal
+      - dokploy-network
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  # Internal network for service-to-service communication (DB, API, Web)
+  internal:
+    driver: bridge
+
+  # Dokploy's Traefik network for external access
+  dokploy-network:
+    external: true
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  postgres_data:

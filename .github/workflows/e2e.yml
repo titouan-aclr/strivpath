@@ -1,0 +1,101 @@
+# =============================================================================
+# Stravanalytics - E2E Tests Workflow
+# =============================================================================
+#
+# This workflow runs E2E tests before merging to main branch.
+# It provides an additional layer of testing beyond unit and integration tests.
+#
+# Jobs:
+#   - e2e-api: Run API E2E tests with PostgreSQL (rate limiting, auth flows)
+#
+# =============================================================================
+
+name: E2E Tests
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    tags-ignore:
+      - "v*"
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "24"
+  PNPM_VERSION: "10.8.1"
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # API E2E Tests - Full application tests with PostgreSQL
+  # ---------------------------------------------------------------------------
+  e2e-api:
+    name: API E2E Tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: stravanalytics_e2e
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm --filter api generate
+
+      - name: Run database migrations
+        run: pnpm --filter api db:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_e2e
+
+      - name: Run API E2E tests
+        run: pnpm --filter api test:e2e
+        env:
+          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_e2e
+          NODE_ENV: test
+          PORT: 3011
+          # JWT Configuration
+          JWT_ACCESS_TOKEN_SECRET: e2e-test-access-secret-key-for-ci
+          JWT_REFRESH_TOKEN_SECRET: e2e-test-refresh-secret-key-for-ci
+          JWT_ACCESS_TOKEN_EXPIRATION: 15m
+          JWT_REFRESH_TOKEN_EXPIRATION: 7d
+          # Strava OAuth (test values)
+          STRAVA_CLIENT_ID: test-client-id
+          STRAVA_CLIENT_SECRET: test-client-secret
+          STRAVA_REDIRECT_URI: http://localhost:3011/v1/auth/strava/callback
+          # Frontend
+          FRONTEND_URL: http://localhost:3000
+          # Rate Limiting
+          THROTTLE_DEFAULT_TTL: 60000
+          THROTTLE_DEFAULT_LIMIT: 100
+          # Token Cleanup
+          TOKEN_CLEANUP_ENABLED: false

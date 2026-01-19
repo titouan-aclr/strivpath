@@ -4,6 +4,7 @@ import { User } from './models/user.model';
 import { PrismaService } from '../database/prisma.service';
 import { UserMapper } from './user.mapper';
 import { StravaAthleteResponse, StravaTokenResponse } from '../strava/types';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 @Injectable()
 export class UserService {
@@ -96,7 +97,7 @@ export class UserService {
         },
         preferences: {
           create: {
-            selectedSports: ['Run'],
+            selectedSports: [SportType.RUN],
             onboardingCompleted: false,
             locale: 'en',
             theme: 'system',
