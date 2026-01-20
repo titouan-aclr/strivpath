@@ -7,6 +7,7 @@ import { GoalPeriodHelper } from './helpers/goal-period.helper';
 import { GoalStatus } from './enums/goal-status.enum';
 import { Prisma } from '@prisma/client';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
+import { getStravaTypesForSport } from '../common/utils/sport-type.utils';
 
 @Injectable()
 export class GoalService {
@@ -175,15 +176,6 @@ export class GoalService {
     });
   }
 
-  private getStravaTypesForSport(sportType: string): string[] {
-    const mapping: Record<string, string[]> = {
-      RUN: ['Run', 'TrailRun', 'VirtualRun'],
-      RIDE: ['Ride', 'MountainBikeRide', 'VirtualRide', 'EBikeRide', 'EMountainBikeRide', 'Velomobile'],
-      SWIM: ['Swim'],
-    };
-    return mapping[sportType] || [];
-  }
-
   private async calculateProgress(goal: {
     userId: number;
     targetType: string;
@@ -197,7 +189,7 @@ export class GoalService {
         gte: goal.startDate,
         lte: goal.endDate,
       },
-      ...(goal.sportType && { type: { in: this.getStravaTypesForSport(goal.sportType) } }),
+      ...(goal.sportType && { type: { in: getStravaTypesForSport(goal.sportType as SportType) } }),
     };
 
     switch (goal.targetType) {

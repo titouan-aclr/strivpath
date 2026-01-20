@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { UserPreferences } from './models/user-preferences.model';
-import { UpdateUserPreferencesInput } from './dto/user-preferences.input';
+import { SportDataCount } from './models/sport-data-count.model';
 import { PrismaService } from '../database/prisma.service';
 import { UserPreferencesMapper } from './user-preferences.mapper';
+import { SportType } from './enums/sport-type.enum';
+import { getStravaTypesForSport } from '../common/utils/sport-type.utils';
 
 @Injectable()
 export class UserPreferencesService {
@@ -16,36 +18,106 @@ export class UserPreferencesService {
     return prismaPreferences ? UserPreferencesMapper.toGraphQL(prismaPreferences) : null;
   }
 
-  async update(userId: number, input: UpdateUserPreferencesInput): Promise<UserPreferences> {
-    const existingPreferences = await this.prisma.userPreferences.findUnique({
+  async completeOnboarding(userId: number): Promise<UserPreferences> {
+    const preferences = await this.prisma.userPreferences.findUnique({
       where: { userId },
     });
 
-    if (!existingPreferences) {
-      throw new NotFoundException(`User preferences not found for user ${userId}`);
+    if (!preferences) {
+      throw new NotFoundException('User preferences not found');
     }
 
-    const shouldCompleteOnboarding =
-      input.selectedSports && input.selectedSports.length > 0 && !existingPreferences.onboardingCompleted;
-
-    const updateData: {
-      selectedSports?: string[];
-      onboardingCompleted?: boolean;
-    } = {};
-
-    if (input.selectedSports !== undefined) {
-      updateData.selectedSports = input.selectedSports as unknown as string[];
+    if (preferences.onboardingCompleted) {
+      return UserPreferencesMapper.toGraphQL(preferences);
     }
 
-    if (shouldCompleteOnboarding) {
-      updateData.onboardingCompleted = true;
+    const selectedSports = preferences.selectedSports as string[];
+    if (selectedSports.length === 0) {
+      throw new BadRequestException('Cannot complete onboarding without selecting at least one sport');
     }
 
     const updatedPreferences = await this.prisma.userPreferences.update({
       where: { userId },
-      data: updateData,
+      data: { onboardingCompleted: true },
     });
 
     return UserPreferencesMapper.toGraphQL(updatedPreferences);
+  }
+
+  async addSport(userId: number, sport: SportType): Promise<UserPreferences> {
+    const preferences = await this.prisma.userPreferences.findUnique({
+      where: { userId },
+    });
+
+    if (!preferences) {
+      throw new NotFoundException('User preferences not found');
+    }
+
+    const currentSports = preferences.selectedSports as string[];
+
+    if (currentSports.includes(sport)) {
+      throw new BadRequestException(`Sport ${sport} is already in user preferences`);
+    }
+
+    const updatedSports = [...currentSports, sport];
+
+    const updatedPreferences = await this.prisma.userPreferences.update({
+      where: { userId },
+      data: { selectedSports: updatedSports },
+    });
+
+    return UserPreferencesMapper.toGraphQL(updatedPreferences);
+  }
+
+  async getSportDataCount(userId: number, sport: SportType): Promise<SportDataCount> {
+    const stravaTypes = getStravaTypesForSport(sport);
+
+    const [activitiesCount, goalsCount] = await Promise.all([
+      this.prisma.activity.count({ where: { userId, type: { in: stravaTypes } } }),
+      this.prisma.goal.count({ where: { userId, sportType: sport } }),
+    ]);
+
+    return { activitiesCount, goalsCount };
+  }
+
+  async removeSport(userId: number, sport: SportType, deleteData: boolean): Promise<boolean> {
+    const preferences = await this.prisma.userPreferences.findUnique({ where: { userId } });
+
+    if (!preferences) {
+      throw new NotFoundException('User preferences not found');
+    }
+
+    const currentSports = preferences.selectedSports as string[];
+
+    if (!currentSports.includes(sport)) {
+      throw new BadRequestException(`Sport ${sport} is not in user preferences`);
+    }
+
+    const updatedSports = currentSports.filter(s => s !== (sport as string));
+
+    if (updatedSports.length === 0) {
+      throw new BadRequestException('Cannot remove last sport - at least one sport must be selected');
+    }
+
+    const stravaTypes = getStravaTypesForSport(sport);
+
+    await this.prisma.$transaction(async tx => {
+      await tx.userPreferences.update({
+        where: { userId },
+        data: { selectedSports: updatedSports },
+      });
+
+      if (deleteData) {
+        await tx.activity.deleteMany({ where: { userId, type: { in: stravaTypes } } });
+        await tx.goal.deleteMany({ where: { userId, sportType: sport } });
+      } else {
+        await tx.goal.updateMany({
+          where: { userId, sportType: sport, status: { not: 'ARCHIVED' } },
+          data: { status: 'ARCHIVED' },
+        });
+      }
+    });
+
+    return true;
   }
 }
