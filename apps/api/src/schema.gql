@@ -334,8 +334,14 @@ type Mutation {
   """Create a goal from a preset template"""
   createGoalFromTemplate(input: CreateGoalFromTemplateInput!): Goal!
 
+  """Permanently delete user account and all data"""
+  deleteAccount: Boolean!
+
   """Delete a goal permanently"""
   deleteGoal(id: Int!): Boolean!
+
+  """Delete all user data but keep account"""
+  deleteUserData: Boolean!
 
   """
   Fetch detailed activity data from Strava on-demand (calories, splits, description)
