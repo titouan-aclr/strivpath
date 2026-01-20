@@ -6,6 +6,7 @@ import { ErrorLink } from '@apollo/client/link/error';
 import { server } from '@/mocks/server';
 import { graphql, HttpResponse } from 'msw';
 import { MOCK_USERS } from '@/mocks/handlers';
+import { MOCK_USER_PREFERENCES } from '@/mocks/fixtures/settings.fixture';
 import { SportType } from '@/gql/graphql';
 import { useSportSelection } from './use-sport-selection';
 import { AuthContextProvider } from '../auth/context';
@@ -64,6 +65,37 @@ vi.mock('sonner', () => ({
 vi.mock('next-intl', () => ({
   useTranslations: mockUseTranslations,
 }));
+
+const setupSuccessHandlers = () => {
+  server.use(
+    graphql.mutation('AddSportToPreferences', ({ variables }) => {
+      const sport = variables.sport as SportType;
+      return HttpResponse.json({
+        data: {
+          addSportToPreferences: {
+            ...MOCK_USER_PREFERENCES.default,
+            selectedSports: [...MOCK_USER_PREFERENCES.default.selectedSports, sport],
+          },
+        },
+      });
+    }),
+    graphql.mutation('RemoveSportFromPreferences', () => {
+      return HttpResponse.json({
+        data: { removeSportFromPreferences: true },
+      });
+    }),
+    graphql.mutation('CompleteOnboarding', () => {
+      return HttpResponse.json({
+        data: {
+          completeOnboarding: {
+            ...MOCK_USER_PREFERENCES.default,
+            onboardingCompleted: true,
+          },
+        },
+      });
+    }),
+  );
+};
 
 describe('useSportSelection', () => {
   beforeEach(() => {
@@ -212,7 +244,7 @@ describe('useSportSelection', () => {
 
     it('should not allow submit while submitting', async () => {
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return new Promise(() => {});
         }),
       );
@@ -241,24 +273,29 @@ describe('useSportSelection', () => {
 
   describe('Submit - Success', () => {
     it('should successfully submit and redirect to sync page', async () => {
-      const updatePreferencesSpy = vi.fn();
+      const addSportSpy = vi.fn();
+      const completeOnboardingSpy = vi.fn();
 
       server.use(
-        graphql.mutation('UpdateUserPreferences', ({ variables }) => {
-          updatePreferencesSpy(variables);
-          const input = variables.input as { selectedSports: string[] };
+        graphql.mutation('AddSportToPreferences', ({ variables }) => {
+          addSportSpy(variables);
+          const sport = variables.sport as SportType;
           return HttpResponse.json({
             data: {
-              updateUserPreferences: {
-                __typename: 'UserPreferences',
-                id: '1',
-                userId: 1,
-                selectedSports: input.selectedSports,
-                locale: 'EN',
-                theme: 'light',
-                onboardingCompleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+              addSportToPreferences: {
+                ...MOCK_USER_PREFERENCES.default,
+                selectedSports: [...MOCK_USER_PREFERENCES.default.selectedSports, sport],
+              },
+            },
+          });
+        }),
+        graphql.mutation('CompleteOnboarding', () => {
+          completeOnboardingSpy();
+          return HttpResponse.json({
+            data: {
+              completeOnboarding: {
+                ...MOCK_USER_PREFERENCES.default,
+                onboardingCompleted: true,
               },
             },
           });
@@ -278,15 +315,60 @@ describe('useSportSelection', () => {
         await result.current.handleSubmit();
       });
 
-      expect(updatePreferencesSpy).toHaveBeenCalledWith({
-        input: {
-          selectedSports: [SportType.Run, SportType.Ride],
-        },
-      });
-
+      expect(addSportSpy).toHaveBeenCalledWith({ sport: SportType.Ride });
+      expect(completeOnboardingSpy).toHaveBeenCalled();
       expect(mockRouterPush).toHaveBeenCalledWith('/sync');
       expect(result.current.error).toBeNull();
       expect(result.current.isSubmitting).toBe(false);
+    });
+
+    it('should remove default sport if not selected', async () => {
+      const removeSportSpy = vi.fn();
+
+      server.use(
+        graphql.mutation('AddSportToPreferences', ({ variables }) => {
+          const sport = variables.sport as SportType;
+          return HttpResponse.json({
+            data: {
+              addSportToPreferences: {
+                ...MOCK_USER_PREFERENCES.default,
+                selectedSports: [sport],
+              },
+            },
+          });
+        }),
+        graphql.mutation('RemoveSportFromPreferences', ({ variables }) => {
+          removeSportSpy(variables);
+          return HttpResponse.json({
+            data: { removeSportFromPreferences: true },
+          });
+        }),
+        graphql.mutation('CompleteOnboarding', () => {
+          return HttpResponse.json({
+            data: {
+              completeOnboarding: {
+                ...MOCK_USER_PREFERENCES.default,
+                onboardingCompleted: true,
+              },
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSportSelection(), {
+        wrapper: createWrapper(MOCK_USERS.john),
+      });
+
+      act(() => {
+        result.current.toggleSport(SportType.Ride);
+      });
+
+      await act(async () => {
+        await result.current.handleSubmit();
+      });
+
+      expect(removeSportSpy).toHaveBeenCalledWith({ sport: SportType.Run, deleteData: false });
+      expect(mockRouterPush).toHaveBeenCalledWith('/sync');
     });
 
     it('should set isSubmitting during submission', async () => {
@@ -296,20 +378,13 @@ describe('useSportSelection', () => {
       });
 
       server.use(
-        graphql.mutation('UpdateUserPreferences', async () => {
+        graphql.mutation('CompleteOnboarding', async () => {
           await submitPromise;
           return HttpResponse.json({
             data: {
-              updateUserPreferences: {
-                __typename: 'UserPreferences',
-                id: '1',
-                userId: 1,
-                selectedSports: [SportType.Run],
-                locale: 'EN',
-                theme: 'light',
-                onboardingCompleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
+              completeOnboarding: {
+                ...MOCK_USER_PREFERENCES.default,
+                onboardingCompleted: true,
               },
             },
           });
@@ -359,11 +434,11 @@ describe('useSportSelection', () => {
     });
 
     it('should not submit when already submitting', async () => {
-      const updatePreferencesSpy = vi.fn();
+      const completeOnboardingSpy = vi.fn();
 
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
-          updatePreferencesSpy();
+        graphql.mutation('CompleteOnboarding', () => {
+          completeOnboardingSpy();
           return new Promise(() => {});
         }),
       );
@@ -388,13 +463,13 @@ describe('useSportSelection', () => {
         await result.current.handleSubmit();
       });
 
-      expect(updatePreferencesSpy).toHaveBeenCalledTimes(1);
+      expect(completeOnboardingSpy).toHaveBeenCalledTimes(1);
     });
   });
 
   describe('Submit - Error Handling', () => {
     it('should handle network errors', async () => {
-      server.use(graphql.mutation('UpdateUserPreferences', () => HttpResponse.error()));
+      server.use(graphql.mutation('CompleteOnboarding', () => HttpResponse.error()));
 
       const { result } = renderHook(() => useSportSelection(), {
         wrapper: createWrapper(MOCK_USERS.john),
@@ -417,7 +492,7 @@ describe('useSportSelection', () => {
 
     it('should handle GraphQL errors', async () => {
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return HttpResponse.json({
             errors: [
               {
@@ -449,7 +524,7 @@ describe('useSportSelection', () => {
 
     it('should handle token expiration errors', async () => {
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return HttpResponse.json({
             errors: [
               {
@@ -481,7 +556,7 @@ describe('useSportSelection', () => {
 
     it('should clear error before new submission', async () => {
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return HttpResponse.json({
             errors: [
               {
@@ -508,25 +583,7 @@ describe('useSportSelection', () => {
 
       expect(result.current.error).not.toBeNull();
 
-      server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
-          return HttpResponse.json({
-            data: {
-              updateUserPreferences: {
-                __typename: 'UserPreferences',
-                id: '1',
-                userId: 1,
-                selectedSports: [SportType.Run],
-                locale: 'EN',
-                theme: 'light',
-                onboardingCompleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            },
-          });
-        }),
-      );
+      setupSuccessHandlers();
 
       await act(async () => {
         await result.current.handleSubmit();
