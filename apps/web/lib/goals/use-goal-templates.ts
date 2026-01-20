@@ -3,7 +3,12 @@
 import { useMemo, useCallback } from 'react';
 import { useLocale } from 'next-intl';
 import { useQuery } from '@/lib/graphql';
-import { GoalTemplatesDocument, GoalTemplateInfoFragmentDoc, type GoalTemplateInfoFragment } from '@/gql/graphql';
+import {
+  GoalTemplatesDocument,
+  GoalTemplateInfoFragmentDoc,
+  type GoalTemplateInfoFragment,
+  Locale,
+} from '@/gql/graphql';
 import { getFragmentData } from '@/gql/fragment-masking';
 
 interface UseGoalTemplatesOptions {
@@ -26,7 +31,7 @@ export function useGoalTemplates(options?: UseGoalTemplatesOptions): UseGoalTemp
   const variables = useMemo(
     () => ({
       category: options?.category,
-      locale: locale.toUpperCase(),
+      locale: locale.toUpperCase() as Locale,
     }),
     [options?.category, locale],
   );
@@ -44,7 +49,9 @@ export function useGoalTemplates(options?: UseGoalTemplatesOptions): UseGoalTemp
 
   const templates = useMemo(() => {
     if (!data?.goalTemplates) return [];
-    return data.goalTemplates.map(template => getFragmentData(GoalTemplateInfoFragmentDoc, template));
+    return data.goalTemplates
+      .filter((template): template is NonNullable<typeof template> => template != null)
+      .map(template => getFragmentData(GoalTemplateInfoFragmentDoc, template));
   }, [data?.goalTemplates]);
 
   const refetch = useCallback(async () => {
