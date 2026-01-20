@@ -132,6 +132,9 @@ input CreateGoalFromTemplateInput {
   """Optional custom title (overrides template title)"""
   customTitle: String
 
+  """Locale for template translation"""
+  locale: Locale = EN
+
   """Start date for the goal (ISO 8601 format)"""
   startDate: String!
 
@@ -309,8 +312,8 @@ type GoalTemplate {
   updatedAt: DateTime!
 }
 
-"""Available locale options"""
-enum LocaleType {
+"""Supported locales for internationalization"""
+enum Locale {
   EN
   FR
 }
@@ -348,7 +351,7 @@ type Mutation {
   """Update an existing goal"""
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
 
-  """Update user preferences (sports, locale, theme)"""
+  """Update user preferences (sports selection)"""
   updateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
 }
 
@@ -382,7 +385,7 @@ type Query {
   goal(id: Int!): Goal
 
   """Get all preset goal templates with localized content"""
-  goalTemplates(category: String, locale: String = "en"): [GoalTemplate!]!
+  goalTemplates(category: String, locale: Locale = EN): [GoalTemplate!]!
 
   """Get all goals for the current user with optional filtering"""
   goals(includeArchived: Boolean = false, sportType: SportType, status: GoalStatus): [Goal!]!
@@ -452,13 +455,6 @@ enum SyncStatus {
   PENDING
 }
 
-"""Available theme options"""
-enum ThemeType {
-  DARK
-  LIGHT
-  SYSTEM
-}
-
 """Input for updating an existing goal"""
 input UpdateGoalInput {
   """Updated goal description"""
@@ -475,9 +471,7 @@ input UpdateGoalInput {
 }
 
 input UpdateUserPreferencesInput {
-  locale: LocaleType
   selectedSports: [SportType!]
-  theme: ThemeType
 }
 
 type User {
@@ -498,10 +492,8 @@ type User {
 type UserPreferences {
   createdAt: DateTime!
   id: Int!
-  locale: LocaleType!
   onboardingCompleted: Boolean!
   selectedSports: [SportType!]!
-  theme: ThemeType!
   updatedAt: DateTime!
   userId: Int!
 }

@@ -3,8 +3,6 @@ import { execSync } from 'child_process';
 import { JwtService } from '@nestjs/jwt';
 import { AccessTokenPayload } from '../src/auth/types';
 import { SportType } from '../src/user-preferences/enums/sport-type.enum';
-import { ThemeType } from '../src/user-preferences/enums/theme-type.enum';
-import { LocaleType } from '../src/user-preferences/enums/locale-type.enum';
 
 let prisma: PrismaClient;
 let databaseUrl: string;
@@ -13,6 +11,16 @@ export const setupTestDatabase = async (): Promise<PrismaClient> => {
   databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/stravanalytics_test';
 
   process.env.DATABASE_URL = databaseUrl;
+
+  try {
+    execSync('pnpm prisma db push --skip-generate --accept-data-loss', {
+      cwd: process.cwd(),
+      stdio: 'pipe',
+      env: { ...process.env, DATABASE_URL: databaseUrl },
+    });
+  } catch (error) {
+    throw new Error(`Failed to setup test database. Please ensure the database exists. Error: ${error}`);
+  }
 
   prisma = new PrismaClient({
     datasources: {
@@ -23,16 +31,6 @@ export const setupTestDatabase = async (): Promise<PrismaClient> => {
   });
 
   await prisma.$connect();
-
-  try {
-    execSync('pnpm prisma migrate deploy', {
-      cwd: process.cwd(),
-      stdio: 'pipe',
-      env: { ...process.env, DATABASE_URL: databaseUrl },
-    });
-  } catch (error) {
-    throw new Error(`Failed to apply migrations: ${error}`);
-  }
 
   return prisma;
 };
@@ -106,8 +104,6 @@ export const seedTestUser = async (overrides?: {
       userId: user.id,
       selectedSports: [SportType.RUN],
       onboardingCompleted: false,
-      locale: LocaleType.EN,
-      theme: ThemeType.SYSTEM,
     },
   });
 

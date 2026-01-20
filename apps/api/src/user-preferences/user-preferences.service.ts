@@ -30,21 +30,11 @@ export class UserPreferencesService {
 
     const updateData: {
       selectedSports?: string[];
-      locale?: string;
-      theme?: string;
       onboardingCompleted?: boolean;
     } = {};
 
     if (input.selectedSports !== undefined) {
       updateData.selectedSports = input.selectedSports as unknown as string[];
-    }
-
-    if (input.locale !== undefined) {
-      updateData.locale = input.locale;
-    }
-
-    if (input.theme !== undefined) {
-      updateData.theme = input.theme;
     }
 
     if (shouldCompleteOnboarding) {

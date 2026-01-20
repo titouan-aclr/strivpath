@@ -3,8 +3,6 @@ import { UserPreferencesResolver } from './user-preferences.resolver';
 import { UserPreferencesService } from './user-preferences.service';
 import { UserPreferences } from './models/user-preferences.model';
 import { SportType } from './enums/sport-type.enum';
-import { ThemeType } from './enums/theme-type.enum';
-import { LocaleType } from './enums/locale-type.enum';
 import { TokenPayload } from '../auth/types';
 
 describe('UserPreferencesResolver', () => {
@@ -21,8 +19,6 @@ describe('UserPreferencesResolver', () => {
     userId: 1,
     selectedSports: [SportType.RUN, SportType.RIDE],
     onboardingCompleted: true,
-    locale: LocaleType.EN,
-    theme: ThemeType.SYSTEM,
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
   };
@@ -51,15 +47,11 @@ describe('UserPreferencesResolver', () => {
     it('should update user preferences and return updated data', async () => {
       const input = {
         selectedSports: [SportType.RUN, SportType.SWIM],
-        locale: LocaleType.FR,
-        theme: ThemeType.DARK,
       };
 
       const updatedPreferences: UserPreferences = {
         ...mockUserPreferences,
         selectedSports: [SportType.RUN, SportType.SWIM],
-        locale: LocaleType.FR,
-        theme: ThemeType.DARK,
       };
 
       mockUserPreferencesService.update.mockResolvedValue(updatedPreferences);
@@ -72,7 +64,7 @@ describe('UserPreferencesResolver', () => {
     });
 
     it('should use userId from token payload (@CurrentUser decorator)', async () => {
-      const input = { locale: LocaleType.EN };
+      const input = { selectedSports: [SportType.RUN] };
       const tokenPayloadWithDifferentUser: TokenPayload = {
         sub: 42,
         stravaId: 99999,
@@ -100,24 +92,6 @@ describe('UserPreferencesResolver', () => {
       const result = await resolver.updateUserPreferences(input, mockTokenPayload);
 
       expect(result.selectedSports).toEqual([SportType.RIDE]);
-      expect(userPreferencesService.update).toHaveBeenCalledWith(1, input);
-    });
-
-    it('should handle partial updates (only theme)', async () => {
-      const input = {
-        theme: ThemeType.LIGHT,
-      };
-
-      const updatedPreferences: UserPreferences = {
-        ...mockUserPreferences,
-        theme: ThemeType.LIGHT,
-      };
-
-      mockUserPreferencesService.update.mockResolvedValue(updatedPreferences);
-
-      const result = await resolver.updateUserPreferences(input, mockTokenPayload);
-
-      expect(result.theme).toBe(ThemeType.LIGHT);
       expect(userPreferencesService.update).toHaveBeenCalledWith(1, input);
     });
   });

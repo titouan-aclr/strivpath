@@ -11,7 +11,7 @@ import { TokenPayload } from '../auth/types';
 export class UserPreferencesResolver {
   constructor(private readonly userPreferencesService: UserPreferencesService) {}
 
-  @Mutation(() => UserPreferences, { description: 'Update user preferences (sports, locale, theme)' })
+  @Mutation(() => UserPreferences, { description: 'Update user preferences (sports selection)' })
   @UseGuards(GqlAuthGuard)
   async updateUserPreferences(
     @Args('input') input: UpdateUserPreferencesInput,
