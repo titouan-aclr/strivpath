@@ -75,7 +75,7 @@ describe('GoalResolver (E2E)', () => {
         .send({
           query: `
             query {
-              goalTemplates(locale: "fr") {
+              goalTemplates(locale: FR) {
                 id
                 title
               }

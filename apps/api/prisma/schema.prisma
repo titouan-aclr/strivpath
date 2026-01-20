@@ -48,8 +48,6 @@ model UserPreferences {
   userId               Int      @unique
   selectedSports       Json
   onboardingCompleted  Boolean  @default(false)
-  locale               String   @default("en")
-  theme                String   @default("system")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 

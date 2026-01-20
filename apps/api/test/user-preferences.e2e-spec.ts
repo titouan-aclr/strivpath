@@ -6,8 +6,6 @@ import { PrismaClient } from '@prisma/client';
 import cookieParser from 'cookie-parser';
 import { generateTestAccessToken } from './test-db';
 import { SportType } from '../src/user-preferences/enums/sport-type.enum';
-import { ThemeType } from '../src/user-preferences/enums/theme-type.enum';
-import { LocaleType } from '../src/user-preferences/enums/locale-type.enum';
 
 describe('UserPreferences GraphQL (e2e)', () => {
   let app: INestApplication;
@@ -73,8 +71,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
         userId: user.id,
         selectedSports: [SportType.RUN],
         onboardingCompleted: false,
-        locale: LocaleType.EN,
-        theme: ThemeType.SYSTEM,
       },
     });
 
@@ -89,8 +85,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
             updateUserPreferences(input: $input) {
               userId
               selectedSports
-              locale
-              theme
               onboardingCompleted
             }
           }
@@ -120,8 +114,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
             updateUserPreferences(input: $input) {
               userId
               selectedSports
-              locale
-              theme
               onboardingCompleted
             }
           }
@@ -262,98 +254,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
         expect(dbPreferences?.selectedSports).toEqual(['RUN', 'RIDE']);
       });
 
-      it('should update locale successfully', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              locale
-            }
-          }
-        `;
-
-        const response = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                locale: 'FR',
-              },
-            },
-          });
-
-        expect(response.status).toBe(200);
-        expect(response.body.data.updateUserPreferences.locale).toBe('FR');
-      });
-
-      it('should update theme successfully', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              theme
-            }
-          }
-        `;
-
-        const response = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                theme: 'DARK',
-              },
-            },
-          });
-
-        expect(response.status).toBe(200);
-        expect(response.body.data.updateUserPreferences.theme).toBe('DARK');
-      });
-
-      it('should update multiple fields simultaneously', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              selectedSports
-              locale
-              theme
-              onboardingCompleted
-            }
-          }
-        `;
-
-        const response = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                selectedSports: ['RUN', 'SWIM'],
-                locale: 'FR',
-                theme: 'LIGHT',
-              },
-            },
-          });
-
-        expect(response.status).toBe(200);
-        expect(response.body.data.updateUserPreferences.selectedSports).toEqual(['RUN', 'SWIM']);
-        expect(response.body.data.updateUserPreferences.locale).toBe('FR');
-        expect(response.body.data.updateUserPreferences.theme).toBe('LIGHT');
-        expect(response.body.data.updateUserPreferences.onboardingCompleted).toBe(true);
-      });
-
       it('should handle all three sport types', async () => {
         const { user } = await seedTestUser();
         const token = generateTestAccessToken(user.id, user.stravaId);
@@ -384,34 +284,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
     });
 
     describe('validation errors', () => {
-      it('should reject invalid locale value', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              locale
-            }
-          }
-        `;
-
-        const response = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                locale: 'INVALID_LOCALE',
-              },
-            },
-          });
-
-        expect(response.body.errors).toBeDefined();
-        expect(response.body.errors[0].message).toContain('LocaleType');
-      });
-
       it('should reject invalid SportType enum value', async () => {
         const { user } = await seedTestUser();
         const token = generateTestAccessToken(user.id, user.stravaId);
@@ -438,34 +310,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
 
         expect(response.body.errors).toBeDefined();
         expect(response.body.errors[0].message).toContain('INVALID_SPORT');
-      });
-
-      it('should reject invalid ThemeType enum value', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              theme
-            }
-          }
-        `;
-
-        const response = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                theme: 'INVALID_THEME',
-              },
-            },
-          });
-
-        expect(response.body.errors).toBeDefined();
-        expect(response.body.errors[0].message).toContain('INVALID_THEME');
       });
 
       it('should reject more than 3 selectedSports', async () => {
@@ -590,8 +434,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
           where: { userId: user.id },
           data: {
             selectedSports: [SportType.RUN],
-            locale: LocaleType.EN,
-            theme: ThemeType.DARK,
           },
         });
 
@@ -599,8 +441,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
           mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
             updateUserPreferences(input: $input) {
               selectedSports
-              locale
-              theme
             }
           }
         `;
@@ -617,8 +457,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.data.updateUserPreferences.selectedSports).toEqual(['RUN']);
-        expect(response.body.data.updateUserPreferences.locale).toBe('EN');
-        expect(response.body.data.updateUserPreferences.theme).toBe('DARK');
       });
 
       it('should complete onboarding on first sports selection', async () => {
@@ -652,81 +490,6 @@ describe('UserPreferences GraphQL (e2e)', () => {
 
         expect(response.status).toBe(200);
         expect(response.body.data.updateUserPreferences.onboardingCompleted).toBe(true);
-      });
-
-      it('should support both locale values: EN and FR', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              locale
-            }
-          }
-        `;
-
-        const responseEn = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                locale: 'EN',
-              },
-            },
-          });
-
-        expect(responseEn.status).toBe(200);
-        expect(responseEn.body.data.updateUserPreferences.locale).toBe('EN');
-
-        const responseFr = await request(app.getHttpServer())
-          .post('/graphql')
-          .set('Cookie', [`Authentication=${token}`])
-          .send({
-            query: mutation,
-            variables: {
-              input: {
-                locale: 'FR',
-              },
-            },
-          });
-
-        expect(responseFr.status).toBe(200);
-        expect(responseFr.body.data.updateUserPreferences.locale).toBe('FR');
-      });
-
-      it('should support all theme types: system, light, dark', async () => {
-        const { user } = await seedTestUser();
-        const token = generateTestAccessToken(user.id, user.stravaId);
-
-        const mutation = `
-          mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-            updateUserPreferences(input: $input) {
-              theme
-            }
-          }
-        `;
-
-        const themes = ['SYSTEM', 'LIGHT', 'DARK'];
-
-        for (const theme of themes) {
-          const response = await request(app.getHttpServer())
-            .post('/graphql')
-            .set('Cookie', [`Authentication=${token}`])
-            .send({
-              query: mutation,
-              variables: {
-                input: {
-                  theme,
-                },
-              },
-            });
-
-          expect(response.status).toBe(200);
-          expect(response.body.data.updateUserPreferences.theme).toBe(theme);
-        }
       });
     });
   });

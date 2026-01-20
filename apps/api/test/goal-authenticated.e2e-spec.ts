@@ -6,8 +6,6 @@ import { PrismaService } from '../src/database/prisma.service';
 import cookieParser from 'cookie-parser';
 import { generateTestAccessToken } from './test-db';
 import { SportType } from '../src/user-preferences/enums/sport-type.enum';
-import { ThemeType } from '../src/user-preferences/enums/theme-type.enum';
-import { LocaleType } from '../src/user-preferences/enums/locale-type.enum';
 
 describe('GoalResolver (E2E Authenticated)', () => {
   let app: INestApplication;
@@ -68,8 +66,6 @@ describe('GoalResolver (E2E Authenticated)', () => {
         userId: user.id,
         selectedSports: [SportType.RUN],
         onboardingCompleted: true,
-        locale: LocaleType.EN,
-        theme: ThemeType.SYSTEM,
       },
     });
 
@@ -95,8 +91,6 @@ describe('GoalResolver (E2E Authenticated)', () => {
         userId: otherUser.id,
         selectedSports: [SportType.RIDE],
         onboardingCompleted: true,
-        locale: LocaleType.EN,
-        theme: ThemeType.SYSTEM,
       },
     });
 

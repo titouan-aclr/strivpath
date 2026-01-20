@@ -1,7 +1,7 @@
 import { graphql, HttpResponse } from 'msw';
 import { createMockUser, MOCK_USERS } from './fixtures/user.fixture';
 import { MOCK_ACTIVITIES_ARRAY } from './fixtures/activity.fixture';
-import { SportType, SyncStatus, LocaleType } from '@/gql/graphql';
+import { SportType, SyncStatus } from '@/gql/graphql';
 
 function serializeActivity(activity: (typeof MOCK_ACTIVITIES_ARRAY)[number]) {
   return {
@@ -52,8 +52,6 @@ export const handlers = [
           id: '1',
           userId: 1,
           selectedSports: [SportType.Run, SportType.Ride],
-          locale: LocaleType.En,
-          theme: 'light',
           onboardingCompleted: false,
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString(),

@@ -12,6 +12,7 @@ import {
 } from 'class-validator';
 import { GoalTargetType } from '../enums/goal-target-type.enum';
 import { GoalPeriodType } from '../enums/goal-period-type.enum';
+import { Locale } from '../enums/locale.enum';
 import { SportType } from '../../user-preferences/enums/sport-type.enum';
 
 @InputType({ description: 'Input for creating a new goal' })
@@ -129,4 +130,13 @@ export class CreateGoalFromTemplateInput {
   @IsString()
   @MinLength(1)
   customTitle?: string;
+
+  @Field(() => Locale, {
+    nullable: true,
+    defaultValue: Locale.EN,
+    description: 'Locale for template translation',
+  })
+  @IsOptional()
+  @IsEnum(Locale)
+  locale?: Locale;
 }

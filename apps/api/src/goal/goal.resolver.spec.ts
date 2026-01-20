@@ -8,6 +8,7 @@ import { GoalTemplate } from './models/goal-template.model';
 import { GoalTargetType } from './enums/goal-target-type.enum';
 import { GoalPeriodType } from './enums/goal-period-type.enum';
 import { GoalStatus } from './enums/goal-status.enum';
+import { Locale } from './enums/locale.enum';
 import { CreateGoalInput, UpdateGoalInput } from './dto/goal.input';
 
 describe('GoalResolver', () => {
@@ -169,18 +170,18 @@ describe('GoalResolver', () => {
     it('should return all templates with default locale', async () => {
       mockGoalTemplateService.findAll.mockResolvedValue([mockGoalTemplate]);
 
-      const result = await resolver.goalTemplates(undefined, 'en');
+      const result = await resolver.goalTemplates(undefined, Locale.EN);
 
-      expect(goalTemplateService.findAll).toHaveBeenCalledWith('en');
+      expect(goalTemplateService.findAll).toHaveBeenCalledWith(Locale.EN);
       expect(result).toEqual([mockGoalTemplate]);
     });
 
     it('should return templates filtered by category', async () => {
       mockGoalTemplateService.findByCategory.mockResolvedValue([mockGoalTemplate]);
 
-      const result = await resolver.goalTemplates('intermediate', 'fr');
+      const result = await resolver.goalTemplates('intermediate', Locale.FR);
 
-      expect(goalTemplateService.findByCategory).toHaveBeenCalledWith('intermediate', 'fr');
+      expect(goalTemplateService.findByCategory).toHaveBeenCalledWith('intermediate', Locale.FR);
       expect(result).toEqual([mockGoalTemplate]);
     });
   });
@@ -212,6 +213,7 @@ describe('GoalResolver', () => {
         templateId: 1,
         startDate: '2025-01-01',
         customTitle: undefined,
+        locale: Locale.EN,
       };
 
       mockGoalTemplateService.createFromTemplate.mockResolvedValue(mockGoal);
@@ -223,6 +225,7 @@ describe('GoalResolver', () => {
         mockTokenPayload.sub,
         '2025-01-01',
         undefined,
+        Locale.EN,
       );
       expect(result).toEqual(mockGoal);
     });

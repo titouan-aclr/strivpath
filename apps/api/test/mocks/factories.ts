@@ -67,8 +67,6 @@ export const createMockPrismaUserPreferences = (overrides?: Partial<PrismaUserPr
     userId: randomInt(1, 1000),
     selectedSports: [],
     onboardingCompleted: false,
-    locale: 'en',
-    theme: 'system',
     createdAt: new Date('2024-01-01'),
     updatedAt: new Date(),
     ...overrides,

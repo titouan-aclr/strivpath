@@ -289,8 +289,6 @@ describe('UserService', () => {
             create: {
               selectedSports: [SportType.RUN],
               onboardingCompleted: false,
-              locale: 'en',
-              theme: 'system',
             },
           },
         },

@@ -5,8 +5,6 @@ import { PrismaService } from '../database/prisma.service';
 import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
 import { createMockPrismaUserPreferences } from '../../test/mocks/factories';
 import { SportType } from './enums/sport-type.enum';
-import { ThemeType } from './enums/theme-type.enum';
-import { LocaleType } from './enums/locale-type.enum';
 
 describe('UserPreferencesService', () => {
   let service: UserPreferencesService;
@@ -37,8 +35,6 @@ describe('UserPreferencesService', () => {
         userId: 1,
         selectedSports: ['RUN', 'RIDE'],
         onboardingCompleted: true,
-        locale: 'fr',
-        theme: 'dark',
       });
 
       prisma.userPreferences.findUnique.mockResolvedValue(mockPreferences);
@@ -49,8 +45,6 @@ describe('UserPreferencesService', () => {
       expect(result?.userId).toBe(1);
       expect(result?.selectedSports).toEqual([SportType.RUN, SportType.RIDE]);
       expect(result?.onboardingCompleted).toBe(true);
-      expect(result?.locale).toBe('fr');
-      expect(result?.theme).toBe(ThemeType.DARK);
       expect(prisma.userPreferences.findUnique).toHaveBeenCalledWith({
         where: { userId: 1 },
       });
@@ -73,8 +67,6 @@ describe('UserPreferencesService', () => {
       userId: 1,
       selectedSports: [],
       onboardingCompleted: false,
-      locale: 'en',
-      theme: 'system',
     });
 
     it('should update selectedSports and mark onboarding as completed', async () => {
@@ -84,8 +76,6 @@ describe('UserPreferencesService', () => {
         userId: 1,
         selectedSports: ['RUN', 'RIDE'],
         onboardingCompleted: true,
-        locale: 'en',
-        theme: 'system',
       });
 
       prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
@@ -100,93 +90,6 @@ describe('UserPreferencesService', () => {
         where: { userId: 1 },
         data: {
           selectedSports: ['RUN', 'RIDE'],
-          onboardingCompleted: true,
-        },
-      });
-    });
-
-    it('should update locale without changing onboarding status', async () => {
-      const completedPreferences = createMockPrismaUserPreferences({
-        userId: 1,
-        selectedSports: ['RUN'],
-        onboardingCompleted: true,
-        locale: 'en',
-        theme: 'system',
-      });
-
-      prisma.userPreferences.findUnique.mockResolvedValue(completedPreferences);
-
-      const updatedPreferences = createMockPrismaUserPreferences({
-        ...completedPreferences,
-        locale: 'fr',
-      });
-
-      prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
-
-      const result = await service.update(1, { locale: LocaleType.FR });
-
-      expect(result.locale).toBe(LocaleType.FR);
-      expect(result.onboardingCompleted).toBe(true);
-      expect(prisma.userPreferences.update).toHaveBeenCalledWith({
-        where: { userId: 1 },
-        data: {
-          locale: 'fr',
-        },
-      });
-    });
-
-    it('should update theme without touching other fields', async () => {
-      prisma.userPreferences.findUnique.mockResolvedValue(existingPreferences);
-
-      const updatedPreferences = createMockPrismaUserPreferences({
-        ...existingPreferences,
-        theme: 'dark',
-      });
-
-      prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
-
-      const result = await service.update(1, { theme: ThemeType.DARK });
-
-      expect(result.theme).toBe(ThemeType.DARK);
-      expect(result.selectedSports).toEqual([]);
-      expect(result.onboardingCompleted).toBe(false);
-      expect(prisma.userPreferences.update).toHaveBeenCalledWith({
-        where: { userId: 1 },
-        data: {
-          theme: 'dark',
-        },
-      });
-    });
-
-    it('should update multiple fields at once', async () => {
-      prisma.userPreferences.findUnique.mockResolvedValue(existingPreferences);
-
-      const updatedPreferences = createMockPrismaUserPreferences({
-        userId: 1,
-        selectedSports: ['SWIM'],
-        onboardingCompleted: true,
-        locale: 'fr',
-        theme: 'light',
-      });
-
-      prisma.userPreferences.update.mockResolvedValue(updatedPreferences);
-
-      const result = await service.update(1, {
-        selectedSports: [SportType.SWIM],
-        locale: LocaleType.FR,
-        theme: ThemeType.LIGHT,
-      });
-
-      expect(result.selectedSports).toEqual([SportType.SWIM]);
-      expect(result.locale).toBe(LocaleType.FR);
-      expect(result.theme).toBe(ThemeType.LIGHT);
-      expect(result.onboardingCompleted).toBe(true);
-      expect(prisma.userPreferences.update).toHaveBeenCalledWith({
-        where: { userId: 1 },
-        data: {
-          selectedSports: ['SWIM'],
-          locale: 'fr',
-          theme: 'light',
           onboardingCompleted: true,
         },
       });

@@ -17,16 +17,7 @@ export type {
   GoalTemplateInfoFragment,
 } from '@/gql/graphql';
 
-export {
-  SportType,
-  ThemeType,
-  LocaleType,
-  SyncStatus,
-  SyncStage,
-  GoalStatus,
-  GoalPeriodType,
-  GoalTargetType,
-} from '@/gql/graphql';
+export { SportType, SyncStatus, SyncStage, GoalStatus, GoalPeriodType, GoalTargetType } from '@/gql/graphql';
 
 export { useSuspenseQuery, useQuery, useMutation, useFragment } from '@apollo/client/react';
 
