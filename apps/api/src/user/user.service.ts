@@ -106,4 +106,22 @@ export class UserService {
 
     return UserMapper.toGraphQL(newUser);
   }
+
+  async deleteUserData(userId: number): Promise<boolean> {
+    await this.prisma.$transaction([
+      this.prisma.goal.deleteMany({ where: { userId } }),
+      this.prisma.activity.deleteMany({ where: { userId } }),
+      this.prisma.syncHistory.deleteMany({ where: { userId } }),
+      this.prisma.userPreferences.update({
+        where: { userId },
+        data: { selectedSports: [SportType.RUN], onboardingCompleted: false },
+      }),
+    ]);
+    return true;
+  }
+
+  async deleteAccount(userId: number): Promise<boolean> {
+    await this.prisma.user.delete({ where: { id: userId } });
+    return true;
+  }
 }

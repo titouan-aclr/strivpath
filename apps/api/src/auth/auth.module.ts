@@ -19,6 +19,6 @@ import { StravaModule } from '../strava/strava.module';
   ],
   controllers: [AuthController],
   providers: [AuthService, AuthResolver, AuthCookieService, TokenCleanupService, JwtStrategy],
-  exports: [AuthService],
+  exports: [AuthService, AuthCookieService],
 })
 export class AuthModule {}
