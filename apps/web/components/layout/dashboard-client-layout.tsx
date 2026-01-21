@@ -2,6 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { AuthContextProvider } from '@/lib/auth/context';
+import { SyncContextProvider } from '@/lib/sync/context';
 import { AuthErrorBoundary } from '@/components/auth/auth-error-boundary';
 import { DashboardLayout } from '@/components/layout/dashboard-layout';
 import { AuthLoadingFallback } from '@/components/auth/auth-loading-fallback';
@@ -38,7 +39,9 @@ export function DashboardClientLayout({ children, initialUser }: DashboardClient
 
   return (
     <AuthContextProvider initialUser={user}>
-      <DashboardContent>{children}</DashboardContent>
+      <SyncContextProvider>
+        <DashboardContent>{children}</DashboardContent>
+      </SyncContextProvider>
     </AuthContextProvider>
   );
 }
