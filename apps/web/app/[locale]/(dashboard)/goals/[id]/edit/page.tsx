@@ -8,6 +8,7 @@ import { GoalForm } from '@/components/goals/goal-form';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useGoalDetail } from '@/lib/goals/use-goal-detail';
 import { useUpdateGoal } from '@/lib/goals/use-goal-mutations';
+import { useAvailableSports } from '@/lib/sports/hooks';
 import { transformFormDataToUpdateInput } from '@/lib/goals/form-utils';
 import type { GoalFormData } from '@/lib/goals/validation';
 
@@ -39,6 +40,7 @@ export default function EditGoalPage({ params }: EditGoalPageProps) {
 
   const { goal, loading: loadingGoal, error: goalError } = useGoalDetail({ id: goalId });
   const { updateGoal, loading: updating } = useUpdateGoal();
+  const { availableSports } = useAvailableSports();
 
   const handleBack = () => {
     router.push(`/goals/${goalId}`);
@@ -84,7 +86,14 @@ export default function EditGoalPage({ params }: EditGoalPageProps) {
 
   return (
     <div className="container max-w-4xl mx-auto py-8">
-      <GoalForm mode="edit" initialData={initialData} onSubmit={handleSubmit} onBack={handleBack} loading={updating} />
+      <GoalForm
+        mode="edit"
+        initialData={initialData}
+        availableSports={availableSports}
+        onSubmit={handleSubmit}
+        onBack={handleBack}
+        loading={updating}
+      />
     </div>
   );
 }

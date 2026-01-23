@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
-import { Loader2, Footprints, Bike, Waves, Activity } from 'lucide-react';
+import { Loader2, Activity } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,20 +20,30 @@ import {
   type GoalFormData,
 } from '@/lib/goals/validation';
 import { getTargetTypeConfig } from '@/lib/goals/form-utils';
+import { SPORT_CONFIGS } from '@/lib/sports/config';
 
 interface GoalFormProps {
   mode: 'create' | 'edit';
   initialData: GoalFormData;
+  availableSports: SportType[];
   onSubmit: (data: GoalFormData) => Promise<void>;
   onBack: () => void;
   loading: boolean;
 }
 
-export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalFormProps) {
+export function GoalForm({ mode, initialData, availableSports, onSubmit, onBack, loading }: GoalFormProps) {
   const t = useTranslations('goals');
   const isEditMode = mode === 'edit';
 
   const [formData, setFormData] = useState<GoalFormData>(initialData);
+
+  const sportOptions = useMemo(
+    () =>
+      availableSports
+        .map(sport => SPORT_CONFIGS[sport])
+        .filter((config): config is NonNullable<typeof config> => config !== undefined),
+    [availableSports],
+  );
   const [errors, setErrors] = useState<Partial<Record<keyof GoalFormData, string>>>({});
   const [touched, setTouched] = useState<Partial<Record<keyof GoalFormData, boolean>>>({});
 
@@ -176,24 +186,14 @@ export function GoalForm({ mode, initialData, onSubmit, onBack, loading }: GoalF
                     {t('create.form.fields.sportType.allSports')}
                   </div>
                 </SelectItem>
-                <SelectItem value={SportType.Run}>
-                  <div className="flex items-center gap-2">
-                    <Footprints className="h-4 w-4" />
-                    {t('sportTypes.run')}
-                  </div>
-                </SelectItem>
-                <SelectItem value={SportType.Ride}>
-                  <div className="flex items-center gap-2">
-                    <Bike className="h-4 w-4" />
-                    {t('sportTypes.ride')}
-                  </div>
-                </SelectItem>
-                <SelectItem value={SportType.Swim}>
-                  <div className="flex items-center gap-2">
-                    <Waves className="h-4 w-4" />
-                    {t('sportTypes.swim')}
-                  </div>
-                </SelectItem>
+                {sportOptions.map(config => (
+                  <SelectItem key={config.type} value={config.type}>
+                    <div className="flex items-center gap-2">
+                      <config.icon className="h-4 w-4" />
+                      {t(config.goalLabelKey)}
+                    </div>
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
             {isEditMode && <p className="text-sm text-muted-foreground">{t('edit.form.fields.cannotChangeSport')}</p>}
