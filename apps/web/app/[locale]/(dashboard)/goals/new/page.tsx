@@ -7,6 +7,7 @@ import { GoalTemplateSelector } from '@/components/goals/goal-template-selector'
 import { GoalForm } from '@/components/goals/goal-form';
 import { useGoalTemplates } from '@/lib/goals/use-goal-templates';
 import { useCreateGoal } from '@/lib/goals/use-goal-mutations';
+import { useAvailableSports } from '@/lib/sports/hooks';
 import { transformFormDataToInput } from '@/lib/goals/form-utils';
 import { GoalTargetType, GoalPeriodType, type GoalTemplateInfoFragment } from '@/gql/graphql';
 import type { GoalFormData } from '@/lib/goals/validation';
@@ -29,6 +30,7 @@ export default function NewGoalPage() {
 
   const { templates, loading: templatesLoading } = useGoalTemplates();
   const { createGoal, loading: createLoading } = useCreateGoal();
+  const { availableSports } = useAvailableSports();
 
   const handleTemplateSelect = (template: GoalTemplateInfoFragment | null) => {
     if (template) {
@@ -78,6 +80,7 @@ export default function NewGoalPage() {
         <GoalForm
           mode="create"
           initialData={formData}
+          availableSports={availableSports}
           onSubmit={handleSubmit}
           onBack={handleBack}
           loading={createLoading}
