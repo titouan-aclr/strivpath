@@ -39,6 +39,8 @@ const defaultInitialData: GoalFormData = {
   endDate: null,
 };
 
+const defaultAvailableSports = [SportType.Run, SportType.Ride, SportType.Swim];
+
 describe('GoalForm', () => {
   const mockOnSubmit = vi.fn();
   const mockOnBack = vi.fn();
@@ -53,6 +55,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -69,6 +72,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -85,6 +89,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -100,6 +105,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -116,6 +122,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -130,6 +137,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -158,6 +166,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={initialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -176,6 +185,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, periodType: GoalPeriodType.Weekly }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -190,6 +200,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, periodType: GoalPeriodType.Custom }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -206,6 +217,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, targetType: GoalTargetType.Distance }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -234,6 +246,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -254,6 +267,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, targetValue: 0 }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -276,6 +290,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -304,6 +319,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, title: '', targetValue: 0 }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -337,7 +353,14 @@ describe('GoalForm', () => {
       };
 
       render(
-        <GoalForm mode="create" initialData={validData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="create"
+          initialData={validData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const submitButton = screen.getByText('goals.create.form.actions.create');
@@ -361,6 +384,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -380,6 +404,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={true}
@@ -400,6 +425,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={true}
@@ -420,6 +446,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={{ ...defaultInitialData, sportType: SportType.Run }}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -448,6 +475,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -476,6 +504,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="create"
           initialData={defaultInitialData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -508,7 +537,14 @@ describe('GoalForm', () => {
 
     it('should display edit mode title', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       expect(screen.getByText('goals.edit.form.title')).toBeInTheDocument();
@@ -517,7 +553,14 @@ describe('GoalForm', () => {
 
     it('should display save button text', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       expect(screen.getByText('goals.edit.form.actions.save')).toBeInTheDocument();
@@ -525,7 +568,14 @@ describe('GoalForm', () => {
 
     it('should disable sportType in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const sportTypeSelect = screen.getByLabelText(/goals.create.form.fields.sportType.label/i);
@@ -534,7 +584,14 @@ describe('GoalForm', () => {
 
     it('should disable targetType in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const targetTypeSelect = screen.getByLabelText(/goals.create.form.fields.targetType.label/i);
@@ -543,7 +600,14 @@ describe('GoalForm', () => {
 
     it('should disable periodType in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const periodTypeSelect = screen.getByLabelText(/goals.create.form.fields.periodType.label/i);
@@ -552,7 +616,14 @@ describe('GoalForm', () => {
 
     it('should disable startDate in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const startDateButton = screen.getByRole('button', { name: /goals.create.form.fields.startDate.label/i });
@@ -561,7 +632,14 @@ describe('GoalForm', () => {
 
     it('should disable isRecurring switch in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const recurringSwitch = screen.getByLabelText(/goals.create.form.fields.isRecurring.label/i);
@@ -570,7 +648,14 @@ describe('GoalForm', () => {
 
     it('should show read-only indicators', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const readOnlyLabels = screen.getAllByText('goals.edit.form.fields.readOnly');
@@ -579,7 +664,14 @@ describe('GoalForm', () => {
 
     it('should show help messages for immutable fields', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       expect(screen.getByText('goals.edit.form.fields.cannotChangeSport')).toBeInTheDocument();
@@ -590,7 +682,14 @@ describe('GoalForm', () => {
 
     it('should keep title editable in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
@@ -599,7 +698,14 @@ describe('GoalForm', () => {
 
     it('should keep description editable in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const descriptionTextarea = screen.getByLabelText(/goals.create.form.fields.description.label/i);
@@ -608,7 +714,14 @@ describe('GoalForm', () => {
 
     it('should keep targetValue editable in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editModeData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editModeData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
@@ -621,6 +734,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="edit"
           initialData={recurringData}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -646,7 +760,14 @@ describe('GoalForm', () => {
 
     it('should disable submit button when no changes in edit mode', () => {
       render(
-        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const submitButton = screen.getByRole('button', { name: /goals.edit.form.actions.save/i });
@@ -658,7 +779,14 @@ describe('GoalForm', () => {
       const user = userEvent.setup();
 
       render(
-        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
@@ -673,7 +801,14 @@ describe('GoalForm', () => {
       const user = userEvent.setup();
 
       render(
-        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const descriptionTextarea = screen.getByLabelText(/goals.create.form.fields.description.label/i);
@@ -688,7 +823,14 @@ describe('GoalForm', () => {
       const user = userEvent.setup();
 
       render(
-        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const targetValueInput = screen.getByLabelText(/goals.create.form.fields.targetValue.label/i);
@@ -703,7 +845,14 @@ describe('GoalForm', () => {
       const user = userEvent.setup();
 
       render(
-        <GoalForm mode="edit" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="edit"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const titleInput = screen.getByLabelText(/goals.create.form.fields.title.label/i);
@@ -729,6 +878,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="edit"
           initialData={dataWithEndDate}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}
@@ -741,7 +891,14 @@ describe('GoalForm', () => {
 
     it('should always enable submit in create mode', () => {
       render(
-        <GoalForm mode="create" initialData={editData} onSubmit={mockOnSubmit} onBack={mockOnBack} loading={false} />,
+        <GoalForm
+          mode="create"
+          initialData={editData}
+          availableSports={defaultAvailableSports}
+          onSubmit={mockOnSubmit}
+          onBack={mockOnBack}
+          loading={false}
+        />,
       );
 
       const submitButton = screen.getByRole('button', { name: /goals.create.form.actions.create/i });
@@ -757,6 +914,7 @@ describe('GoalForm', () => {
         <GoalForm
           mode="edit"
           initialData={dataWithNullDescription}
+          availableSports={defaultAvailableSports}
           onSubmit={mockOnSubmit}
           onBack={mockOnBack}
           loading={false}

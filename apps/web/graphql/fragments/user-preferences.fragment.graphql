@@ -2,8 +2,6 @@ fragment UserPreferencesInfo on UserPreferences {
   id
   selectedSports
   onboardingCompleted
-  locale
-  theme
   createdAt
   updatedAt
 }

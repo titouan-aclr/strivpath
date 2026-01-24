@@ -16,7 +16,7 @@ query ActiveGoals {
   }
 }
 
-query GoalTemplates($category: String, $locale: String) {
+query GoalTemplates($category: String, $locale: Locale) {
   goalTemplates(category: $category, locale: $locale) {
     ...GoalTemplateInfo
   }

@@ -1,0 +1,7 @@
+mutation DeleteUserData {
+  deleteUserData
+}
+
+mutation DeleteAccount {
+  deleteAccount
+}

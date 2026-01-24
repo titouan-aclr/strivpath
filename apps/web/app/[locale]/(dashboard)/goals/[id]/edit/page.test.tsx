@@ -89,6 +89,14 @@ vi.mock('@/lib/goals/form-utils', () => ({
   transformFormDataToUpdateInput: <T,>(data: T): T => data,
 }));
 
+vi.mock('@/lib/sports/hooks', () => ({
+  useAvailableSports: () => ({
+    availableSports: [SportType.Run, SportType.Ride, SportType.Swim],
+    sportConfigs: [],
+    loading: false,
+  }),
+}));
+
 interface MockGoalFormProps {
   initialData?: {
     title?: string;

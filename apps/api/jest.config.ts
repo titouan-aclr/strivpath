@@ -13,6 +13,8 @@ const config: Config = {
     '!src/**/*.module.ts',
     '!src/**/*.input.ts',
     '!src/**/*.model.ts',
+    '!src/**/*.type.ts',
+    '!src/**/types/**',
   ],
   coverageDirectory: './coverage',
   coverageThreshold: {

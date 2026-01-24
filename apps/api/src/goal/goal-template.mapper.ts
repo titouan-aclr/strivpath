@@ -2,6 +2,7 @@ import { GoalTemplate as PrismaGoalTemplate, GoalTemplateTranslation } from '@pr
 import { GoalTemplate as GraphQLGoalTemplate } from './models/goal-template.model';
 import { GoalTargetType } from './enums/goal-target-type.enum';
 import { GoalPeriodType } from './enums/goal-period-type.enum';
+import { Locale } from './enums/locale.enum';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
 import { TranslationHelper } from './helpers/translation.helper';
 
@@ -10,7 +11,7 @@ type PrismaGoalTemplateWithTranslations = PrismaGoalTemplate & {
 };
 
 export class GoalTemplateMapper {
-  static toGraphQL(prismaTemplate: PrismaGoalTemplateWithTranslations, locale: string): GraphQLGoalTemplate {
+  static toGraphQL(prismaTemplate: PrismaGoalTemplateWithTranslations, locale: Locale): GraphQLGoalTemplate {
     const { title, description } = TranslationHelper.selectTranslation(prismaTemplate.translations, locale);
 
     return {

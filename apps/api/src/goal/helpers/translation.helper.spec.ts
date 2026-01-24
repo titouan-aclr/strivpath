@@ -91,5 +91,31 @@ describe('TranslationHelper', () => {
       expect(result.title).toBe('');
       expect(result.description).toBe('Complete 50km of running');
     });
+
+    it('should match locale case-insensitively', () => {
+      const uppercaseTranslations = [
+        { locale: 'EN', title: 'Run 50km', description: 'English description' },
+        { locale: 'FR', title: 'Courir 50km', description: 'Description française' },
+      ];
+
+      const resultLowercase = TranslationHelper.selectTranslation(uppercaseTranslations, 'fr');
+      expect(resultLowercase.title).toBe('Courir 50km');
+
+      const resultUppercase = TranslationHelper.selectTranslation(uppercaseTranslations, 'EN');
+      expect(resultUppercase.title).toBe('Run 50km');
+
+      const resultMixed = TranslationHelper.selectTranslation(uppercaseTranslations, 'Fr');
+      expect(resultMixed.title).toBe('Courir 50km');
+    });
+
+    it('should match language prefix case-insensitively', () => {
+      const uppercaseTranslations = [
+        { locale: 'EN', title: 'Run 50km', description: 'English description' },
+        { locale: 'FR', title: 'Courir 50km', description: 'Description française' },
+      ];
+
+      const result = TranslationHelper.selectTranslation(uppercaseTranslations, 'fr-CA');
+      expect(result.title).toBe('Courir 50km');
+    });
   });
 });

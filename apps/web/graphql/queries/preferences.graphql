@@ -1,0 +1,29 @@
+query UserPreferences {
+  userPreferences {
+    ...UserPreferencesInfo
+  }
+}
+
+query SportDataCount($sport: SportType!) {
+  sportDataCount(sport: $sport) {
+    activitiesCount
+    goalsCount
+  }
+}
+
+query LatestSyncHistory {
+  latestSyncHistory {
+    id
+    userId
+    status
+    stage
+    totalActivities
+    processedActivities
+    startedAt
+    completedAt
+    errorMessage
+    goalsUpdatedCount
+    goalsCompletedCount
+    completedGoalIds
+  }
+}
