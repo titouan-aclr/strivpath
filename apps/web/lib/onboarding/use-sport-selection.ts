@@ -5,10 +5,20 @@ import { useRouter } from '@/i18n/navigation';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 import { useMutation } from '@/lib/graphql';
-import { UpdateUserPreferencesDocument, type UpdateUserPreferencesMutation, SportType } from '@/gql/graphql';
+import {
+  AddSportToPreferencesDocument,
+  RemoveSportFromPreferencesDocument,
+  CompleteOnboardingDocument,
+  type AddSportToPreferencesMutation,
+  type RemoveSportFromPreferencesMutation,
+  type CompleteOnboardingMutation,
+  SportType,
+} from '@/gql/graphql';
 import { MIN_SPORTS_SELECTION, MAX_SPORTS_SELECTION, ONBOARDING_TOAST_CONFIG } from './constants';
 import { classifyOnboardingError, logOnboardingError, type OnboardingError } from './error-handling';
 import { useAuth } from '@/lib/auth/context';
+
+const DEFAULT_SPORTS = [SportType.Run];
 
 interface UseSportSelectionResult {
   selectedSports: SportType[];
@@ -26,7 +36,10 @@ export function useSportSelection(): UseSportSelectionResult {
   const [selectedSports, setSelectedSports] = useState<SportType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<OnboardingError | null>(null);
-  const [updatePreferences] = useMutation<UpdateUserPreferencesMutation>(UpdateUserPreferencesDocument);
+
+  const [addSport] = useMutation<AddSportToPreferencesMutation>(AddSportToPreferencesDocument);
+  const [removeSport] = useMutation<RemoveSportFromPreferencesMutation>(RemoveSportFromPreferencesDocument);
+  const [completeOnboarding] = useMutation<CompleteOnboardingMutation>(CompleteOnboardingDocument);
 
   const toggleSport = useCallback(
     (sport: SportType) => {
@@ -63,9 +76,16 @@ export function useSportSelection(): UseSportSelectionResult {
     setError(null);
 
     try {
-      await updatePreferences({
-        variables: { input: { selectedSports } },
-      });
+      const sportsToAdd = selectedSports.filter(sport => !DEFAULT_SPORTS.includes(sport));
+      const sportsToRemove = DEFAULT_SPORTS.filter(sport => !selectedSports.includes(sport));
+
+      await Promise.all([
+        ...sportsToAdd.map(sport => addSport({ variables: { sport } })),
+        ...sportsToRemove.map(sport => removeSport({ variables: { sport, deleteData: false } })),
+      ]);
+
+      await completeOnboarding();
+
       router.push('/sync');
     } catch (err) {
       const onboardingError = classifyOnboardingError(err, t);
@@ -101,7 +121,7 @@ export function useSportSelection(): UseSportSelectionResult {
     } finally {
       setIsSubmitting(false);
     }
-  }, [selectedSports, isSubmitting, updatePreferences, router, t, user]);
+  }, [selectedSports, isSubmitting, addSport, removeSport, completeOnboarding, router, t, user]);
 
   const canSubmit = selectedSports.length >= MIN_SPORTS_SELECTION && !isSubmitting;
 

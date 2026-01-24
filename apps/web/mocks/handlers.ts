@@ -1,7 +1,9 @@
 import { graphql, HttpResponse } from 'msw';
 import { createMockUser, MOCK_USERS } from './fixtures/user.fixture';
 import { MOCK_ACTIVITIES_ARRAY } from './fixtures/activity.fixture';
-import { SportType, SyncStatus, LocaleType } from '@/gql/graphql';
+import { MOCK_USER_PREFERENCES, MOCK_SPORT_DATA_COUNTS } from './fixtures/settings.fixture';
+import { MOCK_SYNC_HISTORIES } from './fixtures/onboarding.fixture';
+import { SportType, SyncStatus } from '@/gql/graphql';
 
 function serializeActivity(activity: (typeof MOCK_ACTIVITIES_ARRAY)[number]) {
   return {
@@ -40,24 +42,6 @@ export const handlers = [
     return HttpResponse.json({
       data: {
         logout: true,
-      },
-    });
-  }),
-
-  graphql.mutation('UpdateUserPreferences', () => {
-    return HttpResponse.json({
-      data: {
-        updateUserPreferences: {
-          __typename: 'UserPreferences',
-          id: '1',
-          userId: 1,
-          selectedSports: [SportType.Run, SportType.Ride],
-          locale: LocaleType.En,
-          theme: 'light',
-          onboardingCompleted: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
       },
     });
   }),
@@ -144,6 +128,84 @@ export const handlers = [
     return HttpResponse.json({
       data: {
         activities: paginatedActivities.map(serializeActivity),
+      },
+    });
+  }),
+
+  graphql.query('UserPreferences', () => {
+    return HttpResponse.json({
+      data: {
+        userPreferences: MOCK_USER_PREFERENCES.default,
+      },
+    });
+  }),
+
+  graphql.query('LatestSyncHistory', () => {
+    return HttpResponse.json({
+      data: {
+        latestSyncHistory: MOCK_SYNC_HISTORIES.completed,
+      },
+    });
+  }),
+
+  graphql.query('SportDataCount', () => {
+    return HttpResponse.json({
+      data: {
+        sportDataCount: {
+          ...MOCK_SPORT_DATA_COUNTS.withData,
+          __typename: 'SportDataCount',
+        },
+      },
+    });
+  }),
+
+  graphql.mutation('AddSportToPreferences', ({ variables }) => {
+    const sport = variables.sport as SportType;
+    const currentSports = [...MOCK_USER_PREFERENCES.default.selectedSports];
+    if (!currentSports.includes(sport)) {
+      currentSports.push(sport);
+    }
+    return HttpResponse.json({
+      data: {
+        addSportToPreferences: {
+          ...MOCK_USER_PREFERENCES.default,
+          selectedSports: currentSports,
+        },
+      },
+    });
+  }),
+
+  graphql.mutation('RemoveSportFromPreferences', () => {
+    return HttpResponse.json({
+      data: {
+        removeSportFromPreferences: true,
+      },
+    });
+  }),
+
+  graphql.mutation('CompleteOnboarding', () => {
+    return HttpResponse.json({
+      data: {
+        completeOnboarding: {
+          ...MOCK_USER_PREFERENCES.default,
+          onboardingCompleted: true,
+        },
+      },
+    });
+  }),
+
+  graphql.mutation('DeleteUserData', () => {
+    return HttpResponse.json({
+      data: {
+        deleteUserData: true,
+      },
+    });
+  }),
+
+  graphql.mutation('DeleteAccount', () => {
+    return HttpResponse.json({
+      data: {
+        deleteAccount: true,
       },
     });
   }),
@@ -261,9 +323,9 @@ export const authErrorHandlers = {
 };
 
 export const onboardingErrorHandlers = {
-  updatePreferencesNetworkError: graphql.mutation('UpdateUserPreferences', () => HttpResponse.error()),
+  completeOnboardingNetworkError: graphql.mutation('CompleteOnboarding', () => HttpResponse.error()),
 
-  updatePreferencesTokenExpired: graphql.mutation('UpdateUserPreferences', () => {
+  completeOnboardingTokenExpired: graphql.mutation('CompleteOnboarding', () => {
     return HttpResponse.json(
       {
         errors: [
@@ -278,20 +340,9 @@ export const onboardingErrorHandlers = {
     );
   }),
 
-  updatePreferencesRateLimit: graphql.mutation('UpdateUserPreferences', () => {
-    return HttpResponse.json(
-      {
-        errors: [
-          {
-            message: 'Too many requests',
-            extensions: { code: 'RATE_LIMIT_EXCEEDED' },
-          },
-        ],
-        data: null,
-      },
-      { status: 429 },
-    );
-  }),
+  addSportNetworkError: graphql.mutation('AddSportToPreferences', () => HttpResponse.error()),
+
+  removeSportNetworkError: graphql.mutation('RemoveSportFromPreferences', () => HttpResponse.error()),
 
   syncActivitiesFailed: graphql.mutation('SyncActivities', () => {
     return HttpResponse.json({
@@ -306,6 +357,85 @@ export const onboardingErrorHandlers = {
   }),
 
   syncStatusNetworkError: graphql.query('SyncStatus', () => HttpResponse.error()),
+};
+
+export const settingsErrorHandlers = {
+  userPreferencesNetworkError: graphql.query('UserPreferences', () => HttpResponse.error()),
+
+  userPreferencesUnauthenticated: graphql.query('UserPreferences', () => {
+    return HttpResponse.json(
+      {
+        errors: [
+          {
+            message: 'Unauthorized',
+            extensions: { code: 'UNAUTHENTICATED' },
+          },
+        ],
+        data: null,
+      },
+      { status: 401 },
+    );
+  }),
+
+  latestSyncHistoryNetworkError: graphql.query('LatestSyncHistory', () => HttpResponse.error()),
+
+  sportDataCountNetworkError: graphql.query('SportDataCount', () => HttpResponse.error()),
+
+  addSportFailed: graphql.mutation('AddSportToPreferences', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Failed to add sport',
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  addSportNetworkError: graphql.mutation('AddSportToPreferences', () => HttpResponse.error()),
+
+  removeSportFailed: graphql.mutation('RemoveSportFromPreferences', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Failed to remove sport',
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  removeSportNetworkError: graphql.mutation('RemoveSportFromPreferences', () => HttpResponse.error()),
+
+  deleteUserDataFailed: graphql.mutation('DeleteUserData', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Failed to delete user data',
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  deleteUserDataNetworkError: graphql.mutation('DeleteUserData', () => HttpResponse.error()),
+
+  deleteAccountFailed: graphql.mutation('DeleteAccount', () => {
+    return HttpResponse.json({
+      errors: [
+        {
+          message: 'Failed to delete account',
+          extensions: { code: 'INTERNAL_SERVER_ERROR' },
+        },
+      ],
+      data: null,
+    });
+  }),
+
+  deleteAccountNetworkError: graphql.mutation('DeleteAccount', () => HttpResponse.error()),
 };
 
 export { MOCK_USERS };

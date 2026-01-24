@@ -15,7 +15,10 @@ export class TranslationHelper {
       throw new Error('No translations available');
     }
 
-    const exactMatch = translations.find(t => t.locale === locale);
+    const normalizedLocale = locale.toLowerCase();
+    const normalizedFallback = fallbackLocale.toLowerCase();
+
+    const exactMatch = translations.find(t => t.locale.toLowerCase() === normalizedLocale);
     if (exactMatch) {
       return {
         title: exactMatch.title,
@@ -23,8 +26,8 @@ export class TranslationHelper {
       };
     }
 
-    const languageCode = locale.split('-')[0];
-    const languageMatch = translations.find(t => t.locale.startsWith(languageCode));
+    const languageCode = normalizedLocale.split('-')[0];
+    const languageMatch = translations.find(t => t.locale.toLowerCase().startsWith(languageCode));
     if (languageMatch) {
       return {
         title: languageMatch.title,
@@ -32,7 +35,7 @@ export class TranslationHelper {
       };
     }
 
-    const fallbackMatch = translations.find(t => t.locale === fallbackLocale);
+    const fallbackMatch = translations.find(t => t.locale.toLowerCase() === normalizedFallback);
     if (fallbackMatch) {
       return {
         title: fallbackMatch.title,

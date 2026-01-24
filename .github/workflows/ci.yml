@@ -180,4 +180,4 @@ jobs:
       - name: Run integration tests
         run: pnpm --filter api test:integration
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_test
+          TEST_DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_test

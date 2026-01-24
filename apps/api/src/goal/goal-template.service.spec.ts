@@ -1,9 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GoalTemplateService } from './goal-template.service';
 import { PrismaService } from '../database/prisma.service';
-import { UserPreferencesService } from '../user-preferences/user-preferences.service';
 import { NotFoundException, BadRequestException } from '@nestjs/common';
 import { GoalTemplate as PrismaGoalTemplate, GoalTemplateTranslation, Goal as PrismaGoal } from '@prisma/client';
+import { Locale } from './enums/locale.enum';
 
 const createMockPrismaService = () => ({
   goalTemplate: {
@@ -13,10 +13,6 @@ const createMockPrismaService = () => ({
   goal: {
     create: jest.fn(),
   },
-});
-
-const createMockUserPreferencesService = () => ({
-  findByUserId: jest.fn(),
 });
 
 const createMockPrismaTemplate = (
@@ -57,23 +53,16 @@ const createMockPrismaTemplate = (
 describe('GoalTemplateService', () => {
   let service: GoalTemplateService;
   let prisma: ReturnType<typeof createMockPrismaService>;
-  let userPreferencesService: ReturnType<typeof createMockUserPreferencesService>;
 
   beforeEach(async () => {
     const mockPrisma = createMockPrismaService();
-    const mockUserPreferences = createMockUserPreferencesService();
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        GoalTemplateService,
-        { provide: PrismaService, useValue: mockPrisma },
-        { provide: UserPreferencesService, useValue: mockUserPreferences },
-      ],
+      providers: [GoalTemplateService, { provide: PrismaService, useValue: mockPrisma }],
     }).compile();
 
     service = module.get<GoalTemplateService>(GoalTemplateService);
     prisma = module.get(PrismaService) as any;
-    userPreferencesService = module.get(UserPreferencesService) as any;
   });
 
   afterEach(() => {
@@ -86,7 +75,7 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findMany.mockResolvedValue(templates);
 
-      const result = await service.findAll('en');
+      const result = await service.findAll(Locale.EN);
 
       expect(prisma.goalTemplate.findMany).toHaveBeenCalledWith({
         include: { translations: true },
@@ -101,7 +90,7 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findMany.mockResolvedValue(templates);
 
-      const result = await service.findAll('fr');
+      const result = await service.findAll(Locale.FR);
 
       expect(result[0].title).toBe('Courir 50km ce mois');
     });
@@ -113,7 +102,7 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findUnique.mockResolvedValue(template);
 
-      const result = await service.findById(1, 'en');
+      const result = await service.findById(1, Locale.EN);
 
       expect(prisma.goalTemplate.findUnique).toHaveBeenCalledWith({
         where: { id: 1 },
@@ -126,7 +115,7 @@ describe('GoalTemplateService', () => {
     it('should return null when template not found', async () => {
       prisma.goalTemplate.findUnique.mockResolvedValue(null);
 
-      const result = await service.findById(999, 'en');
+      const result = await service.findById(999, Locale.EN);
 
       expect(result).toBeNull();
     });
@@ -141,7 +130,7 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findMany.mockResolvedValue(templates);
 
-      const result = await service.findByCategory('beginner', 'en');
+      const result = await service.findByCategory('beginner', Locale.EN);
 
       expect(prisma.goalTemplate.findMany).toHaveBeenCalledWith({
         where: { category: 'beginner' },
@@ -153,7 +142,7 @@ describe('GoalTemplateService', () => {
   });
 
   describe('createFromTemplate', () => {
-    it('should create a goal from template with English locale', async () => {
+    it('should create a goal from template with default English locale', async () => {
       const template = createMockPrismaTemplate();
       const userId = 42;
       const startDate = '2025-01-15';
@@ -181,7 +170,6 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findUnique.mockResolvedValue(template);
       prisma.goal.create.mockResolvedValue(createdGoal);
-      userPreferencesService.findByUserId.mockResolvedValue({ locale: 'en' });
 
       const result = await service.createFromTemplate(1, userId, startDate);
 
@@ -231,8 +219,6 @@ describe('GoalTemplateService', () => {
       prisma.goalTemplate.findUnique.mockResolvedValue(template);
       prisma.goal.create.mockResolvedValue(createdGoal);
 
-      userPreferencesService.findByUserId.mockResolvedValue({ locale: 'en' });
-
       const result = await service.createFromTemplate(1, 42, '2025-01-15', customTitle);
 
       expect(prisma.goal.create).toHaveBeenCalledWith(
@@ -272,9 +258,8 @@ describe('GoalTemplateService', () => {
 
       prisma.goalTemplate.findUnique.mockResolvedValue(template);
       prisma.goal.create.mockResolvedValue(createdGoal);
-      userPreferencesService.findByUserId.mockResolvedValue({ locale: 'fr' });
 
-      await service.createFromTemplate(1, 42, '2025-01-15');
+      await service.createFromTemplate(1, 42, '2025-01-15', undefined, Locale.FR);
 
       expect(prisma.goal.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -288,7 +273,6 @@ describe('GoalTemplateService', () => {
 
     it('should throw NotFoundException when template does not exist', async () => {
       prisma.goalTemplate.findUnique.mockResolvedValue(null);
-      userPreferencesService.findByUserId.mockResolvedValue({ locale: 'en' });
 
       await expect(service.createFromTemplate(999, 42, '2025-01-15')).rejects.toThrow(NotFoundException);
     });
@@ -297,7 +281,6 @@ describe('GoalTemplateService', () => {
       const templateWithoutTranslations = createMockPrismaTemplate({ translations: [] });
 
       prisma.goalTemplate.findUnique.mockResolvedValue(templateWithoutTranslations);
-      userPreferencesService.findByUserId.mockResolvedValue({ locale: 'en' });
 
       await expect(service.createFromTemplate(1, 42, '2025-01-15')).rejects.toThrow('Template 1 has no translations');
     });

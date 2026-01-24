@@ -9,6 +9,7 @@ import { CreateGoalInput, UpdateGoalInput, CreateGoalFromTemplateInput } from '.
 import { GoalService } from './goal.service';
 import { GoalTemplateService } from './goal-template.service';
 import { GoalStatus } from './enums/goal-status.enum';
+import { Locale } from './enums/locale.enum';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 @Resolver(() => Goal)
@@ -69,11 +70,11 @@ export class GoalResolver {
     @Args('category', { type: () => String, nullable: true })
     category?: string,
     @Args('locale', {
-      type: () => String,
+      type: () => Locale,
       nullable: true,
-      defaultValue: 'en',
+      defaultValue: Locale.EN,
     })
-    locale?: string,
+    locale?: Locale,
   ): Promise<GoalTemplate[]> {
     if (category) {
       return this.goalTemplateService.findByCategory(category, locale);
@@ -106,6 +107,7 @@ export class GoalResolver {
       tokenPayload.sub,
       input.startDate,
       input.customTitle,
+      input.locale,
     );
   }
 

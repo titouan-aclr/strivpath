@@ -7,6 +7,7 @@ import { ErrorLink } from '@apollo/client/link/error';
 import { server } from '@/mocks/server';
 import { graphql, HttpResponse } from 'msw';
 import { MOCK_USERS } from '@/mocks/handlers';
+import { MOCK_USER_PREFERENCES } from '@/mocks/fixtures/settings.fixture';
 import { SportSelectionForm } from './sport-selection-form';
 import { AuthContextProvider } from '@/lib/auth/context';
 import type { User } from '@/lib/graphql';
@@ -64,6 +65,37 @@ vi.mock('sonner', () => ({
 vi.mock('next-intl', () => ({
   useTranslations: mockUseTranslations,
 }));
+
+const setupSuccessHandlers = () => {
+  server.use(
+    graphql.mutation('AddSportToPreferences', ({ variables }) => {
+      const sport = variables.sport as string;
+      return HttpResponse.json({
+        data: {
+          addSportToPreferences: {
+            ...MOCK_USER_PREFERENCES.default,
+            selectedSports: [...MOCK_USER_PREFERENCES.default.selectedSports, sport],
+          },
+        },
+      });
+    }),
+    graphql.mutation('RemoveSportFromPreferences', () => {
+      return HttpResponse.json({
+        data: { removeSportFromPreferences: true },
+      });
+    }),
+    graphql.mutation('CompleteOnboarding', () => {
+      return HttpResponse.json({
+        data: {
+          completeOnboarding: {
+            ...MOCK_USER_PREFERENCES.default,
+            onboardingCompleted: true,
+          },
+        },
+      });
+    }),
+  );
+};
 
 describe('SportSelectionForm', () => {
   beforeEach(() => {
@@ -222,7 +254,7 @@ describe('SportSelectionForm', () => {
       const user = userEvent.setup();
 
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return new Promise(() => {});
         }),
       );
@@ -246,7 +278,7 @@ describe('SportSelectionForm', () => {
       const user = userEvent.setup();
 
       server.use(
-        graphql.mutation('UpdateUserPreferences', () => {
+        graphql.mutation('CompleteOnboarding', () => {
           return new Promise(() => {});
         }),
       );
@@ -274,26 +306,7 @@ describe('SportSelectionForm', () => {
     it('should call handleSubmit and redirect on successful submission', async () => {
       const user = userEvent.setup();
 
-      server.use(
-        graphql.mutation('UpdateUserPreferences', ({ variables }) => {
-          const input = variables.input as { selectedSports: string[] };
-          return HttpResponse.json({
-            data: {
-              updateUserPreferences: {
-                __typename: 'UserPreferences',
-                id: '1',
-                userId: 1,
-                selectedSports: input.selectedSports,
-                locale: 'EN',
-                theme: 'light',
-                onboardingCompleted: false,
-                createdAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString(),
-              },
-            },
-          });
-        }),
-      );
+      setupSuccessHandlers();
 
       render(<SportSelectionForm />, {
         wrapper: createWrapper(MOCK_USERS.john),

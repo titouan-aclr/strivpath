@@ -132,6 +132,9 @@ input CreateGoalFromTemplateInput {
   """Optional custom title (overrides template title)"""
   customTitle: String
 
+  """Locale for template translation"""
+  locale: Locale = EN
+
   """Start date for the goal (ISO 8601 format)"""
   startDate: String!
 
@@ -309,15 +312,21 @@ type GoalTemplate {
   updatedAt: DateTime!
 }
 
-"""Available locale options"""
-enum LocaleType {
+"""Supported locales for internationalization"""
+enum Locale {
   EN
   FR
 }
 
 type Mutation {
+  """Add a sport to user preferences"""
+  addSportToPreferences(sport: SportType!): UserPreferences!
+
   """Archive a goal (soft delete, can be restored)"""
   archiveGoal(id: Int!): Goal!
+
+  """Complete onboarding process"""
+  completeOnboarding: UserPreferences!
 
   """Create a new custom goal"""
   createGoal(input: CreateGoalInput!): Goal!
@@ -325,8 +334,14 @@ type Mutation {
   """Create a goal from a preset template"""
   createGoalFromTemplate(input: CreateGoalFromTemplateInput!): Goal!
 
+  """Permanently delete user account and all data"""
+  deleteAccount: Boolean!
+
   """Delete a goal permanently"""
   deleteGoal(id: Int!): Boolean!
+
+  """Delete all user data but keep account"""
+  deleteUserData: Boolean!
 
   """
   Fetch detailed activity data from Strava on-demand (calories, splits, description)
@@ -342,14 +357,14 @@ type Mutation {
   """Refresh access token using refresh token cookie"""
   refreshToken: AuthResponse!
 
+  """Remove a sport from preferences with optional data deletion"""
+  removeSportFromPreferences(deleteData: Boolean!, sport: SportType!): Boolean!
+
   """Synchronize activities from Strava"""
   syncActivities: SyncHistory!
 
   """Update an existing goal"""
   updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
-
-  """Update user preferences (sports, locale, theme)"""
-  updateUserPreferences(input: UpdateUserPreferencesInput!): UserPreferences!
 }
 
 """Field to order activities by"""
@@ -382,10 +397,16 @@ type Query {
   goal(id: Int!): Goal
 
   """Get all preset goal templates with localized content"""
-  goalTemplates(category: String, locale: String = "en"): [GoalTemplate!]!
+  goalTemplates(category: String, locale: Locale = EN): [GoalTemplate!]!
 
   """Get all goals for the current user with optional filtering"""
   goals(includeArchived: Boolean = false, sportType: SportType, status: GoalStatus): [Goal!]!
+
+  """Get the latest sync history for current user"""
+  latestSyncHistory: SyncHistory
+
+  """Get count of activities and goals for a sport"""
+  sportDataCount(sport: SportType!): SportDataCount!
 
   """Generate Strava OAuth authorization URL"""
   stravaAuthUrl(redirect: String): String!
@@ -393,6 +414,9 @@ type Query {
   """Get the latest sync status"""
   syncStatus: SyncHistory
   userByStravaId(stravaId: Int!): User
+
+  """Get current user preferences"""
+  userPreferences: UserPreferences
   users: [User!]!
 }
 
@@ -412,6 +436,15 @@ type Split {
 
   """Moving time for this split in seconds"""
   movingTime: Int
+}
+
+"""Count of activities and goals for a specific sport"""
+type SportDataCount {
+  """Number of activities for this sport"""
+  activitiesCount: Int!
+
+  """Number of goals for this sport"""
+  goalsCount: Int!
 }
 
 """Available sport types for activity tracking"""
@@ -452,13 +485,6 @@ enum SyncStatus {
   PENDING
 }
 
-"""Available theme options"""
-enum ThemeType {
-  DARK
-  LIGHT
-  SYSTEM
-}
-
 """Input for updating an existing goal"""
 input UpdateGoalInput {
   """Updated goal description"""
@@ -472,12 +498,6 @@ input UpdateGoalInput {
 
   """Updated goal title"""
   title: String
-}
-
-input UpdateUserPreferencesInput {
-  locale: LocaleType
-  selectedSports: [SportType!]
-  theme: ThemeType
 }
 
 type User {
@@ -498,10 +518,8 @@ type User {
 type UserPreferences {
   createdAt: DateTime!
   id: Int!
-  locale: LocaleType!
   onboardingCompleted: Boolean!
   selectedSports: [SportType!]!
-  theme: ThemeType!
   updatedAt: DateTime!
   userId: Int!
 }

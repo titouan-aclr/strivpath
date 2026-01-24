@@ -1,5 +1,15 @@
-mutation UpdateUserPreferences($input: UpdateUserPreferencesInput!) {
-  updateUserPreferences(input: $input) {
+mutation CompleteOnboarding {
+  completeOnboarding {
     ...UserPreferencesInfo
   }
+}
+
+mutation AddSportToPreferences($sport: SportType!) {
+  addSportToPreferences(sport: $sport) {
+    ...UserPreferencesInfo
+  }
+}
+
+mutation RemoveSportFromPreferences($sport: SportType!, $deleteData: Boolean!) {
+  removeSportFromPreferences(sport: $sport, deleteData: $deleteData)
 }

@@ -105,8 +105,6 @@ describe('Auth Flow Integration', () => {
       expect(dbUser).toBeDefined();
       expect(dbUser?.preferences).toBeDefined();
       expect(dbUser?.preferences?.onboardingCompleted).toBe(false);
-      expect(dbUser?.preferences?.locale).toBe('en');
-      expect(dbUser?.preferences?.theme).toBe('system');
       expect(dbUser?.preferences?.selectedSports).toEqual(['RUN']);
 
       expect(dbUser?.tokens).toHaveLength(1);

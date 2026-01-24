@@ -16,19 +16,7 @@ import { StravaActivitySummary } from '../strava/types';
 import { StravaActivityDetail } from '../strava/types/strava-activity-detail.interface';
 import { ActivitySyncLimitExceededException } from './exceptions/activity-sync-limit-exceeded.exception';
 import { GoalProgressUpdateService } from '../goal/goal-progress-update.service';
-
-const STRAVA_SPORT_TYPE_MAPPING: Record<SportType, Set<string>> = {
-  [SportType.RUN]: new Set(['Run', 'TrailRun', 'VirtualRun']),
-  [SportType.RIDE]: new Set([
-    'Ride',
-    'MountainBikeRide',
-    'VirtualRide',
-    'EBikeRide',
-    'EMountainBikeRide',
-    'Velomobile',
-  ]),
-  [SportType.SWIM]: new Set(['Swim']),
-};
+import { getSportTypeFromStravaType } from '../common/utils/sport-type.utils';
 
 @Injectable()
 export class ActivityService {
@@ -41,17 +29,8 @@ export class ActivityService {
     private readonly goalProgressUpdateService: GoalProgressUpdateService,
   ) {}
 
-  private getActivitySportType(stravaType: string): SportType | null {
-    for (const [sportType, stravaTypes] of Object.entries(STRAVA_SPORT_TYPE_MAPPING)) {
-      if (stravaTypes.has(stravaType)) {
-        return sportType as SportType;
-      }
-    }
-    return null;
-  }
-
   private shouldIncludeActivity(activityType: string, selectedSports: SportType[]): boolean {
-    const sportType = this.getActivitySportType(activityType);
+    const sportType = getSportTypeFromStravaType(activityType);
     if (!sportType) {
       return false;
     }
@@ -77,7 +56,7 @@ export class ActivityService {
 
     const existingSportTypes = new Set(
       existingActivityTypes
-        .map(activity => this.getActivitySportType(activity.type))
+        .map(activity => getSportTypeFromStravaType(activity.type))
         .filter((sportType): sportType is SportType => sportType !== null),
     );
 

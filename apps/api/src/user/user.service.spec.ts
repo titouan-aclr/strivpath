@@ -289,8 +289,6 @@ describe('UserService', () => {
             create: {
               selectedSports: [SportType.RUN],
               onboardingCompleted: false,
-              locale: 'en',
-              theme: 'system',
             },
           },
         },
@@ -359,6 +357,55 @@ describe('UserService', () => {
       const updateCall = (prisma.user.update as jest.Mock).mock.calls[0][0];
       expect(updateCall.data.tokens.create).toBeDefined();
       expect(updateCall.data.tokens.create.accessToken).toBe(mockStravaTokens.access_token);
+    });
+  });
+
+  describe('deleteUserData', () => {
+    it('should delete all user data and reset preferences', async () => {
+      prisma.$transaction.mockResolvedValue([]);
+
+      const result = await service.deleteUserData(1);
+
+      expect(result).toBe(true);
+      expect(prisma.$transaction).toHaveBeenCalledWith([
+        prisma.goal.deleteMany({ where: { userId: 1 } }),
+        prisma.activity.deleteMany({ where: { userId: 1 } }),
+        prisma.syncHistory.deleteMany({ where: { userId: 1 } }),
+        prisma.userPreferences.update({
+          where: { userId: 1 },
+          data: { selectedSports: [SportType.RUN], onboardingCompleted: false },
+        }),
+      ]);
+    });
+
+    it('should return true on successful deletion', async () => {
+      prisma.$transaction.mockResolvedValue([{ count: 5 }, { count: 100 }, { count: 10 }, { id: 1 }]);
+
+      const result = await service.deleteUserData(42);
+
+      expect(result).toBe(true);
+    });
+  });
+
+  describe('deleteAccount', () => {
+    it('should delete the user account', async () => {
+      const mockDeletedUser = createMockPrismaUser({ id: 1, stravaId: 12345 });
+      prisma.user.delete.mockResolvedValue(mockDeletedUser);
+
+      const result = await service.deleteAccount(1);
+
+      expect(result).toBe(true);
+      expect(prisma.user.delete).toHaveBeenCalledWith({
+        where: { id: 1 },
+      });
+    });
+
+    it('should return true on successful account deletion', async () => {
+      prisma.user.delete.mockResolvedValue(createMockPrismaUser({ id: 42 }));
+
+      const result = await service.deleteAccount(42);
+
+      expect(result).toBe(true);
     });
   });
 });

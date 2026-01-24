@@ -550,6 +550,120 @@
       }
     }
   },
+  "settings": {
+    "meta": {
+      "title": "Settings - Stravanalytics",
+      "description": "Manage your account and preferences"
+    },
+    "title": "Settings",
+    "description": "Manage your account and preferences",
+    "profile": {
+      "title": "Profile",
+      "description": "Your Strava account information",
+      "connectedVia": "Connected via Strava",
+      "location": "Location",
+      "memberSince": "Member since"
+    },
+    "sports": {
+      "title": "Sports",
+      "description": "Manage the sports you want to track",
+      "add": "Add sport",
+      "addSuccess": "Sport added successfully",
+      "addError": "Failed to add sport",
+      "removeSuccess": "Sport removed successfully",
+      "removeError": "Failed to remove sport",
+      "lastSport": "You must have at least one sport selected",
+      "addDialog": {
+        "title": "Add a Sport",
+        "description": "Select a sport to add to your tracked sports",
+        "noSportsAvailable": "All sports are already being tracked",
+        "cancel": "Cancel",
+        "confirm": "Add Sport"
+      },
+      "removalDialog": {
+        "title": "Remove {sport}?",
+        "description": "You have {activitiesCount} activities and {goalsCount} goals linked to this sport.",
+        "noData": "No activities or goals are linked to this sport.",
+        "keepData": "Keep my data",
+        "keepDataDescription": "Activities will be preserved and goals will be archived.",
+        "deleteData": "Delete data",
+        "deleteDataDescription": "All activities and goals will be permanently deleted.",
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      }
+    },
+    "sync": {
+      "title": "Synchronization",
+      "description": "Manage your activity synchronization",
+      "lastSync": "Last sync",
+      "never": "Never synced",
+      "syncNow": "Sync now",
+      "syncing": "Syncing...",
+      "syncSuccess": "Activities synchronized successfully",
+      "syncError": "Failed to synchronize activities",
+      "activitiesImported": "{count} activities imported",
+      "status": {
+        "pending": "Pending",
+        "fetching": "Fetching from Strava",
+        "storing": "Storing activities",
+        "computing": "Computing statistics",
+        "done": "Completed",
+        "failed": "Failed"
+      }
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Customize how the app looks",
+      "theme": {
+        "label": "Theme",
+        "light": "Light",
+        "dark": "Dark",
+        "system": "System"
+      },
+      "language": {
+        "label": "Language"
+      }
+    },
+    "session": {
+      "title": "Session",
+      "description": "Manage your current session",
+      "logout": "Log out",
+      "loggingOut": "Logging out..."
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "description": "Irreversible actions",
+      "warning": "These actions cannot be undone. Please proceed with caution.",
+      "deleteData": {
+        "title": "Delete all my data",
+        "description": "Delete all your activities, goals, and synchronization history. Your account will remain active.",
+        "button": "Delete my data",
+        "success": "All your data has been deleted",
+        "error": "Failed to delete your data",
+        "dialog": {
+          "title": "Delete all your data?",
+          "description": "This will permanently delete all your activities, goals, and synchronization history. Your account will remain active but you'll need to sync again.",
+          "warning": "This action cannot be undone.",
+          "cancel": "Cancel",
+          "confirm": "Delete all data"
+        }
+      },
+      "deleteAccount": {
+        "title": "Delete my account",
+        "description": "Permanently delete your account and all associated data. This action is irreversible.",
+        "button": "Delete account",
+        "success": "Your account has been deleted",
+        "error": "Failed to delete your account",
+        "dialog": {
+          "title": "Delete your account?",
+          "description": "This will permanently delete your account and all your data including activities, goals, and preferences.",
+          "warning": "This action cannot be undone. You will need to reconnect with Strava to use the app again.",
+          "cancel": "Cancel",
+          "confirm": "Delete my account"
+        }
+      }
+    }
+  },
   "errors": {
     "unexpected": {
       "title": "Something went wrong",

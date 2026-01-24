@@ -2,6 +2,7 @@ import { GoalTemplateMapper } from './goal-template.mapper';
 import { GoalTemplate as PrismaGoalTemplate, GoalTemplateTranslation } from '@prisma/client';
 import { GoalTargetType } from './enums/goal-target-type.enum';
 import { GoalPeriodType } from './enums/goal-period-type.enum';
+import { Locale } from './enums/locale.enum';
 
 describe('GoalTemplateMapper', () => {
   describe('toGraphQL', () => {
@@ -38,7 +39,7 @@ describe('GoalTemplateMapper', () => {
         ],
       };
 
-      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, 'en');
+      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, Locale.EN);
 
       expect(result.id).toBe(1);
       expect(result.targetType).toBe(GoalTargetType.DISTANCE);
@@ -84,7 +85,7 @@ describe('GoalTemplateMapper', () => {
         ],
       };
 
-      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, 'fr');
+      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, Locale.FR);
 
       expect(result.title).toBe('Courir 50km ce mois');
       expect(result.description).toBe('Un objectif mensuel de course pour débutants');
@@ -114,7 +115,7 @@ describe('GoalTemplateMapper', () => {
         ],
       };
 
-      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, 'en');
+      const result = GoalTemplateMapper.toGraphQL(prismaTemplate, Locale.EN);
 
       expect(result.sportType).toBeUndefined();
       expect(result.description).toBeUndefined();

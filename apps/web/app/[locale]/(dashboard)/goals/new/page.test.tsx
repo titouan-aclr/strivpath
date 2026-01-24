@@ -108,6 +108,14 @@ vi.mock('@/lib/goals/use-goal-mutations', () => ({
   }),
 }));
 
+vi.mock('@/lib/sports/hooks', () => ({
+  useAvailableSports: () => ({
+    availableSports: [SportType.Run, SportType.Ride, SportType.Swim],
+    sportConfigs: [],
+    loading: false,
+  }),
+}));
+
 describe('NewGoalPage - Integration Tests', () => {
   beforeEach(() => {
     vi.clearAllMocks();
