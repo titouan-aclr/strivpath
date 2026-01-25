@@ -6,6 +6,7 @@ import { StatisticsPeriod } from './enums/statistics-period.enum';
 const createMockPrismaService = () => ({
   activity: {
     aggregate: jest.fn(),
+    findMany: jest.fn(),
   },
 });
 
@@ -281,6 +282,231 @@ describe('StatisticsService', () => {
         await service.getPeriodStatistics(userId, StatisticsPeriod.MONTH);
 
         expect(prisma.activity.aggregate).toHaveBeenCalledTimes(1);
+      });
+    });
+  });
+
+  describe('getActivityCalendar', () => {
+    const userId = 42;
+
+    describe('full year calendar', () => {
+      it('should return all days of the year', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024);
+
+        expect(result.length).toBe(366);
+        expect(result[0].date.getMonth()).toBe(0);
+        expect(result[0].date.getDate()).toBe(1);
+        expect(result[result.length - 1].date.getMonth()).toBe(11);
+        expect(result[result.length - 1].date.getDate()).toBe(31);
+      });
+
+      it('should return 365 days for non-leap year', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2023);
+
+        expect(result.length).toBe(365);
+      });
+
+      it('should mark days with activities as hasActivity true', async () => {
+        prisma.activity.findMany.mockResolvedValue([
+          { startDate: new Date('2024-03-15T10:00:00Z') },
+          { startDate: new Date('2024-06-20T14:30:00Z') },
+        ]);
+
+        const result = await service.getActivityCalendar(userId, 2024);
+
+        const march15 = result.find(day => day.date.getMonth() === 2 && day.date.getDate() === 15);
+        const june20 = result.find(day => day.date.getMonth() === 5 && day.date.getDate() === 20);
+        const january1 = result.find(day => day.date.getMonth() === 0 && day.date.getDate() === 1);
+
+        expect(march15?.hasActivity).toBe(true);
+        expect(june20?.hasActivity).toBe(true);
+        expect(january1?.hasActivity).toBe(false);
+      });
+
+      it('should handle multiple activities on same day', async () => {
+        prisma.activity.findMany.mockResolvedValue([
+          { startDate: new Date('2024-05-10T08:00:00Z') },
+          { startDate: new Date('2024-05-10T18:00:00Z') },
+        ]);
+
+        const result = await service.getActivityCalendar(userId, 2024);
+
+        const may10 = result.find(day => day.date.getMonth() === 4 && day.date.getDate() === 10);
+
+        expect(may10?.hasActivity).toBe(true);
+      });
+
+      it('should query Prisma with correct year boundaries', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(userId, 2024);
+
+        expect(prisma.activity.findMany).toHaveBeenCalledWith({
+          where: {
+            userId,
+            startDate: {
+              gte: expect.any(Date),
+              lte: expect.any(Date),
+            },
+          },
+          select: { startDate: true },
+        });
+
+        const callArg = prisma.activity.findMany.mock.calls[0][0];
+        expect(callArg.where.startDate.gte.getFullYear()).toBe(2024);
+        expect(callArg.where.startDate.gte.getMonth()).toBe(0);
+        expect(callArg.where.startDate.gte.getDate()).toBe(1);
+        expect(callArg.where.startDate.lte.getFullYear()).toBe(2024);
+        expect(callArg.where.startDate.lte.getMonth()).toBe(11);
+        expect(callArg.where.startDate.lte.getDate()).toBe(31);
+      });
+    });
+
+    describe('specific month calendar', () => {
+      it('should return correct number of days for January (31 days)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 1);
+
+        expect(result.length).toBe(31);
+        expect(result[0].date.getMonth()).toBe(0);
+        expect(result[0].date.getDate()).toBe(1);
+        expect(result[30].date.getDate()).toBe(31);
+      });
+
+      it('should return correct number of days for February in leap year (29 days)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 2);
+
+        expect(result.length).toBe(29);
+      });
+
+      it('should return correct number of days for February in non-leap year (28 days)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2023, 2);
+
+        expect(result.length).toBe(28);
+      });
+
+      it('should return correct number of days for April (30 days)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 4);
+
+        expect(result.length).toBe(30);
+      });
+
+      it('should mark activities correctly within month', async () => {
+        prisma.activity.findMany.mockResolvedValue([
+          { startDate: new Date('2024-07-04T12:00:00Z') },
+          { startDate: new Date('2024-07-25T09:00:00Z') },
+        ]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 7);
+
+        const july4 = result.find(day => day.date.getDate() === 4);
+        const july25 = result.find(day => day.date.getDate() === 25);
+        const july1 = result.find(day => day.date.getDate() === 1);
+
+        expect(july4?.hasActivity).toBe(true);
+        expect(july25?.hasActivity).toBe(true);
+        expect(july1?.hasActivity).toBe(false);
+      });
+
+      it('should query Prisma with correct month boundaries', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(userId, 2024, 3);
+
+        const callArg = prisma.activity.findMany.mock.calls[0][0];
+        expect(callArg.where.startDate.gte.getMonth()).toBe(2);
+        expect(callArg.where.startDate.gte.getDate()).toBe(1);
+        expect(callArg.where.startDate.lte.getMonth()).toBe(2);
+        expect(callArg.where.startDate.lte.getDate()).toBe(31);
+      });
+
+      it('should query with correct boundaries for December', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(userId, 2024, 12);
+
+        const callArg = prisma.activity.findMany.mock.calls[0][0];
+        expect(callArg.where.startDate.gte.getMonth()).toBe(11);
+        expect(callArg.where.startDate.lte.getMonth()).toBe(11);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle empty activities array', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 1);
+
+        expect(result.every(day => day.hasActivity === false)).toBe(true);
+      });
+
+      it('should handle activities spanning entire month', async () => {
+        const activities = Array.from({ length: 31 }, (_, i) => ({
+          startDate: new Date(`2024-01-${String(i + 1).padStart(2, '0')}T10:00:00Z`),
+        }));
+        prisma.activity.findMany.mockResolvedValue(activities);
+
+        const result = await service.getActivityCalendar(userId, 2024, 1);
+
+        expect(result.every(day => day.hasActivity === true)).toBe(true);
+      });
+
+      it('should pass correct userId to Prisma query', async () => {
+        const specificUserId = 99999;
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(specificUserId, 2024);
+
+        expect(prisma.activity.findMany).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: expect.objectContaining({
+              userId: specificUserId,
+            }),
+          }),
+        );
+      });
+
+      it('should return dates in chronological order', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        const result = await service.getActivityCalendar(userId, 2024, 6);
+
+        for (let i = 1; i < result.length; i++) {
+          expect(result[i].date.getTime()).toBeGreaterThan(result[i - 1].date.getTime());
+        }
+      });
+
+      it('should set correct time boundaries for query (start at 00:00:00)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(userId, 2024, 1);
+
+        const callArg = prisma.activity.findMany.mock.calls[0][0];
+        expect(callArg.where.startDate.gte.getHours()).toBe(0);
+        expect(callArg.where.startDate.gte.getMinutes()).toBe(0);
+        expect(callArg.where.startDate.gte.getSeconds()).toBe(0);
+      });
+
+      it('should set correct time boundaries for query (end at 23:59:59)', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getActivityCalendar(userId, 2024, 1);
+
+        const callArg = prisma.activity.findMany.mock.calls[0][0];
+        expect(callArg.where.startDate.lte.getHours()).toBe(23);
+        expect(callArg.where.startDate.lte.getMinutes()).toBe(59);
+        expect(callArg.where.startDate.lte.getSeconds()).toBe(59);
       });
     });
   });
