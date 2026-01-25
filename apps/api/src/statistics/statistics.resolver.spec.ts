@@ -4,6 +4,7 @@ import { StatisticsService } from './statistics.service';
 import { TokenPayload } from '../auth/types/token-payload.interface';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 import { PeriodStatistics } from './models/period-statistics.model';
+import { ActivityCalendarDay } from './models/activity-calendar-day.model';
 
 describe('StatisticsResolver', () => {
   let resolver: StatisticsResolver;
@@ -11,6 +12,7 @@ describe('StatisticsResolver', () => {
 
   const mockStatisticsService = {
     getPeriodStatistics: jest.fn(),
+    getActivityCalendar: jest.fn(),
   };
 
   const mockTokenPayload: TokenPayload = {
@@ -25,6 +27,11 @@ describe('StatisticsResolver', () => {
     periodStart: new Date('2025-01-20'),
     periodEnd: new Date('2025-01-26'),
     ...overrides,
+  });
+
+  const createMockCalendarDay = (date: Date, hasActivity: boolean): ActivityCalendarDay => ({
+    date,
+    hasActivity,
   });
 
   beforeEach(async () => {
@@ -145,6 +152,91 @@ describe('StatisticsResolver', () => {
 
       expect(result.periodStart).toEqual(periodStart);
       expect(result.periodEnd).toEqual(periodEnd);
+    });
+  });
+
+  describe('activityCalendar', () => {
+    it('should return activity calendar for a full year', async () => {
+      const mockCalendar = [
+        createMockCalendarDay(new Date('2024-01-01'), false),
+        createMockCalendarDay(new Date('2024-01-02'), true),
+        createMockCalendarDay(new Date('2024-01-03'), false),
+      ];
+      mockStatisticsService.getActivityCalendar.mockResolvedValue(mockCalendar);
+
+      const result = await resolver.activityCalendar(mockTokenPayload, 2024);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(mockTokenPayload.sub, 2024, undefined);
+      expect(result).toEqual(mockCalendar);
+    });
+
+    it('should return activity calendar for a specific month', async () => {
+      const mockCalendar = [
+        createMockCalendarDay(new Date('2024-03-01'), true),
+        createMockCalendarDay(new Date('2024-03-02'), false),
+      ];
+      mockStatisticsService.getActivityCalendar.mockResolvedValue(mockCalendar);
+
+      const result = await resolver.activityCalendar(mockTokenPayload, 2024, 3);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(mockTokenPayload.sub, 2024, 3);
+      expect(result).toEqual(mockCalendar);
+    });
+
+    it('should pass correct user ID from token payload', async () => {
+      const customTokenPayload: TokenPayload = {
+        sub: 99,
+        stravaId: 88888,
+      };
+      mockStatisticsService.getActivityCalendar.mockResolvedValue([]);
+
+      await resolver.activityCalendar(customTokenPayload, 2024);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(99, 2024, undefined);
+    });
+
+    it('should return empty array when no activities', async () => {
+      const emptyCalendar: ActivityCalendarDay[] = [];
+      mockStatisticsService.getActivityCalendar.mockResolvedValue(emptyCalendar);
+
+      const result = await resolver.activityCalendar(mockTokenPayload, 2024, 6);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should call service exactly once per query', async () => {
+      mockStatisticsService.getActivityCalendar.mockResolvedValue([]);
+
+      await resolver.activityCalendar(mockTokenPayload, 2024, 12);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledTimes(1);
+    });
+
+    it('should propagate service errors', async () => {
+      const error = new Error('Database connection failed');
+      mockStatisticsService.getActivityCalendar.mockRejectedValue(error);
+
+      await expect(resolver.activityCalendar(mockTokenPayload, 2024)).rejects.toThrow('Database connection failed');
+    });
+
+    it('should handle December (month 12) correctly', async () => {
+      const mockCalendar = [createMockCalendarDay(new Date('2024-12-25'), true)];
+      mockStatisticsService.getActivityCalendar.mockResolvedValue(mockCalendar);
+
+      const result = await resolver.activityCalendar(mockTokenPayload, 2024, 12);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(mockTokenPayload.sub, 2024, 12);
+      expect(result).toEqual(mockCalendar);
+    });
+
+    it('should handle January (month 1) correctly', async () => {
+      const mockCalendar = [createMockCalendarDay(new Date('2024-01-01'), true)];
+      mockStatisticsService.getActivityCalendar.mockResolvedValue(mockCalendar);
+
+      const result = await resolver.activityCalendar(mockTokenPayload, 2024, 1);
+
+      expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(mockTokenPayload.sub, 2024, 1);
+      expect(result).toEqual(mockCalendar);
     });
   });
 });
