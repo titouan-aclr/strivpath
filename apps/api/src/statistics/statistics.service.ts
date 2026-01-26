@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
+import { getSportTypeFromStravaType } from '../common/utils/sport-type.utils';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 import { PeriodStatistics } from './models/period-statistics.model';
 import { ActivityCalendarDay } from './models/activity-calendar-day.model';
+import { SportDistribution } from './models/sport-distribution.model';
 
 @Injectable()
 export class StatisticsService {
@@ -132,5 +135,74 @@ export class StatisticsService {
     }
 
     return calendarDays;
+  }
+
+  async getSportDistribution(userId: number): Promise<SportDistribution[]> {
+    const { startDate, endDate } = this.calculateCurrentMonthDates();
+
+    const activitiesByType = await this.prisma.activity.groupBy({
+      by: ['type'],
+      where: {
+        userId,
+        startDate: { gte: startDate, lte: endDate },
+      },
+      _sum: { movingTime: true },
+    });
+
+    const sportTimeMap = this.aggregateBySportType(activitiesByType);
+    const totalTime = this.calculateTotalTime(sportTimeMap);
+
+    return this.buildSportDistribution(sportTimeMap, totalTime);
+  }
+
+  private calculateCurrentMonthDates(): { startDate: Date; endDate: Date } {
+    const now = new Date();
+    const startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    startDate.setHours(0, 0, 0, 0);
+
+    const endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    endDate.setHours(23, 59, 59, 999);
+
+    return { startDate, endDate };
+  }
+
+  private aggregateBySportType(
+    activitiesByType: { type: string; _sum: { movingTime: number | null } }[],
+  ): Map<SportType, number> {
+    const sportTimeMap = new Map<SportType, number>();
+
+    for (const activity of activitiesByType) {
+      const sportType = getSportTypeFromStravaType(activity.type);
+      if (sportType === null) continue;
+
+      const currentTime = sportTimeMap.get(sportType) ?? 0;
+      const activityTime = activity._sum.movingTime ?? 0;
+      sportTimeMap.set(sportType, currentTime + activityTime);
+    }
+
+    return sportTimeMap;
+  }
+
+  private calculateTotalTime(sportTimeMap: Map<SportType, number>): number {
+    let total = 0;
+    for (const time of sportTimeMap.values()) {
+      total += time;
+    }
+    return total;
+  }
+
+  private buildSportDistribution(sportTimeMap: Map<SportType, number>, totalTime: number): SportDistribution[] {
+    const distribution: SportDistribution[] = [];
+
+    for (const [sport, time] of sportTimeMap) {
+      const percentage = totalTime > 0 ? Number(((time / totalTime) * 100).toFixed(2)) : 0;
+      distribution.push({
+        sport,
+        percentage,
+        totalTime: time,
+      });
+    }
+
+    return distribution.sort((a, b) => b.totalTime - a.totalTime);
   }
 }
