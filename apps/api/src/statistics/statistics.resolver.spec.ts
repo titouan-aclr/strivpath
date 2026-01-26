@@ -5,6 +5,8 @@ import { TokenPayload } from '../auth/types/token-payload.interface';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 import { PeriodStatistics } from './models/period-statistics.model';
 import { ActivityCalendarDay } from './models/activity-calendar-day.model';
+import { SportDistribution } from './models/sport-distribution.model';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 describe('StatisticsResolver', () => {
   let resolver: StatisticsResolver;
@@ -13,6 +15,7 @@ describe('StatisticsResolver', () => {
   const mockStatisticsService = {
     getPeriodStatistics: jest.fn(),
     getActivityCalendar: jest.fn(),
+    getSportDistribution: jest.fn(),
   };
 
   const mockTokenPayload: TokenPayload = {
@@ -237,6 +240,77 @@ describe('StatisticsResolver', () => {
 
       expect(statisticsService.getActivityCalendar).toHaveBeenCalledWith(mockTokenPayload.sub, 2024, 1);
       expect(result).toEqual(mockCalendar);
+    });
+  });
+
+  describe('sportDistribution', () => {
+    const createMockSportDistribution = (
+      sport: SportType,
+      percentage: number,
+      totalTime: number,
+    ): SportDistribution => ({
+      sport,
+      percentage,
+      totalTime,
+    });
+
+    it('should return sport distribution for current month', async () => {
+      const mockDistribution = [
+        createMockSportDistribution(SportType.RIDE, 60, 7200),
+        createMockSportDistribution(SportType.RUN, 40, 4800),
+      ];
+      mockStatisticsService.getSportDistribution.mockResolvedValue(mockDistribution);
+
+      const result = await resolver.sportDistribution(mockTokenPayload);
+
+      expect(statisticsService.getSportDistribution).toHaveBeenCalledWith(mockTokenPayload.sub);
+      expect(result).toEqual(mockDistribution);
+    });
+
+    it('should pass correct user ID from token payload', async () => {
+      const customTokenPayload: TokenPayload = {
+        sub: 77,
+        stravaId: 55555,
+      };
+      mockStatisticsService.getSportDistribution.mockResolvedValue([]);
+
+      await resolver.sportDistribution(customTokenPayload);
+
+      expect(statisticsService.getSportDistribution).toHaveBeenCalledWith(77);
+    });
+
+    it('should return empty array when no activities', async () => {
+      mockStatisticsService.getSportDistribution.mockResolvedValue([]);
+
+      const result = await resolver.sportDistribution(mockTokenPayload);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should return single sport distribution', async () => {
+      const mockDistribution = [createMockSportDistribution(SportType.SWIM, 100, 3600)];
+      mockStatisticsService.getSportDistribution.mockResolvedValue(mockDistribution);
+
+      const result = await resolver.sportDistribution(mockTokenPayload);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].sport).toBe(SportType.SWIM);
+      expect(result[0].percentage).toBe(100);
+    });
+
+    it('should call service exactly once per query', async () => {
+      mockStatisticsService.getSportDistribution.mockResolvedValue([]);
+
+      await resolver.sportDistribution(mockTokenPayload);
+
+      expect(statisticsService.getSportDistribution).toHaveBeenCalledTimes(1);
+    });
+
+    it('should propagate service errors', async () => {
+      const error = new Error('Database connection failed');
+      mockStatisticsService.getSportDistribution.mockRejectedValue(error);
+
+      await expect(resolver.sportDistribution(mockTokenPayload)).rejects.toThrow('Database connection failed');
     });
   });
 });

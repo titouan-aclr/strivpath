@@ -7,6 +7,7 @@ const createMockPrismaService = () => ({
   activity: {
     aggregate: jest.fn(),
     findMany: jest.fn(),
+    groupBy: jest.fn(),
   },
 });
 
@@ -507,6 +508,233 @@ describe('StatisticsService', () => {
         expect(callArg.where.startDate.lte.getHours()).toBe(23);
         expect(callArg.where.startDate.lte.getMinutes()).toBe(59);
         expect(callArg.where.startDate.lte.getSeconds()).toBe(59);
+      });
+    });
+  });
+
+  describe('getSportDistribution', () => {
+    const userId = 42;
+
+    describe('data aggregation', () => {
+      it('should return distribution for multiple sports', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 3600 } },
+          { type: 'Ride', _sum: { movingTime: 7200 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(2);
+        expect(result[0].sport).toBe('RIDE');
+        expect(result[0].totalTime).toBe(7200);
+        expect(result[1].sport).toBe('RUN');
+        expect(result[1].totalTime).toBe(3600);
+      });
+
+      it('should calculate percentages correctly', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 2500 } },
+          { type: 'Ride', _sum: { movingTime: 7500 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result[0].percentage).toBe(75);
+        expect(result[1].percentage).toBe(25);
+      });
+
+      it('should return empty array when no activities', async () => {
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(0);
+      });
+
+      it('should handle single sport correctly', async () => {
+        prisma.activity.groupBy.mockResolvedValue([{ type: 'Swim', _sum: { movingTime: 1800 } }]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].sport).toBe('SWIM');
+        expect(result[0].percentage).toBe(100);
+        expect(result[0].totalTime).toBe(1800);
+      });
+
+      it('should sort results by totalTime descending', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Swim', _sum: { movingTime: 500 } },
+          { type: 'Run', _sum: { movingTime: 3000 } },
+          { type: 'Ride', _sum: { movingTime: 1500 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result[0].sport).toBe('RUN');
+        expect(result[1].sport).toBe('RIDE');
+        expect(result[2].sport).toBe('SWIM');
+      });
+    });
+
+    describe('Strava type mapping', () => {
+      it('should aggregate TrailRun with Run', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 1000 } },
+          { type: 'TrailRun', _sum: { movingTime: 2000 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].sport).toBe('RUN');
+        expect(result[0].totalTime).toBe(3000);
+      });
+
+      it('should aggregate VirtualRide with Ride', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Ride', _sum: { movingTime: 5000 } },
+          { type: 'VirtualRide', _sum: { movingTime: 3000 } },
+          { type: 'MountainBikeRide', _sum: { movingTime: 2000 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].sport).toBe('RIDE');
+        expect(result[0].totalTime).toBe(10000);
+      });
+
+      it('should ignore unknown activity types', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 1000 } },
+          { type: 'Yoga', _sum: { movingTime: 500 } },
+          { type: 'WeightTraining', _sum: { movingTime: 300 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].sport).toBe('RUN');
+        expect(result[0].totalTime).toBe(1000);
+        expect(result[0].percentage).toBe(100);
+      });
+
+      it('should handle all supported Strava types', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 100 } },
+          { type: 'TrailRun', _sum: { movingTime: 100 } },
+          { type: 'VirtualRun', _sum: { movingTime: 100 } },
+          { type: 'Ride', _sum: { movingTime: 100 } },
+          { type: 'VirtualRide', _sum: { movingTime: 100 } },
+          { type: 'MountainBikeRide', _sum: { movingTime: 100 } },
+          { type: 'EBikeRide', _sum: { movingTime: 100 } },
+          { type: 'Swim', _sum: { movingTime: 100 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(3);
+
+        const runSport = result.find(r => r.sport === 'RUN');
+        const rideSport = result.find(r => r.sport === 'RIDE');
+        const swimSport = result.find(r => r.sport === 'SWIM');
+
+        expect(runSport?.totalTime).toBe(300);
+        expect(rideSport?.totalTime).toBe(400);
+        expect(swimSport?.totalTime).toBe(100);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle null movingTime values', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: null } },
+          { type: 'Ride', _sum: { movingTime: 1000 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(2);
+        const runSport = result.find(r => r.sport === 'RUN');
+        expect(runSport?.totalTime).toBe(0);
+      });
+
+      it('should handle percentage rounding correctly', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'Run', _sum: { movingTime: 1 } },
+          { type: 'Ride', _sum: { movingTime: 2 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result[0].percentage).toBe(66.67);
+        expect(result[1].percentage).toBe(33.33);
+      });
+
+      it('should pass correct userId to Prisma query', async () => {
+        const specificUserId = 99999;
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        await service.getSportDistribution(specificUserId);
+
+        expect(prisma.activity.groupBy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            where: expect.objectContaining({
+              userId: specificUserId,
+            }),
+          }),
+        );
+      });
+    });
+
+    describe('date boundaries', () => {
+      it('should query current month only', async () => {
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        await service.getSportDistribution(userId);
+
+        const callArg = prisma.activity.groupBy.mock.calls[0][0];
+        const now = new Date();
+
+        expect(callArg.where.startDate.gte.getMonth()).toBe(now.getMonth());
+        expect(callArg.where.startDate.gte.getDate()).toBe(1);
+        expect(callArg.where.startDate.lte.getMonth()).toBe(now.getMonth());
+      });
+
+      it('should set start date at 00:00:00', async () => {
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        await service.getSportDistribution(userId);
+
+        const callArg = prisma.activity.groupBy.mock.calls[0][0];
+        expect(callArg.where.startDate.gte.getHours()).toBe(0);
+        expect(callArg.where.startDate.gte.getMinutes()).toBe(0);
+        expect(callArg.where.startDate.gte.getSeconds()).toBe(0);
+      });
+
+      it('should set end date at 23:59:59', async () => {
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        await service.getSportDistribution(userId);
+
+        const callArg = prisma.activity.groupBy.mock.calls[0][0];
+        expect(callArg.where.startDate.lte.getHours()).toBe(23);
+        expect(callArg.where.startDate.lte.getMinutes()).toBe(59);
+        expect(callArg.where.startDate.lte.getSeconds()).toBe(59);
+      });
+
+      it('should query with groupBy type field', async () => {
+        prisma.activity.groupBy.mockResolvedValue([]);
+
+        await service.getSportDistribution(userId);
+
+        expect(prisma.activity.groupBy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            by: ['type'],
+            _sum: { movingTime: true },
+          }),
+        );
       });
     });
   });

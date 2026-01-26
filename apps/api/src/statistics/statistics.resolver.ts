@@ -6,6 +6,7 @@ import { TokenPayload } from '../auth/types/token-payload.interface';
 import { StatisticsService } from './statistics.service';
 import { PeriodStatistics } from './models/period-statistics.model';
 import { ActivityCalendarDay } from './models/activity-calendar-day.model';
+import { SportDistribution } from './models/sport-distribution.model';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 
 @Resolver()
@@ -39,5 +40,13 @@ export class StatisticsResolver {
     month?: number,
   ): Promise<ActivityCalendarDay[]> {
     return this.statisticsService.getActivityCalendar(tokenPayload.sub, year, month);
+  }
+
+  @Query(() => [SportDistribution], {
+    description: 'Get distribution of training time by sport type for the current month',
+  })
+  @UseGuards(GqlAuthGuard)
+  async sportDistribution(@CurrentUser() tokenPayload: TokenPayload): Promise<SportDistribution[]> {
+    return this.statisticsService.getSportDistribution(tokenPayload.sub);
   }
 }
