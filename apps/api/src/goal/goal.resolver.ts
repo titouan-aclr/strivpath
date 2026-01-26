@@ -4,6 +4,7 @@ import { GqlAuthGuard } from '../auth/guards/gql-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { TokenPayload } from '../auth/types/token-payload.interface';
 import { Goal } from './models/goal.model';
+import { GoalProgressPoint } from './models/goal-progress-point.model';
 import { GoalTemplate } from './models/goal-template.model';
 import { CreateGoalInput, UpdateGoalInput, CreateGoalFromTemplateInput } from './dto/goal.input';
 import { GoalService } from './goal.service';
@@ -61,6 +62,14 @@ export class GoalResolver {
   @UseGuards(GqlAuthGuard)
   async activeGoals(@CurrentUser() tokenPayload: TokenPayload): Promise<Goal[]> {
     return this.goalService.findActiveGoals(tokenPayload.sub);
+  }
+
+  @Query(() => [Goal], {
+    description: 'Get priority goals for dashboard display (max 3, global goals first, then by deadline)',
+  })
+  @UseGuards(GqlAuthGuard)
+  async dashboardGoals(@CurrentUser() tokenPayload: TokenPayload): Promise<Goal[]> {
+    return this.goalService.findDashboardGoals(tokenPayload.sub);
   }
 
   @Query(() => [GoalTemplate], {
@@ -189,5 +198,12 @@ export class GoalResolver {
     const diffTime = end.getTime() - now.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays;
+  }
+
+  @ResolveField(() => [GoalProgressPoint], {
+    description: 'Historical progress data points for charting (cumulative values per day with activity)',
+  })
+  async progressHistory(@Parent() goal: Goal): Promise<GoalProgressPoint[]> {
+    return this.goalService.calculateProgressHistory(goal);
   }
 }
