@@ -2,7 +2,9 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../database/prisma.service';
 import { GoalMapper } from './goal.mapper';
 import { Goal } from './models/goal.model';
+import { GoalProgressPoint } from './models/goal-progress-point.model';
 import { CreateGoalInput, UpdateGoalInput } from './dto/goal.input';
+import { GoalTargetType } from './enums/goal-target-type.enum';
 import { GoalPeriodHelper } from './helpers/goal-period.helper';
 import { GoalStatus } from './enums/goal-status.enum';
 import { Prisma } from '@prisma/client';
@@ -136,6 +138,89 @@ export class GoalService {
 
   async findActiveGoals(userId: number): Promise<Goal[]> {
     return this.findAll(userId, { status: GoalStatus.ACTIVE });
+  }
+
+  async findDashboardGoals(userId: number): Promise<Goal[]> {
+    const prismaGoals = await this.prisma.goal.findMany({
+      where: {
+        userId,
+        status: GoalStatus.ACTIVE,
+      },
+      orderBy: { endDate: 'asc' },
+    });
+
+    const sortedGoals = prismaGoals.sort((a, b) => {
+      const aIsGlobal = a.sportType === null;
+      const bIsGlobal = b.sportType === null;
+      if (aIsGlobal && !bIsGlobal) return -1;
+      if (!aIsGlobal && bIsGlobal) return 1;
+      return a.endDate.getTime() - b.endDate.getTime();
+    });
+
+    return sortedGoals.slice(0, 3).map(goal => GoalMapper.toGraphQL(goal));
+  }
+
+  async calculateProgressHistory(goal: Goal): Promise<GoalProgressPoint[]> {
+    const activityFilter: Prisma.ActivityWhereInput = {
+      userId: goal.userId,
+      startDate: {
+        gte: goal.startDate,
+        lte: goal.endDate,
+      },
+      ...(goal.sportType && { type: { in: getStravaTypesForSport(goal.sportType) } }),
+    };
+
+    const activities = await this.prisma.activity.findMany({
+      where: activityFilter,
+      select: {
+        startDate: true,
+        distance: true,
+        movingTime: true,
+        totalElevationGain: true,
+      },
+      orderBy: { startDate: 'asc' },
+    });
+
+    const dailyValues = new Map<string, number>();
+
+    for (const activity of activities) {
+      const dateKey = activity.startDate.toISOString().split('T')[0];
+      const currentDayValue = dailyValues.get(dateKey) ?? 0;
+      const activityValue = this.extractActivityValue(activity, goal.targetType);
+      dailyValues.set(dateKey, currentDayValue + activityValue);
+    }
+
+    const progressPoints: GoalProgressPoint[] = [];
+    let cumulativeValue = 0;
+
+    const sortedDates = Array.from(dailyValues.keys()).sort();
+    for (const dateKey of sortedDates) {
+      cumulativeValue += dailyValues.get(dateKey)!;
+      progressPoints.push({
+        date: new Date(dateKey),
+        value: Number(cumulativeValue.toFixed(2)),
+      });
+    }
+
+    return progressPoints;
+  }
+
+  private extractActivityValue(
+    activity: { distance: number; movingTime: number; totalElevationGain: number },
+    targetType: GoalTargetType,
+  ): number {
+    switch (targetType) {
+      case GoalTargetType.DISTANCE:
+        return activity.distance / 1000;
+      case GoalTargetType.DURATION:
+        return activity.movingTime / 3600;
+      case GoalTargetType.ELEVATION:
+        return activity.totalElevationGain;
+      case GoalTargetType.FREQUENCY:
+        return 1;
+      default:
+        return 0;
+    }
   }
 
   async findByTemplate(templateId: number, userId: number): Promise<Goal[]> {

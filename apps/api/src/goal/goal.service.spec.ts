@@ -20,6 +20,7 @@ const createMockPrismaService = () => ({
   activity: {
     aggregate: jest.fn(),
     count: jest.fn(),
+    findMany: jest.fn(),
   },
 });
 
@@ -884,6 +885,308 @@ describe('GoalService', () => {
 
       expect(result).toHaveLength(0);
       expect(result).toEqual([]);
+    });
+  });
+
+  describe('findDashboardGoals', () => {
+    it('should return maximum 3 active goals', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', endDate: new Date('2025-01-31') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', endDate: new Date('2025-02-28') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', endDate: new Date('2025-03-31') }),
+        createMockPrismaGoal({ id: 4, status: 'ACTIVE', endDate: new Date('2025-04-30') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result).toHaveLength(3);
+      expect(result.map(g => g.id)).toEqual([1, 2, 3]);
+    });
+
+    it('should prioritize global goals (sportType null) over sport-specific goals', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-31') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-20') }),
+        createMockPrismaGoal({ id: 4, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-10') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].id).toBe(4);
+      expect(result[0].sportType).toBeUndefined();
+      expect(result[1].id).toBe(2);
+      expect(result[1].sportType).toBeUndefined();
+      expect(result[2].id).toBe(1);
+      expect(result[2].sportType).toBe(SportType.RUN);
+    });
+
+    it('should sort global goals by deadline (earliest first)', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-03-31') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: null, endDate: new Date('2025-02-28') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result.map(g => g.id)).toEqual([2, 3, 1]);
+    });
+
+    it('should sort sport-specific goals by deadline after global goals', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-02-28') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-03-31') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-15') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result.map(g => g.id)).toEqual([2, 3, 1]);
+    });
+
+    it('should return empty array when no active goals exist', async () => {
+      const userId = 42;
+
+      prisma.goal.findMany.mockResolvedValue([]);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result).toHaveLength(0);
+    });
+
+    it('should only query ACTIVE goals', async () => {
+      const userId = 42;
+
+      prisma.goal.findMany.mockResolvedValue([]);
+
+      await service.findDashboardGoals(userId);
+
+      expect(prisma.goal.findMany).toHaveBeenCalledWith({
+        where: {
+          userId,
+          status: GoalStatus.ACTIVE,
+        },
+        orderBy: { endDate: 'asc' },
+      });
+    });
+
+    it('should return fewer than 3 goals if user has fewer active goals', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', endDate: new Date('2025-01-31') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', endDate: new Date('2025-02-28') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findDashboardGoals(userId);
+
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe('calculateProgressHistory', () => {
+    const createGoalForHistory = (
+      overrides?: Partial<{
+        userId: number;
+        targetType: GoalTargetType;
+        sportType: SportType | undefined;
+        startDate: Date;
+        endDate: Date;
+      }>,
+    ) => ({
+      id: 1,
+      userId: 42,
+      title: 'Test Goal',
+      targetType: GoalTargetType.DISTANCE,
+      targetValue: 50,
+      periodType: GoalPeriodType.MONTHLY,
+      startDate: new Date('2025-01-01'),
+      endDate: new Date('2025-01-31'),
+      isRecurring: false,
+      status: GoalStatus.ACTIVE,
+      currentValue: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      ...overrides,
+    });
+
+    it('should return empty array when no activities exist', async () => {
+      const goal = createGoalForHistory();
+      prisma.activity.findMany.mockResolvedValue([]);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should calculate cumulative DISTANCE progress in km', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.DISTANCE });
+      const activities = [
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 5000, movingTime: 1800, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 10000, movingTime: 3600, totalElevationGain: 100 },
+        { startDate: new Date('2025-01-15T10:00:00Z'), distance: 7000, movingTime: 2520, totalElevationGain: 70 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toHaveLength(3);
+      expect(result[0]).toEqual({ date: new Date('2025-01-05'), value: 5 });
+      expect(result[1]).toEqual({ date: new Date('2025-01-10'), value: 15 });
+      expect(result[2]).toEqual({ date: new Date('2025-01-15'), value: 22 });
+    });
+
+    it('should calculate cumulative DURATION progress in hours', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.DURATION });
+      const activities = [
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 5000, movingTime: 3600, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 10000, movingTime: 7200, totalElevationGain: 100 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ date: new Date('2025-01-05'), value: 1 });
+      expect(result[1]).toEqual({ date: new Date('2025-01-10'), value: 3 });
+    });
+
+    it('should calculate cumulative ELEVATION progress in meters', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.ELEVATION });
+      const activities = [
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 5000, movingTime: 1800, totalElevationGain: 150 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 10000, movingTime: 3600, totalElevationGain: 250 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ date: new Date('2025-01-05'), value: 150 });
+      expect(result[1]).toEqual({ date: new Date('2025-01-10'), value: 400 });
+    });
+
+    it('should calculate cumulative FREQUENCY progress as activity count', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.FREQUENCY });
+      const activities = [
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 5000, movingTime: 1800, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-05T18:00:00Z'), distance: 3000, movingTime: 1200, totalElevationGain: 30 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 10000, movingTime: 3600, totalElevationGain: 100 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual({ date: new Date('2025-01-05'), value: 2 });
+      expect(result[1]).toEqual({ date: new Date('2025-01-10'), value: 3 });
+    });
+
+    it('should aggregate multiple activities on the same day', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.DISTANCE });
+      const activities = [
+        { startDate: new Date('2025-01-05T08:00:00Z'), distance: 5000, movingTime: 1800, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-05T18:00:00Z'), distance: 3000, movingTime: 1200, totalElevationGain: 30 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]).toEqual({ date: new Date('2025-01-05'), value: 8 });
+    });
+
+    it('should filter activities by sportType when specified', async () => {
+      const goal = createGoalForHistory({ sportType: SportType.RUN });
+      prisma.activity.findMany.mockResolvedValue([]);
+
+      await service.calculateProgressHistory(goal);
+
+      expect(prisma.activity.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
+          }),
+        }),
+      );
+    });
+
+    it('should not filter by sportType when goal is global', async () => {
+      const goal = createGoalForHistory({ sportType: undefined });
+      prisma.activity.findMany.mockResolvedValue([]);
+
+      await service.calculateProgressHistory(goal);
+
+      expect(prisma.activity.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.not.objectContaining({
+            type: expect.anything(),
+          }),
+        }),
+      );
+    });
+
+    it('should query activities within goal date range', async () => {
+      const startDate = new Date('2025-01-01');
+      const endDate = new Date('2025-01-31');
+      const goal = createGoalForHistory({ startDate, endDate });
+      prisma.activity.findMany.mockResolvedValue([]);
+
+      await service.calculateProgressHistory(goal);
+
+      expect(prisma.activity.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            startDate: {
+              gte: startDate,
+              lte: endDate,
+            },
+          }),
+        }),
+      );
+    });
+
+    it('should return progress points sorted by date', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.DISTANCE });
+      const activities = [
+        { startDate: new Date('2025-01-15T10:00:00Z'), distance: 7000, movingTime: 2520, totalElevationGain: 70 },
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 5000, movingTime: 1800, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 10000, movingTime: 3600, totalElevationGain: 100 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result.map(p => p.date.toISOString().split('T')[0])).toEqual(['2025-01-05', '2025-01-10', '2025-01-15']);
+    });
+
+    it('should round values to 2 decimal places', async () => {
+      const goal = createGoalForHistory({ targetType: GoalTargetType.DISTANCE });
+      const activities = [
+        { startDate: new Date('2025-01-05T10:00:00Z'), distance: 3333, movingTime: 1800, totalElevationGain: 50 },
+        { startDate: new Date('2025-01-10T10:00:00Z'), distance: 6666, movingTime: 3600, totalElevationGain: 100 },
+      ];
+      prisma.activity.findMany.mockResolvedValue(activities);
+
+      const result = await service.calculateProgressHistory(goal);
+
+      expect(result[0].value).toBe(3.33);
+      expect(result[1].value).toBe(10);
     });
   });
 });
