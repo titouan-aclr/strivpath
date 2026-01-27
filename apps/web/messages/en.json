@@ -676,5 +676,26 @@
       "description": "The page you are looking for does not exist",
       "goHome": "Go back home"
     }
+  },
+  "dashboard": {
+    "greeting": "Hello, {name}",
+    "greetingFallback": "Hello",
+    "sync": {
+      "lastSync": "Last sync {time}",
+      "never": "Never synced",
+      "syncNow": "Sync now",
+      "syncing": "Syncing..."
+    },
+    "stats": {
+      "title": "Statistics",
+      "totalTime": "Training Time",
+      "activityCount": "Activities",
+      "averageTime": "Avg. per Session",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    }
   }
 }
