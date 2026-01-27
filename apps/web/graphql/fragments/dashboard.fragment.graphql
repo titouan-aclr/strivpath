@@ -1,0 +1,44 @@
+fragment PeriodStatisticsFragment on PeriodStatistics {
+  totalTime
+  activityCount
+  averageTimePerSession
+  periodStart
+  periodEnd
+}
+
+fragment DashboardGoalFragment on Goal {
+  id
+  title
+  targetType
+  targetValue
+  currentValue
+  startDate
+  endDate
+  sportType
+  status
+  progressPercentage
+  daysRemaining
+  isExpired
+  progressHistory {
+    date
+    value
+  }
+}
+
+fragment ActivityCalendarDayFragment on ActivityCalendarDay {
+  date
+  hasActivity
+}
+
+fragment SportDistributionFragment on SportDistribution {
+  sport
+  percentage
+  totalTime
+}
+
+fragment DashboardSyncHistoryFragment on SyncHistory {
+  id
+  completedAt
+  status
+  stage
+}

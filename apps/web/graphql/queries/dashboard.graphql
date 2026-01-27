@@ -1,0 +1,57 @@
+query DashboardData(
+  $period: StatisticsPeriod!
+  $year: Int!
+  $month: Int
+  $activitiesLimit: Int = 5
+) {
+  periodStatistics(period: $period) {
+    ...PeriodStatisticsFragment
+  }
+  dashboardGoals {
+    ...DashboardGoalFragment
+  }
+  activityCalendar(year: $year, month: $month) {
+    ...ActivityCalendarDayFragment
+  }
+  sportDistribution {
+    ...SportDistributionFragment
+  }
+  activities(filter: { limit: $activitiesLimit }) {
+    ...ActivityCard
+  }
+  latestSyncHistory {
+    ...DashboardSyncHistoryFragment
+  }
+  currentUser {
+    id
+    firstname
+    lastname
+  }
+  userPreferences {
+    selectedSports
+  }
+}
+
+query PeriodStatistics($period: StatisticsPeriod!) {
+  periodStatistics(period: $period) {
+    ...PeriodStatisticsFragment
+  }
+}
+
+query ActivityCalendar($year: Int!, $month: Int) {
+  activityCalendar(year: $year, month: $month) {
+    ...ActivityCalendarDayFragment
+  }
+}
+
+query SportDistribution {
+  sportDistribution {
+    ...SportDistributionFragment
+  }
+}
+
+query DashboardGoals {
+  dashboardGoals {
+    ...DashboardGoalFragment
+  }
+}
