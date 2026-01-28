@@ -1,4 +1,4 @@
-import { Footprints, Bike, Waves, type LucideIcon } from 'lucide-react';
+import { Footprints, Bike, Waves, Activity, type LucideIcon } from 'lucide-react';
 import { SportType } from '@/gql/graphql';
 
 export interface SportConfig {
@@ -43,4 +43,9 @@ export function getFilteredSportConfigs(selectedSports: SportType[]): SportConfi
   return selectedSports
     .map(sport => SPORT_CONFIGS[sport])
     .filter((config): config is SportConfig => config !== undefined);
+}
+
+export function getSportIcon(sportType: SportType | null | undefined): LucideIcon {
+  if (!sportType) return Activity;
+  return SPORT_CONFIGS[sportType]?.icon ?? Activity;
 }
