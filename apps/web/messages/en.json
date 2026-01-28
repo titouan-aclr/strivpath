@@ -696,6 +696,38 @@
         "month": "Month",
         "year": "Year"
       }
+    },
+    "goals": {
+      "title": "Goals",
+      "viewAll": "View all",
+      "daysLeft": "{count} days left",
+      "expired": "Expired",
+      "today": "Ends today",
+      "ahead": "Ahead",
+      "behind": "Behind",
+      "onTrack": "On track",
+      "oneMore": "One more to go!",
+      "remaining": "{count} remaining",
+      "completed": "Completed!",
+      "progressComplete": "{percentage}% complete",
+      "daysRemaining": {
+        "expired": "Expired",
+        "today": "Ends today",
+        "tomorrow": "1 day left",
+        "days": "{count} days left"
+      },
+      "chart": {
+        "progress": "Progress",
+        "target": "Target"
+      },
+      "empty": {
+        "title": "Set your first goal",
+        "description": "Track your progress and stay motivated",
+        "cta": "Create a goal"
+      },
+      "suggestions": {
+        "title": "Quick suggestions"
+      }
     }
   }
 }
