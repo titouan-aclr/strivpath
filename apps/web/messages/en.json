@@ -728,6 +728,19 @@
       "suggestions": {
         "title": "Quick suggestions"
       }
+    },
+    "heatmap": {
+      "title": "Activity Calendar",
+      "totalActivities": "{count} activities",
+      "thisYear": "this year",
+      "legend": {
+        "noActivity": "No activity",
+        "withActivity": "With activity"
+      }
+    },
+    "sportDistribution": {
+      "title": "Sport Distribution",
+      "thisMonth": "this month"
     }
   }
 }

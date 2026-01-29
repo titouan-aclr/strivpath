@@ -1,5 +1,12 @@
-import { Footprints, Bike, Waves, Activity, type LucideIcon } from 'lucide-react';
 import { SportType } from '@/gql/graphql';
+import { Activity, Bike, Footprints, Waves, type LucideIcon } from 'lucide-react';
+
+export interface SportColorConfig {
+  bg: string;
+  bgMuted: string;
+  text: string;
+  border: string;
+}
 
 export interface SportConfig {
   type: SportType;
@@ -7,6 +14,7 @@ export interface SportConfig {
   href: string;
   labelKey: string;
   goalLabelKey: string;
+  colors: SportColorConfig;
 }
 
 export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
@@ -16,6 +24,12 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
     href: '/sports/running',
     labelKey: 'navigation.sports.running',
     goalLabelKey: 'sportTypes.run',
+    colors: {
+      bg: 'bg-lime-300',
+      bgMuted: 'bg-lime-300/10',
+      text: 'text-lime-500',
+      border: 'border-lime-300',
+    },
   },
   [SportType.Ride]: {
     type: SportType.Ride,
@@ -23,6 +37,12 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
     href: '/sports/cycling',
     labelKey: 'navigation.sports.cycling',
     goalLabelKey: 'sportTypes.ride',
+    colors: {
+      bg: 'bg-purple-400',
+      bgMuted: 'bg-purple-400/10',
+      text: 'text-purple-500',
+      border: 'border-purple-400',
+    },
   },
   [SportType.Swim]: {
     type: SportType.Swim,
@@ -30,6 +50,12 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
     href: '/sports/swimming',
     labelKey: 'navigation.sports.swimming',
     goalLabelKey: 'sportTypes.swim',
+    colors: {
+      bg: 'bg-cyan-300',
+      bgMuted: 'bg-cyan-300/10',
+      text: 'text-cyan-500',
+      border: 'border-cyan-300',
+    },
   },
 };
 
@@ -48,4 +74,15 @@ export function getFilteredSportConfigs(selectedSports: SportType[]): SportConfi
 export function getSportIcon(sportType: SportType | null | undefined): LucideIcon {
   if (!sportType) return Activity;
   return SPORT_CONFIGS[sportType]?.icon ?? Activity;
+}
+
+export function getSportColors(sportType: SportType | null | undefined): SportColorConfig {
+  const defaultColors: SportColorConfig = {
+    bg: 'bg-gray-300',
+    bgMuted: 'bg-gray-300/10',
+    text: 'text-gray-500',
+    border: 'border-gray-300',
+  };
+  if (!sportType) return defaultColors;
+  return SPORT_CONFIGS[sportType]?.colors ?? defaultColors;
 }
