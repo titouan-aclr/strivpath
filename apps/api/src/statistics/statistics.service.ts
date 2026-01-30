@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { getSportTypeFromStravaType } from '../common/utils/sport-type.utils';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 import { PeriodStatistics } from './models/period-statistics.model';
@@ -172,8 +171,8 @@ export class StatisticsService {
     const sportTimeMap = new Map<SportType, number>();
 
     for (const activity of activitiesByType) {
-      const sportType = getSportTypeFromStravaType(activity.type);
-      if (sportType === null) continue;
+      const sportType = activity.type as SportType;
+      if (!Object.values(SportType).includes(sportType)) continue;
 
       const currentTime = sportTimeMap.get(sportType) ?? 0;
       const activityTime = activity._sum.movingTime ?? 0;

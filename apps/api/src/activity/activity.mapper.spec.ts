@@ -9,7 +9,7 @@ describe('ActivityMapper', () => {
         stravaId: BigInt('1234567890'),
         userId: 10,
         name: 'Evening Ride',
-        type: 'Ride',
+        type: 'RIDE',
         distance: 15000,
         movingTime: 3600,
         elapsedTime: 3700,
@@ -29,7 +29,7 @@ describe('ActivityMapper', () => {
       expect(result.stravaId).toBe(BigInt('1234567890'));
       expect(result.userId).toBe(10);
       expect(result.name).toBe('Evening Ride');
-      expect(result.type).toBe('Ride');
+      expect(result.type).toBe('RIDE');
       expect(result.distance).toBe(15000);
       expect(result.movingTime).toBe(3600);
       expect(result.elapsedTime).toBe(3700);
@@ -124,7 +124,7 @@ describe('ActivityMapper', () => {
         stravaId: BigInt('123'),
         userId: 1,
         name: 'Quick Run',
-        type: 'Run',
+        type: 'RUN',
         distance: 5000,
         movingTime: 1800,
         elapsedTime: 1800,
@@ -145,7 +145,7 @@ describe('ActivityMapper', () => {
         stravaId: BigInt('123'),
         userId: 1,
         name: 'Quick Run',
-        type: 'Run',
+        type: 'RUN',
         distance: 5000,
         movingTime: 1800,
         elapsedTime: 1800,
@@ -166,7 +166,7 @@ describe('ActivityMapper', () => {
         stravaId: BigInt('8888888888'),
         userId: 42,
         name: 'Full Data Activity',
-        type: 'Ride',
+        type: 'RIDE',
         distance: 50000,
         movingTime: 7200,
         elapsedTime: 7500,
@@ -204,7 +204,7 @@ describe('ActivityMapper', () => {
         stravaId: BigInt('8888888888'),
         userId: 42,
         name: 'Full Data Activity',
-        type: 'Ride',
+        type: 'RIDE',
         distance: 50000,
         movingTime: 7200,
         elapsedTime: 7500,
@@ -288,14 +288,14 @@ describe('ActivityMapper', () => {
       expect(result.averageCadence).toBe(0);
     });
 
-    it('should handle different activity types correctly', () => {
-      const runActivity = createMockPrismaActivity({ type: 'Run' });
-      const rideActivity = createMockPrismaActivity({ type: 'Ride' });
-      const swimActivity = createMockPrismaActivity({ type: 'Swim' });
+    it('should pass through normalized activity types', () => {
+      const runActivity = createMockPrismaActivity({ type: 'RUN' });
+      const rideActivity = createMockPrismaActivity({ type: 'RIDE' });
+      const swimActivity = createMockPrismaActivity({ type: 'SWIM' });
 
-      expect(ActivityMapper.toGraphQL(runActivity).type).toBe('Run');
-      expect(ActivityMapper.toGraphQL(rideActivity).type).toBe('Ride');
-      expect(ActivityMapper.toGraphQL(swimActivity).type).toBe('Swim');
+      expect(ActivityMapper.toGraphQL(runActivity).type).toBe('RUN');
+      expect(ActivityMapper.toGraphQL(rideActivity).type).toBe('RIDE');
+      expect(ActivityMapper.toGraphQL(swimActivity).type).toBe('SWIM');
     });
 
     it('should map new altitude and power fields correctly', () => {

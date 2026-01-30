@@ -741,6 +741,16 @@
     "sportDistribution": {
       "title": "Sport Distribution",
       "thisMonth": "this month"
+    },
+    "recentActivities": {
+      "title": "Recent Activities",
+      "viewAll": "View all",
+      "empty": "No recent activities"
+    },
+    "newUser": {
+      "title": "Import your Strava activities",
+      "description": "Sync your data to start tracking your performance and set your goals.",
+      "cta": "Sync now"
     }
   }
 }

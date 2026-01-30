@@ -17,20 +17,18 @@ import {
   formatTime,
 } from '@/lib/activities/formatters';
 
-interface ActivityCardProps {
+export interface ActivityCardProps {
   activity: ActivityCardFragment;
   onClick?: () => void;
+  variant?: 'full' | 'compact';
 }
 
-export function ActivityCard({ activity, onClick }: ActivityCardProps) {
+export function ActivityCard({ activity, onClick, variant = 'full' }: ActivityCardProps) {
   const t = useTranslations('activities.card');
 
-  const sportConfig = SPORT_TYPE_CONFIG[activity.type as keyof typeof SPORT_TYPE_CONFIG] || {
-    icon: Activity,
-    color: 'text-gray-500',
-    label: 'activities.sportTypes.other',
-  };
-  const Icon = sportConfig.icon;
+  const sportType = activity.type as SportType;
+  const sportConfig = SPORT_TYPE_CONFIG[sportType];
+  const Icon = sportConfig?.icon ?? Activity;
 
   const handleKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
     if (onClick && (e.key === 'Enter' || e.key === ' ')) {
@@ -94,7 +92,7 @@ export function ActivityCard({ activity, onClick }: ActivityCardProps) {
           </div>
         </div>
 
-        {(activity.kudosCount > 0 || activity.maxHeartrate) && (
+        {variant === 'full' && (activity.kudosCount > 0 || activity.maxHeartrate) && (
           <div className="flex gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
             {activity.kudosCount > 0 && (
               <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>

@@ -2,7 +2,7 @@ query DashboardData(
   $period: StatisticsPeriod!
   $year: Int!
   $month: Int
-  $activitiesLimit: Int = 5
+  $activitiesLimit: Int = 3
 ) {
   periodStatistics(period: $period) {
     ...PeriodStatisticsFragment
