@@ -121,7 +121,7 @@ describe('ActivityService', () => {
         processedActivities: 0,
         startedAt: new Date(),
       };
-      const mockExistingActivities = [{ type: 'Run' }];
+      const mockExistingActivities = [{ type: 'RUN' }];
       const mockRecentActivities = [
         {
           id: 456,
@@ -177,7 +177,7 @@ describe('ActivityService', () => {
         processedActivities: 0,
         startedAt: new Date(),
       };
-      const mockExistingActivities = [{ type: 'Run' }];
+      const mockExistingActivities = [{ type: 'RUN' }];
       const mockHistoricalRides = [
         {
           id: 789,
@@ -249,7 +249,7 @@ describe('ActivityService', () => {
         processedActivities: 0,
         startedAt: new Date(),
       };
-      const mockExistingActivities = [{ type: 'Run' }];
+      const mockExistingActivities = [{ type: 'RUN' }];
       const mockRecentActivities = [
         {
           id: 456,
@@ -296,7 +296,7 @@ describe('ActivityService', () => {
       expect(prismaService.activity.upsert).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { stravaId: BigInt(456) },
-          create: expect.objectContaining({ type: 'Run' }),
+          create: expect.objectContaining({ type: 'RUN' }),
         }),
       );
     });
@@ -834,7 +834,7 @@ describe('ActivityService', () => {
         userId,
         startDate: new Date('2024-01-01'),
       };
-      const existingActivities = [{ type: 'Run' }, { type: 'TrailRun' }];
+      const existingActivities = [{ type: 'RUN' }];
 
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockSyncHistoryService.create.mockResolvedValue(mockSync);
@@ -928,7 +928,7 @@ describe('ActivityService', () => {
         stage: SyncStage.FETCHING,
         startedAt: new Date(),
       };
-      const existingActivities = [{ type: 'Run' }];
+      const existingActivities = [{ type: 'RUN' }];
 
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockSyncHistoryService.create.mockResolvedValue(mockSync);
@@ -1090,7 +1090,7 @@ describe('ActivityService', () => {
         type: 'Run',
         startDate: new Date('2024-01-01'),
       };
-      const existingRunActivities = [{ type: 'Run' }];
+      const existingRunActivities = [{ type: 'RUN' }];
 
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockSyncHistoryService.create.mockResolvedValue(mockSync);
@@ -1151,7 +1151,7 @@ describe('ActivityService', () => {
         type: 'Run',
         startDate: new Date('2024-01-01'),
       };
-      const existingRunActivities = [{ type: 'Run' }];
+      const existingRunActivities = [{ type: 'RUN' }];
 
       mockPrismaService.userPreferences.findUnique.mockResolvedValue(mockPreferences);
       mockSyncHistoryService.create.mockResolvedValue(mockSync);

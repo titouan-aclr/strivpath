@@ -518,8 +518,8 @@ describe('StatisticsService', () => {
     describe('data aggregation', () => {
       it('should return distribution for multiple sports', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 3600 } },
-          { type: 'Ride', _sum: { movingTime: 7200 } },
+          { type: 'RUN', _sum: { movingTime: 3600 } },
+          { type: 'RIDE', _sum: { movingTime: 7200 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
@@ -533,8 +533,8 @@ describe('StatisticsService', () => {
 
       it('should calculate percentages correctly', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 2500 } },
-          { type: 'Ride', _sum: { movingTime: 7500 } },
+          { type: 'RUN', _sum: { movingTime: 2500 } },
+          { type: 'RIDE', _sum: { movingTime: 7500 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
@@ -552,7 +552,7 @@ describe('StatisticsService', () => {
       });
 
       it('should handle single sport correctly', async () => {
-        prisma.activity.groupBy.mockResolvedValue([{ type: 'Swim', _sum: { movingTime: 1800 } }]);
+        prisma.activity.groupBy.mockResolvedValue([{ type: 'SWIM', _sum: { movingTime: 1800 } }]);
 
         const result = await service.getSportDistribution(userId);
 
@@ -564,9 +564,9 @@ describe('StatisticsService', () => {
 
       it('should sort results by totalTime descending', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Swim', _sum: { movingTime: 500 } },
-          { type: 'Run', _sum: { movingTime: 3000 } },
-          { type: 'Ride', _sum: { movingTime: 1500 } },
+          { type: 'SWIM', _sum: { movingTime: 500 } },
+          { type: 'RUN', _sum: { movingTime: 3000 } },
+          { type: 'RIDE', _sum: { movingTime: 1500 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
@@ -575,61 +575,12 @@ describe('StatisticsService', () => {
         expect(result[1].sport).toBe('RIDE');
         expect(result[2].sport).toBe('SWIM');
       });
-    });
 
-    describe('Strava type mapping', () => {
-      it('should aggregate TrailRun with Run', async () => {
+      it('should handle all three sport types', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 1000 } },
-          { type: 'TrailRun', _sum: { movingTime: 2000 } },
-        ]);
-
-        const result = await service.getSportDistribution(userId);
-
-        expect(result).toHaveLength(1);
-        expect(result[0].sport).toBe('RUN');
-        expect(result[0].totalTime).toBe(3000);
-      });
-
-      it('should aggregate VirtualRide with Ride', async () => {
-        prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Ride', _sum: { movingTime: 5000 } },
-          { type: 'VirtualRide', _sum: { movingTime: 3000 } },
-          { type: 'MountainBikeRide', _sum: { movingTime: 2000 } },
-        ]);
-
-        const result = await service.getSportDistribution(userId);
-
-        expect(result).toHaveLength(1);
-        expect(result[0].sport).toBe('RIDE');
-        expect(result[0].totalTime).toBe(10000);
-      });
-
-      it('should ignore unknown activity types', async () => {
-        prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 1000 } },
-          { type: 'Yoga', _sum: { movingTime: 500 } },
-          { type: 'WeightTraining', _sum: { movingTime: 300 } },
-        ]);
-
-        const result = await service.getSportDistribution(userId);
-
-        expect(result).toHaveLength(1);
-        expect(result[0].sport).toBe('RUN');
-        expect(result[0].totalTime).toBe(1000);
-        expect(result[0].percentage).toBe(100);
-      });
-
-      it('should handle all supported Strava types', async () => {
-        prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 100 } },
-          { type: 'TrailRun', _sum: { movingTime: 100 } },
-          { type: 'VirtualRun', _sum: { movingTime: 100 } },
-          { type: 'Ride', _sum: { movingTime: 100 } },
-          { type: 'VirtualRide', _sum: { movingTime: 100 } },
-          { type: 'MountainBikeRide', _sum: { movingTime: 100 } },
-          { type: 'EBikeRide', _sum: { movingTime: 100 } },
-          { type: 'Swim', _sum: { movingTime: 100 } },
+          { type: 'RUN', _sum: { movingTime: 300 } },
+          { type: 'RIDE', _sum: { movingTime: 400 } },
+          { type: 'SWIM', _sum: { movingTime: 100 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
@@ -647,10 +598,24 @@ describe('StatisticsService', () => {
     });
 
     describe('edge cases', () => {
+      it('should ignore unknown activity types', async () => {
+        prisma.activity.groupBy.mockResolvedValue([
+          { type: 'RUN', _sum: { movingTime: 1000 } },
+          { type: 'UNKNOWN', _sum: { movingTime: 500 } },
+        ]);
+
+        const result = await service.getSportDistribution(userId);
+
+        expect(result).toHaveLength(1);
+        expect(result[0].sport).toBe('RUN');
+        expect(result[0].totalTime).toBe(1000);
+        expect(result[0].percentage).toBe(100);
+      });
+
       it('should handle null movingTime values', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: null } },
-          { type: 'Ride', _sum: { movingTime: 1000 } },
+          { type: 'RUN', _sum: { movingTime: null } },
+          { type: 'RIDE', _sum: { movingTime: 1000 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
@@ -662,8 +627,8 @@ describe('StatisticsService', () => {
 
       it('should handle percentage rounding correctly', async () => {
         prisma.activity.groupBy.mockResolvedValue([
-          { type: 'Run', _sum: { movingTime: 1 } },
-          { type: 'Ride', _sum: { movingTime: 2 } },
+          { type: 'RUN', _sum: { movingTime: 1 } },
+          { type: 'RIDE', _sum: { movingTime: 2 } },
         ]);
 
         const result = await service.getSportDistribution(userId);
