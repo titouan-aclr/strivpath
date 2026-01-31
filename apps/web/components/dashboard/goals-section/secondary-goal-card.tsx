@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { DashboardGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, getGoalStatusColors } from '@/components/goals/constants';
+import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
 import { getSportIcon } from '@/lib/sports/config';
 import { ProgressStatusBadge } from './progress-status-badge';
 
@@ -23,6 +23,9 @@ export function SecondaryGoalCard({ goal, className }: SecondaryGoalCardProps) {
   const displayPercentage = Math.min(goal.progressPercentage, 100);
   const unit = UNIT_LABELS[goal.targetType];
   const statusColors = getGoalStatusColors(goal.status);
+
+  const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
+  const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);
 
   const daysRemainingText =
     goal.isExpired || goal.daysRemaining === null
@@ -50,7 +53,7 @@ export function SecondaryGoalCard({ goal, className }: SecondaryGoalCardProps) {
           <div className="space-y-2">
             <div className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">
-                {formatValue(goal.currentValue, unit)} / {formatValue(goal.targetValue, unit)} {unit}
+                {formatValue(displayCurrentValue, unit)} / {formatValue(displayTargetValue, unit)} {unit}
               </span>
               <span className={cn('font-semibold', statusColors.text)}>{goal.progressPercentage.toFixed(0)}%</span>
             </div>

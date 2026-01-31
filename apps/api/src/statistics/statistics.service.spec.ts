@@ -358,12 +358,12 @@ describe('StatisticsService', () => {
         });
 
         const callArg = prisma.activity.findMany.mock.calls[0][0];
-        expect(callArg.where.startDate.gte.getFullYear()).toBe(2024);
-        expect(callArg.where.startDate.gte.getMonth()).toBe(0);
-        expect(callArg.where.startDate.gte.getDate()).toBe(1);
-        expect(callArg.where.startDate.lte.getFullYear()).toBe(2024);
-        expect(callArg.where.startDate.lte.getMonth()).toBe(11);
-        expect(callArg.where.startDate.lte.getDate()).toBe(31);
+        expect(callArg.where.startDate.gte.getUTCFullYear()).toBe(2024);
+        expect(callArg.where.startDate.gte.getUTCMonth()).toBe(0);
+        expect(callArg.where.startDate.gte.getUTCDate()).toBe(1);
+        expect(callArg.where.startDate.lte.getUTCFullYear()).toBe(2024);
+        expect(callArg.where.startDate.lte.getUTCMonth()).toBe(11);
+        expect(callArg.where.startDate.lte.getUTCDate()).toBe(31);
       });
     });
 
@@ -426,10 +426,10 @@ describe('StatisticsService', () => {
         await service.getActivityCalendar(userId, 2024, 3);
 
         const callArg = prisma.activity.findMany.mock.calls[0][0];
-        expect(callArg.where.startDate.gte.getMonth()).toBe(2);
-        expect(callArg.where.startDate.gte.getDate()).toBe(1);
-        expect(callArg.where.startDate.lte.getMonth()).toBe(2);
-        expect(callArg.where.startDate.lte.getDate()).toBe(31);
+        expect(callArg.where.startDate.gte.getUTCMonth()).toBe(2);
+        expect(callArg.where.startDate.gte.getUTCDate()).toBe(1);
+        expect(callArg.where.startDate.lte.getUTCMonth()).toBe(2);
+        expect(callArg.where.startDate.lte.getUTCDate()).toBe(31);
       });
 
       it('should query with correct boundaries for December', async () => {
@@ -438,8 +438,8 @@ describe('StatisticsService', () => {
         await service.getActivityCalendar(userId, 2024, 12);
 
         const callArg = prisma.activity.findMany.mock.calls[0][0];
-        expect(callArg.where.startDate.gte.getMonth()).toBe(11);
-        expect(callArg.where.startDate.lte.getMonth()).toBe(11);
+        expect(callArg.where.startDate.gte.getUTCMonth()).toBe(11);
+        expect(callArg.where.startDate.lte.getUTCMonth()).toBe(11);
       });
     });
 
@@ -488,26 +488,26 @@ describe('StatisticsService', () => {
         }
       });
 
-      it('should set correct time boundaries for query (start at 00:00:00)', async () => {
+      it('should set correct time boundaries for query (start at 00:00:00 UTC)', async () => {
         prisma.activity.findMany.mockResolvedValue([]);
 
         await service.getActivityCalendar(userId, 2024, 1);
 
         const callArg = prisma.activity.findMany.mock.calls[0][0];
-        expect(callArg.where.startDate.gte.getHours()).toBe(0);
-        expect(callArg.where.startDate.gte.getMinutes()).toBe(0);
-        expect(callArg.where.startDate.gte.getSeconds()).toBe(0);
+        expect(callArg.where.startDate.gte.getUTCHours()).toBe(0);
+        expect(callArg.where.startDate.gte.getUTCMinutes()).toBe(0);
+        expect(callArg.where.startDate.gte.getUTCSeconds()).toBe(0);
       });
 
-      it('should set correct time boundaries for query (end at 23:59:59)', async () => {
+      it('should set correct time boundaries for query (end at 23:59:59 UTC)', async () => {
         prisma.activity.findMany.mockResolvedValue([]);
 
         await service.getActivityCalendar(userId, 2024, 1);
 
         const callArg = prisma.activity.findMany.mock.calls[0][0];
-        expect(callArg.where.startDate.lte.getHours()).toBe(23);
-        expect(callArg.where.startDate.lte.getMinutes()).toBe(59);
-        expect(callArg.where.startDate.lte.getSeconds()).toBe(59);
+        expect(callArg.where.startDate.lte.getUTCHours()).toBe(23);
+        expect(callArg.where.startDate.lte.getUTCMinutes()).toBe(59);
+        expect(callArg.where.startDate.lte.getUTCSeconds()).toBe(59);
       });
     });
   });

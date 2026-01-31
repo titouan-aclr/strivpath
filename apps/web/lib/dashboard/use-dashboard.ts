@@ -58,7 +58,7 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     period = StatisticsPeriod.Week,
     year = getCurrentYear(),
     month = getCurrentMonth(),
-    activitiesLimit = 5,
+    activitiesLimit = 3,
     skip = false,
   } = options;
 

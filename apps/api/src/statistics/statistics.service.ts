@@ -76,7 +76,7 @@ export class StatisticsService {
     return { startDate, endDate };
   }
 
-  async getActivityCalendar(userId: number, year: number, month?: number): Promise<ActivityCalendarDay[]> {
+  async getActivityCalendar(userId: number, year: number, month?: number | null): Promise<ActivityCalendarDay[]> {
     const { startDate, endDate } = this.calculateCalendarDates(year, month);
 
     const activities = await this.prisma.activity.findMany({
@@ -92,32 +92,24 @@ export class StatisticsService {
     return this.buildCalendarDays(startDate, endDate, daysWithActivity);
   }
 
-  private calculateCalendarDates(year: number, month?: number): { startDate: Date; endDate: Date } {
+  private calculateCalendarDates(year: number, month?: number | null): { startDate: Date; endDate: Date } {
     let startDate: Date;
     let endDate: Date;
 
-    if (month !== undefined) {
-      startDate = new Date(year, month - 1, 1);
-      startDate.setHours(0, 0, 0, 0);
-
-      endDate = new Date(year, month, 0);
-      endDate.setHours(23, 59, 59, 999);
+    if (month != null) {
+      startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+      const lastDayOfMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+      endDate = new Date(Date.UTC(year, month - 1, lastDayOfMonth, 23, 59, 59, 999));
     } else {
-      startDate = new Date(year, 0, 1);
-      startDate.setHours(0, 0, 0, 0);
-
-      endDate = new Date(year, 11, 31);
-      endDate.setHours(23, 59, 59, 999);
+      startDate = new Date(Date.UTC(year, 0, 1, 0, 0, 0, 0));
+      endDate = new Date(Date.UTC(year, 11, 31, 23, 59, 59, 999));
     }
 
     return { startDate, endDate };
   }
 
   private formatDateKey(date: Date): string {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return date.toISOString().split('T')[0];
   }
 
   private buildCalendarDays(startDate: Date, endDate: Date, daysWithActivity: Set<string>): ActivityCalendarDay[] {
@@ -130,7 +122,7 @@ export class StatisticsService {
         date: new Date(currentDate),
         hasActivity: daysWithActivity.has(dateKey),
       });
-      currentDate.setDate(currentDate.getDate() + 1);
+      currentDate.setUTCDate(currentDate.getUTCDate() + 1);
     }
 
     return calendarDays;

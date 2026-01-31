@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { GoalTargetType } from '@/gql/graphql';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { DashboardGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, getGoalStatusColors } from '@/components/goals/constants';
+import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
 import { getSportIcon } from '@/lib/sports/config';
 import { GoalProgressChart } from './goal-progress-chart';
 import { SessionDotsProgress } from './session-dots-progress';
@@ -27,6 +27,9 @@ export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
   const unit = UNIT_LABELS[goal.targetType];
   const hasProgressHistory = goal.progressHistory && goal.progressHistory.length > 0;
   const statusColors = getGoalStatusColors(goal.status);
+
+  const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
+  const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);
 
   const daysRemainingText =
     goal.isExpired || goal.daysRemaining === null
@@ -59,9 +62,9 @@ export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
           <div className="flex items-center justify-between">
             <div className="space-y-1">
               <p className="text-2xl font-bold">
-                {formatValue(goal.currentValue, unit)}{' '}
+                {formatValue(displayCurrentValue, unit)}{' '}
                 <span className="text-base font-normal text-muted-foreground">
-                  / {formatValue(goal.targetValue, unit)} {unit}
+                  / {formatValue(displayTargetValue, unit)} {unit}
                 </span>
               </p>
               <p className={cn('text-sm font-medium', statusColors.text)}>
@@ -79,7 +82,7 @@ export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
           ) : hasProgressHistory ? (
             <GoalProgressChart
               progressHistory={goal.progressHistory}
-              targetValue={goal.targetValue}
+              targetValue={displayTargetValue}
               startDate={goal.startDate}
               endDate={goal.endDate}
               unit={unit}
