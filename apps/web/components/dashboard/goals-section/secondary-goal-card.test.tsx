@@ -27,8 +27,8 @@ const createMockGoal = (overrides: Partial<DashboardGoal> = {}): DashboardGoal =
   id: '1',
   title: 'Run 50km this month',
   targetType: GoalTargetType.Distance,
-  targetValue: 50,
-  currentValue: 25,
+  targetValue: 50000,
+  currentValue: 25000,
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-01-31'),
   sportType: SportType.Run,
@@ -110,12 +110,14 @@ describe('SecondaryGoalCard', () => {
   });
 
   it('should have progress bar with correct ARIA attributes', () => {
-    const { container } = render(<SecondaryGoalCard goal={createMockGoal({ currentValue: 25, targetValue: 50 })} />);
+    const { container } = render(
+      <SecondaryGoalCard goal={createMockGoal({ currentValue: 25000, targetValue: 50000 })} />,
+    );
 
     const progressBar = container.querySelector('[role="progressbar"]');
-    expect(progressBar).toHaveAttribute('aria-valuenow', '25');
+    expect(progressBar).toHaveAttribute('aria-valuenow', '25000');
     expect(progressBar).toHaveAttribute('aria-valuemin', '0');
-    expect(progressBar).toHaveAttribute('aria-valuemax', '50');
+    expect(progressBar).toHaveAttribute('aria-valuemax', '50000');
   });
 
   it('should apply custom className', () => {
@@ -143,8 +145,8 @@ describe('SecondaryGoalCard', () => {
       <SecondaryGoalCard
         goal={createMockGoal({
           targetType: GoalTargetType.Distance,
-          currentValue: 25.5,
-          targetValue: 50.0,
+          currentValue: 25500,
+          targetValue: 50000,
         })}
       />,
     );

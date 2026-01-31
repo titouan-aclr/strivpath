@@ -12,8 +12,26 @@ export function getUnitLabel(targetType: GoalTargetType): string {
   return units[targetType];
 }
 
+/**
+ * Converts goal values from storage units (meters, seconds) to display units (km, hours).
+ * - Distance: meters → km (÷ 1000)
+ * - Duration: seconds → hours (÷ 3600)
+ * - Elevation: meters → meters (no conversion)
+ * - Frequency: count → count (no conversion)
+ */
+export function normalizeGoalValue(value: number, targetType: GoalTargetType): number {
+  switch (targetType) {
+    case GoalTargetType.Distance:
+      return value / 1000;
+    case GoalTargetType.Duration:
+      return value / 3600;
+    default:
+      return value;
+  }
+}
+
 export function formatCurrentValue(goal: Goal): string {
-  const value = goal.currentValue;
+  const value = normalizeGoalValue(goal.currentValue, goal.targetType);
   const unit = getUnitLabel(goal.targetType);
 
   if (goal.targetType === GoalTargetType.Frequency) {
@@ -23,7 +41,7 @@ export function formatCurrentValue(goal: Goal): string {
 }
 
 export function formatTargetValue(goal: Goal): string {
-  const value = goal.targetValue;
+  const value = normalizeGoalValue(goal.targetValue, goal.targetType);
   const unit = getUnitLabel(goal.targetType);
 
   if (goal.targetType === GoalTargetType.Frequency) {
@@ -95,10 +113,11 @@ export function getProgressColorForChart(status: GoalStatus): string {
 }
 
 export function formatValueOnly(value: number, targetType: GoalTargetType): string {
+  const normalized = normalizeGoalValue(value, targetType);
   if (targetType === GoalTargetType.Frequency || targetType === GoalTargetType.Elevation) {
-    return Math.floor(value).toString();
+    return Math.floor(normalized).toString();
   }
-  return value.toFixed(1);
+  return normalized.toFixed(1);
 }
 
 export function formatDate(date: Date | string, locale: string): string {
