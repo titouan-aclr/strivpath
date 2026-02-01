@@ -10,6 +10,7 @@ import { useSync } from '@/lib/sync/context';
 import {
   DashboardHeader,
   DashboardSkeleton,
+  DashboardError,
   StatsSection,
   GoalsSection,
   ActivityHeatmap,
@@ -34,6 +35,7 @@ export function DashboardContent() {
     latestSyncHistory,
     currentUser,
     loading,
+    error,
     hasActivities,
     hasMultipleSports,
     refetch,
@@ -55,6 +57,14 @@ export function DashboardContent() {
   const handleSyncClick = useCallback(() => {
     triggerSync('manual');
   }, [triggerSync]);
+
+  const handleRetry = useCallback(() => {
+    void refetch();
+  }, [refetch]);
+
+  if (error && !periodStatistics) {
+    return <DashboardError onRetry={handleRetry} />;
+  }
 
   if (loading && !periodStatistics) {
     return <DashboardSkeleton />;

@@ -26,3 +26,6 @@ export { EmptyState } from './empty-state';
 export type { EmptyStateProps } from './empty-state';
 
 export { DashboardSkeleton } from './dashboard-skeleton';
+
+export { DashboardError } from './dashboard-error';
+export type { DashboardErrorProps } from './dashboard-error';

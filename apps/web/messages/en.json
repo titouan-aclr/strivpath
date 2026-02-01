@@ -751,6 +751,13 @@
       "title": "Import your Strava activities",
       "description": "Sync your data to start tracking your performance and set your goals.",
       "cta": "Sync now"
+    },
+    "error": {
+      "title": "Failed to load dashboard",
+      "description": "An error occurred while loading your dashboard. Please try again.",
+      "networkDescription": "Unable to connect to the server. Please check your connection and try again.",
+      "retry": "Retry",
+      "home": "Home"
     }
   }
 }
