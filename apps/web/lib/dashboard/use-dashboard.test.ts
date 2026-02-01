@@ -22,7 +22,8 @@ vi.mock('@/gql/graphql', async () => {
     ...actual,
     DashboardDataDocument: { kind: 'Document' },
     PeriodStatisticsFragmentFragmentDoc: { kind: 'Document' },
-    DashboardGoalFragmentFragmentDoc: { kind: 'Document' },
+    PrimaryGoalFragmentFragmentDoc: { kind: 'Document' },
+    SecondaryGoalFragmentFragmentDoc: { kind: 'Document' },
     ActivityCalendarDayFragmentFragmentDoc: { kind: 'Document' },
     SportDistributionFragmentFragmentDoc: { kind: 'Document' },
     ActivityCardFragmentDoc: { kind: 'Document' },
@@ -38,7 +39,7 @@ const mockPeriodStatistics = {
   periodEnd: new Date('2025-01-07T23:59:59.999Z'),
 };
 
-const mockGoal = {
+const mockPrimaryGoal = {
   id: '1',
   title: 'Run 50km this month',
   targetType: GoalTargetType.Distance,
@@ -55,6 +56,21 @@ const mockGoal = {
     { date: new Date('2025-01-05T00:00:00.000Z'), value: 10 },
     { date: new Date('2025-01-10T00:00:00.000Z'), value: 25 },
   ],
+};
+
+const mockSecondaryGoal = {
+  id: '2',
+  title: 'Cycle 100km this month',
+  targetType: GoalTargetType.Distance,
+  targetValue: 100,
+  currentValue: 30,
+  startDate: new Date('2025-01-01T00:00:00.000Z'),
+  endDate: new Date('2025-01-31T23:59:59.999Z'),
+  sportType: SportType.Ride,
+  status: GoalStatus.Active,
+  progressPercentage: 30,
+  daysRemaining: 15,
+  isExpired: false,
 };
 
 const mockCalendarDay = {
@@ -102,7 +118,8 @@ const mockUserPreferences = {
 
 const createMockData = (overrides = {}) => ({
   periodStatistics: mockPeriodStatistics,
-  dashboardGoals: [mockGoal],
+  primaryDashboardGoal: mockPrimaryGoal,
+  secondaryDashboardGoals: [mockSecondaryGoal],
   activityCalendar: [mockCalendarDay],
   sportDistribution: [mockSportDistribution],
   activities: [mockActivity],
@@ -183,7 +200,7 @@ describe('useDashboard', () => {
       });
     });
 
-    it('should return dashboard goals correctly', () => {
+    it('should return primary goal correctly', () => {
       mockUseQuery.mockReturnValue({
         data: createMockData(),
         loading: false,
@@ -193,9 +210,23 @@ describe('useDashboard', () => {
 
       const { result } = renderHook(() => useDashboard());
 
-      expect(result.current.dashboardGoals).toHaveLength(1);
-      expect(result.current.dashboardGoals[0].title).toBe('Run 50km this month');
-      expect(result.current.dashboardGoals[0].progressHistory).toHaveLength(2);
+      expect(result.current.primaryGoal).not.toBeNull();
+      expect(result.current.primaryGoal?.title).toBe('Run 50km this month');
+      expect(result.current.primaryGoal?.progressHistory).toHaveLength(2);
+    });
+
+    it('should return secondary goals correctly', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData(),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.secondaryGoals).toHaveLength(1);
+      expect(result.current.secondaryGoals[0].title).toBe('Cycle 100km this month');
     });
 
     it('should return activity calendar correctly', () => {
@@ -311,7 +342,7 @@ describe('useDashboard', () => {
       expect(result.current.hasActivities).toBe(false);
     });
 
-    it('should return hasGoals true when goals exist', () => {
+    it('should return hasGoals true when primary goal exists', () => {
       mockUseQuery.mockReturnValue({
         data: createMockData(),
         loading: false,
@@ -324,9 +355,22 @@ describe('useDashboard', () => {
       expect(result.current.hasGoals).toBe(true);
     });
 
+    it('should return hasGoals true when only secondary goals exist', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({ primaryDashboardGoal: null }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.hasGoals).toBe(true);
+    });
+
     it('should return hasGoals false when no goals', () => {
       mockUseQuery.mockReturnValue({
-        data: createMockData({ dashboardGoals: [] }),
+        data: createMockData({ primaryDashboardGoal: null, secondaryDashboardGoals: [] }),
         loading: false,
         error: null,
         refetch: vi.fn(),
@@ -525,6 +569,19 @@ describe('useDashboard', () => {
       expect(result.current.hasMultipleSports).toBe(false);
     });
 
+    it('should handle null primaryDashboardGoal', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({ primaryDashboardGoal: null }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.primaryGoal).toBeNull();
+    });
+
     it('should return empty arrays when data is null', () => {
       mockUseQuery.mockReturnValue({
         data: null,
@@ -535,7 +592,8 @@ describe('useDashboard', () => {
 
       const { result } = renderHook(() => useDashboard());
 
-      expect(result.current.dashboardGoals).toEqual([]);
+      expect(result.current.primaryGoal).toBeNull();
+      expect(result.current.secondaryGoals).toEqual([]);
       expect(result.current.activityCalendar).toEqual([]);
       expect(result.current.sportDistribution).toEqual([]);
       expect(result.current.recentActivities).toEqual([]);

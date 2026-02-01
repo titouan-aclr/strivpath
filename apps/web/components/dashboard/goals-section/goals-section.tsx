@@ -6,20 +6,21 @@ import { ChevronRight } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { PrimaryGoal, SecondaryGoal } from '@/lib/dashboard/types';
 import { PrimaryGoalCard } from './primary-goal-card';
 import { SecondaryGoalCard } from './secondary-goal-card';
 import { GoalsEmptyState } from './goals-empty-state';
 
 export interface GoalsSectionProps {
-  goals: DashboardGoal[];
+  primaryGoal: PrimaryGoal | null;
+  secondaryGoals: SecondaryGoal[];
   className?: string;
 }
 
-export function GoalsSection({ goals, className }: GoalsSectionProps) {
+export function GoalsSection({ primaryGoal, secondaryGoals, className }: GoalsSectionProps) {
   const t = useTranslations('dashboard.goals');
 
-  if (goals.length === 0) {
+  if (!primaryGoal && secondaryGoals.length === 0) {
     return (
       <Card className={cn('', className)}>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -31,8 +32,6 @@ export function GoalsSection({ goals, className }: GoalsSectionProps) {
       </Card>
     );
   }
-
-  const [primaryGoal, ...secondaryGoals] = goals;
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -47,7 +46,7 @@ export function GoalsSection({ goals, className }: GoalsSectionProps) {
       </div>
 
       <div className="grid gap-4">
-        <PrimaryGoalCard goal={primaryGoal} />
+        {primaryGoal && <PrimaryGoalCard goal={primaryGoal} />}
 
         {secondaryGoals.length > 0 && (
           <div className="grid gap-4 sm:grid-cols-2">

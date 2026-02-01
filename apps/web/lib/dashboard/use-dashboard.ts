@@ -5,7 +5,8 @@ import { useQuery } from '@apollo/client/react';
 import {
   DashboardDataDocument,
   PeriodStatisticsFragmentFragmentDoc,
-  DashboardGoalFragmentFragmentDoc,
+  PrimaryGoalFragmentFragmentDoc,
+  SecondaryGoalFragmentFragmentDoc,
   ActivityCalendarDayFragmentFragmentDoc,
   SportDistributionFragmentFragmentDoc,
   ActivityCardFragmentDoc,
@@ -17,7 +18,8 @@ import type {
   DashboardData,
   DashboardQueryVariables,
   PeriodStats,
-  DashboardGoal,
+  PrimaryGoal,
+  SecondaryGoal,
   ActivityCalendarDay,
   SportDistributionItem,
   DashboardActivity,
@@ -38,7 +40,8 @@ interface UseDashboardOptions {
 interface UseDashboardResult {
   data: DashboardData | null;
   periodStatistics: PeriodStats | null;
-  dashboardGoals: DashboardGoal[];
+  primaryGoal: PrimaryGoal | null;
+  secondaryGoals: SecondaryGoal[];
   activityCalendar: ActivityCalendarDay[];
   sportDistribution: SportDistributionItem[];
   recentActivities: DashboardActivity[];
@@ -97,10 +100,34 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     };
   }, [rawData?.periodStatistics]);
 
-  const dashboardGoals = useMemo<DashboardGoal[]>(() => {
-    if (!rawData?.dashboardGoals) return [];
-    return rawData.dashboardGoals.map(goal => {
-      const fragment = getFragmentData(DashboardGoalFragmentFragmentDoc, goal);
+  const primaryGoal = useMemo<PrimaryGoal | null>(() => {
+    if (!rawData?.primaryDashboardGoal) return null;
+    const primaryFragment = getFragmentData(PrimaryGoalFragmentFragmentDoc, rawData.primaryDashboardGoal);
+    const baseFragment = getFragmentData(SecondaryGoalFragmentFragmentDoc, primaryFragment);
+    return {
+      id: baseFragment.id,
+      title: baseFragment.title,
+      targetType: baseFragment.targetType,
+      targetValue: baseFragment.targetValue,
+      currentValue: baseFragment.currentValue,
+      startDate: baseFragment.startDate,
+      endDate: baseFragment.endDate,
+      sportType: baseFragment.sportType ?? null,
+      status: baseFragment.status,
+      progressPercentage: baseFragment.progressPercentage,
+      daysRemaining: baseFragment.daysRemaining ?? null,
+      isExpired: baseFragment.isExpired,
+      progressHistory: primaryFragment.progressHistory.map(point => ({
+        date: point.date,
+        value: point.value,
+      })),
+    };
+  }, [rawData?.primaryDashboardGoal]);
+
+  const secondaryGoals = useMemo<SecondaryGoal[]>(() => {
+    if (!rawData?.secondaryDashboardGoals) return [];
+    return rawData.secondaryDashboardGoals.map(goal => {
+      const fragment = getFragmentData(SecondaryGoalFragmentFragmentDoc, goal);
       return {
         id: fragment.id,
         title: fragment.title,
@@ -114,13 +141,9 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
         progressPercentage: fragment.progressPercentage,
         daysRemaining: fragment.daysRemaining ?? null,
         isExpired: fragment.isExpired,
-        progressHistory: fragment.progressHistory.map(point => ({
-          date: point.date,
-          value: point.value,
-        })),
       };
     });
-  }, [rawData?.dashboardGoals]);
+  }, [rawData?.secondaryDashboardGoals]);
 
   const activityCalendar = useMemo<ActivityCalendarDay[]>(() => {
     if (!rawData?.activityCalendar) return [];
@@ -197,7 +220,8 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     if (!rawData) return null;
     return {
       periodStatistics: periodStatistics!,
-      dashboardGoals,
+      primaryGoal,
+      secondaryGoals,
       activityCalendar,
       sportDistribution,
       activities: recentActivities,
@@ -208,7 +232,8 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
   }, [
     rawData,
     periodStatistics,
-    dashboardGoals,
+    primaryGoal,
+    secondaryGoals,
     activityCalendar,
     sportDistribution,
     recentActivities,
@@ -218,7 +243,7 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
   ]);
 
   const hasActivities = recentActivities.length > 0;
-  const hasGoals = dashboardGoals.length > 0;
+  const hasGoals = primaryGoal !== null || secondaryGoals.length > 0;
   const hasMultipleSports = (userPreferences?.selectedSports.length ?? 0) > 1;
 
   const refetch = useCallback(
@@ -231,7 +256,8 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
   return {
     data,
     periodStatistics,
-    dashboardGoals,
+    primaryGoal,
+    secondaryGoals,
     activityCalendar,
     sportDistribution,
     recentActivities,

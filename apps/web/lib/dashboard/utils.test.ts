@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { GoalStatus, GoalTargetType } from '@/gql/graphql';
-import type { DashboardGoal } from './types';
+import type { BaseGoal } from './types';
 import {
   formatDurationCompact,
   formatDurationLong,
@@ -152,7 +152,7 @@ describe('calculateIdealProgress', () => {
   });
 
   it('should return 0 if current date is before start date', () => {
-    const goal: DashboardGoal = {
+    const goal: BaseGoal = {
       id: '1',
       title: 'Test Goal',
       targetType: GoalTargetType.Distance,
@@ -165,13 +165,12 @@ describe('calculateIdealProgress', () => {
       progressPercentage: 0,
       daysRemaining: 15,
       isExpired: false,
-      progressHistory: [],
     };
     expect(calculateIdealProgress(goal)).toBe(0);
   });
 
   it('should return target value if current date is after end date', () => {
-    const goal: DashboardGoal = {
+    const goal: BaseGoal = {
       id: '1',
       title: 'Test Goal',
       targetType: GoalTargetType.Distance,
@@ -184,13 +183,12 @@ describe('calculateIdealProgress', () => {
       progressPercentage: 50,
       daysRemaining: null,
       isExpired: true,
-      progressHistory: [],
     };
     expect(calculateIdealProgress(goal)).toBe(100);
   });
 
   it('should calculate proportional progress when in the middle of period', () => {
-    const goal: DashboardGoal = {
+    const goal: BaseGoal = {
       id: '1',
       title: 'Test Goal',
       targetType: GoalTargetType.Distance,
@@ -203,7 +201,6 @@ describe('calculateIdealProgress', () => {
       progressPercentage: 25,
       daysRemaining: 15,
       isExpired: false,
-      progressHistory: [],
     };
     const idealProgress = calculateIdealProgress(goal);
     expect(idealProgress).toBeGreaterThan(40);
@@ -245,7 +242,7 @@ describe('getProgressStatusFromGoal', () => {
   });
 
   it('should return correct status based on goal progress', () => {
-    const aheadGoal: DashboardGoal = {
+    const aheadGoal: BaseGoal = {
       id: '1',
       title: 'Ahead Goal',
       targetType: GoalTargetType.Distance,
@@ -258,7 +255,6 @@ describe('getProgressStatusFromGoal', () => {
       progressPercentage: 80,
       daysRemaining: 15,
       isExpired: false,
-      progressHistory: [],
     };
     expect(getProgressStatusFromGoal(aheadGoal)).toBe('ahead');
   });

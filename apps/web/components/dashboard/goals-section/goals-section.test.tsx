@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
 import { GoalsSection } from './goals-section';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { BaseGoal, PrimaryGoal, SecondaryGoal } from '@/lib/dashboard/types';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => {
@@ -25,7 +25,7 @@ vi.mock('@/lib/dashboard/utils', () => ({
 }));
 
 vi.mock('./primary-goal-card', () => ({
-  PrimaryGoalCard: ({ goal }: { goal: DashboardGoal }) => (
+  PrimaryGoalCard: ({ goal }: { goal: PrimaryGoal }) => (
     <div data-testid="primary-goal-card" data-goal-id={goal.id}>
       Primary: {goal.title}
     </div>
@@ -33,7 +33,7 @@ vi.mock('./primary-goal-card', () => ({
 }));
 
 vi.mock('./secondary-goal-card', () => ({
-  SecondaryGoalCard: ({ goal }: { goal: DashboardGoal }) => (
+  SecondaryGoalCard: ({ goal }: { goal: SecondaryGoal }) => (
     <div data-testid="secondary-goal-card" data-goal-id={goal.id}>
       Secondary: {goal.title}
     </div>
@@ -44,7 +44,7 @@ vi.mock('./goals-empty-state', () => ({
   GoalsEmptyState: () => <div data-testid="goals-empty-state">Empty State</div>,
 }));
 
-const createMockGoal = (id: string, title: string, overrides: Partial<DashboardGoal> = {}): DashboardGoal => ({
+const createMockBaseGoal = (id: string, title: string, overrides: Partial<BaseGoal> = {}): BaseGoal => ({
   id,
   title,
   targetType: GoalTargetType.Distance,
@@ -57,47 +57,49 @@ const createMockGoal = (id: string, title: string, overrides: Partial<DashboardG
   progressPercentage: 50,
   daysRemaining: 10,
   isExpired: false,
+  ...overrides,
+});
+
+const createMockPrimaryGoal = (id: string, title: string, overrides: Partial<PrimaryGoal> = {}): PrimaryGoal => ({
+  ...createMockBaseGoal(id, title, overrides),
   progressHistory: [],
   ...overrides,
 });
 
 describe('GoalsSection', () => {
   it('should render section title', () => {
-    render(<GoalsSection goals={[createMockGoal('1', 'Goal 1')]} />);
+    render(<GoalsSection primaryGoal={createMockPrimaryGoal('1', 'Goal 1')} secondaryGoals={[]} />);
 
     expect(screen.getByText('Goals')).toBeInTheDocument();
   });
 
   it('should render view all link', () => {
-    render(<GoalsSection goals={[createMockGoal('1', 'Goal 1')]} />);
+    render(<GoalsSection primaryGoal={createMockPrimaryGoal('1', 'Goal 1')} secondaryGoals={[]} />);
 
     const link = screen.getByRole('link', { name: /View all/i });
     expect(link).toHaveAttribute('href', '/goals');
   });
 
   it('should render empty state when no goals', () => {
-    render(<GoalsSection goals={[]} />);
+    render(<GoalsSection primaryGoal={null} secondaryGoals={[]} />);
 
     expect(screen.getByTestId('goals-empty-state')).toBeInTheDocument();
     expect(screen.queryByTestId('primary-goal-card')).not.toBeInTheDocument();
   });
 
-  it('should render primary goal card for first goal', () => {
-    render(<GoalsSection goals={[createMockGoal('1', 'Primary Goal')]} />);
+  it('should render primary goal card when primary goal exists', () => {
+    render(<GoalsSection primaryGoal={createMockPrimaryGoal('1', 'Primary Goal')} secondaryGoals={[]} />);
 
     const primaryCard = screen.getByTestId('primary-goal-card');
     expect(primaryCard).toBeInTheDocument();
     expect(primaryCard).toHaveAttribute('data-goal-id', '1');
   });
 
-  it('should render secondary goal cards for remaining goals', () => {
+  it('should render secondary goal cards', () => {
     render(
       <GoalsSection
-        goals={[
-          createMockGoal('1', 'Primary Goal'),
-          createMockGoal('2', 'Secondary Goal 1'),
-          createMockGoal('3', 'Secondary Goal 2'),
-        ]}
+        primaryGoal={createMockPrimaryGoal('1', 'Primary Goal')}
+        secondaryGoals={[createMockBaseGoal('2', 'Secondary Goal 1'), createMockBaseGoal('3', 'Secondary Goal 2')]}
       />,
     );
 
@@ -107,17 +109,18 @@ describe('GoalsSection', () => {
     expect(secondaryCards[1]).toHaveAttribute('data-goal-id', '3');
   });
 
-  it('should render only primary card when single goal', () => {
-    render(<GoalsSection goals={[createMockGoal('1', 'Only Goal')]} />);
+  it('should render only primary card when no secondary goals', () => {
+    render(<GoalsSection primaryGoal={createMockPrimaryGoal('1', 'Only Goal')} secondaryGoals={[]} />);
 
     expect(screen.getByTestId('primary-goal-card')).toBeInTheDocument();
     expect(screen.queryByTestId('secondary-goal-card')).not.toBeInTheDocument();
   });
 
-  it('should render 1 primary and 2 secondary cards for 3 goals', () => {
+  it('should render 1 primary and 2 secondary cards', () => {
     render(
       <GoalsSection
-        goals={[createMockGoal('1', 'Goal 1'), createMockGoal('2', 'Goal 2'), createMockGoal('3', 'Goal 3')]}
+        primaryGoal={createMockPrimaryGoal('1', 'Goal 1')}
+        secondaryGoals={[createMockBaseGoal('2', 'Goal 2'), createMockBaseGoal('3', 'Goal 3')]}
       />,
     );
 
@@ -127,20 +130,24 @@ describe('GoalsSection', () => {
 
   it('should apply custom className', () => {
     const { container } = render(
-      <GoalsSection goals={[createMockGoal('1', 'Goal 1')]} className="custom-goals-section" />,
+      <GoalsSection
+        primaryGoal={createMockPrimaryGoal('1', 'Goal 1')}
+        secondaryGoals={[]}
+        className="custom-goals-section"
+      />,
     );
 
     expect(container.querySelector('.custom-goals-section')).toBeInTheDocument();
   });
 
   it('should not show view all link when empty', () => {
-    render(<GoalsSection goals={[]} />);
+    render(<GoalsSection primaryGoal={null} secondaryGoals={[]} />);
 
     expect(screen.queryByRole('link', { name: /View all/i })).not.toBeInTheDocument();
   });
 
   it('should render title in empty state card', () => {
-    render(<GoalsSection goals={[]} />);
+    render(<GoalsSection primaryGoal={null} secondaryGoals={[]} />);
 
     const titles = screen.getAllByText('Goals');
     expect(titles.length).toBeGreaterThanOrEqual(1);

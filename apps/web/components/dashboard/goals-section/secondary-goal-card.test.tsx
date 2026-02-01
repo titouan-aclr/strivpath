@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
 import { SecondaryGoalCard } from './secondary-goal-card';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { SecondaryGoal } from '@/lib/dashboard/types';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {
@@ -23,7 +23,7 @@ vi.mock('@/lib/dashboard/utils', () => ({
   getProgressStatusFromGoal: vi.fn().mockReturnValue('onTrack'),
 }));
 
-const createMockGoal = (overrides: Partial<DashboardGoal> = {}): DashboardGoal => ({
+const createMockGoal = (overrides: Partial<SecondaryGoal> = {}): SecondaryGoal => ({
   id: '1',
   title: 'Run 50km this month',
   targetType: GoalTargetType.Distance,
@@ -36,7 +36,6 @@ const createMockGoal = (overrides: Partial<DashboardGoal> = {}): DashboardGoal =
   progressPercentage: 50,
   daysRemaining: 5,
   isExpired: false,
-  progressHistory: [],
   ...overrides,
 });
 

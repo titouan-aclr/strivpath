@@ -6,7 +6,7 @@ fragment PeriodStatisticsFragment on PeriodStatistics {
   periodEnd
 }
 
-fragment DashboardGoalFragment on Goal {
+fragment SecondaryGoalFragment on Goal {
   id
   title
   targetType
@@ -19,6 +19,10 @@ fragment DashboardGoalFragment on Goal {
   progressPercentage
   daysRemaining
   isExpired
+}
+
+fragment PrimaryGoalFragment on Goal {
+  ...SecondaryGoalFragment
   progressHistory {
     date
     value

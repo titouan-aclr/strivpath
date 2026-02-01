@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
 import { PrimaryGoalCard } from './primary-goal-card';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { PrimaryGoal } from '@/lib/dashboard/types';
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {
@@ -51,7 +51,7 @@ vi.mock('./circular-progress', () => ({
   ),
 }));
 
-const createMockGoal = (overrides: Partial<DashboardGoal> = {}): DashboardGoal => ({
+const createMockGoal = (overrides: Partial<PrimaryGoal> = {}): PrimaryGoal => ({
   id: '1',
   title: 'Monthly Running Goal',
   targetType: GoalTargetType.Distance,

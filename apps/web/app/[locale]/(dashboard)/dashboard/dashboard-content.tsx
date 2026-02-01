@@ -26,7 +26,8 @@ export function DashboardContent() {
 
   const {
     periodStatistics,
-    dashboardGoals,
+    primaryGoal,
+    secondaryGoals,
     activityCalendar,
     sportDistribution,
     recentActivities,
@@ -74,7 +75,7 @@ export function DashboardContent() {
 
       <StatsSection statistics={periodStatistics} period={period} onPeriodChange={handlePeriodChange} loading={false} />
 
-      <GoalsSection goals={dashboardGoals} />
+      <GoalsSection primaryGoal={primaryGoal} secondaryGoals={secondaryGoals} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {hasMultipleSports && (

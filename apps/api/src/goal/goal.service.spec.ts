@@ -888,44 +888,46 @@ describe('GoalService', () => {
     });
   });
 
-  describe('findDashboardGoals', () => {
-    it('should return maximum 3 active goals', async () => {
-      const userId = 42;
-      const goals = [
-        createMockPrismaGoal({ id: 1, status: 'ACTIVE', endDate: new Date('2025-01-31') }),
-        createMockPrismaGoal({ id: 2, status: 'ACTIVE', endDate: new Date('2025-02-28') }),
-        createMockPrismaGoal({ id: 3, status: 'ACTIVE', endDate: new Date('2025-03-31') }),
-        createMockPrismaGoal({ id: 4, status: 'ACTIVE', endDate: new Date('2025-04-30') }),
-      ];
-
-      prisma.goal.findMany.mockResolvedValue(goals);
-
-      const result = await service.findDashboardGoals(userId);
-
-      expect(result).toHaveLength(3);
-      expect(result.map(g => g.id)).toEqual([1, 2, 3]);
-    });
-
-    it('should prioritize global goals (sportType null) over sport-specific goals', async () => {
+  describe('findPrimaryDashboardGoal', () => {
+    it('should return the highest priority goal', async () => {
       const userId = 42;
       const goals = [
         createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-15') }),
         createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-31') }),
         createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-20') }),
-        createMockPrismaGoal({ id: 4, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-10') }),
       ];
 
       prisma.goal.findMany.mockResolvedValue(goals);
 
-      const result = await service.findDashboardGoals(userId);
+      const result = await service.findPrimaryDashboardGoal(userId);
 
-      expect(result).toHaveLength(3);
-      expect(result[0].id).toBe(4);
-      expect(result[0].sportType).toBeUndefined();
-      expect(result[1].id).toBe(2);
-      expect(result[1].sportType).toBeUndefined();
-      expect(result[2].id).toBe(1);
-      expect(result[2].sportType).toBe(SportType.RUN);
+      expect(result).toBeDefined();
+      expect(result?.id).toBe(2);
+      expect(result?.sportType).toBeUndefined();
+    });
+
+    it('should return null when no active goals exist', async () => {
+      const userId = 42;
+
+      prisma.goal.findMany.mockResolvedValue([]);
+
+      const result = await service.findPrimaryDashboardGoal(userId);
+
+      expect(result).toBeNull();
+    });
+
+    it('should prioritize global goal over sport-specific goal with earlier deadline', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-10') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-31') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findPrimaryDashboardGoal(userId);
+
+      expect(result?.id).toBe(2);
     });
 
     it('should sort global goals by deadline (earliest first)', async () => {
@@ -933,29 +935,32 @@ describe('GoalService', () => {
       const goals = [
         createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-03-31') }),
         createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
-        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: null, endDate: new Date('2025-02-28') }),
       ];
 
       prisma.goal.findMany.mockResolvedValue(goals);
 
-      const result = await service.findDashboardGoals(userId);
+      const result = await service.findPrimaryDashboardGoal(userId);
 
-      expect(result.map(g => g.id)).toEqual([2, 3, 1]);
+      expect(result?.id).toBe(2);
     });
+  });
 
-    it('should sort sport-specific goals by deadline after global goals', async () => {
+  describe('findSecondaryDashboardGoals', () => {
+    it('should return maximum 2 goals excluding the primary', async () => {
       const userId = 42;
       const goals = [
-        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-02-28') }),
-        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: null, endDate: new Date('2025-03-31') }),
-        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-20') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-25') }),
+        createMockPrismaGoal({ id: 4, status: 'ACTIVE', sportType: SportType.SWIM, endDate: new Date('2025-01-30') }),
       ];
 
       prisma.goal.findMany.mockResolvedValue(goals);
 
-      const result = await service.findDashboardGoals(userId);
+      const result = await service.findSecondaryDashboardGoals(userId);
 
-      expect(result.map(g => g.id)).toEqual([2, 3, 1]);
+      expect(result).toHaveLength(2);
+      expect(result.map(g => g.id)).toEqual([2, 3]);
     });
 
     it('should return empty array when no active goals exist', async () => {
@@ -963,39 +968,53 @@ describe('GoalService', () => {
 
       prisma.goal.findMany.mockResolvedValue([]);
 
-      const result = await service.findDashboardGoals(userId);
+      const result = await service.findSecondaryDashboardGoals(userId);
 
       expect(result).toHaveLength(0);
     });
 
-    it('should only query ACTIVE goals', async () => {
-      const userId = 42;
-
-      prisma.goal.findMany.mockResolvedValue([]);
-
-      await service.findDashboardGoals(userId);
-
-      expect(prisma.goal.findMany).toHaveBeenCalledWith({
-        where: {
-          userId,
-          status: GoalStatus.ACTIVE,
-        },
-        orderBy: { endDate: 'asc' },
-      });
-    });
-
-    it('should return fewer than 3 goals if user has fewer active goals', async () => {
+    it('should return empty array when only one goal exists', async () => {
       const userId = 42;
       const goals = [
-        createMockPrismaGoal({ id: 1, status: 'ACTIVE', endDate: new Date('2025-01-31') }),
-        createMockPrismaGoal({ id: 2, status: 'ACTIVE', endDate: new Date('2025-02-28') }),
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
       ];
 
       prisma.goal.findMany.mockResolvedValue(goals);
 
-      const result = await service.findDashboardGoals(userId);
+      const result = await service.findSecondaryDashboardGoals(userId);
 
-      expect(result).toHaveLength(2);
+      expect(result).toHaveLength(0);
+    });
+
+    it('should return one goal when only two goals exist', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-20') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findSecondaryDashboardGoals(userId);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].id).toBe(2);
+    });
+
+    it('should sort secondary goals by priority (global first, then by deadline)', async () => {
+      const userId = 42;
+      const goals = [
+        createMockPrismaGoal({ id: 1, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-15') }),
+        createMockPrismaGoal({ id: 2, status: 'ACTIVE', sportType: SportType.RUN, endDate: new Date('2025-01-10') }),
+        createMockPrismaGoal({ id: 3, status: 'ACTIVE', sportType: null, endDate: new Date('2025-01-20') }),
+        createMockPrismaGoal({ id: 4, status: 'ACTIVE', sportType: SportType.RIDE, endDate: new Date('2025-01-05') }),
+      ];
+
+      prisma.goal.findMany.mockResolvedValue(goals);
+
+      const result = await service.findSecondaryDashboardGoals(userId);
+
+      expect(result.map(g => g.id)).toEqual([3, 4]);
     });
   });
 

@@ -1,6 +1,11 @@
 import type { StatisticsPeriod, SportType, GoalStatus, GoalTargetType } from '@/gql/graphql';
 
-export interface DashboardGoal {
+export interface GoalProgressPoint {
+  date: Date;
+  value: number;
+}
+
+export interface BaseGoal {
   id: string;
   title: string;
   targetType: GoalTargetType;
@@ -13,13 +18,13 @@ export interface DashboardGoal {
   progressPercentage: number;
   daysRemaining: number | null;
   isExpired: boolean;
+}
+
+export interface PrimaryGoal extends BaseGoal {
   progressHistory: GoalProgressPoint[];
 }
 
-export interface GoalProgressPoint {
-  date: Date;
-  value: number;
-}
+export type SecondaryGoal = BaseGoal;
 
 export interface PeriodStats {
   totalTime: number;
@@ -74,7 +79,8 @@ export interface DashboardUserPreferences {
 
 export interface DashboardData {
   periodStatistics: PeriodStats;
-  dashboardGoals: DashboardGoal[];
+  primaryGoal: PrimaryGoal | null;
+  secondaryGoals: SecondaryGoal[];
   activityCalendar: ActivityCalendarDay[];
   sportDistribution: SportDistributionItem[];
   activities: DashboardActivity[];

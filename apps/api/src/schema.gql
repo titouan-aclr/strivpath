@@ -445,11 +445,6 @@ type Query {
   """Get current authenticated user"""
   currentUser: User
 
-  """
-  Get priority goals for dashboard display (max 3, global goals first, then by deadline)
-  """
-  dashboardGoals: [Goal!]!
-
   """Get a single goal by ID (user-scoped)"""
   goal(id: Int!): Goal
 
@@ -464,6 +459,16 @@ type Query {
 
   """Get aggregated statistics for a specific time period"""
   periodStatistics(period: StatisticsPeriod!): PeriodStatistics!
+
+  """
+  Get the primary goal for dashboard display (highest priority: global goals first, then by deadline)
+  """
+  primaryDashboardGoal: Goal
+
+  """
+  Get secondary goals for dashboard display (max 2, excluding the primary goal)
+  """
+  secondaryDashboardGoals: [Goal!]!
 
   """Get count of activities and goals for a sport"""
   sportDataCount(sport: SportType!): SportDataCount!

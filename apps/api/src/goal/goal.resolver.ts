@@ -64,12 +64,21 @@ export class GoalResolver {
     return this.goalService.findActiveGoals(tokenPayload.sub);
   }
 
-  @Query(() => [Goal], {
-    description: 'Get priority goals for dashboard display (max 3, global goals first, then by deadline)',
+  @Query(() => Goal, {
+    nullable: true,
+    description: 'Get the primary goal for dashboard display (highest priority: global goals first, then by deadline)',
   })
   @UseGuards(GqlAuthGuard)
-  async dashboardGoals(@CurrentUser() tokenPayload: TokenPayload): Promise<Goal[]> {
-    return this.goalService.findDashboardGoals(tokenPayload.sub);
+  async primaryDashboardGoal(@CurrentUser() tokenPayload: TokenPayload): Promise<Goal | null> {
+    return this.goalService.findPrimaryDashboardGoal(tokenPayload.sub);
+  }
+
+  @Query(() => [Goal], {
+    description: 'Get secondary goals for dashboard display (max 2, excluding the primary goal)',
+  })
+  @UseGuards(GqlAuthGuard)
+  async secondaryDashboardGoals(@CurrentUser() tokenPayload: TokenPayload): Promise<Goal[]> {
+    return this.goalService.findSecondaryDashboardGoals(tokenPayload.sub);
   }
 
   @Query(() => [GoalTemplate], {
