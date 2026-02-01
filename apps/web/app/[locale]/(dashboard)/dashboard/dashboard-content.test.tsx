@@ -14,9 +14,8 @@ import type {
   PeriodStats,
   ActivityCalendarDay,
   SportDistributionItem,
-  DashboardActivity,
 } from '@/lib/dashboard/types';
-import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
+import { GoalTargetType, GoalStatus, SportType, type ActivityCardFragment } from '@/gql/graphql';
 
 vi.mock('@/lib/dashboard/use-dashboard', () => ({
   useDashboard: vi.fn(),
@@ -173,9 +172,9 @@ const createMockPrimaryGoal = (id: string, title: string, overrides: Partial<Pri
   ...overrides,
 });
 
-const createMockActivity = (id: string, name: string): DashboardActivity => ({
+const createMockActivity = (id: string, name: string): ActivityCardFragment => ({
   id,
-  stravaId: id,
+  stravaId: BigInt(id),
   name,
   type: 'Run',
   distance: 5000,
@@ -236,6 +235,7 @@ const baseMockUseDashboard = {
   hasActivities: true,
   hasGoals: false,
   hasMultipleSports: true,
+  showSportDistribution: true,
 };
 
 const mockUseSync = {
@@ -461,7 +461,7 @@ describe('DashboardContent', () => {
     it('should not render sport distribution when single sport', () => {
       vi.mocked(useDashboard).mockReturnValue({
         ...baseMockUseDashboard,
-        hasMultipleSports: false,
+        showSportDistribution: false,
         sportDistribution: [{ sport: SportType.Run, percentage: 100, totalTime: 3600 }],
       });
 
@@ -470,10 +470,10 @@ describe('DashboardContent', () => {
       expect(screen.queryByTestId('sport-distribution')).not.toBeInTheDocument();
     });
 
-    it('should expand heatmap to full width when single sport', () => {
+    it('should expand heatmap to full width when sport distribution is hidden', () => {
       vi.mocked(useDashboard).mockReturnValue({
         ...baseMockUseDashboard,
-        hasMultipleSports: false,
+        showSportDistribution: false,
       });
 
       render(<DashboardContent />);

@@ -58,35 +58,8 @@ export interface DashboardSyncHistory {
   stage: string | null;
 }
 
-export interface DashboardActivity {
-  id: string;
-  stravaId: string;
-  name: string;
-  type: string;
-  distance: number;
-  movingTime: number;
-  elapsedTime: number;
-  totalElevationGain: number;
-  startDate: Date;
-  averageSpeed: number | null;
-  maxHeartrate: number | null;
-  kudosCount: number;
-}
-
 export interface DashboardUserPreferences {
   selectedSports: SportType[];
-}
-
-export interface DashboardData {
-  periodStatistics: PeriodStats;
-  primaryGoal: PrimaryGoal | null;
-  secondaryGoals: SecondaryGoal[];
-  activityCalendar: ActivityCalendarDay[];
-  sportDistribution: SportDistributionItem[];
-  activities: DashboardActivity[];
-  latestSyncHistory: DashboardSyncHistory | null;
-  currentUser: DashboardUser | null;
-  userPreferences: DashboardUserPreferences | null;
 }
 
 export type ProgressStatus = 'ahead' | 'behind' | 'onTrack';

@@ -12,17 +12,16 @@ import {
   ActivityCardFragmentDoc,
   DashboardSyncHistoryFragmentFragmentDoc,
   StatisticsPeriod,
+  type ActivityCardFragment,
 } from '@/gql/graphql';
 import { getFragmentData } from '@/gql/fragment-masking';
 import type {
-  DashboardData,
   DashboardQueryVariables,
   PeriodStats,
   PrimaryGoal,
   SecondaryGoal,
   ActivityCalendarDay,
   SportDistributionItem,
-  DashboardActivity,
   DashboardSyncHistory,
   DashboardUser,
   DashboardUserPreferences,
@@ -38,13 +37,12 @@ interface UseDashboardOptions {
 }
 
 interface UseDashboardResult {
-  data: DashboardData | null;
   periodStatistics: PeriodStats | null;
   primaryGoal: PrimaryGoal | null;
   secondaryGoals: SecondaryGoal[];
   activityCalendar: ActivityCalendarDay[];
   sportDistribution: SportDistributionItem[];
-  recentActivities: DashboardActivity[];
+  recentActivities: ActivityCardFragment[];
   latestSyncHistory: DashboardSyncHistory | null;
   currentUser: DashboardUser | null;
   userPreferences: DashboardUserPreferences | null;
@@ -54,6 +52,7 @@ interface UseDashboardResult {
   hasActivities: boolean;
   hasGoals: boolean;
   hasMultipleSports: boolean;
+  showSportDistribution: boolean;
 }
 
 export function useDashboard(options: UseDashboardOptions = {}): UseDashboardResult {
@@ -168,25 +167,9 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     });
   }, [rawData?.sportDistribution]);
 
-  const recentActivities = useMemo<DashboardActivity[]>(() => {
+  const recentActivities = useMemo<ActivityCardFragment[]>(() => {
     if (!rawData?.activities) return [];
-    return rawData.activities.map(activity => {
-      const fragment = getFragmentData(ActivityCardFragmentDoc, activity);
-      return {
-        id: fragment.id,
-        stravaId: String(fragment.stravaId),
-        name: fragment.name,
-        type: fragment.type,
-        distance: fragment.distance,
-        movingTime: fragment.movingTime,
-        elapsedTime: fragment.elapsedTime,
-        totalElevationGain: fragment.totalElevationGain,
-        startDate: fragment.startDate,
-        averageSpeed: fragment.averageSpeed ?? null,
-        maxHeartrate: fragment.maxHeartrate ?? null,
-        kudosCount: fragment.kudosCount,
-      };
-    });
+    return rawData.activities.map(activity => getFragmentData(ActivityCardFragmentDoc, activity));
   }, [rawData?.activities]);
 
   const latestSyncHistory = useMemo<DashboardSyncHistory | null>(() => {
@@ -216,35 +199,10 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     };
   }, [rawData?.userPreferences]);
 
-  const data = useMemo<DashboardData | null>(() => {
-    if (!rawData) return null;
-    return {
-      periodStatistics: periodStatistics!,
-      primaryGoal,
-      secondaryGoals,
-      activityCalendar,
-      sportDistribution,
-      activities: recentActivities,
-      latestSyncHistory,
-      currentUser,
-      userPreferences,
-    };
-  }, [
-    rawData,
-    periodStatistics,
-    primaryGoal,
-    secondaryGoals,
-    activityCalendar,
-    sportDistribution,
-    recentActivities,
-    latestSyncHistory,
-    currentUser,
-    userPreferences,
-  ]);
-
   const hasActivities = recentActivities.length > 0;
   const hasGoals = primaryGoal !== null || secondaryGoals.length > 0;
   const hasMultipleSports = (userPreferences?.selectedSports.length ?? 0) > 1;
+  const showSportDistribution = hasMultipleSports && sportDistribution.length > 1;
 
   const refetch = useCallback(
     async (newVariables?: Partial<DashboardQueryVariables>) => {
@@ -254,7 +212,6 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
   );
 
   return {
-    data,
     periodStatistics,
     primaryGoal,
     secondaryGoals,
@@ -270,5 +227,6 @@ export function useDashboard(options: UseDashboardOptions = {}): UseDashboardRes
     hasActivities,
     hasGoals,
     hasMultipleSports,
+    showSportDistribution,
   };
 }

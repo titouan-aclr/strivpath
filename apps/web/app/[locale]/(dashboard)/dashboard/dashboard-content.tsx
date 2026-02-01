@@ -18,7 +18,6 @@ import {
   RecentActivities,
   EmptyState,
 } from '@/components/dashboard';
-import type { ActivityCardFragment } from '@/gql/graphql';
 
 export function DashboardContent() {
   const { triggerSync, isSyncing, isPolling } = useSync();
@@ -37,7 +36,7 @@ export function DashboardContent() {
     loading,
     error,
     hasActivities,
-    hasMultipleSports,
+    showSportDistribution,
     refetch,
   } = useDashboard({
     period,
@@ -83,22 +82,27 @@ export function DashboardContent() {
     <div className="space-y-6">
       <DashboardHeader user={currentUser} syncHistory={latestSyncHistory} loading={loading} />
 
-      <StatsSection statistics={periodStatistics} period={period} onPeriodChange={handlePeriodChange} loading={false} />
+      <StatsSection
+        statistics={periodStatistics}
+        period={period}
+        onPeriodChange={handlePeriodChange}
+        loading={loading}
+      />
 
       <GoalsSection primaryGoal={primaryGoal} secondaryGoals={secondaryGoals} />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {hasMultipleSports && (
+        {showSportDistribution && (
           <div className="lg:col-span-1">
             <SportDistribution distribution={sportDistribution} />
           </div>
         )}
-        <div className={hasMultipleSports ? 'lg:col-span-2' : 'lg:col-span-3'}>
+        <div className={showSportDistribution ? 'lg:col-span-2' : 'lg:col-span-3'}>
           <ActivityHeatmap calendarData={activityCalendar} year={currentYear} />
         </div>
       </div>
 
-      <RecentActivities activities={recentActivities as unknown as ActivityCardFragment[]} loading={false} />
+      <RecentActivities activities={recentActivities} loading={loading} />
     </div>
   );
 }

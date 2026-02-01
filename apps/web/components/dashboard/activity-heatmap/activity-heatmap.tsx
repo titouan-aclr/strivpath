@@ -1,12 +1,12 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useTranslations } from 'next-intl';
-import { Calendar } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
 import type { ActivityCalendarDay } from '@/lib/dashboard/types';
+import { cn } from '@/lib/utils';
+import { Calendar } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { useMemo } from 'react';
 
 export interface ActivityHeatmapProps {
   calendarData: ActivityCalendarDay[];
@@ -148,9 +148,9 @@ export function ActivityHeatmap({ calendarData, year: initialYear, className }: 
         </div>
       </CardHeader>
 
-      <CardContent className="pt-4 flex-1 flex flex-col justify-center">
+      <CardContent className="pt-4 flex-1 flex flex-col justify-center overflow-x-auto">
         <TooltipProvider delayDuration={100}>
-          <div className="space-y-2">
+          <div className="space-y-2 w-fit mx-auto">
             <div className="flex gap-[3px] text-xs text-muted-foreground pl-6">
               {monthLabels.map((label, idx) => (
                 <div
