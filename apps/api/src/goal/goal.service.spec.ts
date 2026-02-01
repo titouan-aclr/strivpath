@@ -704,7 +704,7 @@ describe('GoalService', () => {
       expect(prisma.activity.aggregate).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
+            type: SportType.RUN,
           }),
         }),
       );
@@ -1139,7 +1139,7 @@ describe('GoalService', () => {
       expect(prisma.activity.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: expect.objectContaining({
-            type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
+            type: SportType.RUN,
           }),
         }),
       );

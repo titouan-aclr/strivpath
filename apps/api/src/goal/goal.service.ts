@@ -9,7 +9,6 @@ import { GoalPeriodHelper } from './helpers/goal-period.helper';
 import { GoalStatus } from './enums/goal-status.enum';
 import { Prisma } from '@prisma/client';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
-import { getStravaTypesForSport } from '../common/utils/sport-type.utils';
 
 @Injectable()
 export class GoalService {
@@ -177,7 +176,7 @@ export class GoalService {
         gte: goal.startDate,
         lte: goal.endDate,
       },
-      ...(goal.sportType && { type: { in: getStravaTypesForSport(goal.sportType) } }),
+      ...(goal.sportType && { type: goal.sportType }),
     };
 
     const activities = await this.prisma.activity.findMany({
@@ -284,7 +283,7 @@ export class GoalService {
         gte: goal.startDate,
         lte: goal.endDate,
       },
-      ...(goal.sportType && { type: { in: getStravaTypesForSport(goal.sportType as SportType) } }),
+      ...(goal.sportType && { type: goal.sportType }),
     };
 
     switch (goal.targetType) {
