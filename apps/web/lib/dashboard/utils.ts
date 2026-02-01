@@ -1,4 +1,4 @@
-import type { DashboardGoal, ProgressStatus } from './types';
+import type { BaseGoal, ProgressStatus } from './types';
 
 export function formatDurationCompact(seconds: number): string {
   if (seconds == null || isNaN(seconds) || seconds === 0) return '0h';
@@ -93,7 +93,7 @@ export function formatTimeAgo(date: Date | string | null | undefined, locale: st
   });
 }
 
-export function calculateIdealProgress(goal: DashboardGoal): number {
+export function calculateIdealProgress(goal: BaseGoal): number {
   const startDate = goal.startDate instanceof Date ? goal.startDate : new Date(goal.startDate);
   const endDate = goal.endDate instanceof Date ? goal.endDate : new Date(goal.endDate);
   const now = new Date();
@@ -126,7 +126,7 @@ export function getProgressStatus(currentValue: number, idealValue: number, tole
   return 'onTrack';
 }
 
-export function getProgressStatusFromGoal(goal: DashboardGoal, tolerance: number = 0.1): ProgressStatus {
+export function getProgressStatusFromGoal(goal: BaseGoal, tolerance: number = 0.1): ProgressStatus {
   const idealProgress = calculateIdealProgress(goal);
   return getProgressStatus(goal.currentValue, idealProgress, tolerance);
 }

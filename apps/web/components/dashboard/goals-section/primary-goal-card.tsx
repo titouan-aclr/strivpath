@@ -6,7 +6,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { GoalTargetType } from '@/gql/graphql';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { PrimaryGoal } from '@/lib/dashboard/types';
 import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
 import { getSportIcon } from '@/lib/sports/config';
 import { GoalProgressChart } from './goal-progress-chart';
@@ -15,7 +15,7 @@ import { CircularProgress } from './circular-progress';
 import { ProgressStatusBadge } from './progress-status-badge';
 
 export interface PrimaryGoalCardProps {
-  goal: DashboardGoal;
+  goal: PrimaryGoal;
   className?: string;
 }
 

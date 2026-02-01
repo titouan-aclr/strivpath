@@ -7,8 +7,11 @@ query DashboardData(
   periodStatistics(period: $period) {
     ...PeriodStatisticsFragment
   }
-  dashboardGoals {
-    ...DashboardGoalFragment
+  primaryDashboardGoal {
+    ...PrimaryGoalFragment
+  }
+  secondaryDashboardGoals {
+    ...SecondaryGoalFragment
   }
   activityCalendar(year: $year, month: $month) {
     ...ActivityCalendarDayFragment
@@ -50,8 +53,3 @@ query SportDistribution {
   }
 }
 
-query DashboardGoals {
-  dashboardGoals {
-    ...DashboardGoalFragment
-  }
-}

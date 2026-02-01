@@ -5,13 +5,13 @@ import Link from 'next/link';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
-import type { DashboardGoal } from '@/lib/dashboard/types';
+import type { SecondaryGoal } from '@/lib/dashboard/types';
 import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
 import { getSportIcon } from '@/lib/sports/config';
 import { ProgressStatusBadge } from './progress-status-badge';
 
 export interface SecondaryGoalCardProps {
-  goal: DashboardGoal;
+  goal: SecondaryGoal;
   className?: string;
 }
 

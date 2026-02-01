@@ -140,24 +140,32 @@ export class GoalService {
     return this.findAll(userId, { status: GoalStatus.ACTIVE });
   }
 
-  async findDashboardGoals(userId: number): Promise<Goal[]> {
+  async findPrimaryDashboardGoal(userId: number): Promise<Goal | null> {
+    const sortedGoals = await this.getSortedActiveGoals(userId);
+    const primaryGoal = sortedGoals[0];
+    return primaryGoal ? GoalMapper.toGraphQL(primaryGoal) : null;
+  }
+
+  async findSecondaryDashboardGoals(userId: number): Promise<Goal[]> {
+    const sortedGoals = await this.getSortedActiveGoals(userId);
+    return sortedGoals.slice(1, 3).map(goal => GoalMapper.toGraphQL(goal));
+  }
+
+  private async getSortedActiveGoals(userId: number) {
     const prismaGoals = await this.prisma.goal.findMany({
       where: {
         userId,
         status: GoalStatus.ACTIVE,
       },
-      orderBy: { endDate: 'asc' },
     });
 
-    const sortedGoals = prismaGoals.sort((a, b) => {
+    return prismaGoals.sort((a, b) => {
       const aIsGlobal = a.sportType === null;
       const bIsGlobal = b.sportType === null;
       if (aIsGlobal && !bIsGlobal) return -1;
       if (!aIsGlobal && bIsGlobal) return 1;
       return a.endDate.getTime() - b.endDate.getTime();
     });
-
-    return sortedGoals.slice(0, 3).map(goal => GoalMapper.toGraphQL(goal));
   }
 
   async calculateProgressHistory(goal: Goal): Promise<GoalProgressPoint[]> {

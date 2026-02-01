@@ -6,7 +6,9 @@ import { useDashboard } from '@/lib/dashboard/use-dashboard';
 import { StatisticsPeriod } from '@/lib/dashboard/types';
 import { useSync } from '@/lib/sync/context';
 import type {
-  DashboardGoal,
+  BaseGoal,
+  PrimaryGoal,
+  SecondaryGoal,
   DashboardUser,
   DashboardSyncHistory,
   PeriodStats,
@@ -89,11 +91,22 @@ vi.mock('@/components/dashboard', () => ({
       </button>
     </div>
   ),
-  GoalsSection: ({ goals }: { goals: DashboardGoal[] }) => (
+  GoalsSection: ({
+    primaryGoal,
+    secondaryGoals,
+  }: {
+    primaryGoal: PrimaryGoal | null;
+    secondaryGoals: SecondaryGoal[];
+  }) => (
     <div data-testid="goals-section">
-      <span data-testid="goals-count">{goals.length}</span>
-      {goals.map(goal => (
-        <div key={goal.id} data-testid={`goal-${goal.id}`}>
+      <span data-testid="goals-count">{(primaryGoal ? 1 : 0) + secondaryGoals.length}</span>
+      {primaryGoal && (
+        <div data-testid={`goal-${primaryGoal.id}`} data-primary="true">
+          {primaryGoal.title}
+        </div>
+      )}
+      {secondaryGoals.map(goal => (
+        <div key={goal.id} data-testid={`goal-${goal.id}`} data-secondary="true">
           {goal.title}
         </div>
       ))}
@@ -138,7 +151,7 @@ vi.mock('@/components/dashboard', () => ({
   ),
 }));
 
-const createMockGoal = (id: string, title: string, overrides: Partial<DashboardGoal> = {}): DashboardGoal => ({
+const createMockBaseGoal = (id: string, title: string, overrides: Partial<BaseGoal> = {}): BaseGoal => ({
   id,
   title,
   targetType: GoalTargetType.Distance,
@@ -151,6 +164,11 @@ const createMockGoal = (id: string, title: string, overrides: Partial<DashboardG
   progressPercentage: 50,
   daysRemaining: 10,
   isExpired: false,
+  ...overrides,
+});
+
+const createMockPrimaryGoal = (id: string, title: string, overrides: Partial<PrimaryGoal> = {}): PrimaryGoal => ({
+  ...createMockBaseGoal(id, title, overrides),
   progressHistory: [],
   ...overrides,
 });
@@ -204,7 +222,8 @@ const mockSportDistribution: SportDistributionItem[] = [
 const baseMockUseDashboard = {
   data: null,
   periodStatistics: mockPeriodStats,
-  dashboardGoals: [],
+  primaryGoal: null,
+  secondaryGoals: [],
   activityCalendar: mockCalendarData,
   sportDistribution: mockSportDistribution,
   recentActivities: [createMockActivity('1', 'Morning Run')],
@@ -396,10 +415,11 @@ describe('DashboardContent', () => {
       expect(screen.getByTestId('goals-count')).toHaveTextContent('0');
     });
 
-    it('should render single goal', () => {
+    it('should render single primary goal', () => {
       vi.mocked(useDashboard).mockReturnValue({
         ...baseMockUseDashboard,
-        dashboardGoals: [createMockGoal('1', 'Weekly Running Goal', { sportType: null })],
+        primaryGoal: createMockPrimaryGoal('1', 'Weekly Running Goal', { sportType: null }),
+        secondaryGoals: [],
         hasGoals: true,
       });
 
@@ -407,15 +427,16 @@ describe('DashboardContent', () => {
 
       expect(screen.getByTestId('goals-count')).toHaveTextContent('1');
       expect(screen.getByTestId('goal-1')).toBeInTheDocument();
+      expect(screen.getByTestId('goal-1')).toHaveAttribute('data-primary', 'true');
     });
 
-    it('should render multiple goals', () => {
+    it('should render primary goal with secondary goals', () => {
       vi.mocked(useDashboard).mockReturnValue({
         ...baseMockUseDashboard,
-        dashboardGoals: [
-          createMockGoal('1', 'Global Goal', { sportType: null }),
-          createMockGoal('2', 'Running Goal', { sportType: SportType.Run }),
-          createMockGoal('3', 'Cycling Goal', { sportType: SportType.Ride }),
+        primaryGoal: createMockPrimaryGoal('1', 'Global Goal', { sportType: null }),
+        secondaryGoals: [
+          createMockBaseGoal('2', 'Running Goal', { sportType: SportType.Run }),
+          createMockBaseGoal('3', 'Cycling Goal', { sportType: SportType.Ride }),
         ],
         hasGoals: true,
       });
@@ -423,9 +444,9 @@ describe('DashboardContent', () => {
       render(<DashboardContent />);
 
       expect(screen.getByTestId('goals-count')).toHaveTextContent('3');
-      expect(screen.getByTestId('goal-1')).toBeInTheDocument();
-      expect(screen.getByTestId('goal-2')).toBeInTheDocument();
-      expect(screen.getByTestId('goal-3')).toBeInTheDocument();
+      expect(screen.getByTestId('goal-1')).toHaveAttribute('data-primary', 'true');
+      expect(screen.getByTestId('goal-2')).toHaveAttribute('data-secondary', 'true');
+      expect(screen.getByTestId('goal-3')).toHaveAttribute('data-secondary', 'true');
     });
   });
 
