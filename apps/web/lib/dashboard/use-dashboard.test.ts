@@ -146,7 +146,7 @@ describe('useDashboard', () => {
       const { result } = renderHook(() => useDashboard());
 
       expect(result.current.loading).toBe(true);
-      expect(result.current.data).toBeNull();
+      expect(result.current.periodStatistics).toBeNull();
     });
 
     it('should return loading false when query completes', () => {
@@ -176,7 +176,7 @@ describe('useDashboard', () => {
       const { result } = renderHook(() => useDashboard());
 
       expect(result.current.error).toEqual(error);
-      expect(result.current.data).toBeNull();
+      expect(result.current.periodStatistics).toBeNull();
     });
   });
 
@@ -407,6 +407,69 @@ describe('useDashboard', () => {
       const { result } = renderHook(() => useDashboard());
 
       expect(result.current.hasMultipleSports).toBe(false);
+    });
+
+    it('should return showSportDistribution true when multiple sports with distribution data', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({
+          sportDistribution: [
+            { sport: SportType.Run, percentage: 60, totalTime: 3600 },
+            { sport: SportType.Ride, percentage: 40, totalTime: 2400 },
+          ],
+        }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.showSportDistribution).toBe(true);
+    });
+
+    it('should return showSportDistribution false when single sport selected', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({
+          userPreferences: { selectedSports: [SportType.Run] },
+        }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.showSportDistribution).toBe(false);
+    });
+
+    it('should return showSportDistribution false when distribution has single item', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({
+          sportDistribution: [{ sport: SportType.Run, percentage: 100, totalTime: 3600 }],
+        }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.showSportDistribution).toBe(false);
+    });
+
+    it('should return showSportDistribution false when distribution is empty', () => {
+      mockUseQuery.mockReturnValue({
+        data: createMockData({
+          sportDistribution: [],
+        }),
+        loading: false,
+        error: null,
+        refetch: vi.fn(),
+      });
+
+      const { result } = renderHook(() => useDashboard());
+
+      expect(result.current.showSportDistribution).toBe(false);
     });
   });
 

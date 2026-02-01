@@ -157,6 +157,8 @@ export class GoalService {
         userId,
         status: GoalStatus.ACTIVE,
       },
+      orderBy: { endDate: 'asc' },
+      take: 10,
     });
 
     return prismaGoals.sort((a, b) => {
