@@ -153,7 +153,7 @@ describe('Activity Sync Integration', () => {
 
       expect(dbActivities).toHaveLength(3);
       expect(dbActivities[0].name).toBe('Activity 1');
-      expect(dbActivities[0].type).toBe('Run');
+      expect(dbActivities[0].type).toBe(SportType.RUN);
       expect(dbActivities[0].distance).toBe(5000);
       expect(dbActivities[0].movingTime).toBe(1800);
     });
@@ -168,7 +168,7 @@ describe('Activity Sync Integration', () => {
 
       await seedTestActivity(user.id, {
         stravaId: BigInt(2000),
-        type: 'Run',
+        type: SportType.RUN,
         startDate: new Date('2024-01-01T08:00:00Z'),
       });
 
@@ -257,7 +257,7 @@ describe('Activity Sync Integration', () => {
       });
 
       expect(dbActivities).toHaveLength(2);
-      expect(dbActivities.every(a => a.type === 'Run')).toBe(true);
+      expect(dbActivities.every(a => a.type === SportType.RUN)).toBe(true);
     });
 
     it('should handle sync failure and store error', async () => {
@@ -468,9 +468,9 @@ describe('Activity Sync Integration', () => {
     it('should filter activities by type', async () => {
       const { user } = await seedTestUser();
 
-      await seedTestActivity(user.id, { stravaId: BigInt(9001), type: 'Run' });
-      await seedTestActivity(user.id, { stravaId: BigInt(9002), type: 'Ride' });
-      await seedTestActivity(user.id, { stravaId: BigInt(9003), type: 'Run' });
+      await seedTestActivity(user.id, { stravaId: BigInt(9001), type: SportType.RUN });
+      await seedTestActivity(user.id, { stravaId: BigInt(9002), type: SportType.RIDE });
+      await seedTestActivity(user.id, { stravaId: BigInt(9003), type: SportType.RUN });
 
       const runActivities = await activityService.findAll(user.id, { type: ActivityType.RUN });
       expect(runActivities).toHaveLength(2);

@@ -181,7 +181,7 @@ describe('UserPreferencesService', () => {
       expect(result.activitiesCount).toBe(10);
       expect(result.goalsCount).toBe(3);
       expect(prisma.activity.count).toHaveBeenCalledWith({
-        where: { userId: 1, type: { in: ['Run', 'TrailRun', 'VirtualRun'] } },
+        where: { userId: 1, type: SportType.RUN },
       });
       expect(prisma.goal.count).toHaveBeenCalledWith({
         where: { userId: 1, sportType: SportType.RUN },
@@ -198,7 +198,7 @@ describe('UserPreferencesService', () => {
       expect(result.goalsCount).toBe(0);
     });
 
-    it('should use correct Strava types for RIDE sport', async () => {
+    it('should use correct sport type for RIDE sport', async () => {
       prisma.activity.count.mockResolvedValue(5);
       prisma.goal.count.mockResolvedValue(2);
 
@@ -207,7 +207,7 @@ describe('UserPreferencesService', () => {
       expect(prisma.activity.count).toHaveBeenCalledWith({
         where: {
           userId: 1,
-          type: { in: ['Ride', 'MountainBikeRide', 'VirtualRide', 'EBikeRide', 'EMountainBikeRide', 'Velomobile'] },
+          type: SportType.RIDE,
         },
       });
     });
