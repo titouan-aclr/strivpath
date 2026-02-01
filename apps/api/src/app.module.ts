@@ -9,6 +9,7 @@ import { DatabaseModule } from './database/database.module';
 import { StravaModule } from './strava/strava.module';
 import { ActivityModule } from './activity/activity.module';
 import { GoalModule } from './goal/goal.module';
+import { StatisticsModule } from './statistics/statistics.module';
 import { HealthModule } from './health/health.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
@@ -55,6 +56,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     StravaModule,
     ActivityModule,
     GoalModule,
+    StatisticsModule,
     HealthModule,
   ],
 })

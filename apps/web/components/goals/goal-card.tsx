@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { useLocale } from 'next-intl';
 import Link from 'next/link';
-import { MoreVertical, Edit, Archive, Trash2, Footprints, Bike, Waves, Activity } from 'lucide-react';
+import { MoreVertical, Edit, Archive, Trash2 } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import {
@@ -14,11 +14,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 import { ProgressBar } from './progress-bar';
 import { GoalStatusBadge } from './goal-status-badge';
 import { GoalDeleteDialog } from './goal-delete-dialog';
-import { UNIT_LABELS } from './constants';
-import { GoalTargetType, SportType } from '@/gql/graphql';
+import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from './constants';
+import { getSportIcon } from '@/lib/sports/config';
+import { GoalTargetType } from '@/gql/graphql';
 import type { GoalCardFragment } from '@/gql/graphql';
 
 export interface GoalCardProps {
@@ -34,15 +36,16 @@ export function GoalCard({ goal, onArchive, onDelete, disabled }: GoalCardProps)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const SportIcon = getSportIcon(goal.sportType);
+  const statusColors = getGoalStatusColors(goal.status);
 
   return (
     <>
       <Link href={`/goals/${goal.id}`} className="block">
-        <Card className="transition-all hover:shadow-lg hover:border-strava-orange/50 cursor-pointer">
+        <Card className={cn('transition-all hover:shadow-lg cursor-pointer', statusColors.hoverBorder)}>
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
             <div className="flex items-center gap-3 flex-1">
-              <div className="p-2 rounded-lg bg-strava-orange/10">
-                <SportIcon className="h-5 w-5 text-strava-orange" aria-hidden="true" />
+              <div className={cn('p-2 rounded-lg', statusColors.bgSubtle)}>
+                <SportIcon className={cn('h-5 w-5', statusColors.text)} aria-hidden="true" />
               </div>
 
               <div className="flex-1 min-w-0">
@@ -107,8 +110,8 @@ export function GoalCard({ goal, onArchive, onDelete, disabled }: GoalCardProps)
 
           <CardContent className="space-y-4">
             <ProgressBar
-              current={goal.currentValue}
-              target={goal.targetValue}
+              current={normalizeGoalValue(goal.currentValue, goal.targetType)}
+              target={normalizeGoalValue(goal.targetValue, goal.targetType)}
               unit={getUnitLabel(goal.targetType)}
               status={goal.status}
               percentage={goal.progressPercentage}
@@ -133,13 +136,6 @@ export function GoalCard({ goal, onArchive, onDelete, disabled }: GoalCardProps)
       />
     </>
   );
-}
-
-function getSportIcon(sportType: SportType | null | undefined) {
-  if (sportType === SportType.Run) return Footprints;
-  if (sportType === SportType.Ride) return Bike;
-  if (sportType === SportType.Swim) return Waves;
-  return Activity;
 }
 
 function formatPeriod(startDate: Date | string, endDate: Date | string, locale: string): string {
