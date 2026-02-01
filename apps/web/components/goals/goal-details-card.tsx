@@ -3,7 +3,14 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Calendar, Clock, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { formatPeriod, getSportIcon, getSportLabelKey, getUnitLabel, formatDate } from '@/lib/goals/formatting';
+import {
+  formatPeriod,
+  getSportIcon,
+  getSportLabelKey,
+  getUnitLabel,
+  formatDate,
+  normalizeGoalValue,
+} from '@/lib/goals/formatting';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -58,7 +65,11 @@ export function GoalDetailsCard({ goal }: GoalDetailsCardProps) {
           />
         )}
 
-        <DetailRow icon={Target} label={t('target')} value={`${goal.targetValue} ${getUnitLabel(goal.targetType)}`} />
+        <DetailRow
+          icon={Target}
+          label={t('target')}
+          value={`${normalizeGoalValue(goal.targetValue, goal.targetType)} ${getUnitLabel(goal.targetType)}`}
+        />
 
         <DetailRow icon={SportIcon} label={t('sport')} value={sportLabel} />
 

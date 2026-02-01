@@ -230,4 +230,42 @@ describe('ActivityCard', () => {
       expect(sportIconContainer).toBeInTheDocument();
     });
   });
+
+  describe('Variant', () => {
+    it('should show footer in full variant by default', () => {
+      const { container } = renderWithIntl(<ActivityCard activity={mockActivity} />);
+      const footer = container.querySelector('.border-t');
+      expect(footer).toBeInTheDocument();
+    });
+
+    it('should show footer in full variant when explicitly set', () => {
+      const { container } = renderWithIntl(<ActivityCard activity={mockActivity} variant="full" />);
+      const footer = container.querySelector('.border-t');
+      expect(footer).toBeInTheDocument();
+    });
+
+    it('should hide footer in compact variant', () => {
+      const { container } = renderWithIntl(<ActivityCard activity={mockActivity} variant="compact" />);
+      const footer = container.querySelector('.border-t');
+      expect(footer).not.toBeInTheDocument();
+    });
+
+    it('should still show all 4 metrics in compact variant', () => {
+      renderWithIntl(<ActivityCard activity={mockActivity} variant="compact" />);
+      expect(screen.getByText('Distance')).toBeInTheDocument();
+      expect(screen.getByText('Duration')).toBeInTheDocument();
+      expect(screen.getByText('Elevation')).toBeInTheDocument();
+      expect(screen.getByText('Pace')).toBeInTheDocument();
+    });
+
+    it('should hide kudos in compact variant even when count > 0', () => {
+      renderWithIntl(<ActivityCard activity={mockActivity} variant="compact" />);
+      expect(screen.queryByLabelText('5 kudos')).not.toBeInTheDocument();
+    });
+
+    it('should hide heart rate in compact variant even when available', () => {
+      renderWithIntl(<ActivityCard activity={mockActivity} variant="compact" />);
+      expect(screen.queryByText('165 bpm')).not.toBeInTheDocument();
+    });
+  });
 });

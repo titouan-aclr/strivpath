@@ -92,6 +92,7 @@ const createMockGoal = (overrides?: Partial<Goal>): Goal => ({
   recurrenceEndDate: null,
   templateId: null,
   userId: 1,
+  progressHistory: [],
   ...overrides,
 });
 

@@ -50,8 +50,8 @@ const createMockGoal = (overrides?: Partial<Goal>): Goal => ({
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-01-31'),
   targetType: GoalTargetType.Distance,
-  targetValue: 50,
-  currentValue: 30,
+  targetValue: 50000,
+  currentValue: 30000,
   progressPercentage: 60,
   status: GoalStatus.Active,
   periodType: GoalPeriodType.Monthly,
@@ -65,6 +65,7 @@ const createMockGoal = (overrides?: Partial<Goal>): Goal => ({
   recurrenceEndDate: null,
   templateId: null,
   userId: 1,
+  progressHistory: [],
   ...overrides,
 });
 
@@ -135,8 +136,8 @@ describe('GoalProgressCard', () => {
 
     it('should display 100% for completed goal', () => {
       const goal = createMockGoal({
-        currentValue: 50,
-        targetValue: 50,
+        currentValue: 50000,
+        targetValue: 50000,
         progressPercentage: 100,
       });
       render(<GoalProgressCard goal={goal} />);
@@ -146,8 +147,8 @@ describe('GoalProgressCard', () => {
 
     it('should handle progress over 100%', () => {
       const goal = createMockGoal({
-        currentValue: 60,
-        targetValue: 50,
+        currentValue: 60000,
+        targetValue: 50000,
         progressPercentage: 120,
       });
       render(<GoalProgressCard goal={goal} />);
@@ -160,8 +161,8 @@ describe('GoalProgressCard', () => {
     it('should display current and target values for DISTANCE', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Distance,
-        currentValue: 35.7,
-        targetValue: 100,
+        currentValue: 35700,
+        targetValue: 100000,
       });
       render(<GoalProgressCard goal={goal} />);
 
@@ -171,8 +172,8 @@ describe('GoalProgressCard', () => {
     it('should display current and target values for DURATION', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Duration,
-        currentValue: 12.5,
-        targetValue: 20,
+        currentValue: 45000,
+        targetValue: 72000,
       });
       render(<GoalProgressCard goal={goal} />);
 
@@ -182,7 +183,7 @@ describe('GoalProgressCard', () => {
     it('should display integer values for FREQUENCY', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Frequency,
-        currentValue: 8.9,
+        currentValue: 8,
         targetValue: 12,
       });
       render(<GoalProgressCard goal={goal} />);
@@ -193,7 +194,7 @@ describe('GoalProgressCard', () => {
     it('should display integer values for ELEVATION', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Elevation,
-        currentValue: 3456.789,
+        currentValue: 3456,
         targetValue: 5000,
       });
       render(<GoalProgressCard goal={goal} />);
@@ -216,7 +217,7 @@ describe('GoalProgressCard', () => {
     it('should use COMPLETED color for completed goals', () => {
       const goal = createMockGoal({
         status: GoalStatus.Completed,
-        currentValue: 50,
+        currentValue: 50000,
         progressPercentage: 100,
       });
       const { container } = render(<GoalProgressCard goal={goal} />);

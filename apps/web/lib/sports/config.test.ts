@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { Footprints, Bike, Waves } from 'lucide-react';
+import { Footprints, Bike, Waves, Activity } from 'lucide-react';
 import { SportType } from '@/gql/graphql';
-import { SPORT_CONFIGS, ALL_SPORT_TYPES, getSportConfig, getFilteredSportConfigs } from './config';
+import { SPORT_CONFIGS, ALL_SPORT_TYPES, getSportConfig, getFilteredSportConfigs, getSportIcon } from './config';
 
 describe('sports/config', () => {
   describe('SPORT_CONFIGS', () => {
@@ -146,6 +146,38 @@ describe('sports/config', () => {
       expect(config).toHaveProperty('href');
       expect(config).toHaveProperty('labelKey');
       expect(config).toHaveProperty('goalLabelKey');
+    });
+  });
+
+  describe('getSportIcon', () => {
+    it('should return Footprints icon for RUN', () => {
+      const icon = getSportIcon(SportType.Run);
+      expect(icon).toBe(Footprints);
+    });
+
+    it('should return Bike icon for RIDE', () => {
+      const icon = getSportIcon(SportType.Ride);
+      expect(icon).toBe(Bike);
+    });
+
+    it('should return Waves icon for SWIM', () => {
+      const icon = getSportIcon(SportType.Swim);
+      expect(icon).toBe(Waves);
+    });
+
+    it('should return Activity icon for null sportType', () => {
+      const icon = getSportIcon(null);
+      expect(icon).toBe(Activity);
+    });
+
+    it('should return Activity icon for undefined sportType', () => {
+      const icon = getSportIcon(undefined);
+      expect(icon).toBe(Activity);
+    });
+
+    it('should return Activity icon for invalid sportType', () => {
+      const icon = getSportIcon('INVALID' as SportType);
+      expect(icon).toBe(Activity);
     });
   });
 });

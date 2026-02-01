@@ -101,3 +101,62 @@ export const UNIT_LABELS = {
   [GoalTargetType.Elevation]: 'meters',
   [GoalTargetType.Frequency]: 'sessions',
 };
+
+// Re-export normalization function from lib for convenience
+export { normalizeGoalValue } from '@/lib/goals/formatting';
+
+// Goal status color configuration
+export interface GoalStatusColorConfig {
+  text: string;
+  textSubtle: string;
+  bg: string;
+  bgSubtle: string;
+  border: string;
+  hoverBorder: string;
+  hex: string;
+}
+
+export const GOAL_STATUS_COLORS: Record<GoalStatus, GoalStatusColorConfig> = {
+  [GoalStatus.Active]: {
+    text: 'text-strava-orange',
+    textSubtle: 'text-strava-orange/10',
+    bg: 'bg-strava-orange',
+    bgSubtle: 'bg-strava-orange/10',
+    border: 'border-strava-orange',
+    hoverBorder: 'hover:border-strava-orange/50',
+    hex: '#fc4c02',
+  },
+  [GoalStatus.Completed]: {
+    text: 'text-green-500',
+    textSubtle: 'text-green-500/10',
+    bg: 'bg-green-500',
+    bgSubtle: 'bg-green-500/10',
+    border: 'border-green-500',
+    hoverBorder: 'hover:border-green-500/50',
+    hex: '#22c55e',
+  },
+  [GoalStatus.Failed]: {
+    text: 'text-destructive',
+    textSubtle: 'text-destructive/10',
+    bg: 'bg-destructive',
+    bgSubtle: 'bg-destructive/10',
+    border: 'border-destructive',
+    hoverBorder: 'hover:border-destructive/50',
+    hex: '#ef4444',
+  },
+  [GoalStatus.Archived]: {
+    text: 'text-muted-foreground',
+    textSubtle: 'text-muted-foreground/10',
+    bg: 'bg-muted-foreground',
+    bgSubtle: 'bg-muted-foreground/10',
+    border: 'border-muted-foreground',
+    hoverBorder: 'hover:border-muted-foreground/50',
+    hex: '#64748b',
+  },
+};
+
+export function getGoalStatusColors(status: GoalStatus | undefined): GoalStatusColorConfig {
+  return GOAL_STATUS_COLORS[status ?? GoalStatus.Active];
+}
+
+export const CHART_TARGET_LINE_COLOR = '#94a3b8';

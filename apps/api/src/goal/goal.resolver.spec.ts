@@ -20,6 +20,8 @@ describe('GoalResolver', () => {
     findAll: jest.fn(),
     findById: jest.fn(),
     findActiveGoals: jest.fn(),
+    findPrimaryDashboardGoal: jest.fn(),
+    findSecondaryDashboardGoals: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -163,6 +165,50 @@ describe('GoalResolver', () => {
 
       expect(goalService.findActiveGoals).toHaveBeenCalledWith(mockTokenPayload.sub);
       expect(result).toEqual([mockGoal]);
+    });
+  });
+
+  describe('primaryDashboardGoal', () => {
+    it('should return the primary goal for dashboard', async () => {
+      mockGoalService.findPrimaryDashboardGoal.mockResolvedValue(mockGoal);
+
+      const result = await resolver.primaryDashboardGoal(mockTokenPayload);
+
+      expect(goalService.findPrimaryDashboardGoal).toHaveBeenCalledWith(mockTokenPayload.sub);
+      expect(result).toEqual(mockGoal);
+    });
+
+    it('should return null when no active goals exist', async () => {
+      mockGoalService.findPrimaryDashboardGoal.mockResolvedValue(null);
+
+      const result = await resolver.primaryDashboardGoal(mockTokenPayload);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('secondaryDashboardGoals', () => {
+    it('should return secondary goals for dashboard', async () => {
+      const secondaryGoals = [
+        { ...mockGoal, id: 2, title: 'Secondary Goal 1' },
+        { ...mockGoal, id: 3, title: 'Secondary Goal 2' },
+      ];
+      mockGoalService.findSecondaryDashboardGoals.mockResolvedValue(secondaryGoals);
+
+      const result = await resolver.secondaryDashboardGoals(mockTokenPayload);
+
+      expect(goalService.findSecondaryDashboardGoals).toHaveBeenCalledWith(mockTokenPayload.sub);
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe(2);
+      expect(result[1].id).toBe(3);
+    });
+
+    it('should return empty array when no secondary goals exist', async () => {
+      mockGoalService.findSecondaryDashboardGoals.mockResolvedValue([]);
+
+      const result = await resolver.secondaryDashboardGoals(mockTokenPayload);
+
+      expect(result).toEqual([]);
     });
   });
 

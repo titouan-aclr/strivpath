@@ -81,6 +81,15 @@ type Activity {
   weightedAverageWatts: Float
 }
 
+"""Represents a single day in the activity calendar with activity status"""
+type ActivityCalendarDay {
+  """The date of the calendar day"""
+  date: DateTime!
+
+  """Whether an activity occurred on this day"""
+  hasActivity: Boolean!
+}
+
 """Types of activities supported by Strava"""
 enum ActivityType {
   ALPINE_SKI
@@ -212,6 +221,11 @@ type Goal {
   """Time period type for this goal"""
   periodType: GoalPeriodType!
 
+  """
+  Historical progress data points for charting (cumulative values per day with activity)
+  """
+  progressHistory: [GoalProgressPoint!]!
+
   """Calculated progress percentage (0-100+)"""
   progressPercentage: Float!
 
@@ -254,6 +268,17 @@ enum GoalPeriodType {
   MONTHLY
   WEEKLY
   YEARLY
+}
+
+"""
+A single data point representing cumulative progress on a specific date
+"""
+type GoalProgressPoint {
+  """Date of the progress point"""
+  date: DateTime!
+
+  """Cumulative progress value up to this date"""
+  value: Float!
 }
 
 """
@@ -380,6 +405,24 @@ enum OrderDirection {
   DESC
 }
 
+"""Aggregated statistics for a specific time period"""
+type PeriodStatistics {
+  """Number of activities in the period"""
+  activityCount: Int!
+
+  """Average time per session in seconds"""
+  averageTimePerSession: Float!
+
+  """End date of the period"""
+  periodEnd: DateTime!
+
+  """Start date of the period"""
+  periodStart: DateTime!
+
+  """Total training time in seconds"""
+  totalTime: Int!
+}
+
 type Query {
   """Get all active goals for the current user"""
   activeGoals: [Goal!]!
@@ -389,6 +432,15 @@ type Query {
 
   """Get a single activity by Strava ID"""
   activity(stravaId: String!): Activity
+
+  """Get activity calendar data for heatmap visualization"""
+  activityCalendar(
+    """Optional month (1-12) to limit results to a specific month"""
+    month: Int
+
+    """The year to retrieve calendar data for"""
+    year: Int!
+  ): [ActivityCalendarDay!]!
 
   """Get current authenticated user"""
   currentUser: User
@@ -405,8 +457,24 @@ type Query {
   """Get the latest sync history for current user"""
   latestSyncHistory: SyncHistory
 
+  """Get aggregated statistics for a specific time period"""
+  periodStatistics(period: StatisticsPeriod!): PeriodStatistics!
+
+  """
+  Get the primary goal for dashboard display (highest priority: global goals first, then by deadline)
+  """
+  primaryDashboardGoal: Goal
+
+  """
+  Get secondary goals for dashboard display (max 2, excluding the primary goal)
+  """
+  secondaryDashboardGoals: [Goal!]!
+
   """Get count of activities and goals for a sport"""
   sportDataCount(sport: SportType!): SportDataCount!
+
+  """Get distribution of training time by sport type for the current month"""
+  sportDistribution: [SportDistribution!]!
 
   """Generate Strava OAuth authorization URL"""
   stravaAuthUrl(redirect: String): String!
@@ -447,11 +515,30 @@ type SportDataCount {
   goalsCount: Int!
 }
 
+"""Distribution of training time by sport type for the current month"""
+type SportDistribution {
+  """Percentage of total training time (0-100)"""
+  percentage: Float!
+
+  """The sport type"""
+  sport: SportType!
+
+  """Total time in seconds for this sport"""
+  totalTime: Int!
+}
+
 """Available sport types for activity tracking"""
 enum SportType {
   RIDE
   RUN
   SWIM
+}
+
+"""Time period for statistics aggregation"""
+enum StatisticsPeriod {
+  MONTH
+  WEEK
+  YEAR
 }
 
 type SyncHistory {

@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl';
 import { GoalStatus } from '@/gql/graphql';
 import { cn } from '@/lib/utils';
+import { getGoalStatusColors } from './constants';
 
 export interface ProgressBarProps {
   current: number;
@@ -15,21 +16,7 @@ export interface ProgressBarProps {
 
 export function ProgressBar({ current, target, unit, status, percentage, className }: ProgressBarProps) {
   const t = useTranslations('goals.progress');
-
-  const getBarColor = () => {
-    if (status === GoalStatus.Completed) return 'bg-green-500';
-    if (status === GoalStatus.Failed) return 'bg-destructive';
-    if (status === GoalStatus.Archived) return 'bg-strava-orange';
-    return 'bg-goal-progress';
-  };
-
-  const getBackgroundColor = () => {
-    if (status === GoalStatus.Completed) return 'bg-green-500/10';
-    if (status === GoalStatus.Failed) return 'bg-destructive/10';
-    if (status === GoalStatus.Archived) return 'bg-strava-orange/10';
-    return 'bg-goal-progress/10';
-  };
-
+  const statusColors = getGoalStatusColors(status);
   const displayPercentage = Math.min(percentage, 100);
 
   return (
@@ -38,22 +25,12 @@ export function ProgressBar({ current, target, unit, status, percentage, classNa
         <span className="font-medium">
           {formatValue(current, unit)} / {formatValue(target, unit)} {unit}
         </span>
-        <span
-          className={cn(
-            'font-bold',
-            status === GoalStatus.Completed && 'text-green-500',
-            status === GoalStatus.Failed && 'text-destructive',
-            status === GoalStatus.Active && 'text-goal-progress',
-            status === GoalStatus.Archived && 'text-strava-orange',
-          )}
-        >
-          {percentage.toFixed(1)}%
-        </span>
+        <span className={cn('font-bold', statusColors.text)}>{percentage.toFixed(1)}%</span>
       </div>
 
-      <div className={cn('relative h-3 rounded-full overflow-hidden', getBackgroundColor())}>
+      <div className={cn('relative h-3 rounded-full overflow-hidden', statusColors.bgSubtle)}>
         <div
-          className={cn('h-full rounded-full transition-all duration-500 ease-out', getBarColor())}
+          className={cn('h-full rounded-full transition-all duration-500 ease-out', statusColors.bg)}
           style={{ width: `${displayPercentage}%` }}
           role="progressbar"
           aria-valuenow={current}

@@ -4,7 +4,6 @@ import { SportDataCount } from './models/sport-data-count.model';
 import { PrismaService } from '../database/prisma.service';
 import { UserPreferencesMapper } from './user-preferences.mapper';
 import { SportType } from './enums/sport-type.enum';
-import { getStravaTypesForSport } from '../common/utils/sport-type.utils';
 
 @Injectable()
 export class UserPreferencesService {
@@ -70,10 +69,8 @@ export class UserPreferencesService {
   }
 
   async getSportDataCount(userId: number, sport: SportType): Promise<SportDataCount> {
-    const stravaTypes = getStravaTypesForSport(sport);
-
     const [activitiesCount, goalsCount] = await Promise.all([
-      this.prisma.activity.count({ where: { userId, type: { in: stravaTypes } } }),
+      this.prisma.activity.count({ where: { userId, type: sport } }),
       this.prisma.goal.count({ where: { userId, sportType: sport } }),
     ]);
 
@@ -99,8 +96,6 @@ export class UserPreferencesService {
       throw new BadRequestException('Cannot remove last sport - at least one sport must be selected');
     }
 
-    const stravaTypes = getStravaTypesForSport(sport);
-
     await this.prisma.$transaction(async tx => {
       await tx.userPreferences.update({
         where: { userId },
@@ -108,7 +103,7 @@ export class UserPreferencesService {
       });
 
       if (deleteData) {
-        await tx.activity.deleteMany({ where: { userId, type: { in: stravaTypes } } });
+        await tx.activity.deleteMany({ where: { userId, type: sport } });
         await tx.goal.deleteMany({ where: { userId, sportType: sport } });
       } else {
         await tx.goal.updateMany({

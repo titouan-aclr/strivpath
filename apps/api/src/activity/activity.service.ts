@@ -54,15 +54,9 @@ export class ActivityService {
       distinct: ['type'],
     });
 
-    const existingSportTypes = new Set(
-      existingActivityTypes
-        .map(activity => getSportTypeFromStravaType(activity.type))
-        .filter((sportType): sportType is SportType => sportType !== null),
-    );
+    const existingSportTypes = new Set(existingActivityTypes.map(activity => activity.type));
 
-    const newlySelectedSports = selectedSports.filter(
-      sport => !existingSportTypes.has(sport as SportType),
-    ) as SportType[];
+    const newlySelectedSports = selectedSports.filter(sport => !existingSportTypes.has(sport)) as SportType[];
 
     return newlySelectedSports;
   }
@@ -149,7 +143,8 @@ export class ActivityService {
     for (let i = 0; i < activities.length; i++) {
       const stravaActivity = activities[i];
 
-      if (!this.shouldIncludeActivity(stravaActivity.type, selectedSports)) {
+      const normalizedType = getSportTypeFromStravaType(stravaActivity.type);
+      if (!normalizedType || !selectedSports.includes(normalizedType)) {
         continue;
       }
 
@@ -159,7 +154,7 @@ export class ActivityService {
           stravaId: BigInt(stravaActivity.id),
           userId,
           name: stravaActivity.name,
-          type: stravaActivity.type,
+          type: normalizedType,
           distance: stravaActivity.distance,
           movingTime: stravaActivity.moving_time,
           elapsedTime: stravaActivity.elapsed_time,
@@ -185,7 +180,7 @@ export class ActivityService {
         },
         update: {
           name: stravaActivity.name,
-          type: stravaActivity.type,
+          type: normalizedType,
           distance: stravaActivity.distance,
           movingTime: stravaActivity.moving_time,
           elapsedTime: stravaActivity.elapsed_time,

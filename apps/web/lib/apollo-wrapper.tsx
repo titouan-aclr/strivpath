@@ -24,9 +24,21 @@ function makeClient() {
         Query: {
           fields: {
             activities: {
-              keyArgs: ['filter', ['type']],
-              merge(existing: unknown[] = [], incoming: unknown[]): unknown[] {
-                return [...existing, ...incoming];
+              keyArgs: ['filter', ['type', 'startDate', 'endDate', 'orderBy', 'orderDirection']],
+              merge(
+                existing: unknown[] | undefined,
+                incoming: unknown[],
+                { args }: { args: { filter?: { offset?: number } } | null },
+              ): unknown[] {
+                const offset = args?.filter?.offset ?? 0;
+                if (offset === 0) {
+                  return incoming;
+                }
+                const merged = existing ? [...existing] : [];
+                for (let i = 0; i < incoming.length; i++) {
+                  merged[offset + i] = incoming[i];
+                }
+                return merged;
               },
             },
           },
