@@ -1,15 +1,16 @@
-import { ObjectType, Field, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
+import { IntervalType } from '../enums/interval-type.enum';
 
 @ObjectType({
   description: 'A single data point for progression chart visualization',
 })
 export class ProgressionDataPoint {
-  @Field({ description: 'Label for the x-axis (e.g., "Lun", "S1", "Jan")' })
-  label!: string;
+  @Field(() => Int, { description: 'Index within the interval (0-6 for days, 1-5 for weeks, 0-11 for months)' })
+  index!: number;
+
+  @Field(() => IntervalType, { description: 'Type of interval (DAY, WEEK, MONTH)' })
+  intervalType!: IntervalType;
 
   @Field(() => Float, { description: 'Numeric value for the data point' })
   value!: number;
-
-  @Field({ description: 'Formatted value for display (e.g., "42.5 km", "4h 32min")' })
-  formattedValue!: string;
 }
