@@ -7,11 +7,8 @@ export class PersonalRecord {
   @Field({ description: 'Type of record (e.g., "longest_distance", "best_pace")' })
   type!: string;
 
-  @Field(() => Float, { description: 'Numeric value of the record' })
+  @Field(() => Float, { description: 'Numeric value of the record (raw units: meters, seconds, m/s)' })
   value!: number;
-
-  @Field({ description: 'Human-readable formatted value (e.g., "42.5 km")' })
-  formattedValue!: string;
 
   @Field({ description: 'Date when the record was achieved' })
   achievedAt!: Date;
