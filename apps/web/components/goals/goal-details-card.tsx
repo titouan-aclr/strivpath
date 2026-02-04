@@ -3,14 +3,8 @@ import { useLocale, useTranslations } from 'next-intl';
 import { Calendar, Clock, Target } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import {
-  formatPeriod,
-  getSportIcon,
-  getSportLabelKey,
-  getUnitLabel,
-  formatDate,
-  normalizeGoalValue,
-} from '@/lib/goals/formatting';
+import { formatPeriod, getSportIcon, getSportLabelKey, getUnitLabel, normalizeGoalValue } from '@/lib/goals/formatting';
+import { formatDate } from '@/lib/activities/formatters';
 import type { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 

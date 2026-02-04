@@ -6,6 +6,8 @@ export interface SportColorConfig {
   bgMuted: string;
   text: string;
   border: string;
+  ring: string;
+  chart: string;
 }
 
 export interface SportConfig {
@@ -29,6 +31,8 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bgMuted: 'bg-lime-300/10',
       text: 'text-lime-500',
       border: 'border-lime-300',
+      ring: 'ring-lime-300',
+      chart: 'oklch(0.84 0.18 128)',
     },
   },
   [SportType.Ride]: {
@@ -42,6 +46,8 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bgMuted: 'bg-purple-400/10',
       text: 'text-purple-500',
       border: 'border-purple-400',
+      ring: 'ring-purple-400',
+      chart: 'oklch(0.65 0.25 300)',
     },
   },
   [SportType.Swim]: {
@@ -55,6 +61,8 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bgMuted: 'bg-cyan-300/10',
       text: 'text-cyan-500',
       border: 'border-cyan-300',
+      ring: 'ring-cyan-300',
+      chart: 'oklch(0.80 0.15 200)',
     },
   },
 };
@@ -82,6 +90,8 @@ export function getSportColors(sportType: SportType | null | undefined): SportCo
     bgMuted: 'bg-gray-300/10',
     text: 'text-gray-500',
     border: 'border-gray-300',
+    ring: 'ring-gray-300',
+    chart: 'oklch(0.70 0 0)',
   };
   if (!sportType) return defaultColors;
   return SPORT_CONFIGS[sportType]?.colors ?? defaultColors;

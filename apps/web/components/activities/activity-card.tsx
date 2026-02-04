@@ -10,7 +10,7 @@ import { SportType } from '@/gql/graphql';
 import { SPORT_TYPE_CONFIG } from '@/lib/activities/constants';
 import {
   formatDistance,
-  formatDuration,
+  formatDurationFull,
   formatPace,
   formatElevation,
   formatDate,
@@ -76,7 +76,7 @@ export function ActivityCard({ activity, onClick, variant = 'full' }: ActivityCa
 
           <div>
             <p className="text-xs text-muted-foreground">{t('duration')}</p>
-            <p className="font-semibold">{formatDuration(activity.movingTime)}</p>
+            <p className="font-semibold">{formatDurationFull(activity.movingTime)}</p>
           </div>
 
           <div>
