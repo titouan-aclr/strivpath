@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   formatDistance,
-  formatDuration,
+  formatDurationFull,
   formatElevation,
   formatPace,
   formatAltitudeRange,
@@ -36,9 +36,9 @@ export function StatsGrid({ activity, detailsLoading }: StatsGridProps) {
     },
     {
       label: t('stats.duration'),
-      value: formatDuration(activity.movingTime),
+      value: formatDurationFull(activity.movingTime),
       icon: Timer,
-      subValue: `${t('stats.elapsed')}: ${formatDuration(activity.elapsedTime)}`,
+      subValue: `${t('stats.elapsed')}: ${formatDurationFull(activity.elapsedTime)}`,
     },
     {
       label: t('stats.elevation'),
