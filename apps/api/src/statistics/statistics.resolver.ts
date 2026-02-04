@@ -7,7 +7,13 @@ import { StatisticsService } from './statistics.service';
 import { PeriodStatistics } from './models/period-statistics.model';
 import { ActivityCalendarDay } from './models/activity-calendar-day.model';
 import { SportDistribution } from './models/sport-distribution.model';
+import { SportPeriodStatistics } from './models/sport-period-statistics.model';
+import { SportAverageMetrics } from './models/sport-average-metrics.model';
+import { ProgressionDataPoint } from './models/progression-data-point.model';
+import { PersonalRecord } from './models/personal-record.model';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
+import { ProgressionMetric } from './enums/progression-metric.enum';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
 
 @Resolver()
 export class StatisticsResolver {
@@ -48,5 +54,53 @@ export class StatisticsResolver {
   @UseGuards(GqlAuthGuard)
   async sportDistribution(@CurrentUser() tokenPayload: TokenPayload): Promise<SportDistribution[]> {
     return this.statisticsService.getSportDistribution(tokenPayload.sub);
+  }
+
+  @Query(() => SportPeriodStatistics, {
+    description: 'Get aggregated statistics for a sport over a specific time period with trend comparisons',
+  })
+  @UseGuards(GqlAuthGuard)
+  async sportPeriodStatistics(
+    @CurrentUser() tokenPayload: TokenPayload,
+    @Args('sportType', { type: () => SportType }) sportType: SportType,
+    @Args('period', { type: () => StatisticsPeriod }) period: StatisticsPeriod,
+  ): Promise<SportPeriodStatistics> {
+    return this.statisticsService.getSportPeriodStatistics(tokenPayload.sub, sportType, period);
+  }
+
+  @Query(() => [ProgressionDataPoint], {
+    description: 'Get progression data points for chart visualization',
+  })
+  @UseGuards(GqlAuthGuard)
+  async sportProgressionData(
+    @CurrentUser() tokenPayload: TokenPayload,
+    @Args('sportType', { type: () => SportType }) sportType: SportType,
+    @Args('period', { type: () => StatisticsPeriod }) period: StatisticsPeriod,
+    @Args('metric', { type: () => ProgressionMetric }) metric: ProgressionMetric,
+  ): Promise<ProgressionDataPoint[]> {
+    return this.statisticsService.getSportProgressionData(tokenPayload.sub, sportType, period, metric);
+  }
+
+  @Query(() => SportAverageMetrics, {
+    description: 'Get average performance metrics for a sport over a time period',
+  })
+  @UseGuards(GqlAuthGuard)
+  async sportAverageMetrics(
+    @CurrentUser() tokenPayload: TokenPayload,
+    @Args('sportType', { type: () => SportType }) sportType: SportType,
+    @Args('period', { type: () => StatisticsPeriod }) period: StatisticsPeriod,
+  ): Promise<SportAverageMetrics> {
+    return this.statisticsService.getSportAverageMetrics(tokenPayload.sub, sportType, period);
+  }
+
+  @Query(() => [PersonalRecord], {
+    description: 'Get personal records for a specific sport',
+  })
+  @UseGuards(GqlAuthGuard)
+  async personalRecords(
+    @CurrentUser() tokenPayload: TokenPayload,
+    @Args('sportType', { type: () => SportType }) sportType: SportType,
+  ): Promise<PersonalRecord[]> {
+    return this.statisticsService.getPersonalRecords(tokenPayload.sub, sportType);
   }
 }
