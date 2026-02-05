@@ -1,4 +1,4 @@
-import { SportType } from '@/gql/graphql';
+import { ActivityType, SportType } from '@/gql/graphql';
 import { Activity, Bike, Footprints, Waves, type LucideIcon } from 'lucide-react';
 
 export interface SportColorConfig {
@@ -95,4 +95,14 @@ export function getSportColors(sportType: SportType | null | undefined): SportCo
   };
   if (!sportType) return defaultColors;
   return SPORT_CONFIGS[sportType]?.colors ?? defaultColors;
+}
+
+const SPORT_TO_ACTIVITY_TYPE: Record<SportType, ActivityType> = {
+  [SportType.Run]: ActivityType.Run,
+  [SportType.Ride]: ActivityType.Ride,
+  [SportType.Swim]: ActivityType.Swim,
+};
+
+export function getPrimaryActivityType(sportType: SportType): ActivityType {
+  return SPORT_TO_ACTIVITY_TYPE[sportType];
 }
