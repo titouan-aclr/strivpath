@@ -6,23 +6,25 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { SecondaryGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
-import { getSportIcon } from '@/lib/sports/config';
+import { UNIT_LABELS, normalizeGoalValue } from '@/components/goals/constants';
+import { getSportIcon, type SportColorConfig } from '@/lib/sports/config';
 import { ProgressStatusBadge } from './progress-status-badge';
+import { getEffectiveStatusColors } from './utils';
 
 export interface SecondaryGoalCardProps {
   goal: SecondaryGoal;
   className?: string;
+  sportColor?: SportColorConfig;
 }
 
-export function SecondaryGoalCard({ goal, className }: SecondaryGoalCardProps) {
+export function SecondaryGoalCard({ goal, className, sportColor }: SecondaryGoalCardProps) {
   const t = useTranslations('dashboard.goals');
 
   const SportIcon = getSportIcon(goal.sportType);
   const progressStatus = getProgressStatusFromGoal(goal);
   const displayPercentage = Math.min(goal.progressPercentage, 100);
   const unit = UNIT_LABELS[goal.targetType];
-  const statusColors = getGoalStatusColors(goal.status);
+  const statusColors = getEffectiveStatusColors(goal.status, sportColor);
 
   const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
   const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);

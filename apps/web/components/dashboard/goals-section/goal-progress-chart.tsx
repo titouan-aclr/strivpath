@@ -16,6 +16,7 @@ export interface GoalProgressChartProps {
   unit: string;
   className?: string;
   status?: GoalStatus;
+  colorHex?: string;
 }
 
 interface ChartDataPoint {
@@ -33,11 +34,12 @@ export function GoalProgressChart({
   unit,
   className,
   status,
+  colorHex,
 }: GoalProgressChartProps) {
   const locale = useLocale();
   const t = useTranslations('dashboard.goals.chart');
   const gradientId = useId();
-  const progressColor = getGoalStatusColors(status).hex;
+  const progressColor = colorHex ?? getGoalStatusColors(status).hex;
 
   const chartConfig = {
     progress: {
