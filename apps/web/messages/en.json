@@ -677,6 +677,38 @@
       "goHome": "Go back home"
     }
   },
+  "sportDashboard": {
+    "header": {
+      "title": "{sport} Dashboard",
+      "lastSync": "Last sync {time}",
+      "neverSynced": "Never synced"
+    },
+    "stats": {
+      "title": "Statistics",
+      "distance": "Distance",
+      "duration": "Duration",
+      "sessions": "Sessions",
+      "elevation": "Elevation",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    },
+    "averageMetrics": {
+      "title": "Average Metrics",
+      "pace": "Avg Pace",
+      "speed": "Avg Speed",
+      "heartRate": "Avg Heart Rate",
+      "cadence": "Avg Cadence",
+      "power": "Avg Power",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    }
+  },
   "dashboard": {
     "greeting": "Hello, {name}",
     "greetingFallback": "Hello",
