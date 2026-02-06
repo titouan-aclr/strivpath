@@ -2,6 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { CircularProgress } from './circular-progress';
 import { GoalStatus } from '@/gql/graphql';
+import type { SportColorConfig } from '@/lib/sports/config';
+
+const rideSportColor: SportColorConfig = {
+  bg: 'bg-purple-400',
+  bgMuted: 'bg-purple-400/10',
+  text: 'text-purple-500',
+  textMuted: 'text-purple-500/10',
+  border: 'border-purple-400',
+  ring: 'ring-purple-400',
+  chart: 'oklch(0.65 0.25 300)',
+};
 
 describe('CircularProgress', () => {
   it('should render percentage value', () => {
@@ -117,5 +128,26 @@ describe('CircularProgress', () => {
     const backgroundCircle = container.querySelector('.text-muted-foreground\\/10');
     expect(progressCircle).toBeInTheDocument();
     expect(backgroundCircle).toBeInTheDocument();
+  });
+
+  it('should use sport colors on circles when sportColor is provided', () => {
+    const { container } = render(<CircularProgress percentage={50} sportColor={rideSportColor} />);
+
+    const progressCircle = container.querySelector('.text-purple-500');
+    const backgroundCircle = container.querySelector('.text-purple-500\\/10');
+    expect(progressCircle).toBeInTheDocument();
+    expect(backgroundCircle).toBeInTheDocument();
+  });
+
+  it('should use sport colors over status colors when sportColor is provided', () => {
+    const { container } = render(
+      <CircularProgress percentage={50} status={GoalStatus.Active} sportColor={rideSportColor} />,
+    );
+
+    const progressCircle = container.querySelector('.text-purple-500');
+    const backgroundCircle = container.querySelector('.text-purple-500\\/10');
+    expect(progressCircle).toBeInTheDocument();
+    expect(backgroundCircle).toBeInTheDocument();
+    expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
   });
 });
