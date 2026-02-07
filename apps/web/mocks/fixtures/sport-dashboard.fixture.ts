@@ -37,24 +37,14 @@ export const MOCK_SPORT_PERIOD_STATISTICS: Record<SportType, SportPeriodStatisti
   },
 };
 
-export const MOCK_PROGRESSION_DATA_WEEK: ProgressionDataPoint[] = [
-  { __typename: 'ProgressionDataPoint', index: 0, intervalType: IntervalType.Day, value: 5200 },
-  { __typename: 'ProgressionDataPoint', index: 1, intervalType: IntervalType.Day, value: 0 },
-  { __typename: 'ProgressionDataPoint', index: 2, intervalType: IntervalType.Day, value: 8100 },
-  { __typename: 'ProgressionDataPoint', index: 3, intervalType: IntervalType.Day, value: 0 },
-  { __typename: 'ProgressionDataPoint', index: 4, intervalType: IntervalType.Day, value: 6300 },
-  { __typename: 'ProgressionDataPoint', index: 5, intervalType: IntervalType.Day, value: 12500 },
-  { __typename: 'ProgressionDataPoint', index: 6, intervalType: IntervalType.Day, value: 0 },
-];
+export const MOCK_PROGRESSION_DATA_WEEKLY: ProgressionDataPoint[] = Array.from({ length: 52 }, (_, i) => ({
+  __typename: 'ProgressionDataPoint' as const,
+  index: i + 1,
+  intervalType: IntervalType.Week,
+  value: Math.round(15000 + Math.sin(i * 0.3) * 10000 + ((i * 1733) % 5000)),
+}));
 
-export const MOCK_PROGRESSION_DATA_MONTH: ProgressionDataPoint[] = [
-  { __typename: 'ProgressionDataPoint', index: 1, intervalType: IntervalType.Week, value: 28500 },
-  { __typename: 'ProgressionDataPoint', index: 2, intervalType: IntervalType.Week, value: 32100 },
-  { __typename: 'ProgressionDataPoint', index: 3, intervalType: IntervalType.Week, value: 18900 },
-  { __typename: 'ProgressionDataPoint', index: 4, intervalType: IntervalType.Week, value: 42500 },
-];
-
-export const MOCK_PROGRESSION_DATA_YEAR: ProgressionDataPoint[] = [
+export const MOCK_PROGRESSION_DATA_MONTHLY: ProgressionDataPoint[] = [
   { __typename: 'ProgressionDataPoint', index: 0, intervalType: IntervalType.Month, value: 95000 },
   { __typename: 'ProgressionDataPoint', index: 1, intervalType: IntervalType.Month, value: 88000 },
   { __typename: 'ProgressionDataPoint', index: 2, intervalType: IntervalType.Month, value: 102000 },
@@ -164,12 +154,10 @@ export const MOCK_PERSONAL_RECORDS: Record<SportType, PersonalRecord[]> = {
 export function getProgressionDataForPeriod(period: StatisticsPeriod): ProgressionDataPoint[] {
   switch (period) {
     case StatisticsPeriod.Week:
-      return MOCK_PROGRESSION_DATA_WEEK;
+      return MOCK_PROGRESSION_DATA_WEEKLY;
     case StatisticsPeriod.Month:
-      return MOCK_PROGRESSION_DATA_MONTH;
-    case StatisticsPeriod.Year:
-      return MOCK_PROGRESSION_DATA_YEAR;
+      return MOCK_PROGRESSION_DATA_MONTHLY;
     default:
-      return MOCK_PROGRESSION_DATA_MONTH;
+      return MOCK_PROGRESSION_DATA_WEEKLY;
   }
 }

@@ -270,7 +270,7 @@ export class StatisticsService {
     metric: ProgressionMetric,
   ): Promise<ProgressionDataPoint[]> {
     const stravaTypes = getStravaTypesForSport(sportType);
-    const intervals = this.generateIntervals(period);
+    const intervals = this.generateProgressionIntervals(period);
 
     const dataPoints: ProgressionDataPoint[] = [];
 
@@ -532,48 +532,24 @@ export class StatisticsService {
     return Number((((current - previous) / previous) * 100).toFixed(1));
   }
 
-  private generateIntervals(period: StatisticsPeriod): DateInterval[] {
-    const { startDate } = this.calculatePeriodDates(period);
+  private generateProgressionIntervals(period: StatisticsPeriod): DateInterval[] {
+    const now = new Date();
+    const year = now.getFullYear();
     const intervals: DateInterval[] = [];
 
     switch (period) {
       case StatisticsPeriod.WEEK: {
-        for (let i = 0; i < 7; i++) {
-          const dayStart = new Date(startDate);
-          dayStart.setDate(startDate.getDate() + i);
-          dayStart.setHours(0, 0, 0, 0);
-
-          const dayEnd = new Date(dayStart);
-          dayEnd.setHours(23, 59, 59, 999);
-
-          intervals.push({
-            index: i,
-            intervalType: IntervalType.DAY,
-            startDate: dayStart,
-            endDate: dayEnd,
-          });
-        }
-        break;
-      }
-
-      case StatisticsPeriod.MONTH: {
-        const year = startDate.getFullYear();
-        const month = startDate.getMonth();
-        const lastDay = new Date(year, month + 1, 0).getDate();
-
-        let weekNumber = 1;
-        let weekStart = new Date(year, month, 1);
+        const jan1 = new Date(year, 0, 1);
+        const dayOfWeek = jan1.getDay();
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        let weekStart = new Date(year, 0, 1 + mondayOffset);
         weekStart.setHours(0, 0, 0, 0);
 
-        while (weekStart.getDate() <= lastDay && weekStart.getMonth() === month) {
+        let weekNumber = 1;
+
+        while (weekStart.getFullYear() <= year) {
           const weekEnd = new Date(weekStart);
           weekEnd.setDate(weekStart.getDate() + 6);
-
-          if (weekEnd.getMonth() !== month || weekEnd.getDate() > lastDay) {
-            weekEnd.setFullYear(year);
-            weekEnd.setMonth(month);
-            weekEnd.setDate(lastDay);
-          }
           weekEnd.setHours(23, 59, 59, 999);
 
           intervals.push({
@@ -587,13 +563,14 @@ export class StatisticsService {
           weekStart.setDate(weekStart.getDate() + 1);
           weekStart.setHours(0, 0, 0, 0);
           weekNumber++;
+
+          if (weekStart.getFullYear() > year) break;
         }
         break;
       }
 
+      case StatisticsPeriod.MONTH:
       case StatisticsPeriod.YEAR: {
-        const year = startDate.getFullYear();
-
         for (let i = 0; i < 12; i++) {
           const monthStart = new Date(year, i, 1);
           monthStart.setHours(0, 0, 0, 0);
