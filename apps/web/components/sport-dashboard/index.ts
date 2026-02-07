@@ -4,3 +4,5 @@ export { SportStatsSection } from './sport-stats-section';
 export type { SportStatsSectionProps } from './sport-stats-section';
 export { AverageMetricsSection } from './average-metrics';
 export type { AverageMetricsSectionProps } from './average-metrics';
+export { ProgressionChartSection } from './progression-chart';
+export type { ProgressionChartSectionProps } from './progression-chart';

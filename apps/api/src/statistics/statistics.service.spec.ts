@@ -889,7 +889,7 @@ describe('StatisticsService', () => {
     });
 
     describe('interval generation', () => {
-      it('should return 7 data points for WEEK period', async () => {
+      it('should return 52-53 weekly data points for WEEK period (full year)', async () => {
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
@@ -897,40 +897,15 @@ describe('StatisticsService', () => {
           ProgressionMetric.DISTANCE,
         );
 
-        expect(result).toHaveLength(7);
+        expect(result.length).toBeGreaterThanOrEqual(52);
+        expect(result.length).toBeLessThanOrEqual(53);
       });
 
-      it('should return index 0-6 and intervalType DAY for WEEK period', async () => {
+      it('should return index starting at 1 and intervalType WEEK for WEEK period', async () => {
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
           StatisticsPeriod.WEEK,
-          ProgressionMetric.DISTANCE,
-        );
-
-        expect(result.map(p => p.index)).toEqual([0, 1, 2, 3, 4, 5, 6]);
-        result.forEach(point => {
-          expect(point.intervalType).toBe(IntervalType.DAY);
-        });
-      });
-
-      it('should return 4-5 data points for MONTH period', async () => {
-        const result = await service.getSportProgressionData(
-          userId,
-          SportType.RUN,
-          StatisticsPeriod.MONTH,
-          ProgressionMetric.DISTANCE,
-        );
-
-        expect(result.length).toBeGreaterThanOrEqual(4);
-        expect(result.length).toBeLessThanOrEqual(5);
-      });
-
-      it('should return index 1-5 and intervalType WEEK for MONTH period', async () => {
-        const result = await service.getSportProgressionData(
-          userId,
-          SportType.RUN,
-          StatisticsPeriod.MONTH,
           ProgressionMetric.DISTANCE,
         );
 
@@ -941,7 +916,32 @@ describe('StatisticsService', () => {
         });
       });
 
-      it('should return 12 data points for YEAR period', async () => {
+      it('should return 12 data points for MONTH period (full year)', async () => {
+        const result = await service.getSportProgressionData(
+          userId,
+          SportType.RUN,
+          StatisticsPeriod.MONTH,
+          ProgressionMetric.DISTANCE,
+        );
+
+        expect(result).toHaveLength(12);
+      });
+
+      it('should return index 0-11 and intervalType MONTH for MONTH period', async () => {
+        const result = await service.getSportProgressionData(
+          userId,
+          SportType.RUN,
+          StatisticsPeriod.MONTH,
+          ProgressionMetric.DISTANCE,
+        );
+
+        expect(result.map(p => p.index)).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
+        result.forEach(point => {
+          expect(point.intervalType).toBe(IntervalType.MONTH);
+        });
+      });
+
+      it('should return 12 data points for YEAR period (same as MONTH)', async () => {
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,

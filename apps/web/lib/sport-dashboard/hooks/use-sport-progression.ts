@@ -31,7 +31,7 @@ export interface UseSportProgressionResult {
 }
 
 export function useSportProgression(options: UseSportProgressionOptions): UseSportProgressionResult {
-  const { sportType, initialPeriod = StatisticsPeriod.Month, initialMetric, skip = false } = options;
+  const { sportType, initialPeriod = StatisticsPeriod.Week, initialMetric, skip = false } = options;
 
   const availableMetrics = useMemo(() => getAvailableMetrics(sportType), [sportType]);
 

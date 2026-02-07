@@ -707,6 +707,22 @@
         "month": "Month",
         "year": "Year"
       }
+    },
+    "progression": {
+      "title": "My Progression",
+      "empty": "No data available for this period",
+      "metrics": {
+        "distance": "Distance",
+        "duration": "Duration",
+        "pace": "Pace",
+        "speed": "Speed",
+        "sessions": "Sessions",
+        "elevation": "Elevation"
+      },
+      "periods": {
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      }
     }
   },
   "dashboard": {

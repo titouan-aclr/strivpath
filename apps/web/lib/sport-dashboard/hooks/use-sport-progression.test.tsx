@@ -63,7 +63,7 @@ describe('useSportProgression', () => {
       });
 
       expect(result.current.loading).toBe(true);
-      expect(result.current.period).toBe(StatisticsPeriod.Month);
+      expect(result.current.period).toBe(StatisticsPeriod.Week);
       expect(result.current.metric).toBe(ProgressionMetric.Distance);
 
       await waitFor(() => {
@@ -77,10 +77,10 @@ describe('useSportProgression', () => {
     it('should use initial period and metric when provided', async () => {
       server.use(
         graphql.query('SportProgressionData', ({ variables }) => {
-          expect(variables.period).toBe(StatisticsPeriod.Week);
+          expect(variables.period).toBe(StatisticsPeriod.Month);
           expect(variables.metric).toBe(ProgressionMetric.Duration);
           return HttpResponse.json({
-            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Week) },
+            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Month) },
           });
         }),
       );
@@ -89,13 +89,13 @@ describe('useSportProgression', () => {
         () =>
           useSportProgression({
             sportType: SportType.Run,
-            initialPeriod: StatisticsPeriod.Week,
+            initialPeriod: StatisticsPeriod.Month,
             initialMetric: ProgressionMetric.Duration,
           }),
         { wrapper: createWrapper() },
       );
 
-      expect(result.current.period).toBe(StatisticsPeriod.Week);
+      expect(result.current.period).toBe(StatisticsPeriod.Month);
       expect(result.current.metric).toBe(ProgressionMetric.Duration);
 
       await waitFor(() => {
@@ -203,14 +203,14 @@ describe('useSportProgression', () => {
       });
 
       act(() => {
-        result.current.setPeriod(StatisticsPeriod.Year);
+        result.current.setPeriod(StatisticsPeriod.Month);
       });
 
       await waitFor(() => {
-        expect(querySpy).toHaveBeenCalledWith(StatisticsPeriod.Year);
+        expect(querySpy).toHaveBeenCalledWith(StatisticsPeriod.Month);
       });
 
-      expect(result.current.period).toBe(StatisticsPeriod.Year);
+      expect(result.current.period).toBe(StatisticsPeriod.Month);
     });
   });
 
@@ -222,7 +222,7 @@ describe('useSportProgression', () => {
         graphql.query('SportProgressionData', ({ variables }) => {
           querySpy(variables.metric);
           return HttpResponse.json({
-            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Month) },
+            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Week) },
           });
         }),
       );
@@ -257,7 +257,7 @@ describe('useSportProgression', () => {
         graphql.query('SportProgressionData', () => {
           querySpy();
           return HttpResponse.json({
-            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Month) },
+            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Week) },
           });
         }),
       );
@@ -325,7 +325,7 @@ describe('useSportProgression', () => {
         graphql.query('SportProgressionData', () => {
           querySpy();
           return HttpResponse.json({
-            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Month) },
+            data: { sportProgressionData: getProgressionDataForPeriod(StatisticsPeriod.Week) },
           });
         }),
       );
