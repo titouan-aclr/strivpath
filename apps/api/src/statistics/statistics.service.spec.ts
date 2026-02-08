@@ -738,37 +738,37 @@ describe('StatisticsService', () => {
         expect(result.totalElevation).toBe(500);
       });
 
-      it('should filter by correct Strava types for RUN', async () => {
+      it('should filter by sport type for RUN', async () => {
         await service.getSportPeriodStatistics(userId, SportType.RUN, StatisticsPeriod.WEEK);
 
         expect(prisma.activity.aggregate).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
+              type: SportType.RUN,
             }),
           }),
         );
       });
 
-      it('should filter by correct Strava types for RIDE', async () => {
+      it('should filter by sport type for RIDE', async () => {
         await service.getSportPeriodStatistics(userId, SportType.RIDE, StatisticsPeriod.MONTH);
 
         expect(prisma.activity.aggregate).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              type: { in: ['Ride', 'MountainBikeRide', 'VirtualRide', 'EBikeRide', 'EMountainBikeRide', 'Velomobile'] },
+              type: SportType.RIDE,
             }),
           }),
         );
       });
 
-      it('should filter by correct Strava types for SWIM', async () => {
+      it('should filter by sport type for SWIM', async () => {
         await service.getSportPeriodStatistics(userId, SportType.SWIM, StatisticsPeriod.YEAR);
 
         expect(prisma.activity.aggregate).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              type: { in: ['Swim'] },
+              type: SportType.SWIM,
             }),
           }),
         );
@@ -1522,13 +1522,13 @@ describe('StatisticsService', () => {
         expect(distanceRecord).toBeUndefined();
       });
 
-      it('should filter by correct Strava types', async () => {
+      it('should filter by sport type', async () => {
         await service.getPersonalRecords(userId, SportType.RUN);
 
         expect(prisma.activity.findFirst).toHaveBeenCalledWith(
           expect.objectContaining({
             where: expect.objectContaining({
-              type: { in: ['Run', 'TrailRun', 'VirtualRun'] },
+              type: SportType.RUN,
             }),
           }),
         );

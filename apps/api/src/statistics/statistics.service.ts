@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../database/prisma.service';
-import { getStravaTypesForSport } from '../common/utils/sport-type.utils';
 import { SportType } from '../user-preferences/enums/sport-type.enum';
 import { StatisticsPeriod } from './enums/statistics-period.enum';
 import { ProgressionMetric } from './enums/progression-metric.enum';
@@ -216,7 +215,6 @@ export class StatisticsService {
     sportType: SportType,
     period: StatisticsPeriod,
   ): Promise<SportPeriodStatistics> {
-    const stravaTypes = getStravaTypesForSport(sportType);
     const { startDate, endDate } = this.calculatePeriodDates(period);
     const { startDate: prevStartDate, endDate: prevEndDate } = this.calculatePreviousPeriodDates(period);
 
@@ -224,7 +222,7 @@ export class StatisticsService {
       this.prisma.activity.aggregate({
         where: {
           userId,
-          type: { in: stravaTypes },
+          type: sportType,
           startDate: { gte: startDate, lte: endDate },
         },
         _sum: { distance: true, movingTime: true, totalElevationGain: true },
@@ -233,7 +231,7 @@ export class StatisticsService {
       this.prisma.activity.aggregate({
         where: {
           userId,
-          type: { in: stravaTypes },
+          type: sportType,
           startDate: { gte: prevStartDate, lte: prevEndDate },
         },
         _sum: { distance: true, movingTime: true, totalElevationGain: true },
@@ -269,7 +267,6 @@ export class StatisticsService {
     period: StatisticsPeriod,
     metric: ProgressionMetric,
   ): Promise<ProgressionDataPoint[]> {
-    const stravaTypes = getStravaTypesForSport(sportType);
     const intervals = this.generateProgressionIntervals(period);
 
     const dataPoints: ProgressionDataPoint[] = [];
@@ -278,7 +275,7 @@ export class StatisticsService {
       const activities = await this.prisma.activity.findMany({
         where: {
           userId,
-          type: { in: stravaTypes },
+          type: sportType,
           startDate: { gte: interval.startDate, lte: interval.endDate },
         },
         select: {
@@ -305,13 +302,12 @@ export class StatisticsService {
     sportType: SportType,
     period: StatisticsPeriod,
   ): Promise<SportAverageMetrics> {
-    const stravaTypes = getStravaTypesForSport(sportType);
     const { startDate, endDate } = this.calculatePeriodDates(period);
 
     const activities = await this.prisma.activity.findMany({
       where: {
         userId,
-        type: { in: stravaTypes },
+        type: sportType,
         startDate: { gte: startDate, lte: endDate },
       },
       select: {
@@ -385,11 +381,10 @@ export class StatisticsService {
   }
 
   async getPersonalRecords(userId: number, sportType: SportType): Promise<PersonalRecord[]> {
-    const stravaTypes = getStravaTypesForSport(sportType);
     const records: PersonalRecord[] = [];
 
     const longestDistance = await this.prisma.activity.findFirst({
-      where: { userId, type: { in: stravaTypes } },
+      where: { userId, type: sportType },
       orderBy: { distance: 'desc' },
       select: { id: true, distance: true, startDate: true },
     });
@@ -404,7 +399,7 @@ export class StatisticsService {
     }
 
     const longestDuration = await this.prisma.activity.findFirst({
-      where: { userId, type: { in: stravaTypes } },
+      where: { userId, type: sportType },
       orderBy: { movingTime: 'desc' },
       select: { id: true, movingTime: true, startDate: true },
     });
@@ -419,7 +414,7 @@ export class StatisticsService {
     }
 
     const mostElevation = await this.prisma.activity.findFirst({
-      where: { userId, type: { in: stravaTypes } },
+      where: { userId, type: sportType },
       orderBy: { totalElevationGain: 'desc' },
       select: { id: true, totalElevationGain: true, startDate: true },
     });
@@ -437,7 +432,7 @@ export class StatisticsService {
       const activitiesForPace = await this.prisma.activity.findMany({
         where: {
           userId,
-          type: { in: stravaTypes },
+          type: sportType,
           distance: { gte: 1000 },
         },
         select: { id: true, distance: true, movingTime: true, startDate: true },
@@ -468,7 +463,7 @@ export class StatisticsService {
       const bestSpeed = await this.prisma.activity.findFirst({
         where: {
           userId,
-          type: { in: stravaTypes },
+          type: sportType,
           averageSpeed: { gt: 0 },
         },
         orderBy: { averageSpeed: 'desc' },
