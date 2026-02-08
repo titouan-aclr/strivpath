@@ -723,6 +723,27 @@
         "weekly": "Weekly",
         "monthly": "Monthly"
       }
+    },
+    "goals": {
+      "title": "Goals",
+      "viewAll": "View all goals",
+      "empty": {
+        "title": "No goals yet",
+        "description": "Set goals to track your progress and stay motivated.",
+        "cta": "Create a goal"
+      }
+    },
+    "records": {
+      "title": "Personal Records",
+      "empty": "No records yet. Keep training to set your first records!",
+      "achievedOn": "Achieved on {date}",
+      "types": {
+        "longest_distance": "Longest Distance",
+        "longest_duration": "Longest Duration",
+        "most_elevation": "Most Elevation",
+        "best_pace": "Best Pace",
+        "best_speed": "Best Speed"
+      }
     }
   },
   "dashboard": {

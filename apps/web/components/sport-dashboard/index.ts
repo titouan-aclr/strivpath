@@ -6,3 +6,7 @@ export { AverageMetricsSection } from './average-metrics';
 export type { AverageMetricsSectionProps } from './average-metrics';
 export { ProgressionChartSection } from './progression-chart';
 export type { ProgressionChartSectionProps } from './progression-chart';
+export { SportGoalsSection } from './sport-goals-section';
+export type { SportGoalsSectionProps } from './sport-goals-section';
+export { PersonalRecordsSection } from './personal-records-section';
+export type { PersonalRecordsSectionProps } from './personal-records-section';
