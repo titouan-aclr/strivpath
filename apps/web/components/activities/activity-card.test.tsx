@@ -84,10 +84,26 @@ describe('ActivityCard', () => {
       expect(screen.getByText(/km\/h/)).toBeInTheDocument();
     });
 
-    it('should render sport icon', () => {
+    it('should render sport icon with default orange color', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} />);
       const iconContainer = container.querySelector('.text-strava-orange');
       expect(iconContainer).toBeInTheDocument();
+    });
+
+    it('should render sport icon with sport color when provided', () => {
+      const sportColor = {
+        bg: 'bg-lime-300',
+        bgMuted: 'bg-lime-300/10',
+        text: 'text-lime-500',
+        textMuted: 'text-lime-500/10',
+        border: 'border-lime-300',
+        ring: 'ring-lime-300',
+        chart: 'oklch(0.84 0.18 128)',
+      };
+      const { container } = renderWithIntl(<ActivityCard activity={mockActivity} sportColor={sportColor} />);
+      expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
+      expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
+      expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
     });
   });
 
