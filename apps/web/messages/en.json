@@ -744,6 +744,13 @@
         "best_pace": "Best Pace",
         "best_speed": "Best Speed"
       }
+    },
+    "recentActivities": {
+      "empty": "No recent activities for this sport"
+    },
+    "empty": {
+      "title": "No activities yet",
+      "description": "Start recording {sport} activities on Strava and sync them to see your dashboard."
     }
   },
   "dashboard": {

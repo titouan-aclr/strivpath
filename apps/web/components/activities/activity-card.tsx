@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import type { ActivityCardFragment } from '@/gql/graphql';
 import { SportType } from '@/gql/graphql';
 import { SPORT_TYPE_CONFIG } from '@/lib/activities/constants';
+import type { SportColorConfig } from '@/lib/sports/config';
 import {
   formatDistance,
   formatDurationFull,
@@ -21,9 +22,10 @@ export interface ActivityCardProps {
   activity: ActivityCardFragment;
   onClick?: () => void;
   variant?: 'full' | 'compact';
+  sportColor?: SportColorConfig;
 }
 
-export function ActivityCard({ activity, onClick, variant = 'full' }: ActivityCardProps) {
+export function ActivityCard({ activity, onClick, variant = 'full', sportColor }: ActivityCardProps) {
   const t = useTranslations('activities.card');
 
   const sportType = activity.type as SportType;
@@ -54,8 +56,8 @@ export function ActivityCard({ activity, onClick, variant = 'full' }: ActivityCa
     >
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-lg bg-strava-orange/10" aria-hidden="true">
-            <Icon className="h-5 w-5 text-strava-orange" />
+          <div className={cn('p-2 rounded-lg', sportColor?.bgMuted ?? 'bg-strava-orange/10')} aria-hidden="true">
+            <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-strava-orange')} />
           </div>
 
           <div className="flex-1 min-w-0">
