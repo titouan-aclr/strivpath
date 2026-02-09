@@ -7,12 +7,9 @@ export function SportDashboardSkeleton() {
   return (
     <div className="space-y-6" aria-label="Loading sport dashboard" aria-busy="true">
       <HeaderSkeleton />
-      <StatsSkeleton />
+      <PerformanceOverviewSkeleton />
       <ProgressionChartSkeleton />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <GoalsSkeleton />
-        <AverageMetricsSkeleton />
-      </div>
+      <GoalsSkeleton />
       <RecordsSkeleton />
       <RecentActivitiesSkeleton />
     </div>
@@ -31,22 +28,27 @@ function HeaderSkeleton() {
   );
 }
 
-function StatsSkeleton() {
+function PerformanceOverviewSkeleton() {
   return (
     <Card>
       <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-24" />
-          <Skeleton className="h-8 w-48" />
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Skeleton className="h-9 w-44" />
+          <Skeleton className="h-9 w-48" />
         </div>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map(i => (
             <Card key={i}>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-16 mb-2" />
-                <Skeleton className="h-7 w-24" />
+              <CardContent className="p-6">
+                <div className="flex items-start justify-between">
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-20" />
+                    <Skeleton className="h-8 w-24" />
+                  </div>
+                  <Skeleton className="h-10 w-10 rounded-lg" />
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -100,31 +102,6 @@ function GoalsSkeleton() {
   );
 }
 
-function AverageMetricsSkeleton() {
-  return (
-    <Card>
-      <CardHeader className="pb-4">
-        <div className="flex items-center justify-between">
-          <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-8 w-48" />
-        </div>
-      </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <Card key={i}>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-20 mb-2" />
-                <Skeleton className="h-7 w-16" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
 function RecordsSkeleton() {
   return (
     <Card>
@@ -132,15 +109,17 @@ function RecordsSkeleton() {
         <Skeleton className="h-6 w-36" />
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map(i => (
-            <Card key={i}>
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-24 mb-2" />
-                <Skeleton className="h-7 w-20 mb-1" />
-                <Skeleton className="h-3 w-28" />
-              </CardContent>
-            </Card>
+        <div className="divide-y">
+          {[1, 2, 3].map(i => (
+            <div key={i} className="flex items-center gap-4 py-3">
+              <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+              <Skeleton className="h-4 w-28" />
+              <div className="ml-auto flex items-center gap-4">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-4 w-24 hidden sm:block" />
+                <Skeleton className="h-4 w-4" />
+              </div>
+            </div>
           ))}
         </div>
       </CardContent>

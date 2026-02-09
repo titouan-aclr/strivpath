@@ -683,6 +683,18 @@
       "lastSync": "Last sync {time}",
       "neverSynced": "Never synced"
     },
+    "performanceOverview": {
+      "title": "Performance",
+      "tabs": {
+        "volume": "Volume",
+        "averages": "Averages"
+      },
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    },
     "stats": {
       "title": "Statistics",
       "distance": "Distance",

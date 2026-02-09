@@ -94,7 +94,7 @@ describe('PersonalRecordsSection', () => {
     expect(screen.getByText('Personal Records')).toBeInTheDocument();
   });
 
-  it('should render record values formatted for running', () => {
+  it('should render record labels and values for running', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: mockRunRecords,
       loading: false,
@@ -126,7 +126,22 @@ describe('PersonalRecordsSection', () => {
     expect(screen.getByText('Best Speed')).toBeInTheDocument();
   });
 
-  it('should render achievement dates', () => {
+  it('should render records as a list with dividers', () => {
+    mockUsePersonalRecords.mockReturnValue({
+      records: mockRunRecords,
+      loading: false,
+      error: undefined,
+      refetch: vi.fn(),
+    });
+
+    const { container } = render(<PersonalRecordsSection sportType={SportType.Run} />);
+
+    expect(container.querySelector('.divide-y')).toBeInTheDocument();
+    const links = screen.getAllByRole('link');
+    expect(links).toHaveLength(3);
+  });
+
+  it('should render achievement dates inline', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: [mockRunRecords[0]],
       loading: false,
@@ -136,10 +151,11 @@ describe('PersonalRecordsSection', () => {
 
     render(<PersonalRecordsSection sportType={SportType.Run} />);
 
-    expect(screen.getByText(/Achieved on/)).toBeInTheDocument();
+    const link = screen.getByRole('link');
+    expect(link).toHaveTextContent(/1\/15\/25/);
   });
 
-  it('should link each record to its activity', () => {
+  it('should link each record row to its activity', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: mockRunRecords,
       loading: false,
@@ -181,6 +197,19 @@ describe('PersonalRecordsSection', () => {
     expect(skeletons.length).toBeGreaterThan(0);
   });
 
+  it('should render list skeleton with dividers when loading', () => {
+    mockUsePersonalRecords.mockReturnValue({
+      records: [],
+      loading: true,
+      error: undefined,
+      refetch: vi.fn(),
+    });
+
+    const { container } = render(<PersonalRecordsSection sportType={SportType.Run} />);
+
+    expect(container.querySelector('.divide-y')).toBeInTheDocument();
+  });
+
   it('should not render records when loading', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: [],
@@ -207,7 +236,7 @@ describe('PersonalRecordsSection', () => {
     expect(screen.queryByRole('region')).not.toBeInTheDocument();
   });
 
-  it('should apply sport colors for running', () => {
+  it('should apply sport colors for running values', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: mockRunRecords,
       loading: false,
@@ -221,7 +250,7 @@ describe('PersonalRecordsSection', () => {
     expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
   });
 
-  it('should apply sport colors for cycling', () => {
+  it('should apply sport colors for cycling values', () => {
     mockUsePersonalRecords.mockReturnValue({
       records: mockRideRecords,
       loading: false,
