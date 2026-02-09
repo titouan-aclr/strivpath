@@ -38,7 +38,7 @@ const mockRunRecords: PersonalRecord[] = [
   },
   {
     __typename: 'PersonalRecord',
-    type: 'best_pace_5k',
+    type: 'best_pace',
     value: 285,
     achievedAt: new Date('2025-01-10T07:00:00Z'),
     activityId: '12345678902',
@@ -62,14 +62,14 @@ const mockRideRecords: PersonalRecord[] = [
   },
   {
     __typename: 'PersonalRecord',
-    type: 'highest_elevation',
+    type: 'most_elevation',
     value: 1850,
     achievedAt: new Date('2024-11-15T07:30:00Z'),
     activityId: '12345678904',
   },
   {
     __typename: 'PersonalRecord',
-    type: 'best_average_speed',
+    type: 'best_speed',
     value: 12.5,
     achievedAt: new Date('2025-01-05T09:00:00Z'),
     activityId: '12345678905',

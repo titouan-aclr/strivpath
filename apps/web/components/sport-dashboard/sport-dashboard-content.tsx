@@ -86,10 +86,8 @@ export function SportDashboardContent({ sportType }: SportDashboardContentProps)
       <SportDashboardHeader sportType={sportType} lastSyncTime={lastSyncTime} />
       <SportStatsSection sportType={sportType} />
       <ProgressionChartSection sportType={sportType} />
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <SportGoalsSection sportType={sportType} />
-        <AverageMetricsSection sportType={sportType} />
-      </div>
+      <SportGoalsSection sportType={sportType} />
+      <AverageMetricsSection sportType={sportType} />
       <PersonalRecordsSection sportType={sportType} />
       <RecentActivities
         activities={activities}

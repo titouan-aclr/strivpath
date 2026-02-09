@@ -968,16 +968,18 @@ describe('StatisticsService', () => {
     });
 
     describe('metric aggregation', () => {
+      const januaryDate = new Date(new Date().getFullYear(), 0, 2, 10, 0, 0);
+
       it('should sum distances correctly', async () => {
         prisma.activity.findMany.mockResolvedValue([
-          { distance: 5000, movingTime: 1800, totalElevationGain: 50 },
-          { distance: 7000, movingTime: 2400, totalElevationGain: 80 },
+          { distance: 5000, movingTime: 1800, totalElevationGain: 50, startDate: januaryDate },
+          { distance: 7000, movingTime: 2400, totalElevationGain: 80, startDate: januaryDate },
         ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.DISTANCE,
         );
 
@@ -986,14 +988,14 @@ describe('StatisticsService', () => {
 
       it('should sum durations correctly', async () => {
         prisma.activity.findMany.mockResolvedValue([
-          { distance: 5000, movingTime: 1800, totalElevationGain: 50 },
-          { distance: 7000, movingTime: 2400, totalElevationGain: 80 },
+          { distance: 5000, movingTime: 1800, totalElevationGain: 50, startDate: januaryDate },
+          { distance: 7000, movingTime: 2400, totalElevationGain: 80, startDate: januaryDate },
         ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.DURATION,
         );
 
@@ -1002,14 +1004,14 @@ describe('StatisticsService', () => {
 
       it('should count sessions correctly', async () => {
         prisma.activity.findMany.mockResolvedValue([
-          { distance: 5000, movingTime: 1800, totalElevationGain: 50 },
-          { distance: 7000, movingTime: 2400, totalElevationGain: 80 },
+          { distance: 5000, movingTime: 1800, totalElevationGain: 50, startDate: januaryDate },
+          { distance: 7000, movingTime: 2400, totalElevationGain: 80, startDate: januaryDate },
         ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.SESSIONS,
         );
 
@@ -1018,14 +1020,14 @@ describe('StatisticsService', () => {
 
       it('should sum elevations correctly', async () => {
         prisma.activity.findMany.mockResolvedValue([
-          { distance: 5000, movingTime: 1800, totalElevationGain: 50 },
-          { distance: 7000, movingTime: 2400, totalElevationGain: 80 },
+          { distance: 5000, movingTime: 1800, totalElevationGain: 50, startDate: januaryDate },
+          { distance: 7000, movingTime: 2400, totalElevationGain: 80, startDate: januaryDate },
         ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.ELEVATION,
         );
 
@@ -1033,12 +1035,14 @@ describe('StatisticsService', () => {
       });
 
       it('should calculate pace correctly for RUN', async () => {
-        prisma.activity.findMany.mockResolvedValue([{ distance: 10000, movingTime: 3000, totalElevationGain: 100 }]);
+        prisma.activity.findMany.mockResolvedValue([
+          { distance: 10000, movingTime: 3000, totalElevationGain: 100, startDate: januaryDate },
+        ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.PACE,
         );
 
@@ -1046,12 +1050,14 @@ describe('StatisticsService', () => {
       });
 
       it('should return 0 for pace with RIDE sport', async () => {
-        prisma.activity.findMany.mockResolvedValue([{ distance: 10000, movingTime: 3000, totalElevationGain: 100 }]);
+        prisma.activity.findMany.mockResolvedValue([
+          { distance: 10000, movingTime: 3000, totalElevationGain: 100, startDate: januaryDate },
+        ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RIDE,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.PACE,
         );
 
@@ -1059,12 +1065,14 @@ describe('StatisticsService', () => {
       });
 
       it('should calculate speed correctly for RIDE', async () => {
-        prisma.activity.findMany.mockResolvedValue([{ distance: 10000, movingTime: 1000, totalElevationGain: 100 }]);
+        prisma.activity.findMany.mockResolvedValue([
+          { distance: 10000, movingTime: 1000, totalElevationGain: 100, startDate: januaryDate },
+        ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RIDE,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.SPEED,
         );
 
@@ -1072,16 +1080,45 @@ describe('StatisticsService', () => {
       });
 
       it('should return 0 for speed with RUN sport', async () => {
-        prisma.activity.findMany.mockResolvedValue([{ distance: 10000, movingTime: 1000, totalElevationGain: 100 }]);
+        prisma.activity.findMany.mockResolvedValue([
+          { distance: 10000, movingTime: 1000, totalElevationGain: 100, startDate: januaryDate },
+        ]);
 
         const result = await service.getSportProgressionData(
           userId,
           SportType.RUN,
-          StatisticsPeriod.WEEK,
+          StatisticsPeriod.MONTH,
           ProgressionMetric.SPEED,
         );
 
         expect(result[0].value).toBe(0);
+      });
+
+      it('should distribute activities across correct intervals', async () => {
+        const year = new Date().getFullYear();
+        prisma.activity.findMany.mockResolvedValue([
+          { distance: 5000, movingTime: 1800, totalElevationGain: 50, startDate: new Date(year, 0, 15) },
+          { distance: 3000, movingTime: 1200, totalElevationGain: 30, startDate: new Date(year, 2, 10) },
+        ]);
+
+        const result = await service.getSportProgressionData(
+          userId,
+          SportType.RUN,
+          StatisticsPeriod.MONTH,
+          ProgressionMetric.DISTANCE,
+        );
+
+        expect(result[0].value).toBe(5000);
+        expect(result[1].value).toBe(0);
+        expect(result[2].value).toBe(3000);
+      });
+
+      it('should only execute a single database query', async () => {
+        prisma.activity.findMany.mockResolvedValue([]);
+
+        await service.getSportProgressionData(userId, SportType.RUN, StatisticsPeriod.WEEK, ProgressionMetric.DISTANCE);
+
+        expect(prisma.activity.findMany).toHaveBeenCalledTimes(1);
       });
     });
 
