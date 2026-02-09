@@ -306,13 +306,21 @@ describe('SportDashboardContent', () => {
       expect(recentActivities).toHaveAttribute('data-sport-color-text', 'text-lime-500');
     });
 
-    it('should render goals and metrics in a 2-column grid', () => {
+    it('should render sections in correct order', () => {
       const { container } = render(<SportDashboardContent sportType={SportType.Run} />);
 
-      const grid = container.querySelector('.grid.grid-cols-1.lg\\:grid-cols-2');
-      expect(grid).toBeInTheDocument();
-      expect(grid?.querySelector('[data-testid="sport-goals-section"]')).toBeInTheDocument();
-      expect(grid?.querySelector('[data-testid="average-metrics-section"]')).toBeInTheDocument();
+      const testIds = Array.from(container.querySelectorAll('[data-testid]')).map(el => el.getAttribute('data-testid'));
+
+      const statsIndex = testIds.indexOf('sport-stats-section');
+      const goalsIndex = testIds.indexOf('sport-goals-section');
+      const metricsIndex = testIds.indexOf('average-metrics-section');
+      const recordsIndex = testIds.indexOf('personal-records-section');
+      const activitiesIndex = testIds.indexOf('recent-activities');
+
+      expect(statsIndex).toBeLessThan(goalsIndex);
+      expect(goalsIndex).toBeLessThan(metricsIndex);
+      expect(metricsIndex).toBeLessThan(recordsIndex);
+      expect(recordsIndex).toBeLessThan(activitiesIndex);
     });
   });
 

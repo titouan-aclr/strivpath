@@ -269,32 +269,34 @@ export class StatisticsService {
   ): Promise<ProgressionDataPoint[]> {
     const intervals = this.generateProgressionIntervals(period);
 
-    const dataPoints: ProgressionDataPoint[] = [];
+    const globalStart = intervals[0].startDate;
+    const globalEnd = intervals[intervals.length - 1].endDate;
 
-    for (const interval of intervals) {
-      const activities = await this.prisma.activity.findMany({
-        where: {
-          userId,
-          type: sportType,
-          startDate: { gte: interval.startDate, lte: interval.endDate },
-        },
-        select: {
-          distance: true,
-          movingTime: true,
-          totalElevationGain: true,
-        },
-      });
+    const allActivities = await this.prisma.activity.findMany({
+      where: {
+        userId,
+        type: sportType,
+        startDate: { gte: globalStart, lte: globalEnd },
+      },
+      select: {
+        distance: true,
+        movingTime: true,
+        totalElevationGain: true,
+        startDate: true,
+      },
+    });
 
-      const value = this.calculateMetricValue(activities, metric, sportType);
+    return intervals.map(interval => {
+      const intervalActivities = allActivities.filter(
+        a => a.startDate >= interval.startDate && a.startDate <= interval.endDate,
+      );
 
-      dataPoints.push({
+      return {
         index: interval.index,
         intervalType: interval.intervalType,
-        value,
-      });
-    }
-
-    return dataPoints;
+        value: this.calculateMetricValue(intervalActivities, metric, sportType),
+      };
+    });
   }
 
   async getSportAverageMetrics(
