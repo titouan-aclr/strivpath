@@ -44,10 +44,10 @@ vi.mock('./sport-dashboard-header', () => ({
   ),
 }));
 
-vi.mock('./sport-stats-section', () => ({
-  SportStatsSection: ({ sportType }: { sportType: string }) => (
-    <div data-testid="sport-stats-section" data-sport-type={sportType}>
-      Stats
+vi.mock('./performance-overview-section', () => ({
+  PerformanceOverviewSection: ({ sportType }: { sportType: string }) => (
+    <div data-testid="performance-overview-section" data-sport-type={sportType}>
+      Performance Overview
     </div>
   ),
 }));
@@ -64,14 +64,6 @@ vi.mock('./sport-goals-section', () => ({
   SportGoalsSection: ({ sportType }: { sportType: string }) => (
     <div data-testid="sport-goals-section" data-sport-type={sportType}>
       Goals
-    </div>
-  ),
-}));
-
-vi.mock('./average-metrics', () => ({
-  AverageMetricsSection: ({ sportType }: { sportType: string }) => (
-    <div data-testid="average-metrics-section" data-sport-type={sportType}>
-      Metrics
     </div>
   ),
 }));
@@ -180,7 +172,7 @@ describe('SportDashboardContent', () => {
 
       expect(screen.queryByTestId('sport-dashboard-skeleton')).not.toBeInTheDocument();
       expect(screen.getByTestId('sport-dashboard-header')).toBeInTheDocument();
-      expect(screen.getByTestId('sport-stats-section')).toBeInTheDocument();
+      expect(screen.getByTestId('performance-overview-section')).toBeInTheDocument();
     });
   });
 
@@ -266,14 +258,13 @@ describe('SportDashboardContent', () => {
       });
     });
 
-    it('should render all 7 sections', () => {
+    it('should render all 6 sections', () => {
       render(<SportDashboardContent sportType={SportType.Run} />);
 
       expect(screen.getByTestId('sport-dashboard-header')).toBeInTheDocument();
-      expect(screen.getByTestId('sport-stats-section')).toBeInTheDocument();
+      expect(screen.getByTestId('performance-overview-section')).toBeInTheDocument();
       expect(screen.getByTestId('progression-chart-section')).toBeInTheDocument();
       expect(screen.getByTestId('sport-goals-section')).toBeInTheDocument();
-      expect(screen.getByTestId('average-metrics-section')).toBeInTheDocument();
       expect(screen.getByTestId('personal-records-section')).toBeInTheDocument();
       expect(screen.getByTestId('recent-activities')).toBeInTheDocument();
     });
@@ -282,10 +273,9 @@ describe('SportDashboardContent', () => {
       render(<SportDashboardContent sportType={SportType.Ride} />);
 
       expect(screen.getByTestId('sport-dashboard-header')).toHaveAttribute('data-sport-type', 'RIDE');
-      expect(screen.getByTestId('sport-stats-section')).toHaveAttribute('data-sport-type', 'RIDE');
+      expect(screen.getByTestId('performance-overview-section')).toHaveAttribute('data-sport-type', 'RIDE');
       expect(screen.getByTestId('progression-chart-section')).toHaveAttribute('data-sport-type', 'RIDE');
       expect(screen.getByTestId('sport-goals-section')).toHaveAttribute('data-sport-type', 'RIDE');
-      expect(screen.getByTestId('average-metrics-section')).toHaveAttribute('data-sport-type', 'RIDE');
       expect(screen.getByTestId('personal-records-section')).toHaveAttribute('data-sport-type', 'RIDE');
     });
 
@@ -311,15 +301,13 @@ describe('SportDashboardContent', () => {
 
       const testIds = Array.from(container.querySelectorAll('[data-testid]')).map(el => el.getAttribute('data-testid'));
 
-      const statsIndex = testIds.indexOf('sport-stats-section');
+      const overviewIndex = testIds.indexOf('performance-overview-section');
       const goalsIndex = testIds.indexOf('sport-goals-section');
-      const metricsIndex = testIds.indexOf('average-metrics-section');
       const recordsIndex = testIds.indexOf('personal-records-section');
       const activitiesIndex = testIds.indexOf('recent-activities');
 
-      expect(statsIndex).toBeLessThan(goalsIndex);
-      expect(goalsIndex).toBeLessThan(metricsIndex);
-      expect(metricsIndex).toBeLessThan(recordsIndex);
+      expect(overviewIndex).toBeLessThan(goalsIndex);
+      expect(goalsIndex).toBeLessThan(recordsIndex);
       expect(recordsIndex).toBeLessThan(activitiesIndex);
     });
   });

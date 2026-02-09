@@ -22,10 +22,10 @@ describe('SportDashboardSkeleton', () => {
     expect(skeletons.length).toBeGreaterThan(10);
   });
 
-  it('should render the goals and metrics grid with 2 columns on large screens', () => {
+  it('should render records skeleton with list layout', () => {
     const { container } = render(<SportDashboardSkeleton />);
 
-    const grid = container.querySelector('.grid.grid-cols-1.lg\\:grid-cols-2');
-    expect(grid).toBeInTheDocument();
+    const dividers = container.querySelectorAll('.divide-y');
+    expect(dividers.length).toBeGreaterThan(0);
   });
 });

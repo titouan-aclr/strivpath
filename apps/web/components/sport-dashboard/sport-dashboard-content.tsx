@@ -11,10 +11,9 @@ import { DashboardError } from '@/components/dashboard/dashboard-error';
 import { EmptyState } from '@/components/dashboard/empty-state';
 import { RecentActivities } from '@/components/dashboard/recent-activities';
 import { SportDashboardHeader } from './sport-dashboard-header';
-import { SportStatsSection } from './sport-stats-section';
+import { PerformanceOverviewSection } from './performance-overview-section';
 import { ProgressionChartSection } from './progression-chart';
 import { SportGoalsSection } from './sport-goals-section';
-import { AverageMetricsSection } from './average-metrics';
 import { PersonalRecordsSection } from './personal-records-section';
 import { SportDashboardSkeleton } from './sport-dashboard-skeleton';
 import type { SportType } from '@/gql/graphql';
@@ -84,10 +83,9 @@ export function SportDashboardContent({ sportType }: SportDashboardContentProps)
   return (
     <div className="space-y-6">
       <SportDashboardHeader sportType={sportType} lastSyncTime={lastSyncTime} />
-      <SportStatsSection sportType={sportType} />
+      <PerformanceOverviewSection sportType={sportType} />
       <ProgressionChartSection sportType={sportType} />
       <SportGoalsSection sportType={sportType} />
-      <AverageMetricsSection sportType={sportType} />
       <PersonalRecordsSection sportType={sportType} />
       <RecentActivities
         activities={activities}

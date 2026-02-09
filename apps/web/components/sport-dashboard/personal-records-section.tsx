@@ -8,7 +8,7 @@ import { usePersonalRecords } from '@/lib/sport-dashboard/hooks/use-personal-rec
 import { getSportColors, type SportColorConfig } from '@/lib/sports/config';
 import { formatPaceFromSeconds, formatSpeed } from '@/lib/sports/formatters';
 import { cn } from '@/lib/utils';
-import { Trophy } from 'lucide-react';
+import { Trophy, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -42,19 +42,17 @@ function PersonalRecordsSkeleton() {
         <Skeleton className="h-6 w-40" />
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div className="divide-y">
           {Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i}>
-              <CardContent className="p-6">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-20" />
-                    <Skeleton className="h-8 w-24" />
-                  </div>
-                  <Skeleton className="h-10 w-10 rounded-lg" />
-                </div>
-              </CardContent>
-            </Card>
+            <div key={i} className="flex items-center gap-4 py-3">
+              <Skeleton className="h-9 w-9 rounded-lg shrink-0" />
+              <Skeleton className="h-4 w-28" />
+              <div className="ml-auto flex items-center gap-4">
+                <Skeleton className="h-5 w-20" />
+                <Skeleton className="h-4 w-24 hidden sm:block" />
+                <Skeleton className="h-4 w-4" />
+              </div>
+            </div>
           ))}
         </div>
       </CardContent>
@@ -62,7 +60,7 @@ function PersonalRecordsSkeleton() {
   );
 }
 
-interface RecordCardProps {
+interface RecordRowProps {
   record: PersonalRecord;
   sportColors: SportColorConfig;
   locale: string;
@@ -70,27 +68,28 @@ interface RecordCardProps {
   t: (key: string, params?: Record<string, string>) => string;
 }
 
-function RecordCard({ record, sportColors, locale, sportType, t }: RecordCardProps) {
+function RecordRow({ record, sportColors, locale, sportType, t }: RecordRowProps) {
   const formattedValue = formatRecordValue(record.type, record.value, sportType, locale);
   const label = getRecordLabel(record.type, t);
   const formattedDate = formatDate(record.achievedAt, locale, 'short');
 
   return (
-    <Link href={`/activities/${record.activityId}`} className="block">
-      <Card className="overflow-hidden transition-all hover:shadow-md">
-        <CardContent className="p-6">
-          <div className="flex items-start justify-between">
-            <div className="space-y-2 min-w-0">
-              <p className="text-sm font-medium text-muted-foreground truncate">{label}</p>
-              <p className="text-3xl font-bold tracking-tight truncate">{formattedValue}</p>
-              <p className="text-xs text-muted-foreground">{t('achievedOn', { date: formattedDate })}</p>
-            </div>
-            <div className={cn('p-2.5 rounded-lg', sportColors.bgMuted)}>
-              <Trophy className={cn('h-5 w-5', sportColors.text)} aria-hidden="true" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+    <Link
+      href={`/activities/${record.activityId}`}
+      className="flex items-center gap-4 py-3 transition-colors hover:bg-muted/50 -mx-2 px-2 rounded-md group"
+    >
+      <div className={cn('p-2 rounded-lg shrink-0', sportColors.bgMuted)}>
+        <Trophy className={cn('h-4 w-4', sportColors.text)} aria-hidden="true" />
+      </div>
+      <span className="font-medium text-sm truncate min-w-0">{label}</span>
+      <div className="ml-auto flex items-center gap-4 shrink-0">
+        <span className={cn('font-semibold text-sm', sportColors.text)}>{formattedValue}</span>
+        <span className="text-xs text-muted-foreground hidden sm:block">{formattedDate}</span>
+        <ChevronRight
+          className="h-4 w-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-hidden="true"
+        />
+      </div>
     </Link>
   );
 }
@@ -132,14 +131,9 @@ export function PersonalRecordsSection({ sportType, className }: PersonalRecords
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div
-            className={cn(
-              'grid grid-cols-1 gap-4',
-              records.length >= 4 ? 'sm:grid-cols-2 lg:grid-cols-4' : 'sm:grid-cols-3',
-            )}
-          >
+          <div className="divide-y">
             {records.map(record => (
-              <RecordCard
+              <RecordRow
                 key={record.type}
                 record={record}
                 sportColors={sportColors}

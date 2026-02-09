@@ -4,7 +4,6 @@ import {
   StatisticsPeriod,
   type PersonalRecord,
   type ProgressionDataPoint,
-  type SportAverageMetrics,
 } from '@/gql/graphql';
 
 export type {
@@ -21,26 +20,12 @@ export interface SportDashboardProps {
   sportType: SportType;
 }
 
-export interface SportStatsSectionProps {
-  sportType: SportType;
-  period: StatisticsPeriod;
-  onPeriodChange: (period: StatisticsPeriod) => void;
-}
-
 export interface ProgressionChartProps {
   sportType: SportType;
   data: ProgressionDataPoint[];
   metric: ProgressionMetric;
   period: StatisticsPeriod;
   onMetricChange: (metric: ProgressionMetric) => void;
-  onPeriodChange: (period: StatisticsPeriod) => void;
-  isLoading?: boolean;
-}
-
-export interface AverageMetricsProps {
-  sportType: SportType;
-  metrics: SportAverageMetrics | null;
-  period: StatisticsPeriod;
   onPeriodChange: (period: StatisticsPeriod) => void;
   isLoading?: boolean;
 }

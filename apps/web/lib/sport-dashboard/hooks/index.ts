@@ -10,6 +10,11 @@ export {
   type UseSportAverageMetricsResult,
 } from './use-sport-average-metrics';
 export {
+  usePerformanceOverview,
+  type UsePerformanceOverviewOptions,
+  type UsePerformanceOverviewResult,
+} from './use-performance-overview';
+export {
   usePersonalRecords,
   type UsePersonalRecordsOptions,
   type UsePersonalRecordsResult,
