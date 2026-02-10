@@ -1,4 +1,4 @@
-import { ExecutionContext } from '@nestjs/common';
+import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { GqlAuthGuard } from './gql-auth.guard';
 import '../../common/types/express-request.interface';
@@ -160,6 +160,33 @@ describe('GqlAuthGuard', () => {
 
     expect(createSpy).toHaveBeenCalledWith(mockExecutionContext);
     expect(mockGqlContextInstance.getContext).toHaveBeenCalled();
+  });
+
+  describe('handleRequest', () => {
+    it('should return the user when authentication succeeds', () => {
+      const mockUser = { sub: 1, stravaId: 12345 };
+
+      const result = guard.handleRequest(null, mockUser, null);
+
+      expect(result).toBe(mockUser);
+    });
+
+    it('should throw UnauthorizedException when no user is provided', () => {
+      expect(() => guard.handleRequest(null, false, null)).toThrow(UnauthorizedException);
+    });
+
+    it('should throw the original error when err is provided', () => {
+      const originalError = new Error('Token expired');
+
+      expect(() => guard.handleRequest(originalError, false, null)).toThrow('Token expired');
+    });
+
+    it('should throw the original error even when user exists', () => {
+      const originalError = new Error('Invalid token');
+      const mockUser = { sub: 1, stravaId: 12345 };
+
+      expect(() => guard.handleRequest(originalError, mockUser, null)).toThrow('Invalid token');
+    });
   });
 
   it('should extract request from nested GraphQL context structure', () => {

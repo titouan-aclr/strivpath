@@ -14,24 +14,20 @@ describe('PrismaService', () => {
   });
 
   describe('lifecycle hooks', () => {
-    it('should implement OnModuleInit interface', () => {
-      expect(service.onModuleInit).toBeDefined();
-      expect(typeof service.onModuleInit).toBe('function');
+    it('should call $connect on module init', async () => {
+      const connectSpy = jest.spyOn(service, '$connect').mockResolvedValue();
+
+      await service.onModuleInit();
+
+      expect(connectSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should implement OnModuleDestroy interface', () => {
-      expect(service.onModuleDestroy).toBeDefined();
-      expect(typeof service.onModuleDestroy).toBe('function');
-    });
+    it('should call $disconnect on module destroy', async () => {
+      const disconnectSpy = jest.spyOn(service, '$disconnect').mockResolvedValue();
 
-    it('should have $connect method from PrismaClient', () => {
-      expect(service.$connect).toBeDefined();
-      expect(typeof service.$connect).toBe('function');
-    });
+      await service.onModuleDestroy();
 
-    it('should have $disconnect method from PrismaClient', () => {
-      expect(service.$disconnect).toBeDefined();
-      expect(typeof service.$disconnect).toBe('function');
+      expect(disconnectSpy).toHaveBeenCalledTimes(1);
     });
   });
 
