@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics - E2E Tests Workflow
+# StrivPath - E2E Tests Workflow
 # =============================================================================
 #
 # This workflow runs E2E tests before merging to main branch.
@@ -42,7 +42,7 @@ jobs:
         env:
           POSTGRES_USER: test
           POSTGRES_PASSWORD: test
-          POSTGRES_DB: stravanalytics_e2e
+          POSTGRES_DB: strivpath_e2e
         ports:
           - 5432:5432
         options: >-
@@ -75,12 +75,12 @@ jobs:
       - name: Run database migrations
         run: pnpm --filter api db:migrate:deploy
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_e2e
+          DATABASE_URL: postgresql://test:test@localhost:5432/strivpath_e2e
 
       - name: Run API E2E tests
         run: pnpm --filter api test:e2e
         env:
-          DATABASE_URL: postgresql://test:test@localhost:5432/stravanalytics_e2e
+          DATABASE_URL: postgresql://test:test@localhost:5432/strivpath_e2e
           NODE_ENV: test
           PORT: 3011
           # JWT Configuration

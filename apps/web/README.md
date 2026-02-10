@@ -1,6 +1,6 @@
 # Web - Next.js Frontend
 
-Next.js 16 frontend application for Stravanalytics with modern UI and complete authentication flow.
+Next.js 16 frontend application for StrivPath with modern UI and complete authentication flow.
 
 ## Tech Stack
 

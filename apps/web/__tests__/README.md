@@ -79,7 +79,7 @@ import HomePage from './page';
 describe('HomePage', () => {
   it('should render the heading', () => {
     render(<HomePage />);
-    expect(screen.getByRole('heading', { name: /stravanalytics/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /strivpath/i })).toBeInTheDocument();
   });
 });
 ```
@@ -148,12 +148,12 @@ __tests__/
 
 ### Database Setup
 
-E2E tests use a dedicated database: `stravanalytics_test_e2e`
+E2E tests use a dedicated database: `strivpath_test_e2e`
 
 Create the database:
 
 ```bash
-docker exec stravanalytics-postgres psql -U postgres -c "CREATE DATABASE stravanalytics_test_e2e;"
+docker exec strivpath-postgres psql -U postgres -c "CREATE DATABASE strivpath_test_e2e;"
 ```
 
 The global setup automatically applies migrations before tests run.
@@ -297,7 +297,7 @@ test.describe('Homepage', () => {
   test('should display the main heading', async ({ page }) => {
     await page.goto('/');
 
-    await expect(page.getByRole('heading', { name: /stravanalytics/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /strivpath/i })).toBeVisible();
   });
 
   test('should navigate to login page', async ({ page }) => {

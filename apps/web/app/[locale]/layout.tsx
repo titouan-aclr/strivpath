@@ -10,7 +10,7 @@ import { routing } from '@/i18n/routing';
 import '../globals.css';
 
 export const metadata: Metadata = {
-  title: 'Stravanalytics',
+  title: 'StrivPath',
   description: 'Advanced sports analytics and motivation platform for athletes',
 };
 

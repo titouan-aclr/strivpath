@@ -34,7 +34,7 @@ export default async function LoginPage({ params, searchParams }: Props) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between p-6">
-        <h1 className="text-2xl font-bold">Stravanalytics</h1>
+        <h1 className="text-2xl font-bold">StrivPath</h1>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ModeToggle />
