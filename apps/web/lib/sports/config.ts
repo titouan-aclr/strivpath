@@ -1,11 +1,14 @@
-import { SportType } from '@/gql/graphql';
+import { ActivityType, SportType } from '@/gql/graphql';
 import { Activity, Bike, Footprints, Waves, type LucideIcon } from 'lucide-react';
 
 export interface SportColorConfig {
   bg: string;
   bgMuted: string;
   text: string;
+  textMuted: string;
   border: string;
+  ring: string;
+  chart: string;
 }
 
 export interface SportConfig {
@@ -28,7 +31,10 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bg: 'bg-lime-300',
       bgMuted: 'bg-lime-300/10',
       text: 'text-lime-500',
+      textMuted: 'text-lime-500/10',
       border: 'border-lime-300',
+      ring: 'ring-lime-300',
+      chart: 'oklch(0.84 0.18 128)',
     },
   },
   [SportType.Ride]: {
@@ -41,7 +47,10 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bg: 'bg-purple-400',
       bgMuted: 'bg-purple-400/10',
       text: 'text-purple-500',
+      textMuted: 'text-purple-500/10',
       border: 'border-purple-400',
+      ring: 'ring-purple-400',
+      chart: 'oklch(0.65 0.25 300)',
     },
   },
   [SportType.Swim]: {
@@ -54,7 +63,10 @@ export const SPORT_CONFIGS: Record<SportType, SportConfig> = {
       bg: 'bg-cyan-300',
       bgMuted: 'bg-cyan-300/10',
       text: 'text-cyan-500',
+      textMuted: 'text-cyan-500/10',
       border: 'border-cyan-300',
+      ring: 'ring-cyan-300',
+      chart: 'oklch(0.80 0.15 200)',
     },
   },
 };
@@ -81,8 +93,21 @@ export function getSportColors(sportType: SportType | null | undefined): SportCo
     bg: 'bg-gray-300',
     bgMuted: 'bg-gray-300/10',
     text: 'text-gray-500',
+    textMuted: 'text-gray-500/10',
     border: 'border-gray-300',
+    ring: 'ring-gray-300',
+    chart: 'oklch(0.70 0 0)',
   };
   if (!sportType) return defaultColors;
   return SPORT_CONFIGS[sportType]?.colors ?? defaultColors;
+}
+
+const SPORT_TO_ACTIVITY_TYPE: Record<SportType, ActivityType> = {
+  [SportType.Run]: ActivityType.Run,
+  [SportType.Ride]: ActivityType.Ride,
+  [SportType.Swim]: ActivityType.Swim,
+};
+
+export function getPrimaryActivityType(sportType: SportType): ActivityType {
+  return SPORT_TO_ACTIVITY_TYPE[sportType];
 }

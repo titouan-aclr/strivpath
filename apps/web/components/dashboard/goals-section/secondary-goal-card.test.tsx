@@ -3,6 +3,17 @@ import { render, screen } from '@testing-library/react';
 import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
 import { SecondaryGoalCard } from './secondary-goal-card';
 import type { SecondaryGoal } from '@/lib/dashboard/types';
+import type { SportColorConfig } from '@/lib/sports/config';
+
+const swimSportColor: SportColorConfig = {
+  bg: 'bg-cyan-300',
+  bgMuted: 'bg-cyan-300/10',
+  text: 'text-cyan-500',
+  textMuted: 'text-cyan-500/10',
+  border: 'border-cyan-300',
+  ring: 'ring-cyan-300',
+  chart: 'oklch(0.80 0.15 200)',
+};
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {
@@ -179,5 +190,25 @@ describe('SecondaryGoalCard', () => {
 
     expect(container.querySelector('.bg-muted-foreground\\/10')).toBeInTheDocument();
     expect(container.querySelector('.text-muted-foreground')).toBeInTheDocument();
+  });
+
+  it('should use sport colors when sportColor is provided and status is Active', () => {
+    const { container } = render(
+      <SecondaryGoalCard goal={createMockGoal({ status: GoalStatus.Active })} sportColor={swimSportColor} />,
+    );
+
+    expect(container.querySelector('.bg-cyan-300\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-cyan-500')).toBeInTheDocument();
+    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+  });
+
+  it('should use status colors when sportColor is provided but status is not Active', () => {
+    const { container } = render(
+      <SecondaryGoalCard goal={createMockGoal({ status: GoalStatus.Failed })} sportColor={swimSportColor} />,
+    );
+
+    expect(container.querySelector('.bg-destructive\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-destructive')).toBeInTheDocument();
+    expect(container.querySelector('.bg-cyan-300\\/10')).not.toBeInTheDocument();
   });
 });

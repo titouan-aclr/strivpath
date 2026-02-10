@@ -3,6 +3,17 @@ import { render, screen } from '@testing-library/react';
 import { GoalTargetType, GoalStatus, SportType } from '@/gql/graphql';
 import { PrimaryGoalCard } from './primary-goal-card';
 import type { PrimaryGoal } from '@/lib/dashboard/types';
+import type { SportColorConfig } from '@/lib/sports/config';
+
+const runSportColor: SportColorConfig = {
+  bg: 'bg-lime-300',
+  bgMuted: 'bg-lime-300/10',
+  text: 'text-lime-500',
+  textMuted: 'text-lime-500/10',
+  border: 'border-lime-300',
+  ring: 'ring-lime-300',
+  chart: 'oklch(0.84 0.18 128)',
+};
 
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, values?: Record<string, string | number>) => {
@@ -28,24 +39,41 @@ vi.mock('@/lib/dashboard/utils', () => ({
 }));
 
 vi.mock('./goal-progress-chart', () => ({
-  GoalProgressChart: ({ targetValue, unit }: { targetValue: number; unit: string }) => (
-    <div data-testid="goal-progress-chart" data-target={targetValue} data-unit={unit}>
+  GoalProgressChart: ({ targetValue, unit, colorHex }: { targetValue: number; unit: string; colorHex?: string }) => (
+    <div data-testid="goal-progress-chart" data-target={targetValue} data-unit={unit} data-color-hex={colorHex ?? ''}>
       Chart
     </div>
   ),
 }));
 
 vi.mock('./session-dots-progress', () => ({
-  SessionDotsProgress: ({ current, target }: { current: number; target: number }) => (
-    <div data-testid="session-dots-progress" data-current={current} data-target={target}>
+  SessionDotsProgress: ({
+    current,
+    target,
+    sportColor,
+  }: {
+    current: number;
+    target: number;
+    sportColor?: SportColorConfig;
+  }) => (
+    <div
+      data-testid="session-dots-progress"
+      data-current={current}
+      data-target={target}
+      data-has-sport-color={sportColor ? 'true' : 'false'}
+    >
       Dots
     </div>
   ),
 }));
 
 vi.mock('./circular-progress', () => ({
-  CircularProgress: ({ percentage }: { percentage: number }) => (
-    <div data-testid="circular-progress" data-percentage={percentage}>
+  CircularProgress: ({ percentage, sportColor }: { percentage: number; sportColor?: SportColorConfig }) => (
+    <div
+      data-testid="circular-progress"
+      data-percentage={percentage}
+      data-has-sport-color={sportColor ? 'true' : 'false'}
+    >
       Circle
     </div>
   ),
@@ -260,5 +288,74 @@ describe('PrimaryGoalCard', () => {
 
     expect(container.querySelector('.bg-muted-foreground\\/10')).toBeInTheDocument();
     expect(container.querySelector('.text-muted-foreground')).toBeInTheDocument();
+  });
+
+  it('should use sport colors when sportColor is provided and status is Active', () => {
+    const { container } = render(
+      <PrimaryGoalCard goal={createMockGoal({ status: GoalStatus.Active })} sportColor={runSportColor} />,
+    );
+
+    expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
+    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+  });
+
+  it('should use status colors when sportColor is provided but status is Completed', () => {
+    const { container } = render(
+      <PrimaryGoalCard goal={createMockGoal({ status: GoalStatus.Completed })} sportColor={runSportColor} />,
+    );
+
+    expect(container.querySelector('.bg-green-500\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-green-500')).toBeInTheDocument();
+    expect(container.querySelector('.bg-lime-300\\/10')).not.toBeInTheDocument();
+  });
+
+  it('should propagate sportColor to CircularProgress when Active', () => {
+    render(
+      <PrimaryGoalCard
+        goal={createMockGoal({
+          targetType: GoalTargetType.Duration,
+          targetValue: 36000,
+          currentValue: 23400,
+          progressPercentage: 65,
+          status: GoalStatus.Active,
+        })}
+        sportColor={runSportColor}
+      />,
+    );
+
+    const circle = screen.getByTestId('circular-progress');
+    expect(circle).toHaveAttribute('data-has-sport-color', 'true');
+  });
+
+  it('should propagate colorHex to GoalProgressChart when Active', () => {
+    render(<PrimaryGoalCard goal={createMockGoal({ status: GoalStatus.Active })} sportColor={runSportColor} />);
+
+    const chart = screen.getByTestId('goal-progress-chart');
+    expect(chart).toHaveAttribute('data-color-hex', 'oklch(0.84 0.18 128)');
+  });
+
+  it('should not propagate sportColor to GoalProgressChart when Completed', () => {
+    render(<PrimaryGoalCard goal={createMockGoal({ status: GoalStatus.Completed })} sportColor={runSportColor} />);
+
+    const chart = screen.getByTestId('goal-progress-chart');
+    expect(chart).toHaveAttribute('data-color-hex', '');
+  });
+
+  it('should propagate sportColor to SessionDotsProgress when Active', () => {
+    render(
+      <PrimaryGoalCard
+        goal={createMockGoal({
+          targetType: GoalTargetType.Frequency,
+          targetValue: 5,
+          currentValue: 2,
+          status: GoalStatus.Active,
+        })}
+        sportColor={runSportColor}
+      />,
+    );
+
+    const dots = screen.getByTestId('session-dots-progress');
+    expect(dots).toHaveAttribute('data-has-sport-color', 'true');
   });
 });

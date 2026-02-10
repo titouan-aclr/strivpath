@@ -13,7 +13,7 @@ export function formatDistance(meters: number | null | undefined, locale: string
   return `${Math.round(absMeters).toLocaleString(locale)} m`;
 }
 
-export function formatDuration(seconds: number | null | undefined): string {
+export function formatDurationFull(seconds: number | null | undefined): string {
   if (seconds == null || isNaN(seconds)) return '—';
 
   const absSeconds = Math.abs(Math.floor(seconds));

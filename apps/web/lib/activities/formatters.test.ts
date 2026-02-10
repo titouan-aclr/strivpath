@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   formatDistance,
-  formatDuration,
+  formatDurationFull,
   formatPace,
   formatElevation,
   formatDate,
@@ -56,64 +56,64 @@ describe('formatDistance', () => {
   });
 });
 
-describe('formatDuration', () => {
+describe('formatDurationFull', () => {
   it('should return em dash for null input', () => {
-    expect(formatDuration(null)).toBe('—');
+    expect(formatDurationFull(null)).toBe('—');
   });
 
   it('should return em dash for undefined input', () => {
-    expect(formatDuration(undefined)).toBe('—');
+    expect(formatDurationFull(undefined)).toBe('—');
   });
 
   it('should return em dash for NaN input', () => {
-    expect(formatDuration(NaN)).toBe('—');
+    expect(formatDurationFull(NaN)).toBe('—');
   });
 
   it('should return "0s" for zero seconds', () => {
-    expect(formatDuration(0)).toBe('0s');
+    expect(formatDurationFull(0)).toBe('0s');
   });
 
   it('should format seconds less than 60', () => {
-    expect(formatDuration(45)).toBe('45s');
-    expect(formatDuration(1)).toBe('1s');
-    expect(formatDuration(59)).toBe('59s');
+    expect(formatDurationFull(45)).toBe('45s');
+    expect(formatDurationFull(1)).toBe('1s');
+    expect(formatDurationFull(59)).toBe('59s');
   });
 
   it('should format minutes and seconds (no hours)', () => {
-    expect(formatDuration(90)).toBe('1m 30s');
-    expect(formatDuration(125)).toBe('2m 5s');
-    expect(formatDuration(3599)).toBe('59m 59s');
+    expect(formatDurationFull(90)).toBe('1m 30s');
+    expect(formatDurationFull(125)).toBe('2m 5s');
+    expect(formatDurationFull(3599)).toBe('59m 59s');
   });
 
   it('should format hours, minutes, and seconds', () => {
-    expect(formatDuration(3600)).toBe('1h');
-    expect(formatDuration(3661)).toBe('1h 1m 1s');
-    expect(formatDuration(5025)).toBe('1h 23m 45s');
+    expect(formatDurationFull(3600)).toBe('1h');
+    expect(formatDurationFull(3661)).toBe('1h 1m 1s');
+    expect(formatDurationFull(5025)).toBe('1h 23m 45s');
   });
 
   it('should handle exact hours', () => {
-    expect(formatDuration(3600)).toBe('1h');
-    expect(formatDuration(7200)).toBe('2h');
+    expect(formatDurationFull(3600)).toBe('1h');
+    expect(formatDurationFull(7200)).toBe('2h');
   });
 
   it('should handle exact minutes', () => {
-    expect(formatDuration(60)).toBe('1m');
-    expect(formatDuration(120)).toBe('2m');
+    expect(formatDurationFull(60)).toBe('1m');
+    expect(formatDurationFull(120)).toBe('2m');
   });
 
   it('should handle durations longer than 24 hours', () => {
-    expect(formatDuration(86400)).toBe('24h');
-    expect(formatDuration(90000)).toBe('25h');
+    expect(formatDurationFull(86400)).toBe('24h');
+    expect(formatDurationFull(90000)).toBe('25h');
   });
 
   it('should handle negative values by using absolute value', () => {
-    expect(formatDuration(-90)).toBe('1m 30s');
-    expect(formatDuration(-3661)).toBe('1h 1m 1s');
+    expect(formatDurationFull(-90)).toBe('1m 30s');
+    expect(formatDurationFull(-3661)).toBe('1h 1m 1s');
   });
 
   it('should floor fractional seconds', () => {
-    expect(formatDuration(90.9)).toBe('1m 30s');
-    expect(formatDuration(45.5)).toBe('45s');
+    expect(formatDurationFull(90.9)).toBe('1m 30s');
+    expect(formatDurationFull(45.5)).toBe('45s');
   });
 });
 

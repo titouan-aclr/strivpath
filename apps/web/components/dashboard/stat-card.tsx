@@ -3,6 +3,7 @@
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import type { SportColorConfig } from '@/lib/sports/config';
 
 export interface TrendInfo {
   value: number;
@@ -15,9 +16,10 @@ export interface StatCardProps {
   icon?: LucideIcon;
   trend?: TrendInfo;
   className?: string;
+  sportColor?: SportColorConfig;
 }
 
-export function StatCard({ label, value, icon: Icon, trend, className }: StatCardProps) {
+export function StatCard({ label, value, icon: Icon, trend, className, sportColor }: StatCardProps) {
   return (
     <Card className={cn('overflow-hidden', className)}>
       <CardContent className="p-6">
@@ -38,8 +40,8 @@ export function StatCard({ label, value, icon: Icon, trend, className }: StatCar
             )}
           </div>
           {Icon && (
-            <div className="p-2.5 rounded-lg bg-strava-orange/10">
-              <Icon className="h-5 w-5 text-strava-orange" aria-hidden="true" />
+            <div className={cn('p-2.5 rounded-lg', sportColor?.bgMuted ?? 'bg-strava-orange/10')}>
+              <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-strava-orange')} aria-hidden="true" />
             </div>
           )}
         </div>

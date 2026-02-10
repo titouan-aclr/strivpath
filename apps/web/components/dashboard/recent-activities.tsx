@@ -1,5 +1,6 @@
 'use client';
 
+import { type ReactNode } from 'react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from '@/i18n/navigation';
 import { ArrowRight, Activity } from 'lucide-react';
@@ -7,14 +8,27 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ActivityCard } from '@/components/activities/activity-card';
+import { cn } from '@/lib/utils';
 import type { ActivityCardFragment } from '@/gql/graphql';
+import type { SportColorConfig } from '@/lib/sports/config';
 
 export interface RecentActivitiesProps {
   activities: ActivityCardFragment[];
   loading?: boolean;
+  emptyIcon?: ReactNode;
+  emptyMessage?: string;
+  className?: string;
+  sportColor?: SportColorConfig;
 }
 
-export function RecentActivities({ activities, loading }: RecentActivitiesProps) {
+export function RecentActivities({
+  activities,
+  loading,
+  emptyIcon,
+  emptyMessage,
+  className,
+  sportColor,
+}: RecentActivitiesProps) {
   const t = useTranslations('dashboard.recentActivities');
   const router = useRouter();
 
@@ -27,11 +41,11 @@ export function RecentActivities({ activities, loading }: RecentActivitiesProps)
   };
 
   if (loading) {
-    return <RecentActivitiesSkeleton />;
+    return <RecentActivitiesSkeleton className={className} />;
   }
 
   return (
-    <section aria-labelledby="recent-activities-title">
+    <section aria-labelledby="recent-activities-title" className={cn(className)}>
       <Card>
         <CardHeader className="pb-4">
           <div className="flex items-center justify-between">
@@ -48,7 +62,10 @@ export function RecentActivities({ activities, loading }: RecentActivitiesProps)
         </CardHeader>
         <CardContent>
           {activities.length === 0 ? (
-            <RecentActivitiesEmpty />
+            <div className="flex flex-col items-center justify-center py-8 text-center">
+              {emptyIcon ?? <Activity className="h-12 w-12 text-muted-foreground mb-3" aria-hidden="true" />}
+              <p className="text-sm text-muted-foreground">{emptyMessage ?? t('empty')}</p>
+            </div>
           ) : (
             <div className="space-y-3">
               {activities.map(activity => (
@@ -56,6 +73,7 @@ export function RecentActivities({ activities, loading }: RecentActivitiesProps)
                   key={activity.id}
                   activity={activity}
                   variant="compact"
+                  sportColor={sportColor}
                   onClick={() => handleActivityClick(activity)}
                 />
               ))}
@@ -67,20 +85,9 @@ export function RecentActivities({ activities, loading }: RecentActivitiesProps)
   );
 }
 
-function RecentActivitiesEmpty() {
-  const t = useTranslations('dashboard.recentActivities');
-
+function RecentActivitiesSkeleton({ className }: { className?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center py-8 text-center">
-      <Activity className="h-12 w-12 text-muted-foreground mb-3" aria-hidden="true" />
-      <p className="text-sm text-muted-foreground">{t('empty')}</p>
-    </div>
-  );
-}
-
-function RecentActivitiesSkeleton() {
-  return (
-    <Card>
+    <Card className={cn(className)}>
       <CardHeader className="pb-4">
         <div className="flex items-center justify-between">
           <Skeleton className="h-6 w-36" />
