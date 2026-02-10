@@ -4,29 +4,32 @@ import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
-import { GoalTargetType } from '@/gql/graphql';
+import { GoalTargetType, GoalStatus } from '@/gql/graphql';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { PrimaryGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from '@/components/goals/constants';
-import { getSportIcon } from '@/lib/sports/config';
+import { UNIT_LABELS, normalizeGoalValue } from '@/components/goals/constants';
+import { getSportIcon, type SportColorConfig } from '@/lib/sports/config';
 import { GoalProgressChart } from './goal-progress-chart';
 import { SessionDotsProgress } from './session-dots-progress';
 import { CircularProgress } from './circular-progress';
 import { ProgressStatusBadge } from './progress-status-badge';
+import { getEffectiveStatusColors } from './utils';
 
 export interface PrimaryGoalCardProps {
   goal: PrimaryGoal;
   className?: string;
+  sportColor?: SportColorConfig;
 }
 
-export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
+export function PrimaryGoalCard({ goal, className, sportColor }: PrimaryGoalCardProps) {
   const t = useTranslations('dashboard.goals');
 
   const SportIcon = getSportIcon(goal.sportType);
   const progressStatus = getProgressStatusFromGoal(goal);
   const unit = UNIT_LABELS[goal.targetType];
   const hasProgressHistory = goal.progressHistory && goal.progressHistory.length > 0;
-  const statusColors = getGoalStatusColors(goal.status);
+  const statusColors = getEffectiveStatusColors(goal.status, sportColor);
+  const activeSportColor = sportColor && goal.status === GoalStatus.Active ? sportColor : undefined;
 
   const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
   const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);
@@ -73,12 +76,23 @@ export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
             </div>
 
             {goal.targetType === GoalTargetType.Duration && (
-              <CircularProgress percentage={goal.progressPercentage} size={70} strokeWidth={6} status={goal.status} />
+              <CircularProgress
+                percentage={goal.progressPercentage}
+                size={70}
+                strokeWidth={6}
+                status={goal.status}
+                sportColor={activeSportColor}
+              />
             )}
           </div>
 
           {goal.targetType === GoalTargetType.Frequency ? (
-            <SessionDotsProgress current={goal.currentValue} target={goal.targetValue} status={goal.status} />
+            <SessionDotsProgress
+              current={goal.currentValue}
+              target={goal.targetValue}
+              status={goal.status}
+              sportColor={activeSportColor}
+            />
           ) : hasProgressHistory ? (
             <GoalProgressChart
               progressHistory={goal.progressHistory}
@@ -88,6 +102,7 @@ export function PrimaryGoalCard({ goal, className }: PrimaryGoalCardProps) {
               unit={unit}
               className="h-[160px] w-full"
               status={goal.status}
+              colorHex={activeSportColor?.chart}
             />
           ) : (
             <div className="space-y-2">

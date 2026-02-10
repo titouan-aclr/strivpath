@@ -1,0 +1,39 @@
+query SportPeriodStatistics($sportType: SportType!, $period: StatisticsPeriod!) {
+  sportPeriodStatistics(sportType: $sportType, period: $period) {
+    totalDistance
+    totalDuration
+    activityCount
+    totalElevation
+    distanceTrend
+    durationTrend
+    activityTrend
+    elevationTrend
+  }
+}
+
+query SportProgressionData($sportType: SportType!, $period: StatisticsPeriod!, $metric: ProgressionMetric!) {
+  sportProgressionData(sportType: $sportType, period: $period, metric: $metric) {
+    index
+    intervalType
+    value
+  }
+}
+
+query SportAverageMetrics($sportType: SportType!, $period: StatisticsPeriod!) {
+  sportAverageMetrics(sportType: $sportType, period: $period) {
+    averagePace
+    averageSpeed
+    averageHeartRate
+    averageCadence
+    averagePower
+  }
+}
+
+query PersonalRecords($sportType: SportType!) {
+  personalRecords(sportType: $sportType) {
+    type
+    value
+    achievedAt
+    activityId
+  }
+}

@@ -337,6 +337,13 @@ type GoalTemplate {
   updatedAt: DateTime!
 }
 
+"""Type of time interval for progression data"""
+enum IntervalType {
+  DAY
+  MONTH
+  WEEK
+}
+
 """Supported locales for internationalization"""
 enum Locale {
   EN
@@ -423,6 +430,45 @@ type PeriodStatistics {
   totalTime: Int!
 }
 
+"""A personal record achievement for a specific sport"""
+type PersonalRecord {
+  """Date when the record was achieved"""
+  achievedAt: DateTime!
+
+  """ID of the activity where the record was set"""
+  activityId: ID!
+
+  """Type of record (e.g., "longest_distance", "best_pace")"""
+  type: String!
+
+  """Numeric value of the record (raw units: meters, seconds, m/s)"""
+  value: Float!
+}
+
+"""A single data point for progression chart visualization"""
+type ProgressionDataPoint {
+  """
+  Index within the interval (0-6 for days, 1-5 for weeks, 0-11 for months)
+  """
+  index: Int!
+
+  """Type of interval (DAY, WEEK, MONTH)"""
+  intervalType: IntervalType!
+
+  """Numeric value for the data point"""
+  value: Float!
+}
+
+"""Available metrics for progression chart visualization"""
+enum ProgressionMetric {
+  DISTANCE
+  DURATION
+  ELEVATION
+  PACE
+  SESSIONS
+  SPEED
+}
+
 type Query {
   """Get all active goals for the current user"""
   activeGoals: [Goal!]!
@@ -460,6 +506,9 @@ type Query {
   """Get aggregated statistics for a specific time period"""
   periodStatistics(period: StatisticsPeriod!): PeriodStatistics!
 
+  """Get personal records for a specific sport"""
+  personalRecords(sportType: SportType!): [PersonalRecord!]!
+
   """
   Get the primary goal for dashboard display (highest priority: global goals first, then by deadline)
   """
@@ -470,11 +519,22 @@ type Query {
   """
   secondaryDashboardGoals: [Goal!]!
 
+  """Get average performance metrics for a sport over a time period"""
+  sportAverageMetrics(period: StatisticsPeriod!, sportType: SportType!): SportAverageMetrics!
+
   """Get count of activities and goals for a sport"""
   sportDataCount(sport: SportType!): SportDataCount!
 
   """Get distribution of training time by sport type for the current month"""
   sportDistribution: [SportDistribution!]!
+
+  """
+  Get aggregated statistics for a sport over a specific time period with trend comparisons
+  """
+  sportPeriodStatistics(period: StatisticsPeriod!, sportType: SportType!): SportPeriodStatistics!
+
+  """Get progression data points for chart visualization"""
+  sportProgressionData(metric: ProgressionMetric!, period: StatisticsPeriod!, sportType: SportType!): [ProgressionDataPoint!]!
 
   """Generate Strava OAuth authorization URL"""
   stravaAuthUrl(redirect: String): String!
@@ -506,6 +566,24 @@ type Split {
   movingTime: Int
 }
 
+"""Average performance metrics for a sport over a time period"""
+type SportAverageMetrics {
+  """Average cadence (steps/strokes per minute)"""
+  averageCadence: Float
+
+  """Average heart rate in beats per minute"""
+  averageHeartRate: Float
+
+  """Average pace in seconds per kilometer (for running/swimming)"""
+  averagePace: Float
+
+  """Average power output in watts (cycling only)"""
+  averagePower: Float
+
+  """Average speed in meters per second (for cycling)"""
+  averageSpeed: Float
+}
+
 """Count of activities and goals for a specific sport"""
 type SportDataCount {
   """Number of activities for this sport"""
@@ -525,6 +603,35 @@ type SportDistribution {
 
   """Total time in seconds for this sport"""
   totalTime: Int!
+}
+
+"""
+Aggregated statistics for a sport over a specific time period with trend comparisons
+"""
+type SportPeriodStatistics {
+  """Number of activities in the period"""
+  activityCount: Int!
+
+  """Percentage change in activity count compared to previous period"""
+  activityTrend: Float
+
+  """Percentage change in distance compared to previous period"""
+  distanceTrend: Float
+
+  """Percentage change in duration compared to previous period"""
+  durationTrend: Float
+
+  """Percentage change in elevation compared to previous period"""
+  elevationTrend: Float
+
+  """Total distance in meters"""
+  totalDistance: Float!
+
+  """Total duration in seconds"""
+  totalDuration: Int!
+
+  """Total elevation gain in meters"""
+  totalElevation: Float!
 }
 
 """Available sport types for activity tracking"""

@@ -677,6 +677,94 @@
       "goHome": "Go back home"
     }
   },
+  "sportDashboard": {
+    "header": {
+      "title": "{sport} Dashboard",
+      "lastSync": "Last sync {time}",
+      "neverSynced": "Never synced"
+    },
+    "performanceOverview": {
+      "title": "Performance",
+      "tabs": {
+        "volume": "Volume",
+        "averages": "Averages"
+      },
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    },
+    "stats": {
+      "title": "Statistics",
+      "distance": "Distance",
+      "duration": "Duration",
+      "sessions": "Sessions",
+      "elevation": "Elevation",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    },
+    "averageMetrics": {
+      "title": "Average Metrics",
+      "pace": "Avg Pace",
+      "speed": "Avg Speed",
+      "heartRate": "Avg Heart Rate",
+      "cadence": "Avg Cadence",
+      "power": "Avg Power",
+      "periods": {
+        "week": "Week",
+        "month": "Month",
+        "year": "Year"
+      }
+    },
+    "progression": {
+      "title": "My Progression",
+      "empty": "No data available for this period",
+      "metrics": {
+        "distance": "Distance",
+        "duration": "Duration",
+        "pace": "Pace",
+        "speed": "Speed",
+        "sessions": "Sessions",
+        "elevation": "Elevation"
+      },
+      "periods": {
+        "weekly": "Weekly",
+        "monthly": "Monthly"
+      }
+    },
+    "goals": {
+      "title": "Goals",
+      "viewAll": "View all goals",
+      "empty": {
+        "title": "No goals yet",
+        "description": "Set goals to track your progress and stay motivated.",
+        "cta": "Create a goal"
+      }
+    },
+    "records": {
+      "title": "Personal Records",
+      "empty": "No records yet. Keep training to set your first records!",
+      "achievedOn": "Achieved on {date}",
+      "types": {
+        "longest_distance": "Longest Distance",
+        "longest_duration": "Longest Duration",
+        "most_elevation": "Most Elevation",
+        "best_pace": "Best Pace",
+        "best_speed": "Best Speed"
+      }
+    },
+    "recentActivities": {
+      "empty": "No recent activities for this sport"
+    },
+    "empty": {
+      "title": "No activities yet",
+      "description": "Start recording {sport} activities on Strava and sync them to see your dashboard."
+    }
+  },
   "dashboard": {
     "greeting": "Hello, {name}",
     "greetingFallback": "Hello",

@@ -12,7 +12,6 @@ import {
   getProgressBackgroundColor,
   getProgressColorForChart,
   formatValueOnly,
-  formatDate,
 } from './formatting';
 import { Activity, Bike, Footprints, Waves } from 'lucide-react';
 
@@ -244,28 +243,5 @@ describe('formatValueOnly', () => {
 
   it('should format FREQUENCY as integer', () => {
     expect(formatValueOnly(10.9, GoalTargetType.Frequency)).toBe('10');
-  });
-});
-
-describe('formatDate', () => {
-  it('should format Date object with en-US locale', () => {
-    const date = new Date('2024-03-15');
-    const result = formatDate(date, 'en-US');
-    expect(result).toContain('Mar');
-    expect(result).toContain('15');
-    expect(result).toContain('2024');
-  });
-
-  it('should format date string with en-US locale', () => {
-    const result = formatDate('2024-06-20', 'en-US');
-    expect(result).toContain('Jun');
-    expect(result).toContain('20');
-    expect(result).toContain('2024');
-  });
-
-  it('should format date with French locale', () => {
-    const date = new Date('2024-09-10');
-    const result = formatDate(date, 'fr-FR');
-    expect(result).toContain('2024');
   });
 });

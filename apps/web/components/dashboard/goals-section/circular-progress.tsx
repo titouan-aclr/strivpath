@@ -3,6 +3,7 @@
 import { cn } from '@/lib/utils';
 import { GoalStatus } from '@/gql/graphql';
 import { getGoalStatusColors } from '@/components/goals/constants';
+import type { SportColorConfig } from '@/lib/sports/config';
 
 export interface CircularProgressProps {
   percentage: number;
@@ -10,14 +11,24 @@ export interface CircularProgressProps {
   strokeWidth?: number;
   className?: string;
   status?: GoalStatus;
+  sportColor?: SportColorConfig;
 }
 
-export function CircularProgress({ percentage, size = 80, strokeWidth = 8, className, status }: CircularProgressProps) {
+export function CircularProgress({
+  percentage,
+  size = 80,
+  strokeWidth = 8,
+  className,
+  status,
+  sportColor,
+}: CircularProgressProps) {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const displayPercentage = Math.min(Math.max(percentage, 0), 100);
   const offset = circumference - (displayPercentage / 100) * circumference;
   const statusColors = getGoalStatusColors(status);
+  const effectiveTextClass = sportColor?.text ?? statusColors.text;
+  const effectiveTextMutedClass = sportColor?.textMuted ?? statusColors.textSubtle;
 
   return (
     <div className={cn('relative inline-flex items-center justify-center', className)}>
@@ -29,7 +40,7 @@ export function CircularProgress({ percentage, size = 80, strokeWidth = 8, class
           strokeWidth={strokeWidth}
           stroke="currentColor"
           fill="none"
-          className={statusColors.textSubtle}
+          className={effectiveTextMutedClass}
         />
         <circle
           cx={size / 2}
@@ -41,7 +52,7 @@ export function CircularProgress({ percentage, size = 80, strokeWidth = 8, class
           strokeLinecap="round"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
-          className={cn('transition-all duration-500 ease-out', statusColors.text)}
+          className={cn('transition-all duration-500 ease-out', effectiveTextClass)}
         />
       </svg>
       <div className="absolute inset-0 flex items-center justify-center">

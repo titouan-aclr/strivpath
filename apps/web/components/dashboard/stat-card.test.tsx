@@ -2,6 +2,17 @@ import { describe, it, expect } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { Clock, Timer } from 'lucide-react';
 import { StatCard } from './stat-card';
+import type { SportColorConfig } from '@/lib/sports/config';
+
+const runSportColor: SportColorConfig = {
+  bg: 'bg-lime-300',
+  bgMuted: 'bg-lime-300/10',
+  text: 'text-lime-500',
+  textMuted: 'text-lime-500/10',
+  border: 'border-lime-300',
+  ring: 'ring-lime-300',
+  chart: 'oklch(0.84 0.18 128)',
+};
 
 describe('StatCard', () => {
   it('should render label and value', () => {
@@ -96,5 +107,40 @@ describe('StatCard', () => {
     render(<StatCard label="Test" value={5} trend={{ value: 0, isPositive: true }} />);
 
     expect(screen.getByText('+0%')).toBeInTheDocument();
+  });
+
+  it('should use sport colors for icon when sportColor is provided', () => {
+    const { container } = render(<StatCard label="Distance" value="42km" icon={Clock} sportColor={runSportColor} />);
+
+    expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
+    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+  });
+
+  it('should use strava-orange when sportColor is not provided', () => {
+    const { container } = render(<StatCard label="Distance" value="42km" icon={Clock} />);
+
+    expect(container.querySelector('.bg-strava-orange\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+  });
+
+  it('should render with sportColor and all other props', () => {
+    const { container } = render(
+      <StatCard
+        label="Total Distance"
+        value="150km"
+        icon={Timer}
+        trend={{ value: 10, isPositive: true }}
+        className="sport-stat"
+        sportColor={runSportColor}
+      />,
+    );
+
+    expect(screen.getByText('Total Distance')).toBeInTheDocument();
+    expect(screen.getByText('150km')).toBeInTheDocument();
+    expect(screen.getByText('+10%')).toBeInTheDocument();
+    expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
+    expect(container.querySelector('.sport-stat')).toBeInTheDocument();
   });
 });
