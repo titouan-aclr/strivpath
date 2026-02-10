@@ -1,6 +1,6 @@
 # API - NestJS GraphQL Backend
 
-GraphQL API backend for Stravanalytics, built with NestJS using a code-first approach.
+GraphQL API backend for StrivPath, built with NestJS using a code-first approach.
 
 ## Tech Stack
 
@@ -175,7 +175,7 @@ pnpm test:e2e
 Required in `.env`:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/stravanalytics"
+DATABASE_URL="postgresql://user:password@localhost:5432/strivpath"
 STRAVA_CLIENT_ID="your_client_id"
 STRAVA_CLIENT_SECRET="your_client_secret"
 STRAVA_CALLBACK_URL="http://localhost:3011/v1/auth/strava/callback"

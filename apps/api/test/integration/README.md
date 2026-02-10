@@ -23,13 +23,13 @@ docker compose up -d
 The test database URL is configured in `test/setup-integration.ts`:
 
 ```
-postgresql://postgres:postgres@localhost:5432/stravanalytics_test
+postgresql://postgres:postgres@localhost:5432/strivpath_test
 ```
 
 You can create the test database manually:
 
 ```bash
-psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE stravanalytics_test;"
+psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE strivpath_test;"
 ```
 
 Or the integration tests will attempt to apply migrations automatically.
@@ -39,7 +39,7 @@ Or the integration tests will attempt to apply migrations automatically.
 Migrations are automatically applied during test setup, but you can apply them manually:
 
 ```bash
-DATABASE_URL=postgresql://postgres:postgres@localhost:5432/stravanalytics_test pnpm prisma migrate deploy
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/strivpath_test pnpm prisma migrate deploy
 ```
 
 ## Running Tests
@@ -153,7 +153,7 @@ pnpm test:integration -- -t "should create user and preferences on first Strava 
 During debugging, you can connect to the test database:
 
 ```bash
-psql -U postgres -h localhost -p 5432 -d stravanalytics_test
+psql -U postgres -h localhost -p 5432 -d strivpath_test
 ```
 
 ### Common Issues

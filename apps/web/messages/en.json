@@ -1,11 +1,11 @@
 {
   "common": {
-    "appName": "Stravanalytics",
+    "appName": "StrivPath",
     "loading": "Loading...",
     "error": "An error occurred"
   },
   "home": {
-    "title": "Stravanalytics",
+    "title": "StrivPath",
     "usersFromApi": "Users from GraphQL API:",
     "demoButton": "Demo Button",
     "noUsers": "No users found",
@@ -174,7 +174,7 @@
     },
     "sports": {
       "title": "Select Your Sports",
-      "description": "Choose at least one sport to track with Stravanalytics",
+      "description": "Choose at least one sport to track with StrivPath",
       "run": {
         "title": "Running",
         "description": "Track your runs and improve your pace"
@@ -248,7 +248,7 @@
   },
   "auth": {
     "login": {
-      "title": "Welcome to Stravanalytics",
+      "title": "Welcome to StrivPath",
       "description": "Connect your Strava account to start tracking your progress and achieving your goals",
       "connectButton": "Connect with Strava",
       "errors": {
@@ -278,7 +278,7 @@
     "description": "Track your progress and achieve your objectives",
     "newGoal": "New Goal",
     "meta": {
-      "title": "Goals - Stravanalytics",
+      "title": "Goals - StrivPath",
       "description": "Set and track your sports goals"
     },
     "filters": {
@@ -552,7 +552,7 @@
   },
   "settings": {
     "meta": {
-      "title": "Settings - Stravanalytics",
+      "title": "Settings - StrivPath",
       "description": "Manage your account and preferences"
     },
     "title": "Settings",
