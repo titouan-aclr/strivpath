@@ -13,6 +13,7 @@ import { StravaService } from '../strava/strava.service';
 import { SyncHistoryService } from '../sync-history/sync-history.service';
 import { ActivityMapper } from './activity.mapper';
 import { StravaActivitySummary } from '../strava/types';
+import { stripGeographicData } from '../strava/strava-data.utils';
 import { StravaActivityDetail } from '../strava/types/strava-activity-detail.interface';
 import { ActivitySyncLimitExceededException } from './exceptions/activity-sync-limit-exceeded.exception';
 import { GoalProgressUpdateService } from '../goal/goal-progress-update.service';
@@ -176,7 +177,7 @@ export class ActivityService {
           averageWatts: stravaActivity.average_watts,
           weightedAverageWatts: stravaActivity.weighted_average_watts,
           maxWatts: stravaActivity.max_watts,
-          raw: stravaActivity as unknown as Prisma.InputJsonValue,
+          raw: stripGeographicData(stravaActivity) as unknown as Prisma.InputJsonValue,
         },
         update: {
           name: stravaActivity.name,
@@ -202,7 +203,7 @@ export class ActivityService {
           averageWatts: stravaActivity.average_watts,
           weightedAverageWatts: stravaActivity.weighted_average_watts,
           maxWatts: stravaActivity.max_watts,
-          raw: stravaActivity as unknown as Prisma.InputJsonValue,
+          raw: stripGeographicData(stravaActivity) as unknown as Prisma.InputJsonValue,
         },
       });
 
