@@ -87,7 +87,7 @@ describe('GoalTemplateCard', () => {
   it('should have orange background for sport icon', () => {
     const { container } = render(<GoalTemplateCard template={mockTemplate} onSelect={mockOnSelect} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -129,7 +129,7 @@ describe('GoalTemplateCard', () => {
     const card = container.querySelector('.hover\\:shadow-lg');
     expect(card).toBeInTheDocument();
 
-    const borderHover = container.querySelector('.hover\\:border-strava-orange\\/50');
+    const borderHover = container.querySelector('.hover\\:border-primary\\/50');
     expect(borderHover).toBeInTheDocument();
   });
 

@@ -21,7 +21,7 @@ export function GoalTemplateCard({ template, onSelect }: GoalTemplateCardProps) 
 
   return (
     <Card
-      className="cursor-pointer transition-all hover:shadow-lg hover:border-strava-orange/50"
+      className="cursor-pointer transition-all hover:shadow-lg hover:border-primary/50"
       onClick={onSelect}
       role="button"
       tabIndex={0}
@@ -35,8 +35,8 @@ export function GoalTemplateCard({ template, onSelect }: GoalTemplateCardProps) 
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-2">
-            <div className="p-2 rounded-lg bg-strava-orange/10">
-              <SportIcon className="h-5 w-5 text-strava-orange" aria-hidden="true" />
+            <div className="p-2 rounded-lg bg-primary/10">
+              <SportIcon className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
             <CardTitle className="text-lg">{template.title}</CardTitle>
           </div>
@@ -46,7 +46,7 @@ export function GoalTemplateCard({ template, onSelect }: GoalTemplateCardProps) 
       </CardHeader>
       <CardContent>
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-strava-orange">{formattedValue}</span>
+          <span className="text-2xl font-bold text-primary">{formattedValue}</span>
           <span className="text-sm text-muted-foreground">{config.unit}</span>
         </div>
         {template.isPreset && (

@@ -61,8 +61,8 @@ export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
   return (
     <>
       <div className="flex items-start gap-4">
-        <div className="p-3 rounded-lg bg-strava-orange/10">
-          <SportIcon className="h-8 w-8 text-strava-orange" />
+        <div className="p-3 rounded-lg bg-primary/10">
+          <SportIcon className="h-8 w-8 text-primary" />
         </div>
 
         <div className="flex-1">

@@ -43,7 +43,7 @@ export function ProfileSection() {
                   href={`https://www.strava.com/athletes/${user.stravaId}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-strava-orange transition-colors"
+                  className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-primary transition-colors"
                 >
                   @{user.username}
                   <ExternalLink className="h-3 w-3" aria-hidden="true" />

@@ -54,7 +54,7 @@ export function AppearanceSection() {
                 key={loc.code}
                 variant={locale === loc.code ? 'default' : 'outline'}
                 size="sm"
-                className={cn('gap-2', locale === loc.code && 'bg-strava-orange hover:bg-strava-orange/90')}
+                className={cn('gap-2', locale === loc.code && 'bg-primary hover:bg-primary/90')}
                 onClick={() => handleLocaleChange(loc.code)}
               >
                 <span aria-hidden="true">{loc.flag}</span>
@@ -79,7 +79,7 @@ export function AppearanceSection() {
                   key={value}
                   variant={theme === value ? 'default' : 'outline'}
                   size="sm"
-                  className={cn('gap-2', theme === value && 'bg-strava-orange hover:bg-strava-orange/90')}
+                  className={cn('gap-2', theme === value && 'bg-primary hover:bg-primary/90')}
                   onClick={() => setTheme(value)}
                 >
                   <Icon className="h-4 w-4" aria-hidden="true" />

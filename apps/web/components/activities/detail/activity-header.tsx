@@ -23,8 +23,8 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
     <div className="space-y-4">
       <div className="flex items-start gap-4">
         {Icon && (
-          <div className="p-3 rounded-lg bg-strava-orange/10">
-            <Icon className="h-8 w-8 text-strava-orange" aria-hidden="true" />
+          <div className="p-3 rounded-lg bg-primary/10">
+            <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
           </div>
         )}
         <div className="flex-1">
@@ -40,7 +40,7 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
             </span>
           </div>
         </div>
-        <Badge className="bg-strava-orange hover:bg-strava-orange/90 px-3 py-1.5">
+        <Badge className="bg-primary hover:bg-primary/90 px-3 py-1.5">
           {t(`sportTypes.${activity.type.toLowerCase()}`)}
         </Badge>
       </div>

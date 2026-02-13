@@ -173,7 +173,7 @@ describe('EditGoalPage', () => {
 
       const spinner = container.querySelector('.animate-spin');
       expect(spinner).toBeInTheDocument();
-      expect(spinner).toHaveClass('text-strava-orange');
+      expect(spinner).toHaveClass('text-primary');
     });
 
     it('should handle goal with null description', async () => {

@@ -14,14 +14,14 @@ describe('StatCard', () => {
   it('should render icon when provided', () => {
     const { container } = render(<StatCard label="Distance" value="10.5 km" icon={Route} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.icon-container-sm');
     expect(iconContainer).toBeInTheDocument();
   });
 
   it('should not render icon when not provided', () => {
     const { container } = render(<StatCard label="Distance" value="10.5 km" />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.icon-container-sm');
     expect(iconContainer).not.toBeInTheDocument();
   });
 
@@ -44,14 +44,14 @@ describe('StatCard', () => {
   it('should apply highlight class when highlight is true', () => {
     const { container } = render(<StatCard label="Distance" value="10.5 km" highlight />);
 
-    const card = container.querySelector('.border-strava-orange\\/50');
+    const card = container.querySelector('.border-primary\\/50');
     expect(card).toBeInTheDocument();
   });
 
   it('should not apply highlight class when highlight is false', () => {
     const { container } = render(<StatCard label="Distance" value="10.5 km" highlight={false} />);
 
-    const card = container.querySelector('.border-strava-orange\\/50');
+    const card = container.querySelector('.border-primary\\/50');
     expect(card).not.toBeInTheDocument();
   });
 
