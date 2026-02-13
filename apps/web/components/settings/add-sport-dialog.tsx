@@ -67,8 +67,8 @@ export function AddSportDialog({ open, onOpenChange, selectedSports, onSuccess }
       <DialogContent>
         <DialogHeader>
           <div className="flex items-center gap-3">
-            <div className="rounded-full bg-strava-orange/10 p-2">
-              <Plus className="h-5 w-5 text-strava-orange" aria-hidden="true" />
+            <div className="rounded-full bg-primary/10 p-2">
+              <Plus className="h-5 w-5 text-primary" aria-hidden="true" />
             </div>
             <DialogTitle>{t('addDialog.title')}</DialogTitle>
           </div>
@@ -98,7 +98,7 @@ export function AddSportDialog({ open, onOpenChange, selectedSports, onSuccess }
                   }}
                   className={cn(
                     'cursor-pointer transition-all',
-                    isSelected && 'ring-2 ring-strava-orange border-strava-orange bg-strava-orange/5',
+                    isSelected && 'selected-ring',
                     !isSelected && 'hover:border-muted-foreground/50',
                   )}
                 >
@@ -106,7 +106,7 @@ export function AddSportDialog({ open, onOpenChange, selectedSports, onSuccess }
                     <div
                       className={cn(
                         'rounded-full p-3 transition-colors',
-                        isSelected ? 'bg-strava-orange text-white' : 'bg-muted',
+                        isSelected ? 'bg-primary text-white' : 'bg-muted',
                       )}
                     >
                       <Icon className="h-5 w-5" aria-hidden="true" />

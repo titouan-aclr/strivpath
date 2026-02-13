@@ -91,25 +91,25 @@ describe('SecondaryGoalCard', () => {
   it('should render sport icon for running', () => {
     const { container } = render(<SecondaryGoalCard goal={createMockGoal({ sportType: SportType.Run })} />);
 
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should render sport icon for cycling', () => {
     const { container } = render(<SecondaryGoalCard goal={createMockGoal({ sportType: SportType.Ride })} />);
 
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should render sport icon for swimming', () => {
     const { container } = render(<SecondaryGoalCard goal={createMockGoal({ sportType: SportType.Swim })} />);
 
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should render global icon when no sport type', () => {
     const { container } = render(<SecondaryGoalCard goal={createMockGoal({ sportType: null })} />);
 
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should cap progress bar at 100%', () => {
@@ -164,11 +164,11 @@ describe('SecondaryGoalCard', () => {
     expect(screen.getByText(/25\.5 \/ 50\.0 km/)).toBeInTheDocument();
   });
 
-  it('should use strava-orange colors for Active status', () => {
+  it('should use primary colors for Active status', () => {
     const { container } = render(<SecondaryGoalCard goal={createMockGoal({ status: GoalStatus.Active })} />);
 
-    expect(container.querySelector('.bg-strava-orange\\/10')).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should use green colors for Completed status', () => {
@@ -199,7 +199,7 @@ describe('SecondaryGoalCard', () => {
 
     expect(container.querySelector('.bg-cyan-300\\/10')).toBeInTheDocument();
     expect(container.querySelector('.text-cyan-500')).toBeInTheDocument();
-    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).not.toBeInTheDocument();
   });
 
   it('should use status colors when sportColor is provided but status is not Active', () => {

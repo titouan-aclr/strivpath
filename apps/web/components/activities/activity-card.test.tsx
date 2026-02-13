@@ -86,7 +86,7 @@ describe('ActivityCard', () => {
 
     it('should render sport icon with default orange color', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} />);
-      const iconContainer = container.querySelector('.text-strava-orange');
+      const iconContainer = container.querySelector('.text-primary');
       expect(iconContainer).toBeInTheDocument();
     });
 
@@ -103,7 +103,7 @@ describe('ActivityCard', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} sportColor={sportColor} />);
       expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
       expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
-      expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
+      expect(container.querySelector('.text-primary')).not.toBeInTheDocument();
     });
   });
 

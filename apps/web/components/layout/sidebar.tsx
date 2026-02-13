@@ -48,7 +48,7 @@ export function Sidebar() {
               variant="ghost"
               className={cn(
                 'w-full justify-start',
-                isActive && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+                isActive && 'bg-primary/10 text-primary hover:bg-primary/20 shadow-sm',
               )}
             >
               <Link href={item.href}>
@@ -87,7 +87,7 @@ export function Sidebar() {
                     variant="ghost"
                     className={cn(
                       'w-full justify-start',
-                      isActive && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+                      isActive && 'bg-primary/10 text-primary hover:bg-primary/20 shadow-sm',
                     )}
                   >
                     <Link href={sport.href}>
@@ -108,7 +108,7 @@ export function Sidebar() {
           variant="ghost"
           className={cn(
             'w-full justify-start',
-            isActiveRoute('/settings') && 'bg-strava-orange/10 text-strava-orange hover:bg-strava-orange/20 shadow-sm',
+            isActiveRoute('/settings') && 'bg-primary/10 text-primary hover:bg-primary/20 shadow-sm',
           )}
         >
           <Link href="/settings">

@@ -73,7 +73,7 @@ describe('ActivityHeader', () => {
   it('should render sport icon for Run', () => {
     const { container } = render(<ActivityHeader activity={mockActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -81,7 +81,7 @@ describe('ActivityHeader', () => {
     const rideActivity = { ...mockActivity, type: SportType.Ride };
     const { container } = render(<ActivityHeader activity={rideActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe('ActivityHeader', () => {
     const swimActivity = { ...mockActivity, type: SportType.Swim };
     const { container } = render(<ActivityHeader activity={swimActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 

@@ -406,7 +406,7 @@ describe('SyncSection', () => {
 
     const { container } = render(<SyncSection />);
 
-    const orangeSpinner = container.querySelector('.text-strava-orange.animate-spin');
+    const orangeSpinner = container.querySelector('.text-primary.animate-spin');
     expect(orangeSpinner).toBeInTheDocument();
   });
 });

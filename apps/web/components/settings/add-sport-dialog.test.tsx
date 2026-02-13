@@ -108,8 +108,7 @@ describe('AddSportDialog', () => {
     const rideCard = screen.getByText('ride.title').closest('[role="button"]');
     await user.click(rideCard!);
 
-    expect(rideCard).toHaveClass('ring-2');
-    expect(rideCard).toHaveClass('ring-strava-orange');
+    expect(rideCard).toHaveClass('selected-ring');
   });
 
   it('should handle keyboard navigation with Enter', async () => {

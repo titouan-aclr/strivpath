@@ -80,25 +80,25 @@ describe('CircularProgress', () => {
     expect(container.querySelector('.custom-progress')).toBeInTheDocument();
   });
 
-  it('should have strava-orange styling on progress circle by default (Active status)', () => {
+  it('should have primary styling on progress circle by default (Active status)', () => {
     const { container } = render(<CircularProgress percentage={50} />);
 
-    const progressCircle = container.querySelector('.text-strava-orange');
+    const progressCircle = container.querySelector('.text-primary');
     expect(progressCircle).toBeInTheDocument();
   });
 
-  it('should have strava-orange/10 styling on background circle by default (Active status)', () => {
+  it('should have primary/10 styling on background circle by default (Active status)', () => {
     const { container } = render(<CircularProgress percentage={50} />);
 
-    const backgroundCircle = container.querySelector('.text-strava-orange\\/10');
+    const backgroundCircle = container.querySelector('.text-primary\\/10');
     expect(backgroundCircle).toBeInTheDocument();
   });
 
-  it('should have strava-orange styling for Active status', () => {
+  it('should have primary styling for Active status', () => {
     const { container } = render(<CircularProgress percentage={50} status={GoalStatus.Active} />);
 
-    const progressCircle = container.querySelector('.text-strava-orange');
-    const backgroundCircle = container.querySelector('.text-strava-orange\\/10');
+    const progressCircle = container.querySelector('.text-primary');
+    const backgroundCircle = container.querySelector('.text-primary\\/10');
     expect(progressCircle).toBeInTheDocument();
     expect(backgroundCircle).toBeInTheDocument();
   });
@@ -148,6 +148,6 @@ describe('CircularProgress', () => {
     const backgroundCircle = container.querySelector('.text-purple-500\\/10');
     expect(progressCircle).toBeInTheDocument();
     expect(backgroundCircle).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).not.toBeInTheDocument();
   });
 });

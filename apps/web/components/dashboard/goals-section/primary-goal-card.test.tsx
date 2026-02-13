@@ -195,14 +195,14 @@ describe('PrimaryGoalCard', () => {
   it('should render sport icon', () => {
     const { container } = render(<PrimaryGoalCard goal={createMockGoal()} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
   it('should render global icon when no sport type', () => {
     const { container } = render(<PrimaryGoalCard goal={createMockGoal({ sportType: null })} />);
 
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should format hours for duration goals', () => {
@@ -262,11 +262,11 @@ describe('PrimaryGoalCard', () => {
     expect(chart).toHaveAttribute('data-unit', 'km');
   });
 
-  it('should use strava-orange colors for Active status', () => {
+  it('should use primary colors for Active status', () => {
     const { container } = render(<PrimaryGoalCard goal={createMockGoal({ status: GoalStatus.Active })} />);
 
-    expect(container.querySelector('.bg-strava-orange\\/10')).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should use green colors for Completed status', () => {
@@ -297,7 +297,7 @@ describe('PrimaryGoalCard', () => {
 
     expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
     expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
-    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).not.toBeInTheDocument();
   });
 
   it('should use status colors when sportColor is provided but status is Completed', () => {

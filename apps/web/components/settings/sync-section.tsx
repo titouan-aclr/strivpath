@@ -29,7 +29,7 @@ export function SyncSection() {
     if (status === SyncStatus.Failed) {
       return <AlertCircle className="h-4 w-4 text-destructive" aria-hidden="true" />;
     }
-    return <Loader2 className="h-4 w-4 animate-spin text-strava-orange" aria-hidden="true" />;
+    return <Loader2 className="h-4 w-4 animate-spin text-primary" aria-hidden="true" />;
   };
 
   const getStatusKey = (status: SyncStatus, stage: SyncStage | null | undefined): string => {

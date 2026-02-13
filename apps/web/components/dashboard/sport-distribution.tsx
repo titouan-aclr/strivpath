@@ -32,8 +32,8 @@ export function SportDistribution({ distribution, className }: SportDistribution
   return (
     <Card className={cn('overflow-hidden h-full flex flex-col', className)}>
       <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-4">
-        <div className="p-2 rounded-lg bg-strava-orange/10">
-          <PieChart className="h-4 w-4 text-strava-orange" aria-hidden="true" />
+        <div className="icon-container">
+          <PieChart className="h-4 w-4 text-primary" aria-hidden="true" />
         </div>
         <div>
           <CardTitle className="text-base font-medium">{t('title')}</CardTitle>

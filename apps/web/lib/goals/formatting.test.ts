@@ -1,19 +1,19 @@
-import { describe, expect, it } from 'vitest';
-import { GoalStatus, GoalTargetType, SportType } from '@/gql/graphql';
 import type { Goal } from '@/gql/graphql';
+import { GoalStatus, GoalTargetType, SportType } from '@/gql/graphql';
+import { Activity, Bike, Footprints, Waves } from 'lucide-react';
+import { describe, expect, it } from 'vitest';
 import {
-  getUnitLabel,
   formatCurrentValue,
-  formatTargetValue,
   formatPeriod,
+  formatTargetValue,
+  formatValueOnly,
+  getProgressBackgroundColor,
+  getProgressColor,
+  getProgressColorForChart,
   getSportIcon,
   getSportLabelKey,
-  getProgressColor,
-  getProgressBackgroundColor,
-  getProgressColorForChart,
-  formatValueOnly,
+  getUnitLabel,
 } from './formatting';
-import { Activity, Bike, Footprints, Waves } from 'lucide-react';
 
 describe('getUnitLabel', () => {
   it('should return km for DISTANCE', () => {
@@ -175,38 +175,44 @@ describe('getSportLabelKey', () => {
 });
 
 describe('getProgressColor', () => {
-  it('should return goal-progress color for ACTIVE', () => {
-    expect(getProgressColor(GoalStatus.Active)).toBe('hsl(var(--goal-progress))');
+  it('should return accent-blue color for ACTIVE', () => {
+    expect(getProgressColor(GoalStatus.Active)).toBe('var(--accent-blue)');
   });
 
   it('should return green color for COMPLETED', () => {
-    expect(getProgressColor(GoalStatus.Completed)).toBe('hsl(142 71% 45%)');
+    expect(getProgressColor(GoalStatus.Completed)).toBe('oklch(0.65 0.19 142)');
   });
 
   it('should return destructive color for FAILED', () => {
-    expect(getProgressColor(GoalStatus.Failed)).toBe('hsl(var(--destructive))');
+    expect(getProgressColor(GoalStatus.Failed)).toBe('var(--destructive)');
   });
 
-  it('should return strava-orange color for ARCHIVED', () => {
-    expect(getProgressColor(GoalStatus.Archived)).toBe('hsl(var(--strava-orange))');
+  it('should return primary color for ARCHIVED', () => {
+    expect(getProgressColor(GoalStatus.Archived)).toBe('var(--primary)');
   });
 });
 
 describe('getProgressBackgroundColor', () => {
-  it('should return goal-progress background for ACTIVE', () => {
-    expect(getProgressBackgroundColor(GoalStatus.Active)).toBe('hsl(var(--goal-progress) / 0.1)');
+  it('should return accent-blue background for ACTIVE', () => {
+    expect(getProgressBackgroundColor(GoalStatus.Active)).toBe(
+      'color-mix(in oklch, var(--accent-blue) 10%, transparent)',
+    );
   });
 
   it('should return green background for COMPLETED', () => {
-    expect(getProgressBackgroundColor(GoalStatus.Completed)).toBe('hsl(142 71% 45% / 0.1)');
+    expect(getProgressBackgroundColor(GoalStatus.Completed)).toBe('oklch(0.65 0.19 142 / 0.1)');
   });
 
   it('should return destructive background for FAILED', () => {
-    expect(getProgressBackgroundColor(GoalStatus.Failed)).toBe('hsl(var(--destructive) / 0.1)');
+    expect(getProgressBackgroundColor(GoalStatus.Failed)).toBe(
+      'color-mix(in oklch, var(--destructive) 10%, transparent)',
+    );
   });
 
-  it('should return strava-orange background for ARCHIVED', () => {
-    expect(getProgressBackgroundColor(GoalStatus.Archived)).toBe('hsl(var(--strava-orange) / 0.1)');
+  it('should return primary background for ARCHIVED', () => {
+    expect(getProgressBackgroundColor(GoalStatus.Archived)).toBe(
+      'color-mix(in oklch, var(--primary) 10%, transparent)',
+    );
   });
 });
 
@@ -223,8 +229,8 @@ describe('getProgressColorForChart', () => {
     expect(getProgressColorForChart(GoalStatus.Failed)).toBe('oklch(0.55 0.19 25)');
   });
 
-  it('should return OKLCH strava-orange for ARCHIVED', () => {
-    expect(getProgressColorForChart(GoalStatus.Archived)).toBe('oklch(0.6678 0.216988 38.3451)');
+  it('should return OKLCH primary for ARCHIVED', () => {
+    expect(getProgressColorForChart(GoalStatus.Archived)).toBe('oklch(0.6216 0.198 32.23)');
   });
 });
 

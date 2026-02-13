@@ -24,9 +24,9 @@ export function StatCard({ label, value, icon: Icon, trend, className, sportColo
     <Card className={cn('overflow-hidden', className)}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
-          <div className="space-y-2">
+          <div className="stat-content">
             <p className="text-sm font-medium text-muted-foreground">{label}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
+            <p className="metric-value">{value}</p>
             {trend && (
               <div
                 className={cn('flex items-center gap-1 text-sm', trend.isPositive ? 'text-green-600' : 'text-red-600')}
@@ -40,8 +40,8 @@ export function StatCard({ label, value, icon: Icon, trend, className, sportColo
             )}
           </div>
           {Icon && (
-            <div className={cn('p-2.5 rounded-lg', sportColor?.bgMuted ?? 'bg-strava-orange/10')}>
-              <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-strava-orange')} aria-hidden="true" />
+            <div className={cn('p-2.5 rounded-lg', sportColor?.bgMuted ?? 'bg-primary/10')}>
+              <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-primary')} aria-hidden="true" />
             </div>
           )}
         </div>

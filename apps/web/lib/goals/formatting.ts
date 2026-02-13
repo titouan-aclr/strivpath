@@ -84,20 +84,20 @@ export function getSportLabelKey(sportType: SportType | null | undefined): strin
 
 export function getProgressColor(status: GoalStatus): string {
   const colors: Record<GoalStatus, string> = {
-    ACTIVE: 'hsl(var(--goal-progress))',
-    COMPLETED: 'hsl(142 71% 45%)',
-    FAILED: 'hsl(var(--destructive))',
-    ARCHIVED: 'hsl(var(--strava-orange))',
+    ACTIVE: 'var(--accent-blue)',
+    COMPLETED: 'oklch(0.65 0.19 142)',
+    FAILED: 'var(--destructive)',
+    ARCHIVED: 'var(--primary)',
   };
   return colors[status];
 }
 
 export function getProgressBackgroundColor(status: GoalStatus): string {
   const colors: Record<GoalStatus, string> = {
-    ACTIVE: 'hsl(var(--goal-progress) / 0.1)',
-    COMPLETED: 'hsl(142 71% 45% / 0.1)',
-    FAILED: 'hsl(var(--destructive) / 0.1)',
-    ARCHIVED: 'hsl(var(--strava-orange) / 0.1)',
+    ACTIVE: 'color-mix(in oklch, var(--accent-blue) 10%, transparent)',
+    COMPLETED: 'oklch(0.65 0.19 142 / 0.1)',
+    FAILED: 'color-mix(in oklch, var(--destructive) 10%, transparent)',
+    ARCHIVED: 'color-mix(in oklch, var(--primary) 10%, transparent)',
   };
   return colors[status];
 }
@@ -107,7 +107,7 @@ export function getProgressColorForChart(status: GoalStatus): string {
     ACTIVE: 'oklch(0.65 0.19 245)',
     COMPLETED: 'oklch(0.65 0.19 142)',
     FAILED: 'oklch(0.55 0.19 25)',
-    ARCHIVED: 'oklch(0.6678 0.216988 38.3451)',
+    ARCHIVED: 'oklch(0.6216 0.198 32.23)',
   };
   return colors[status];
 }

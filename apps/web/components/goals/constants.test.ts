@@ -12,13 +12,13 @@ describe('getGoalStatusColors', () => {
   it('should return Active colors for Active status', () => {
     const colors = getGoalStatusColors(GoalStatus.Active);
 
-    expect(colors.text).toBe('text-strava-orange');
-    expect(colors.textSubtle).toBe('text-strava-orange/10');
-    expect(colors.bg).toBe('bg-strava-orange');
-    expect(colors.bgSubtle).toBe('bg-strava-orange/10');
-    expect(colors.border).toBe('border-strava-orange');
-    expect(colors.hoverBorder).toBe('hover:border-strava-orange/50');
-    expect(colors.hex).toBe('#fc4c02');
+    expect(colors.text).toBe('text-primary');
+    expect(colors.textSubtle).toBe('text-primary/10');
+    expect(colors.bg).toBe('bg-primary');
+    expect(colors.bgSubtle).toBe('bg-primary/10');
+    expect(colors.border).toBe('border-primary');
+    expect(colors.hoverBorder).toBe('hover:border-primary/50');
+    expect(colors.hex).toBe('#E5482D');
   });
 
   it('should return Completed colors for Completed status', () => {

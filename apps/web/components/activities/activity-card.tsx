@@ -47,7 +47,7 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
       tabIndex={onClick ? 0 : -1}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={cn('transition-all', onClick && 'cursor-pointer hover:shadow-lg hover:border-strava-orange/50')}
+      className={cn('transition-all', onClick && 'cursor-pointer card-hover')}
       aria-label={
         onClick
           ? `${activity.name} - ${formatDate(activity.startDate)} - ${formatDistance(activity.distance)}`
@@ -56,8 +56,8 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
     >
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className={cn('p-2 rounded-lg', sportColor?.bgMuted ?? 'bg-strava-orange/10')} aria-hidden="true">
-            <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-strava-orange')} />
+          <div className={cn('p-2 rounded-lg', sportColor?.bgMuted ?? 'bg-primary/10')} aria-hidden="true">
+            <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-primary')} />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -70,7 +70,7 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="stats-grid">
           <div>
             <p className="text-xs text-muted-foreground">{t('distance')}</p>
             <p className="font-semibold">{formatDistance(activity.distance)}</p>

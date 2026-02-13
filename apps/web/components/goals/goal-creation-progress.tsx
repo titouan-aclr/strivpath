@@ -23,7 +23,7 @@ export function GoalCreationProgress({ currentStep }: GoalCreationProgressProps)
             <div
               className={cn(
                 'flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium transition-colors duration-200 relative z-10',
-                currentStep >= step.number ? 'bg-strava-orange text-white' : 'bg-muted text-muted-foreground',
+                currentStep >= step.number ? 'bg-primary text-white' : 'bg-muted text-muted-foreground',
               )}
             >
               {step.number}
@@ -32,7 +32,7 @@ export function GoalCreationProgress({ currentStep }: GoalCreationProgressProps)
               <div
                 className={cn(
                   'h-1.5 w-32 -mx-1 transition-colors duration-300',
-                  currentStep > step.number ? 'bg-strava-orange' : 'bg-muted',
+                  currentStep > step.number ? 'bg-primary' : 'bg-muted',
                 )}
               />
             )}

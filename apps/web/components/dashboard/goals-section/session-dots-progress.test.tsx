@@ -25,8 +25,8 @@ describe('SessionDotsProgress', () => {
   it('should fill dots based on current progress', () => {
     const { container } = render(<SessionDotsProgress current={3} target={5} />);
 
-    const filledDots = container.querySelectorAll('.bg-strava-orange:not(.bg-strava-orange\\/10)');
-    const emptyDots = container.querySelectorAll('.bg-strava-orange\\/10');
+    const filledDots = container.querySelectorAll('.bg-primary:not(.bg-primary\\/10)');
+    const emptyDots = container.querySelectorAll('.bg-primary\\/10');
 
     expect(filledDots).toHaveLength(3);
     expect(emptyDots).toHaveLength(2);
@@ -53,7 +53,7 @@ describe('SessionDotsProgress', () => {
   it('should handle current exceeding target', () => {
     const { container } = render(<SessionDotsProgress current={7} target={5} />);
 
-    const filledDots = container.querySelectorAll('.bg-strava-orange:not(.bg-strava-orange\\/10)');
+    const filledDots = container.querySelectorAll('.bg-primary:not(.bg-primary\\/10)');
     expect(filledDots).toHaveLength(5);
     expect(screen.getByText('Completed!')).toBeInTheDocument();
   });
@@ -61,8 +61,8 @@ describe('SessionDotsProgress', () => {
   it('should handle zero current', () => {
     const { container } = render(<SessionDotsProgress current={0} target={5} />);
 
-    const filledDots = container.querySelectorAll('.bg-strava-orange:not(.bg-strava-orange\\/10)');
-    const emptyDots = container.querySelectorAll('.bg-strava-orange\\/10');
+    const filledDots = container.querySelectorAll('.bg-primary:not(.bg-primary\\/10)');
+    const emptyDots = container.querySelectorAll('.bg-primary\\/10');
 
     expect(filledDots).toHaveLength(0);
     expect(emptyDots).toHaveLength(5);
@@ -82,21 +82,21 @@ describe('SessionDotsProgress', () => {
     expect(container.querySelector('.custom-dots-class')).toBeInTheDocument();
   });
 
-  it('should use strava-orange colors by default (Active status)', () => {
+  it('should use primary colors by default (Active status)', () => {
     const { container } = render(<SessionDotsProgress current={3} target={5} />);
 
-    const filledDots = container.querySelectorAll('.bg-strava-orange:not(.bg-strava-orange\\/10)');
-    const emptyDots = container.querySelectorAll('.bg-strava-orange\\/10');
+    const filledDots = container.querySelectorAll('.bg-primary:not(.bg-primary\\/10)');
+    const emptyDots = container.querySelectorAll('.bg-primary\\/10');
 
     expect(filledDots).toHaveLength(3);
     expect(emptyDots).toHaveLength(2);
   });
 
-  it('should use strava-orange colors for Active status', () => {
+  it('should use primary colors for Active status', () => {
     const { container } = render(<SessionDotsProgress current={3} target={5} status={GoalStatus.Active} />);
 
-    const filledDots = container.querySelectorAll('.bg-strava-orange:not(.bg-strava-orange\\/10)');
-    const emptyDots = container.querySelectorAll('.bg-strava-orange\\/10');
+    const filledDots = container.querySelectorAll('.bg-primary:not(.bg-primary\\/10)');
+    const emptyDots = container.querySelectorAll('.bg-primary\\/10');
 
     expect(filledDots).toHaveLength(3);
     expect(emptyDots).toHaveLength(2);

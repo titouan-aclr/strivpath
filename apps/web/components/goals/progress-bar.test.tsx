@@ -28,7 +28,7 @@ describe('ProgressBar', () => {
     );
 
     const progressBar = container.querySelector('[role="progressbar"]');
-    expect(progressBar).toHaveClass('bg-strava-orange');
+    expect(progressBar).toHaveClass('bg-primary');
   });
 
   it('applies correct color for completed status', () => {
