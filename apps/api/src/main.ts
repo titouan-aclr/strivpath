@@ -26,6 +26,7 @@ async function bootstrap() {
       { path: 'graphql', method: RequestMethod.ALL },
       { path: 'health', method: RequestMethod.GET },
       { path: 'health/ready', method: RequestMethod.GET },
+      { path: 'webhooks/strava', method: RequestMethod.ALL },
     ],
   });
 

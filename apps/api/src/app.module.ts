@@ -11,6 +11,7 @@ import { ActivityModule } from './activity/activity.module';
 import { GoalModule } from './goal/goal.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { HealthModule } from './health/health.module';
+import { WebhookModule } from './webhook/webhook.module';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
@@ -58,6 +59,7 @@ const isProduction = process.env.NODE_ENV === 'production';
     GoalModule,
     StatisticsModule,
     HealthModule,
+    WebhookModule,
   ],
 })
 export class AppModule {}
