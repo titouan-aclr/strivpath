@@ -17,6 +17,7 @@ import {
   formatDate,
   formatTime,
 } from '@/lib/activities/formatters';
+import { ViewOnStravaLink } from '@/components/strava/view-on-strava-link';
 
 export interface ActivityCardProps {
   activity: ActivityCardFragment;
@@ -94,20 +95,23 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
           </div>
         </div>
 
-        {variant === 'full' && (activity.kudosCount > 0 || activity.maxHeartrate) && (
-          <div className="flex gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
-            {activity.kudosCount > 0 && (
-              <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>
-                <Heart className="h-4 w-4" aria-hidden="true" />
-                <span>{activity.kudosCount}</span>
-              </div>
-            )}
-            {activity.maxHeartrate && (
-              <div className="flex items-center gap-1" aria-label={`${activity.maxHeartrate} bpm`}>
-                <Activity className="h-4 w-4" aria-hidden="true" />
-                <span>{activity.maxHeartrate} bpm</span>
-              </div>
-            )}
+        {variant === 'full' && (
+          <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
+            <div className="flex gap-4">
+              {activity.kudosCount > 0 && (
+                <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>
+                  <Heart className="h-4 w-4" aria-hidden="true" />
+                  <span>{activity.kudosCount}</span>
+                </div>
+              )}
+              {activity.maxHeartrate && (
+                <div className="flex items-center gap-1" aria-label={`${activity.maxHeartrate} bpm`}>
+                  <Activity className="h-4 w-4" aria-hidden="true" />
+                  <span>{activity.maxHeartrate} bpm</span>
+                </div>
+              )}
+            </div>
+            <ViewOnStravaLink variant="inline" stravaId={activity.stravaId} />
           </div>
         )}
       </CardContent>
