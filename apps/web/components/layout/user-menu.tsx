@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Settings, LogOut, Loader2 } from 'lucide-react';
+import { Settings, LogOut, Loader2, ExternalLink } from 'lucide-react';
 import { useRouter } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 import { useAuth } from '@/lib/auth/context';
@@ -62,6 +62,12 @@ export function UserMenu() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem asChild>
+          <a href={`https://www.strava.com/athletes/${user.stravaId}`} target="_blank" rel="noopener noreferrer">
+            <ExternalLink className="mr-2 h-4 w-4" />
+            {t('viewOnStrava')}
+          </a>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={() => router.push('/settings')}>
           <Settings className="mr-2 h-4 w-4" />
           {t('settings')}

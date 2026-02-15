@@ -155,6 +155,7 @@
   "layout": {
     "userMenu": {
       "profile": "Profile",
+      "viewOnStrava": "View on Strava",
       "settings": "Settings",
       "logout": "Logout",
       "loggingOut": "Logging out...",
@@ -663,6 +664,11 @@
         }
       }
     }
+  },
+  "strava": {
+    "poweredBy": { "alt": "Powered by Strava" },
+    "viewOnStrava": { "label": "View on Strava", "ariaLabel": "View this activity on Strava" },
+    "connectButton": { "alt": "Connect with Strava" }
   },
   "errors": {
     "unexpected": {

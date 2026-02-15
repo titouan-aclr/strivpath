@@ -1,4 +1,4 @@
-import { Button } from '@/components/ui/button';
+import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModeToggle } from '@/components/mode-toggle';
 import { LanguageSwitcher } from '@/components/language-switcher';
@@ -54,9 +54,20 @@ export default async function LoginPage({ params, searchParams }: Props) {
             <CardDescription>{t('description')}</CardDescription>
           </CardHeader>
           <CardContent className="flex justify-center">
-            <Button asChild size="lg" className="w-full">
-              <a href={data?.stravaAuthUrl || '#'}>{t('connectButton')}</a>
-            </Button>
+            <a
+              href={data?.stravaAuthUrl || '#'}
+              className="inline-block transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded"
+              aria-label={t('connectButton')}
+            >
+              <Image
+                src="/strava/btn_strava_connect_with_orange.svg"
+                alt={t('connectButton')}
+                width={237}
+                height={48}
+                priority
+                unoptimized
+              />
+            </a>
           </CardContent>
         </Card>
       </main>
