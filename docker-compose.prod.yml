@@ -120,6 +120,8 @@ services:
       NEXT_PUBLIC_GRAPHQL_URL: https://api.${DOMAIN}/graphql
       # GraphQL URL for SSR (internal Docker network)
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
+      # Legal pages base URL
+      NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:?NEXT_PUBLIC_LEGAL_BASE_URL is required}
     labels:
       # Traefik configuration
       - "traefik.enable=true"
