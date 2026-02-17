@@ -320,15 +320,41 @@ describe('GoalResolver', () => {
   });
 
   describe('refreshGoalProgress', () => {
-    it('should refresh goal progress', async () => {
+    it('should verify ownership before updating progress', async () => {
+      const callOrder: string[] = [];
+      mockGoalService.findById.mockImplementation(async () => {
+        callOrder.push('findById');
+        return mockGoal;
+      });
+      mockGoalService.updateGoalProgress.mockImplementation(async () => {
+        callOrder.push('updateGoalProgress');
+      });
+
+      await resolver.refreshGoalProgress(mockTokenPayload, 1);
+
+      expect(callOrder[0]).toBe('findById');
+      expect(callOrder[1]).toBe('updateGoalProgress');
+    });
+
+    it('should refresh goal progress and return updated goal', async () => {
+      const updatedGoal = { ...mockGoal, currentValue: 30 };
+      mockGoalService.findById.mockResolvedValueOnce(mockGoal).mockResolvedValueOnce(updatedGoal);
       mockGoalService.updateGoalProgress.mockResolvedValue(undefined);
-      mockGoalService.findById.mockResolvedValue(mockGoal);
 
       const result = await resolver.refreshGoalProgress(mockTokenPayload, 1);
 
-      expect(goalService.updateGoalProgress).toHaveBeenCalledWith(1);
       expect(goalService.findById).toHaveBeenCalledWith(1, mockTokenPayload.sub);
-      expect(result).toEqual(mockGoal);
+      expect(goalService.updateGoalProgress).toHaveBeenCalledWith(1);
+      expect(result).toEqual(updatedGoal);
+    });
+
+    it('should throw NotFoundException if goal does not belong to user', async () => {
+      mockGoalService.findById.mockResolvedValue(null);
+
+      await expect(resolver.refreshGoalProgress(mockTokenPayload, 999)).rejects.toThrow(
+        'Goal with ID 999 not found or does not belong to user',
+      );
+      expect(goalService.updateGoalProgress).not.toHaveBeenCalled();
     });
   });
 

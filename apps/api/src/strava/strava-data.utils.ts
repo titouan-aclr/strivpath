@@ -1,13 +1,13 @@
 import { StravaActivitySummary } from './types';
 
-const GEOGRAPHIC_FIELDS: (keyof StravaActivitySummary)[] = [
+const GEOGRAPHIC_FIELDS = [
   'start_latlng',
   'end_latlng',
   'location_city',
   'location_state',
   'location_country',
   'map',
-];
+] as const satisfies readonly (keyof StravaActivitySummary)[];
 
 export function stripGeographicData(
   activity: StravaActivitySummary,
