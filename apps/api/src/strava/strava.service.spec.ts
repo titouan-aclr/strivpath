@@ -1,10 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { HttpService } from '@nestjs/axios';
 import { ConfigService } from '@nestjs/config';
-import { UnauthorizedException, BadRequestException } from '@nestjs/common';
+import { UnauthorizedException, BadRequestException, ServiceUnavailableException } from '@nestjs/common';
 import { of, throwError } from 'rxjs';
 import { StravaService } from './strava.service';
 import { StravaTokenService } from './strava-token.service';
+import { StravaRateLimitService } from './strava-rate-limit.service';
+import { StravaRateLimitExceededException } from './strava-rate-limit.exceptions';
 import { StravaTokenResponse, StravaAthleteResponse } from './types';
 
 describe('StravaService', () => {
@@ -12,10 +14,18 @@ describe('StravaService', () => {
   let httpService: HttpService;
   let configService: ConfigService;
   let stravaTokenService: StravaTokenService;
+  let stravaRateLimitService: StravaRateLimitService;
 
   const mockHttpService = {
     post: jest.fn(),
     get: jest.fn(),
+    axiosRef: {
+      interceptors: {
+        response: {
+          use: jest.fn(),
+        },
+      },
+    },
   };
 
   const mockConfigService = {
@@ -26,6 +36,13 @@ describe('StravaService', () => {
     getValidAccessToken: jest.fn(),
   };
 
+  const mockStravaRateLimitService = {
+    updateFromHeaders: jest.fn(),
+    isApproachingLimit: jest.fn().mockReturnValue(false),
+    isApproachingDailyLimit: jest.fn().mockReturnValue(false),
+    getCurrentState: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -33,6 +50,7 @@ describe('StravaService', () => {
         { provide: HttpService, useValue: mockHttpService },
         { provide: ConfigService, useValue: mockConfigService },
         { provide: StravaTokenService, useValue: mockStravaTokenService },
+        { provide: StravaRateLimitService, useValue: mockStravaRateLimitService },
       ],
     }).compile();
 
@@ -40,10 +58,13 @@ describe('StravaService', () => {
     httpService = module.get<HttpService>(HttpService);
     configService = module.get<ConfigService>(ConfigService);
     stravaTokenService = module.get<StravaTokenService>(StravaTokenService);
+    stravaRateLimitService = module.get<StravaRateLimitService>(StravaRateLimitService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockStravaRateLimitService.isApproachingLimit.mockReturnValue(false);
+    mockStravaRateLimitService.isApproachingDailyLimit.mockReturnValue(false);
   });
 
   describe('exchangeCodeForToken', () => {
@@ -267,6 +288,103 @@ describe('StravaService', () => {
       mockStravaTokenService.getValidAccessToken.mockRejectedValue(tokenError);
 
       await expect(service.getActivities(userId)).rejects.toThrow(tokenError);
+    });
+
+    it('should throw StravaRateLimitExceededException when 15min limit is approaching', async () => {
+      mockStravaRateLimitService.isApproachingLimit.mockReturnValue(true);
+      mockStravaRateLimitService.isApproachingDailyLimit.mockReturnValue(false);
+
+      await expect(service.getActivities(1)).rejects.toThrow(StravaRateLimitExceededException);
+      expect(mockHttpService.get).not.toHaveBeenCalled();
+    });
+
+    it('should throw StravaRateLimitExceededException with daily limitType when daily limit is approaching', async () => {
+      mockStravaRateLimitService.isApproachingLimit.mockReturnValue(true);
+      mockStravaRateLimitService.isApproachingDailyLimit.mockReturnValue(true);
+
+      await expect(service.getActivities(1)).rejects.toThrow(ServiceUnavailableException);
+      expect(mockHttpService.get).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('rate limit guard scope', () => {
+    it('should not apply rate limit guard to getAthlete', async () => {
+      mockStravaRateLimitService.isApproachingLimit.mockReturnValue(true);
+
+      mockHttpService.get.mockReturnValue(
+        of({ data: { id: 1 }, status: 200, statusText: 'OK', headers: {}, config: {} as any }),
+      );
+
+      await expect(service.getAthlete('some-token')).resolves.toBeDefined();
+      expect(stravaRateLimitService.isApproachingLimit).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleStravaError — 429 fallback', () => {
+    it('should throw StravaRateLimitExceededException when Strava returns 429', async () => {
+      mockConfigService.getOrThrow.mockReturnValue('test-value');
+
+      mockHttpService.post.mockReturnValue(
+        throwError(() => ({
+          response: {
+            status: 429,
+            data: { message: 'Too Many Requests' },
+          },
+        })),
+      );
+
+      await expect(service.exchangeCodeForToken('code')).rejects.toThrow(StravaRateLimitExceededException);
+    });
+  });
+
+  describe('onModuleInit', () => {
+    it('should register an axios response interceptor', () => {
+      service.onModuleInit();
+
+      expect(mockHttpService.axiosRef.interceptors.response.use).toHaveBeenCalledWith(
+        expect.any(Function),
+        expect.any(Function),
+      );
+    });
+
+    it('should update rate limit state from successful response headers', () => {
+      service.onModuleInit();
+
+      const [successHandler] = mockHttpService.axiosRef.interceptors.response.use.mock.calls[0] as [
+        (res: unknown) => unknown,
+        (err: unknown) => Promise<never>,
+      ];
+      const mockResponse = { headers: { 'x-ratelimit-limit': '200,2000' }, data: {} };
+      successHandler(mockResponse);
+
+      expect(stravaRateLimitService.updateFromHeaders).toHaveBeenCalledWith(mockResponse.headers);
+    });
+
+    it('should update rate limit state from error response headers', async () => {
+      service.onModuleInit();
+
+      const [, errorHandler] = mockHttpService.axiosRef.interceptors.response.use.mock.calls[0] as [
+        (res: unknown) => unknown,
+        (err: unknown) => Promise<never>,
+      ];
+      const mockError = { response: { headers: { 'x-ratelimit-usage': '180,500' } } };
+
+      await expect(errorHandler(mockError)).rejects.toBeDefined();
+
+      expect(stravaRateLimitService.updateFromHeaders).toHaveBeenCalledWith(mockError.response.headers);
+    });
+
+    it('should not update rate limit state when error has no response', async () => {
+      service.onModuleInit();
+
+      const [, errorHandler] = mockHttpService.axiosRef.interceptors.response.use.mock.calls[0] as [
+        (res: unknown) => unknown,
+        (err: unknown) => Promise<never>,
+      ];
+
+      await expect(errorHandler(new Error('network error'))).rejects.toBeDefined();
+
+      expect(stravaRateLimitService.updateFromHeaders).not.toHaveBeenCalled();
     });
   });
 

@@ -8,6 +8,7 @@ const mockT = (key: string) => {
     'onboarding.errors.network': 'Connection error',
     'onboarding.errors.tokenExpired': 'Strava connection expired',
     'onboarding.errors.rateLimitTitle': 'Too many requests',
+    'onboarding.errors.rateLimitDailyTitle': 'Daily limit reached',
     'onboarding.errors.syncFailed': 'Failed to sync activities',
     'onboarding.errors.unknownError': 'An unexpected error occurred',
   };
@@ -54,6 +55,17 @@ describe('isRateLimitError', () => {
   it('should return true for RATE_LIMIT_EXCEEDED error code', () => {
     const graphQLError = new GraphQLError('Rate limit exceeded', {
       extensions: { code: 'RATE_LIMIT_EXCEEDED' },
+    });
+    const combinedError = new CombinedGraphQLErrors({
+      errors: [graphQLError],
+    });
+
+    expect(isRateLimitError(combinedError)).toBe(true);
+  });
+
+  it('should return true for STRAVA_RATE_LIMIT_EXCEEDED error code', () => {
+    const graphQLError = new GraphQLError('Strava rate limit exceeded', {
+      extensions: { code: 'STRAVA_RATE_LIMIT_EXCEEDED' },
     });
     const combinedError = new CombinedGraphQLErrors({
       errors: [graphQLError],
@@ -127,7 +139,7 @@ describe('classifyOnboardingError', () => {
     expect(result.type).toBe('network');
     expect(result.message).toBe('Connection error');
     expect(result.retriable).toBe(true);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
   });
 
   it('should classify Strava token expired errors correctly', () => {
@@ -143,10 +155,10 @@ describe('classifyOnboardingError', () => {
     expect(result.message).toBe('Strava connection expired');
     expect(result.code).toBe('STRAVA_REFRESH_TOKEN_EXPIRED');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
   });
 
-  it('should classify rate limit errors correctly', () => {
+  it('should classify rate limit errors correctly (15min — retriable)', () => {
     const graphQLError = new GraphQLError('Rate limit exceeded', {
       extensions: { code: 'RATE_LIMIT_EXCEEDED' },
     });
@@ -158,8 +170,59 @@ describe('classifyOnboardingError', () => {
     expect(result.type).toBe('rate_limit');
     expect(result.message).toBe('Too many requests');
     expect(result.code).toBe('RATE_LIMIT_EXCEEDED');
+    expect(result.retriable).toBe(true);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
+  });
+
+  it('should classify rate limit errors with limitType daily as non-retriable', () => {
+    const graphQLError = new GraphQLError('Daily rate limit exceeded', {
+      extensions: { code: 'STRAVA_RATE_LIMIT_EXCEEDED', limitType: 'daily' },
+    });
+    const combinedError = new CombinedGraphQLErrors({
+      errors: [graphQLError],
+    });
+    const result = classifyOnboardingError(combinedError, mockT);
+
+    expect(result.type).toBe('rate_limit');
+    expect(result.message).toBe('Daily limit reached');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+  });
+
+  it('should classify rate limit errors with limitType 15min as retriable', () => {
+    const graphQLError = new GraphQLError('Rate limit exceeded', {
+      extensions: { code: 'STRAVA_RATE_LIMIT_EXCEEDED', limitType: '15min' },
+    });
+    const combinedError = new CombinedGraphQLErrors({
+      errors: [graphQLError],
+    });
+    const result = classifyOnboardingError(combinedError, mockT);
+
+    expect(result.type).toBe('rate_limit');
+    expect(result.message).toBe('Too many requests');
+    expect(result.retriable).toBe(true);
+  });
+
+  it('should classify plain Error with "rate limit" message as retriable rate_limit', () => {
+    const error = new Error(
+      'Strava rate limit exceeded during activities fetch. Please retry after the current 15-minute window resets.',
+    );
+    const result = classifyOnboardingError(error, mockT);
+
+    expect(result.type).toBe('rate_limit');
+    expect(result.retriable).toBe(true);
+    expect(result.code).toBe('STRAVA_RATE_LIMIT_EXCEEDED');
+  });
+
+  it('should classify plain Error with "daily" in rate limit message as non-retriable', () => {
+    const error = new Error(
+      'Strava daily rate limit reached during activities fetch. Sync cannot continue until midnight UTC.',
+    );
+    const result = classifyOnboardingError(error, mockT);
+
+    expect(result.type).toBe('rate_limit');
+    expect(result.message).toBe('Daily limit reached');
+    expect(result.retriable).toBe(false);
+    expect(result.code).toBe('STRAVA_RATE_LIMIT_EXCEEDED');
   });
 
   it('should classify sync failed errors correctly', () => {
@@ -174,7 +237,7 @@ describe('classifyOnboardingError', () => {
     expect(result.type).toBe('sync_failed');
     expect(result.message).toBe('Database connection lost');
     expect(result.retriable).toBe(true);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
   });
 
   it('should classify unknown errors with fallback', () => {
@@ -185,7 +248,7 @@ describe('classifyOnboardingError', () => {
     expect(result.message).toBe('An unexpected error occurred');
     expect(result.code).toBe('UNKNOWN');
     expect(result.retriable).toBe(false);
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
   });
 
   it('should extract error code from GraphQL extensions', () => {
@@ -251,6 +314,6 @@ describe('Support ID generation', () => {
     const error = new Error('Test');
     const result = classifyOnboardingError(error, mockT);
 
-    expect(result.supportId).toMatch(/^E-[A-Z0-9]{1,6}$/);
+    expect(result.supportId).toMatch(/^E-[A-Z0-9]{6}$/);
   });
 });
