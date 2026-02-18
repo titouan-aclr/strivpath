@@ -64,11 +64,12 @@ export function isStravaTokenExpired(error: unknown): boolean {
   return false;
 }
 
-export function isRateLimitError(error: unknown): boolean {
+export function isRateLimitError(error: unknown): error is CombinedGraphQLErrors {
   if (CombinedGraphQLErrors.is(error)) {
     return error.errors.some(
       err =>
         err.extensions?.code === 'RATE_LIMIT_EXCEEDED' ||
+        err.extensions?.code === 'STRAVA_RATE_LIMIT_EXCEEDED' ||
         err.message?.includes('rate limit') ||
         err.message?.includes('Too Many Requests'),
     );
@@ -98,6 +99,21 @@ export function classifyOnboardingError(error: unknown, t: (key: string) => stri
     };
   }
 
+  if (error instanceof Error && !CombinedGraphQLErrors.is(error)) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes('rate limit') || msg.includes('strava_rate_limit')) {
+      const isDaily = msg.includes('daily') || msg.includes('midnight');
+      return {
+        type: 'rate_limit',
+        message: isDaily ? t('onboarding.errors.rateLimitDailyTitle') : t('onboarding.errors.rateLimitTitle'),
+        code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+        supportId,
+        retriable: !isDaily,
+        rawError: error,
+      };
+    }
+  }
+
   if (isStravaTokenExpired(error)) {
     return {
       type: 'token_expired',
@@ -110,12 +126,14 @@ export function classifyOnboardingError(error: unknown, t: (key: string) => stri
   }
 
   if (isRateLimitError(error)) {
+    const limitType = (error.errors[0]?.extensions?.limitType as string | undefined) ?? '15min';
     return {
       type: 'rate_limit',
-      message: t('onboarding.errors.rateLimitTitle'),
-      code: code ?? 'RATE_LIMIT_EXCEEDED',
+      message:
+        limitType === 'daily' ? t('onboarding.errors.rateLimitDailyTitle') : t('onboarding.errors.rateLimitTitle'),
+      code: code ?? 'STRAVA_RATE_LIMIT_EXCEEDED',
       supportId,
-      retriable: false,
+      retriable: limitType !== 'daily',
       rawError: error,
     };
   }

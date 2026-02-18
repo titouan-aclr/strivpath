@@ -12,7 +12,7 @@ import { useTranslations } from 'next-intl';
 
 export function SyncSection() {
   const t = useTranslations('settings.sync');
-  const { syncHistory, isLoading, isSyncing, isPolling, triggerSync } = useSync();
+  const { syncHistory, isLoading, isSyncing, isPolling, triggerSync, error } = useSync();
 
   const handleSyncNow = () => {
     triggerSync('manual');
@@ -49,6 +49,7 @@ export function SyncSection() {
   };
 
   const syncing = isSyncing || isPolling;
+  const rateLimitedDaily = error?.type === 'rate_limit' && error.retriable === false;
 
   if (isLoading) {
     return (
@@ -103,9 +104,16 @@ export function SyncSection() {
                 )}
               </div>
             )}
+
+            {error?.type === 'rate_limit' && (
+              <div className="flex items-center gap-2 text-sm text-amber-600 dark:text-amber-400">
+                <Clock className="h-4 w-4 flex-shrink-0" aria-hidden="true" />
+                <span>{error.retriable ? t('rateLimitMessage') : t('rateLimitDailyMessage')}</span>
+              </div>
+            )}
           </div>
 
-          <Button variant="outline" className="gap-2" onClick={handleSyncNow} disabled={syncing}>
+          <Button variant="outline" className="gap-2" onClick={handleSyncNow} disabled={syncing || rateLimitedDaily}>
             {syncing ? (
               <>
                 <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
