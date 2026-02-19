@@ -419,4 +419,11 @@ export class ActivityService {
 
     return ActivityMapper.toGraphQL(updatedActivity);
   }
+
+  async deleteByStravaId(stravaId: bigint, userId: number): Promise<boolean> {
+    const result = await this.prisma.activity.deleteMany({
+      where: { stravaId, userId },
+    });
+    return result.count > 0;
+  }
 }

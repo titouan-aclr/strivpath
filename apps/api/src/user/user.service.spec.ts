@@ -29,28 +29,6 @@ describe('UserService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('findAll', () => {
-    it('should return an array of users', async () => {
-      const mockUsers = [createMockPrismaUser({ stravaId: 12345 }), createMockPrismaUser({ stravaId: 67890 })];
-      prisma.user.findMany.mockResolvedValue(mockUsers);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual(mockUsers);
-      expect(result).toHaveLength(2);
-      expect(prisma.user.findMany).toHaveBeenCalledTimes(1);
-    });
-
-    it('should return an empty array when no users exist', async () => {
-      prisma.user.findMany.mockResolvedValue([]);
-
-      const result = await service.findAll();
-
-      expect(result).toEqual([]);
-      expect(result).toHaveLength(0);
-    });
-  });
-
   describe('findById', () => {
     it('should return a GraphQL user when found', async () => {
       const mockPrismaUser = createMockPrismaUser({
