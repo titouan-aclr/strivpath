@@ -4,9 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/lib/auth/context';
-import { Calendar, ExternalLink, MapPin, User } from 'lucide-react';
+import { Calendar, CheckCircle, ExternalLink, MapPin, User } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import Image from 'next/image';
 
 export function ProfileSection() {
   const t = useTranslations('settings.profile');
@@ -52,7 +51,7 @@ export function ProfileSection() {
             </div>
             <div className="flex flex-wrap gap-2">
               <Badge variant="secondary" className="gap-1.5 px-2.5 py-1">
-                <Image src="/strava-icon.svg" alt="" width={12} height={12} aria-hidden="true" />
+                <CheckCircle className="h-3 w-3 text-strava-brand" aria-hidden="true" />
                 {t('connectedVia')}
               </Badge>
               {user.city && (

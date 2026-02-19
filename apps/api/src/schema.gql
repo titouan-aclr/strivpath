@@ -541,11 +541,9 @@ type Query {
 
   """Get the latest sync status"""
   syncStatus: SyncHistory
-  userByStravaId(stravaId: Int!): User
 
   """Get current user preferences"""
   userPreferences: UserPreferences
-  users: [User!]!
 }
 
 """Split data for a segment of the activity"""
