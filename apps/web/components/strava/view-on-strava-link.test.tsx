@@ -111,7 +111,7 @@ describe('ViewOnStravaLink', () => {
       renderWithIntl(<ViewOnStravaLink stravaId="123" variant="button" />);
 
       const link = screen.getByRole('link');
-      expect(link.className).toContain('text-[#FC5200]');
+      expect(link.className).toContain('text-strava-brand');
     });
 
     it('should not stop click propagation', async () => {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { ExternalLink } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ExternalLink } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ViewOnStravaLinkProps {
   stravaId: string | bigint;
@@ -24,7 +24,7 @@ export function ViewOnStravaLink({ stravaId, variant = 'inline', className }: Vi
         aria-label={t('ariaLabel')}
         className={cn(
           'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors',
-          'text-[#FC5200] border-[#FC5200]/30 hover:bg-[#FC5200]/10',
+          'text-strava-brand border-strava-brand/30 hover:bg-strava-brand/10',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
           className,
         )}
@@ -45,7 +45,7 @@ export function ViewOnStravaLink({ stravaId, variant = 'inline', className }: Vi
       onKeyDown={e => e.stopPropagation()}
       className={cn(
         'inline-flex items-center gap-1 text-xs text-muted-foreground underline underline-offset-2 transition-colors',
-        'hover:text-foreground',
+        'hover:text-strava-brand',
         'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm',
         className,
       )}
