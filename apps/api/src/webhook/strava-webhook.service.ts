@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { timingSafeEqual } from 'crypto';
 import { UserService } from '../user/user.service';
+import { ActivityService } from '../activity/activity.service';
 import { StravaWebhookEvent } from './types/strava-webhook-event.interface';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class StravaWebhookService {
 
   constructor(
     private readonly userService: UserService,
+    private readonly activityService: ActivityService,
     private readonly configService: ConfigService,
   ) {}
 
@@ -31,7 +33,31 @@ export class StravaWebhookService {
       return;
     }
 
+    if (event.object_type === 'activity' && event.aspect_type === 'delete') {
+      await this.handleActivityDeletion(event.object_id, event.owner_id);
+      return;
+    }
+
     this.logger.log(`Received ${event.object_type} ${event.aspect_type} event for owner ${event.owner_id}`);
+  }
+
+  private async handleActivityDeletion(stravaActivityId: number, stravaOwnerId: number): Promise<void> {
+    const user = await this.userService.findByStravaId(stravaOwnerId);
+
+    if (!user) {
+      this.logger.warn(`No user found for Strava athlete ${stravaOwnerId} during activity deletion`);
+      return;
+    }
+
+    const deleted = await this.activityService.deleteByStravaId(BigInt(stravaActivityId), user.id);
+
+    if (deleted) {
+      this.logger.log(`Deleted activity ${stravaActivityId} for user ${user.id} (Strava athlete ${stravaOwnerId})`);
+    } else {
+      this.logger.warn(
+        `Activity ${stravaActivityId} not found for user ${user.id} — already deleted or never imported`,
+      );
+    }
   }
 
   private async handleDeauthorization(stravaId: number): Promise<void> {
