@@ -73,7 +73,7 @@ describe('AppearanceSection', () => {
     render(<AppearanceSection />);
 
     const englishButton = screen.getByRole('button', { name: /English/i });
-    expect(englishButton).toHaveClass('bg-strava-orange');
+    expect(englishButton).toHaveClass('bg-primary');
   });
 
   it('should render all theme options after mount', async () => {
@@ -86,12 +86,12 @@ describe('AppearanceSection', () => {
     });
   });
 
-  it('should highlight current theme with strava-orange', async () => {
+  it('should highlight current theme with primary', async () => {
     render(<AppearanceSection />);
 
     await waitFor(() => {
       const systemButton = screen.getByRole('button', { name: /theme.system/i });
-      expect(systemButton).toHaveClass('bg-strava-orange');
+      expect(systemButton).toHaveClass('bg-primary');
     });
   });
 

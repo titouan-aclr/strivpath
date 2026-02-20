@@ -198,6 +198,34 @@ describe('UserMenu', () => {
     expect(logoutItem).toHaveAttribute('data-disabled');
   });
 
+  it('should display View on Strava link with correct URL', async () => {
+    vi.mocked(authContext.useAuth).mockReturnValue({
+      user: mockUser,
+      setUser: vi.fn(),
+    });
+    vi.mocked(authFeedback.useAuthFeedback).mockReturnValue({
+      isLoading: false,
+      showRefreshing: false,
+      error: null,
+    });
+    vi.mocked(useLogoutHook.useLogout).mockReturnValue({
+      logout: vi.fn(),
+      isLoading: false,
+      error: null,
+    });
+
+    const user = userEvent.setup();
+    render(<UserMenu />);
+
+    const trigger = screen.getByRole('button');
+    await user.click(trigger);
+
+    const stravaLink = screen.getByText('viewOnStrava').closest('a');
+    expect(stravaLink).toHaveAttribute('href', 'https://www.strava.com/athletes/12345');
+    expect(stravaLink).toHaveAttribute('target', '_blank');
+    expect(stravaLink).toHaveAttribute('rel', 'noopener noreferrer');
+  });
+
   it('should call logout handler when logout button clicked', async () => {
     const mockLogout = vi.fn();
     vi.mocked(authContext.useAuth).mockReturnValue({

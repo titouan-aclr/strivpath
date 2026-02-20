@@ -127,18 +127,18 @@ describe('GoalProgressChart', () => {
     expect(referenceLine).toHaveAttribute('data-label', '500');
   });
 
-  it('should use strava-orange color by default (Active status)', () => {
+  it('should use primary color by default (Active status)', () => {
     const { getByTestId } = render(<GoalProgressChart {...defaultProps} />);
 
     const area = getByTestId('area');
-    expect(area).toHaveAttribute('data-stroke', '#fc4c02');
+    expect(area).toHaveAttribute('data-stroke', '#E5482D');
   });
 
-  it('should use strava-orange color for Active status', () => {
+  it('should use primary color for Active status', () => {
     const { getByTestId } = render(<GoalProgressChart {...defaultProps} status={GoalStatus.Active} />);
 
     const area = getByTestId('area');
-    expect(area).toHaveAttribute('data-stroke', '#fc4c02');
+    expect(area).toHaveAttribute('data-stroke', '#E5482D');
   });
 
   it('should use green color for Completed status', () => {

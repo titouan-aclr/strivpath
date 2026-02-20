@@ -172,12 +172,12 @@ export class GoalResolver {
     @CurrentUser() tokenPayload: TokenPayload,
     @Args('id', { type: () => Int }) id: number,
   ): Promise<Goal> {
-    await this.goalService.updateGoalProgress(id);
     const goal = await this.goalService.findById(id, tokenPayload.sub);
     if (!goal) {
       throw new NotFoundException(`Goal with ID ${id} not found or does not belong to user`);
     }
-    return goal;
+    await this.goalService.updateGoalProgress(id);
+    return (await this.goalService.findById(id, tokenPayload.sub))!;
   }
 
   @ResolveField(() => Float, {

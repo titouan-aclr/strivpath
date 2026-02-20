@@ -406,7 +406,144 @@ describe('SyncSection', () => {
 
     const { container } = render(<SyncSection />);
 
-    const orangeSpinner = container.querySelector('.text-strava-orange.animate-spin');
+    const orangeSpinner = container.querySelector('.text-primary.animate-spin');
     expect(orangeSpinner).toBeInTheDocument();
+  });
+
+  describe('rate limit error display', () => {
+    it('should display 15min rate limit message when error is retriable', () => {
+      vi.mocked(useSyncContext.useSync).mockReturnValue({
+        syncHistory: createMockSyncHistory({ status: SyncStatus.Failed }),
+        isLoading: false,
+        isSyncing: false,
+        isPolling: false,
+        triggerSync: mockTriggerSync,
+        error: {
+          type: 'rate_limit',
+          message: 'Rate limit reached',
+          code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+          supportId: 'E-ABC123',
+          retriable: true,
+        },
+        triggerSource: null,
+        retry: vi.fn(),
+        refreshStatus: vi.fn(),
+        clearError: vi.fn(),
+      });
+
+      render(<SyncSection />);
+
+      expect(screen.getByText('rateLimitMessage')).toBeInTheDocument();
+    });
+
+    it('should display daily rate limit message when error is not retriable', () => {
+      vi.mocked(useSyncContext.useSync).mockReturnValue({
+        syncHistory: createMockSyncHistory({ status: SyncStatus.Failed }),
+        isLoading: false,
+        isSyncing: false,
+        isPolling: false,
+        triggerSync: mockTriggerSync,
+        error: {
+          type: 'rate_limit',
+          message: 'Daily rate limit reached',
+          code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+          supportId: 'E-ABC123',
+          retriable: false,
+        },
+        triggerSource: null,
+        retry: vi.fn(),
+        refreshStatus: vi.fn(),
+        clearError: vi.fn(),
+      });
+
+      render(<SyncSection />);
+
+      expect(screen.getByText('rateLimitDailyMessage')).toBeInTheDocument();
+    });
+
+    it('should not display rate limit message when error is null', () => {
+      render(<SyncSection />);
+
+      expect(screen.queryByText('rateLimitMessage')).not.toBeInTheDocument();
+      expect(screen.queryByText('rateLimitDailyMessage')).not.toBeInTheDocument();
+    });
+
+    it('should disable sync button when daily rate limit is active', () => {
+      vi.mocked(useSyncContext.useSync).mockReturnValue({
+        syncHistory: createMockSyncHistory({ status: SyncStatus.Failed }),
+        isLoading: false,
+        isSyncing: false,
+        isPolling: false,
+        triggerSync: mockTriggerSync,
+        error: {
+          type: 'rate_limit',
+          message: 'Daily rate limit reached',
+          code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+          supportId: 'E-ABC123',
+          retriable: false,
+        },
+        triggerSource: null,
+        retry: vi.fn(),
+        refreshStatus: vi.fn(),
+        clearError: vi.fn(),
+      });
+
+      render(<SyncSection />);
+
+      const button = screen.getByRole('button', { name: /syncNow/i });
+      expect(button).toBeDisabled();
+    });
+
+    it('should keep sync button enabled for 15min rate limit', () => {
+      vi.mocked(useSyncContext.useSync).mockReturnValue({
+        syncHistory: createMockSyncHistory({ status: SyncStatus.Failed }),
+        isLoading: false,
+        isSyncing: false,
+        isPolling: false,
+        triggerSync: mockTriggerSync,
+        error: {
+          type: 'rate_limit',
+          message: 'Rate limit reached',
+          code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+          supportId: 'E-ABC123',
+          retriable: true,
+        },
+        triggerSource: null,
+        retry: vi.fn(),
+        refreshStatus: vi.fn(),
+        clearError: vi.fn(),
+      });
+
+      render(<SyncSection />);
+
+      const button = screen.getByRole('button', { name: /syncNow/i });
+      expect(button).not.toBeDisabled();
+    });
+
+    it('should not display rate limit message for non-rate-limit errors', () => {
+      vi.mocked(useSyncContext.useSync).mockReturnValue({
+        syncHistory: createMockSyncHistory({ status: SyncStatus.Failed }),
+        isLoading: false,
+        isSyncing: false,
+        isPolling: false,
+        triggerSync: mockTriggerSync,
+        error: {
+          type: 'unknown',
+          message: 'Something went wrong',
+          code: 'UNKNOWN',
+          supportId: 'E-XYZ789',
+          retriable: false,
+        },
+        triggerSource: null,
+        retry: vi.fn(),
+        refreshStatus: vi.fn(),
+        clearError: vi.fn(),
+      });
+
+      render(<SyncSection />);
+
+      expect(screen.queryByText('rateLimitMessage')).not.toBeInTheDocument();
+      expect(screen.queryByText('rateLimitDailyMessage')).not.toBeInTheDocument();
+    });
   });
 });

@@ -1,8 +1,8 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { GoalStatus } from '@/gql/graphql';
 import { Badge } from '@/components/ui/badge';
+import { GoalStatus } from '@/gql/graphql';
+import { useTranslations } from 'next-intl';
 
 export interface GoalStatusBadgeProps {
   status: GoalStatus;
@@ -15,7 +15,7 @@ export function GoalStatusBadge({ status }: GoalStatusBadgeProps) {
     [GoalStatus.Active]: {
       variant: 'default' as const,
       label: t('active'),
-      className: 'bg-goal-progress text-white hover:bg-goal-progress/90',
+      className: 'bg-accent-blue text-white hover:bg-accent-blue/90',
     },
     [GoalStatus.Completed]: {
       variant: 'default' as const,
@@ -30,7 +30,7 @@ export function GoalStatusBadge({ status }: GoalStatusBadgeProps) {
     [GoalStatus.Archived]: {
       variant: 'default' as const,
       label: t('archived'),
-      className: 'bg-strava-orange text-white hover:bg-strava-orange/90',
+      className: 'bg-primary text-white hover:bg-primary/90',
     },
   }[status];
 

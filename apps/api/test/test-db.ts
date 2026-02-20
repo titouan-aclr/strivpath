@@ -8,7 +8,7 @@ let prisma: PrismaClient;
 let databaseUrl: string;
 
 export const setupTestDatabase = async (): Promise<PrismaClient> => {
-  databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/stravanalytics_test';
+  databaseUrl = process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/strivpath_test';
 
   process.env.DATABASE_URL = databaseUrl;
 

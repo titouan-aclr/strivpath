@@ -28,11 +28,11 @@ describe('GoalCreationProgress', () => {
     expect(screen.getByText('2')).toBeInTheDocument();
   });
 
-  it('should highlight current step with strava-orange background', () => {
+  it('should highlight current step with primary background', () => {
     const { container } = render(<GoalCreationProgress currentStep={1} />);
 
     const circles = container.querySelectorAll('.rounded-full');
-    expect(circles[0]).toHaveClass('bg-strava-orange');
+    expect(circles[0]).toHaveClass('bg-primary');
     expect(circles[0]).toHaveClass('text-white');
   });
 
@@ -48,8 +48,8 @@ describe('GoalCreationProgress', () => {
     const { container } = render(<GoalCreationProgress currentStep={2} />);
 
     const circles = container.querySelectorAll('.rounded-full');
-    expect(circles[0]).toHaveClass('bg-strava-orange');
-    expect(circles[1]).toHaveClass('bg-strava-orange');
+    expect(circles[0]).toHaveClass('bg-primary');
+    expect(circles[1]).toHaveClass('bg-primary');
   });
 
   it('should display step 1 label when currentStep is 1', () => {
@@ -67,7 +67,7 @@ describe('GoalCreationProgress', () => {
   it('should have orange connector when past step 1', () => {
     const { container } = render(<GoalCreationProgress currentStep={2} />);
 
-    const connector = container.querySelector('.bg-strava-orange.h-1\\.5.w-32');
+    const connector = container.querySelector('.bg-primary.h-1\\.5.w-32');
     expect(connector).toBeInTheDocument();
   });
 

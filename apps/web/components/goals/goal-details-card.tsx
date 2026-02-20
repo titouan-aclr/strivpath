@@ -27,7 +27,7 @@ function DetailRow({ icon: Icon, label, value, highlight }: DetailRowProps) {
       </div>
       <div className="flex-1">
         <p className="text-sm text-muted-foreground">{label}</p>
-        <p className={cn('font-medium', highlight && 'text-strava-orange')}>{value}</p>
+        <p className={cn('font-medium', highlight && 'text-primary')}>{value}</p>
       </div>
     </div>
   );

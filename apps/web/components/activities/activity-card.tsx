@@ -17,6 +17,7 @@ import {
   formatDate,
   formatTime,
 } from '@/lib/activities/formatters';
+import { ViewOnStravaLink } from '@/components/strava/view-on-strava-link';
 
 export interface ActivityCardProps {
   activity: ActivityCardFragment;
@@ -47,7 +48,7 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
       tabIndex={onClick ? 0 : -1}
       onClick={onClick}
       onKeyDown={handleKeyDown}
-      className={cn('transition-all', onClick && 'cursor-pointer hover:shadow-lg hover:border-strava-orange/50')}
+      className={cn('transition-all', onClick && 'cursor-pointer card-hover')}
       aria-label={
         onClick
           ? `${activity.name} - ${formatDate(activity.startDate)} - ${formatDistance(activity.distance)}`
@@ -56,8 +57,8 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
     >
       <CardHeader className="pb-3">
         <div className="flex items-start gap-3">
-          <div className={cn('p-2 rounded-lg', sportColor?.bgMuted ?? 'bg-strava-orange/10')} aria-hidden="true">
-            <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-strava-orange')} />
+          <div className={cn('p-2 rounded-lg', sportColor?.bgMuted ?? 'bg-primary/10')} aria-hidden="true">
+            <Icon className={cn('h-5 w-5', sportColor?.text ?? 'text-primary')} />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -70,7 +71,7 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
       </CardHeader>
 
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="stats-grid">
           <div>
             <p className="text-xs text-muted-foreground">{t('distance')}</p>
             <p className="font-semibold">{formatDistance(activity.distance)}</p>
@@ -94,20 +95,23 @@ export function ActivityCard({ activity, onClick, variant = 'full', sportColor }
           </div>
         </div>
 
-        {variant === 'full' && (activity.kudosCount > 0 || activity.maxHeartrate) && (
-          <div className="flex gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
-            {activity.kudosCount > 0 && (
-              <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>
-                <Heart className="h-4 w-4" aria-hidden="true" />
-                <span>{activity.kudosCount}</span>
-              </div>
-            )}
-            {activity.maxHeartrate && (
-              <div className="flex items-center gap-1" aria-label={`${activity.maxHeartrate} bpm`}>
-                <Activity className="h-4 w-4" aria-hidden="true" />
-                <span>{activity.maxHeartrate} bpm</span>
-              </div>
-            )}
+        {variant === 'full' && (
+          <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t text-sm text-muted-foreground">
+            <div className="flex gap-4">
+              {activity.kudosCount > 0 && (
+                <div className="flex items-center gap-1" aria-label={`${activity.kudosCount} ${t('kudos')}`}>
+                  <Heart className="h-4 w-4" aria-hidden="true" />
+                  <span>{activity.kudosCount}</span>
+                </div>
+              )}
+              {activity.maxHeartrate && (
+                <div className="flex items-center gap-1" aria-label={`${activity.maxHeartrate} bpm`}>
+                  <Activity className="h-4 w-4" aria-hidden="true" />
+                  <span>{activity.maxHeartrate} bpm</span>
+                </div>
+              )}
+            </div>
+            <ViewOnStravaLink variant="inline" stravaId={activity.stravaId} />
           </div>
         )}
       </CardContent>

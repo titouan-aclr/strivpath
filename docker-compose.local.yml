@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics - Docker Compose for Local Testing
+# StrivPath - Docker Compose for Local Testing
 # =============================================================================
 #
 # This compose file builds images locally from Dockerfiles for testing
@@ -28,11 +28,11 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-password}
-      POSTGRES_DB: ${POSTGRES_DB:-stravanalytics}
+      POSTGRES_DB: ${POSTGRES_DB:-strivpath}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-stravanalytics}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-strivpath}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -61,7 +61,7 @@ services:
       NODE_ENV: production
       PORT: 3011
       # Database
-      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-stravanalytics}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-password}@db:5432/${POSTGRES_DB:-strivpath}
       # JWT
       JWT_ACCESS_TOKEN_SECRET: ${JWT_ACCESS_TOKEN_SECRET:-local-dev-jwt-secret-min-32-chars}
       JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:-local-dev-refresh-secret-min-32}
@@ -107,6 +107,7 @@ services:
       PORT: 3000
       NEXT_PUBLIC_GRAPHQL_URL: http://localhost:3011/graphql
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
+      NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:-https://example.com}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s

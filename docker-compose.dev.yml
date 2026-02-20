@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics - Docker Compose for Development
+# StrivPath - Docker Compose for Development
 # =============================================================================
 #
 # This compose file provides only the PostgreSQL database for local development.
@@ -9,25 +9,25 @@
 #   docker compose -f docker-compose.dev.yml up -d
 #
 # Connection string for apps/api/.env:
-#   DATABASE_URL=postgresql://postgres:password@localhost:5432/stravanalytics
+#   DATABASE_URL=postgresql://postgres:password@localhost:5432/strivpath
 #
 # =============================================================================
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: stravanalytics-postgres
+    container_name: strivpath-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: stravanalytics
+      POSTGRES_DB: strivpath
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d stravanalytics"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d strivpath"]
       interval: 10s
       timeout: 5s
       retries: 5

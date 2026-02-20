@@ -73,7 +73,7 @@ describe('ActivityHeader', () => {
   it('should render sport icon for Run', () => {
     const { container } = render(<ActivityHeader activity={mockActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -81,7 +81,7 @@ describe('ActivityHeader', () => {
     const rideActivity = { ...mockActivity, type: SportType.Ride };
     const { container } = render(<ActivityHeader activity={rideActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -89,7 +89,7 @@ describe('ActivityHeader', () => {
     const swimActivity = { ...mockActivity, type: SportType.Swim };
     const { container } = render(<ActivityHeader activity={swimActivity} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
   });
 
@@ -98,5 +98,22 @@ describe('ActivityHeader', () => {
 
     const icons = container.querySelectorAll('svg.lucide');
     expect(icons.length).toBeGreaterThan(0);
+  });
+
+  it('should render View on Strava link', () => {
+    render(<ActivityHeader activity={mockActivity} />);
+
+    const stravaLink = screen.getByRole('link');
+    expect(stravaLink).toHaveAttribute('href', 'https://www.strava.com/activities/123456789');
+    expect(stravaLink).toHaveAttribute('target', '_blank');
+  });
+
+  it('should render sport badge before View on Strava link', () => {
+    const { container } = render(<ActivityHeader activity={mockActivity} />);
+
+    const badgeAndLinkContainer = container.querySelector('.flex.items-center.gap-2');
+    const children = badgeAndLinkContainer?.children;
+    expect(children?.[0]?.textContent).toBe('sportTypes.run');
+    expect(children?.[1]?.tagName).toBe('A');
   });
 });

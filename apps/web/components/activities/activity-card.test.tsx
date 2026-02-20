@@ -16,6 +16,12 @@ const messages = {
       kudos: 'kudos',
     },
   },
+  strava: {
+    viewOnStrava: {
+      label: 'View on Strava',
+      ariaLabel: 'View this activity on Strava',
+    },
+  },
 };
 
 const mockActivity: ActivityCardFragment = {
@@ -86,7 +92,7 @@ describe('ActivityCard', () => {
 
     it('should render sport icon with default orange color', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} />);
-      const iconContainer = container.querySelector('.text-strava-orange');
+      const iconContainer = container.querySelector('.text-primary');
       expect(iconContainer).toBeInTheDocument();
     });
 
@@ -103,7 +109,7 @@ describe('ActivityCard', () => {
       const { container } = renderWithIntl(<ActivityCard activity={mockActivity} sportColor={sportColor} />);
       expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
       expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
-      expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
+      expect(container.querySelector('.text-primary')).not.toBeInTheDocument();
     });
   });
 
@@ -114,11 +120,18 @@ describe('ActivityCard', () => {
       expect(screen.getByLabelText('5 kudos')).toBeInTheDocument();
     });
 
-    it('should not display kudos section when count is 0', () => {
+    it('should not display kudos when count is 0', () => {
+      const activityWithoutKudos = { ...mockActivity, kudosCount: 0, maxHeartrate: null };
+      renderWithIntl(<ActivityCard activity={activityWithoutKudos} />);
+      expect(screen.queryByLabelText('0 kudos')).not.toBeInTheDocument();
+    });
+
+    it('should still display footer with View on Strava link when no kudos or heart rate', () => {
       const activityWithoutKudos = { ...mockActivity, kudosCount: 0, maxHeartrate: null };
       const { container } = renderWithIntl(<ActivityCard activity={activityWithoutKudos} />);
       const footer = container.querySelector('.border-t');
-      expect(footer).not.toBeInTheDocument();
+      expect(footer).toBeInTheDocument();
+      expect(screen.getByText('View on Strava')).toBeInTheDocument();
     });
 
     it('should display heart rate when available', () => {

@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics Web - Multi-stage Docker Build (Next.js Standalone)
+# StrivPath Web - Multi-stage Docker Build (Next.js Standalone)
 # =============================================================================
 # This Dockerfile creates an optimized production image for the Next.js frontend.
 # It uses the standalone output mode for minimal image size.
@@ -13,7 +13,7 @@
 #   - NEXT_PUBLIC_GRAPHQL_URL: GraphQL API endpoint for build
 #
 # Build command (from monorepo root):
-#   docker build -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_GRAPHQL_URL=https://api.example.com/graphql -t stravanalytics-web .
+#   docker build -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_GRAPHQL_URL=https://api.example.com/graphql -t strivpath-web .
 # =============================================================================
 
 # -----------------------------------------------------------------------------

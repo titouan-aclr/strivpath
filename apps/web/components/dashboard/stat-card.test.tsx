@@ -31,15 +31,15 @@ describe('StatCard', () => {
   it('should render icon when provided', () => {
     const { container } = render(<StatCard label="Duration" value="5h" icon={Clock} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should not render icon container when no icon provided', () => {
     const { container } = render(<StatCard label="Count" value={10} />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).not.toBeInTheDocument();
   });
 
@@ -99,7 +99,7 @@ describe('StatCard', () => {
     expect(screen.getByText('Total Time')).toBeInTheDocument();
     expect(screen.getByText('24h 15m')).toBeInTheDocument();
     expect(screen.getByText('+12%')).toBeInTheDocument();
-    expect(container.querySelector('.bg-strava-orange\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
     expect(container.querySelector('.full-stat')).toBeInTheDocument();
   });
 
@@ -114,14 +114,14 @@ describe('StatCard', () => {
 
     expect(container.querySelector('.bg-lime-300\\/10')).toBeInTheDocument();
     expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
-    expect(container.querySelector('.bg-strava-orange\\/10')).not.toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).not.toBeInTheDocument();
   });
 
-  it('should use strava-orange when sportColor is not provided', () => {
+  it('should use primary when sportColor is not provided', () => {
     const { container } = render(<StatCard label="Distance" value="42km" icon={Clock} />);
 
-    expect(container.querySelector('.bg-strava-orange\\/10')).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.bg-primary\\/10')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should render with sportColor and all other props', () => {

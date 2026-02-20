@@ -134,7 +134,7 @@ describe('GoalDetailHeader', () => {
       const goal = createMockGoal({ sportType: SportType.Run });
       const { container } = render(<GoalDetailHeader goal={goal} />);
 
-      const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+      const iconContainer = container.querySelector('.bg-primary\\/10');
       expect(iconContainer).toBeInTheDocument();
     });
 

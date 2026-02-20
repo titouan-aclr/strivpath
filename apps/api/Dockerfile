@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics API - Multi-stage Docker Build
+# StrivPath API - Multi-stage Docker Build
 # =============================================================================
 # This Dockerfile creates an optimized production image for the NestJS API.
 # It uses turbo prune to extract only the necessary workspace packages.
@@ -14,7 +14,7 @@
 #   - FRONTEND_URL: Frontend application URL for CORS
 #
 # Build command (from monorepo root):
-#   docker build -f apps/api/Dockerfile -t stravanalytics-api .
+#   docker build -f apps/api/Dockerfile -t strivpath-api .
 # =============================================================================
 
 # -----------------------------------------------------------------------------

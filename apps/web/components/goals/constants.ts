@@ -118,13 +118,13 @@ export interface GoalStatusColorConfig {
 
 export const GOAL_STATUS_COLORS: Record<GoalStatus, GoalStatusColorConfig> = {
   [GoalStatus.Active]: {
-    text: 'text-strava-orange',
-    textSubtle: 'text-strava-orange/10',
-    bg: 'bg-strava-orange',
-    bgSubtle: 'bg-strava-orange/10',
-    border: 'border-strava-orange',
-    hoverBorder: 'hover:border-strava-orange/50',
-    hex: '#fc4c02',
+    text: 'text-primary',
+    textSubtle: 'text-primary/10',
+    bg: 'bg-primary',
+    bgSubtle: 'bg-primary/10',
+    border: 'border-primary',
+    hoverBorder: 'hover:border-primary/50',
+    hex: '#E5482D',
   },
   [GoalStatus.Completed]: {
     text: 'text-green-500',

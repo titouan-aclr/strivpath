@@ -22,7 +22,7 @@ export function StepProgressBar({ steps, currentStepIndex }: StepProgressBarProp
           <div key={step.path} className="flex items-center">
             <div
               className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-medium transition-colors duration-200 relative z-10 ${
-                index <= currentStepIndex ? 'bg-strava-orange text-white' : 'bg-muted text-muted-foreground'
+                index <= currentStepIndex ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
               }`}
             >
               {index + 1}
@@ -30,7 +30,7 @@ export function StepProgressBar({ steps, currentStepIndex }: StepProgressBarProp
             {index < steps.length - 1 && (
               <div
                 className={`h-2 w-32 -mx-1 transition-colors duration-300 ${
-                  index < currentStepIndex ? 'bg-strava-orange' : 'bg-muted'
+                  index < currentStepIndex ? 'bg-primary' : 'bg-muted'
                 }`}
               />
             )}

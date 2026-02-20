@@ -2,7 +2,7 @@ import { setupTestDatabase, closeTestDatabase, resetTestDatabase } from './test-
 
 process.env.NODE_ENV = 'test';
 process.env.DATABASE_URL =
-  process.env.TEST_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/stravanalytics_test';
+  process.env.TEST_DATABASE_URL || 'postgresql://postgres:password@localhost:5432/strivpath_test';
 process.env.JWT_ACCESS_TOKEN_SECRET = 'test-access-secret-key';
 process.env.JWT_REFRESH_TOKEN_SECRET = 'test-refresh-secret-key';
 process.env.JWT_ACCESS_TOKEN_EXPIRATION = '15m';

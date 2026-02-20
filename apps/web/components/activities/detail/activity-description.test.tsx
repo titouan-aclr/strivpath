@@ -119,7 +119,7 @@ describe('ActivityDescription', () => {
       const activity = createMockActivity();
       const { container } = render(<ActivityDescription activity={activity} />);
 
-      expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+      expect(container.querySelector('.text-primary')).toBeInTheDocument();
     });
   });
 

@@ -97,7 +97,7 @@ describe('ActivityHeatmap', () => {
       const singleActivity = createCalendarData([`${currentYear}-01-15`]);
       render(<ActivityHeatmap calendarData={singleActivity} year={currentYear} />);
 
-      const cells = document.querySelectorAll('.bg-strava-orange');
+      const cells = document.querySelectorAll('.bg-primary');
       expect(cells.length).toBeGreaterThan(0);
     });
 

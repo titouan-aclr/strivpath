@@ -82,7 +82,7 @@ export function GoalFiltersDesktop({ filter, onFilterChange }: GoalFiltersDeskto
             variant="outline"
             size="sm"
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className={cn('gap-2', hasAdvancedFilters && 'border-strava-orange text-strava-orange')}
+            className={cn('gap-2', hasAdvancedFilters && 'border-primary text-primary')}
           >
             <SlidersHorizontal className="h-4 w-4" />
             {t('filters.moreFilters')}

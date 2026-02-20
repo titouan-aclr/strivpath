@@ -1,6 +1,6 @@
 # Testing Guide
 
-This document provides an overview of the testing infrastructure for the Stravanalytics monorepo.
+This document provides an overview of the testing infrastructure for the StrivPath monorepo.
 
 ## Overview
 

@@ -8,7 +8,7 @@ import { SyncActivitiesDocument, LatestSyncHistoryDocument, SyncStatus, type Syn
 import { useAuth } from '@/lib/auth/context';
 import { useGoalSyncNotifications } from '@/lib/goals/use-goal-sync-notifications';
 import { classifyOnboardingError, logOnboardingError, type OnboardingError } from '@/lib/onboarding/error-handling';
-import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS } from '@/lib/onboarding/constants';
+import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS, ONBOARDING_TOAST_CONFIG } from '@/lib/onboarding/constants';
 import type { SyncContextValue, SyncTriggerSource } from './types';
 
 const SyncContext = createContext<SyncContextValue | undefined>(undefined);
@@ -135,7 +135,15 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
           rawError: failedError,
         });
         setError(onboardingError);
-        toast.error(t('settings.sync.syncError'));
+        if (onboardingError.type === 'rate_limit') {
+          const isDaily = onboardingError.retriable === false;
+          toast.error(
+            isDaily ? t('settings.sync.rateLimitDailyError') : t('settings.sync.rateLimitError'),
+            ONBOARDING_TOAST_CONFIG.RATE_LIMIT,
+          );
+        } else {
+          toast.error(t('settings.sync.syncError'));
+        }
       }
 
       setTriggerSource(null);

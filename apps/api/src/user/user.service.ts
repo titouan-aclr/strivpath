@@ -10,10 +10,6 @@ import { SportType } from '../user-preferences/enums/sport-type.enum';
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll() {
-    return await this.prisma.user.findMany();
-  }
-
   async findById(id: number): Promise<User | null> {
     const prismaUser = await this.prisma.user.findUnique({
       where: { id },
