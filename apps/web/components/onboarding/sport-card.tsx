@@ -44,20 +44,18 @@ export function SportCard({
       className={cn(
         'relative transition-all duration-200',
         isInteractive && 'cursor-pointer hover:scale-105 hover:shadow-lg',
-        selected && 'ring-2 ring-strava-orange border-strava-orange bg-strava-orange/5',
+        selected && 'selected-ring',
         maxReached && !selected && 'opacity-50 cursor-not-allowed',
         disabled && 'opacity-60 pointer-events-none',
       )}
     >
       <CardHeader className="text-center space-y-4">
         <div className="flex justify-center">
-          <div
-            className={cn('rounded-full p-4 transition-colors', selected ? 'bg-strava-orange text-white' : 'bg-muted')}
-          >
+          <div className={cn('rounded-full p-4 transition-colors', selected ? 'bg-primary text-white' : 'bg-muted')}>
             <Icon className="h-8 w-8" aria-hidden="true" />
           </div>
         </div>
-        {selected && <Check className="absolute top-4 right-4 h-5 w-5 text-strava-orange" aria-label="Selected" />}
+        {selected && <Check className="absolute top-4 right-4 h-5 w-5 text-primary" aria-label="Selected" />}
       </CardHeader>
       <CardContent className="text-center space-y-2">
         <CardTitle className="text-lg">{title}</CardTitle>

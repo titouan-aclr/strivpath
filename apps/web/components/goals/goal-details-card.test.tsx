@@ -117,14 +117,14 @@ describe('GoalDetailsCard', () => {
       expect(screen.queryByText('Days Remaining')).not.toBeInTheDocument();
     });
 
-    it('should highlight days remaining value with strava-orange', () => {
+    it('should highlight days remaining value with primary', () => {
       const goal = createMockGoal({
         isExpired: false,
         daysRemaining: 5,
       });
       const { container } = render(<GoalDetailsCard goal={goal} />);
 
-      const highlightedText = container.querySelector('.text-strava-orange');
+      const highlightedText = container.querySelector('.text-primary');
       expect(highlightedText).toBeInTheDocument();
     });
   });

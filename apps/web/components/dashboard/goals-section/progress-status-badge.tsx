@@ -1,9 +1,9 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
 import type { ProgressStatus } from '@/lib/dashboard/types';
+import { cn } from '@/lib/utils';
+import { useTranslations } from 'next-intl';
 
 export interface ProgressStatusBadgeProps {
   status: ProgressStatus;
@@ -22,7 +22,7 @@ const STATUS_CONFIG = {
   },
   onTrack: {
     labelKey: 'onTrack',
-    className: 'bg-goal-progress/10 text-goal-progress',
+    className: 'bg-accent-blue/10 text-accent-blue',
   },
 } as const;
 

@@ -167,7 +167,7 @@ describe('GoalTemplateSelector', () => {
         />,
       );
 
-      const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+      const iconContainer = container.querySelector('.bg-primary\\/10');
       expect(iconContainer).toBeInTheDocument();
     });
   });

@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { ProgressStatusBadge } from './progress-status-badge';
 
 vi.mock('next-intl', () => ({
@@ -48,12 +48,12 @@ describe('ProgressStatusBadge', () => {
     expect(badge).toHaveClass('text-red-700');
   });
 
-  it('should apply goal-progress styling for onTrack status', () => {
+  it('should apply accent-blue styling for onTrack status', () => {
     render(<ProgressStatusBadge status="onTrack" />);
 
     const badge = screen.getByText('On Track');
-    expect(badge).toHaveClass('bg-goal-progress/10');
-    expect(badge).toHaveClass('text-goal-progress');
+    expect(badge).toHaveClass('bg-accent-blue/10');
+    expect(badge).toHaveClass('text-accent-blue');
   });
 
   it('should render default size by default', () => {

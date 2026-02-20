@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props) {
   const { id } = await params;
 
   return {
-    title: 'Activity Details | Stravanalytics',
+    title: 'Activity Details | StrivPath',
     description: `View detailed statistics and analysis for activity ${id}`,
   };
 }

@@ -1,11 +1,11 @@
 {
   "common": {
-    "appName": "Stravanalytics",
+    "appName": "StrivPath",
     "loading": "Loading...",
     "error": "An error occurred"
   },
   "home": {
-    "title": "Stravanalytics",
+    "title": "StrivPath",
     "usersFromApi": "Users from GraphQL API:",
     "demoButton": "Demo Button",
     "noUsers": "No users found",
@@ -155,6 +155,7 @@
   "layout": {
     "userMenu": {
       "profile": "Profile",
+      "viewOnStrava": "View on Strava",
       "settings": "Settings",
       "logout": "Logout",
       "loggingOut": "Logging out...",
@@ -174,7 +175,7 @@
     },
     "sports": {
       "title": "Select Your Sports",
-      "description": "Choose at least one sport to track with Stravanalytics",
+      "description": "Choose at least one sport to track with StrivPath",
       "run": {
         "title": "Running",
         "description": "Track your runs and improve your pace"
@@ -237,8 +238,10 @@
       "tokenExpired": "Strava connection expired",
       "tokenExpiredDescription": "Please reconnect your Strava account to continue",
       "reconnectButton": "Reconnect Strava",
-      "rateLimitTitle": "Too many requests",
-      "rateLimitDescription": "Please wait a few minutes before trying again",
+      "rateLimitTitle": "Strava rate limit reached",
+      "rateLimitDescription": "The 15-minute API limit has been reached. Please wait a few minutes and try again.",
+      "rateLimitDailyTitle": "Strava daily limit reached",
+      "rateLimitDailyDescription": "The daily API limit has been reached. Please try again tomorrow.",
       "unknownError": "An unexpected error occurred",
       "contactSupport": "Contact Support",
       "errorCode": "Error code: {code}",
@@ -248,7 +251,7 @@
   },
   "auth": {
     "login": {
-      "title": "Welcome to Stravanalytics",
+      "title": "Welcome to StrivPath",
       "description": "Connect your Strava account to start tracking your progress and achieving your goals",
       "connectButton": "Connect with Strava",
       "errors": {
@@ -278,7 +281,7 @@
     "description": "Track your progress and achieve your objectives",
     "newGoal": "New Goal",
     "meta": {
-      "title": "Goals - Stravanalytics",
+      "title": "Goals - StrivPath",
       "description": "Set and track your sports goals"
     },
     "filters": {
@@ -552,7 +555,7 @@
   },
   "settings": {
     "meta": {
-      "title": "Settings - Stravanalytics",
+      "title": "Settings - StrivPath",
       "description": "Manage your account and preferences"
     },
     "title": "Settings",
@@ -601,6 +604,10 @@
       "syncing": "Syncing...",
       "syncSuccess": "Activities synchronized successfully",
       "syncError": "Failed to synchronize activities",
+      "rateLimitError": "Rate limit reached. Please wait a few minutes before retrying.",
+      "rateLimitDailyError": "Daily rate limit reached. Please try again tomorrow.",
+      "rateLimitMessage": "Rate limit reached — wait a few minutes before syncing again.",
+      "rateLimitDailyMessage": "Daily rate limit reached — try again tomorrow.",
       "activitiesImported": "{count} activities imported",
       "status": {
         "pending": "Pending",
@@ -663,6 +670,11 @@
         }
       }
     }
+  },
+  "strava": {
+    "poweredBy": { "alt": "Powered by Strava" },
+    "viewOnStrava": { "label": "View on Strava", "ariaLabel": "View this activity on Strava" },
+    "connectButton": { "alt": "Connect with Strava" }
   },
   "errors": {
     "unexpected": {

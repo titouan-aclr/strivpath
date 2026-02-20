@@ -20,7 +20,7 @@ export function ActivityDescription({ activity }: ActivityDescriptionProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <FileText className="h-5 w-5 text-strava-orange" aria-hidden="true" />
+          <FileText className="h-5 w-5 text-primary" aria-hidden="true" />
           {t('description.title')}
         </CardTitle>
       </CardHeader>

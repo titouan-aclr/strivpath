@@ -1,5 +1,5 @@
 # =============================================================================
-# Stravanalytics - Docker Compose for Production (Dokploy)
+# StrivPath - Docker Compose for Production (Dokploy)
 # =============================================================================
 #
 # This compose file is designed to work with Dokploy and Traefik reverse proxy.
@@ -30,13 +30,13 @@ services:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-stravanalytics}
+      POSTGRES_USER: ${POSTGRES_USER:-strivpath}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
-      POSTGRES_DB: ${POSTGRES_DB:-stravanalytics}
+      POSTGRES_DB: ${POSTGRES_DB:-strivpath}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-stravanalytics} -d ${POSTGRES_DB:-stravanalytics}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-strivpath} -d ${POSTGRES_DB:-strivpath}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,7 +52,7 @@ services:
   # NestJS API Backend
   # ---------------------------------------------------------------------------
   api:
-    image: ghcr.io/titouan-aclr/stravanalytics-api:${API_TAG:-latest}
+    image: ghcr.io/titouan-aclr/strivpath-api:${API_TAG:-latest}
     pull_policy: always
     restart: unless-stopped
     depends_on:
@@ -62,7 +62,7 @@ services:
       NODE_ENV: production
       PORT: 3011
       # Database (internal Docker network)
-      DATABASE_URL: postgresql://${POSTGRES_USER:-stravanalytics}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-stravanalytics}
+      DATABASE_URL: postgresql://${POSTGRES_USER:-strivpath}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-strivpath}
       # JWT
       JWT_ACCESS_TOKEN_SECRET: ${JWT_ACCESS_TOKEN_SECRET:?JWT_ACCESS_TOKEN_SECRET is required}
       JWT_REFRESH_TOKEN_SECRET: ${JWT_REFRESH_TOKEN_SECRET:?JWT_REFRESH_TOKEN_SECRET is required}
@@ -83,11 +83,11 @@ services:
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"
       # Router configuration
-      - "traefik.http.routers.strava-api.rule=Host(`api.${DOMAIN}`)"
-      - "traefik.http.routers.strava-api.entrypoints=websecure"
-      - "traefik.http.routers.strava-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.strivpath-api.rule=Host(`api.${DOMAIN}`)"
+      - "traefik.http.routers.strivpath-api.entrypoints=websecure"
+      - "traefik.http.routers.strivpath-api.tls.certresolver=letsencrypt"
       # Service configuration
-      - "traefik.http.services.strava-api.loadbalancer.server.port=3011"
+      - "traefik.http.services.strivpath-api.loadbalancer.server.port=3011"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3011/health"]
       interval: 30s
@@ -107,7 +107,7 @@ services:
   # Next.js Web Frontend
   # ---------------------------------------------------------------------------
   web:
-    image: ghcr.io/titouan-aclr/stravanalytics-web:${WEB_TAG:-latest}
+    image: ghcr.io/titouan-aclr/strivpath-web:${WEB_TAG:-latest}
     pull_policy: always
     restart: unless-stopped
     depends_on:
@@ -120,16 +120,18 @@ services:
       NEXT_PUBLIC_GRAPHQL_URL: https://api.${DOMAIN}/graphql
       # GraphQL URL for SSR (internal Docker network)
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
+      # Legal pages base URL
+      NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:?NEXT_PUBLIC_LEGAL_BASE_URL is required}
     labels:
       # Traefik configuration
       - "traefik.enable=true"
       - "traefik.docker.network=dokploy-network"
       # Router configuration
-      - "traefik.http.routers.strava-web.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.strava-web.entrypoints=websecure"
-      - "traefik.http.routers.strava-web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.strivpath-web.rule=Host(`${DOMAIN}`)"
+      - "traefik.http.routers.strivpath-web.entrypoints=websecure"
+      - "traefik.http.routers.strivpath-web.tls.certresolver=letsencrypt"
       # Service configuration
-      - "traefik.http.services.strava-web.loadbalancer.server.port=3000"
+      - "traefik.http.services.strivpath-web.loadbalancer.server.port=3000"
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s

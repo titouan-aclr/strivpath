@@ -1029,6 +1029,173 @@ describe('SyncContext', () => {
       expect(mockNotifyGoalUpdates).not.toHaveBeenCalled();
     });
 
+    it('should show rate_limit toast when sync fails with rate limit error', async () => {
+      vi.mocked(classifyOnboardingError).mockReturnValue({
+        type: 'rate_limit',
+        code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+        supportId: 'test-support-id',
+        message: 'Rate limit reached',
+        retriable: true,
+      });
+
+      let queryCount = 0;
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          queryCount++;
+          if (queryCount === 1) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '1',
+                  status: SyncStatus.Completed,
+                  stage: SyncStage.Done,
+                }),
+              },
+            });
+          }
+          if (queryCount === 2) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '2',
+                  status: SyncStatus.InProgress,
+                  stage: SyncStage.Fetching,
+                }),
+              },
+            });
+          }
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '2',
+                status: SyncStatus.Failed,
+                errorMessage: 'Strava rate limit exceeded during activities fetch.',
+              }),
+            },
+          });
+        }),
+        graphql.mutation('SyncActivities', () => {
+          return HttpResponse.json({
+            data: {
+              syncActivities: createMockSyncHistory({ id: '2', status: SyncStatus.Pending }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.syncHistory?.id).toBe('1');
+      });
+
+      act(() => {
+        result.current.triggerSync();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPolling).toBe(false);
+      });
+
+      expect(toast.error).toHaveBeenCalledWith(
+        'settings.sync.rateLimitError',
+        expect.objectContaining({ id: 'onboarding-rate-limit', duration: Infinity, dismissible: true }),
+      );
+      expect(toast.error).not.toHaveBeenCalledWith('settings.sync.syncError');
+    });
+
+    it('should show daily rate_limit toast when sync fails with non-retriable rate limit', async () => {
+      vi.mocked(classifyOnboardingError).mockReturnValue({
+        type: 'rate_limit',
+        code: 'STRAVA_RATE_LIMIT_EXCEEDED',
+        supportId: 'test-support-id',
+        message: 'Daily rate limit reached',
+        retriable: false,
+      });
+
+      let queryCount = 0;
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          queryCount++;
+          if (queryCount === 1) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '1',
+                  status: SyncStatus.Completed,
+                  stage: SyncStage.Done,
+                }),
+              },
+            });
+          }
+          if (queryCount === 2) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '2',
+                  status: SyncStatus.InProgress,
+                  stage: SyncStage.Fetching,
+                }),
+              },
+            });
+          }
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '2',
+                status: SyncStatus.Failed,
+                errorMessage: 'Strava daily rate limit reached. Try again tomorrow.',
+              }),
+            },
+          });
+        }),
+        graphql.mutation('SyncActivities', () => {
+          return HttpResponse.json({
+            data: {
+              syncActivities: createMockSyncHistory({ id: '2', status: SyncStatus.Pending }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.syncHistory?.id).toBe('1');
+      });
+
+      act(() => {
+        result.current.triggerSync();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPolling).toBe(false);
+      });
+
+      expect(toast.error).toHaveBeenCalledWith(
+        'settings.sync.rateLimitDailyError',
+        expect.objectContaining({ id: 'onboarding-rate-limit', duration: Infinity, dismissible: true }),
+      );
+    });
+
     it('should classify and log errors on sync failure', async () => {
       let queryCount = 0;
       server.use(

@@ -88,7 +88,7 @@ export function SportsSection() {
 
               return (
                 <Badge key={sport} variant="secondary" className="gap-1.5 py-1.5 pl-2 pr-1 text-sm">
-                  <Icon className="h-4 w-4 text-strava-orange" aria-hidden="true" />
+                  <Icon className="h-4 w-4 text-primary" aria-hidden="true" />
                   {tOnboarding(`${config.labelKey}.title`)}
                   {canRemove && (
                     <Button

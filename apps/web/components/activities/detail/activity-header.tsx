@@ -1,12 +1,13 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
-import { Calendar, Clock } from 'lucide-react';
+import { ViewOnStravaLink } from '@/components/strava/view-on-strava-link';
 import { Badge } from '@/components/ui/badge';
+import { SportType } from '@/gql/graphql';
+import type { ActivityDetail } from '@/lib/activities/activity-types';
 import { SPORT_TYPE_CONFIG } from '@/lib/activities/constants';
 import { formatDate, formatTime } from '@/lib/activities/formatters';
-import type { ActivityDetail } from '@/lib/activities/activity-types';
-import { SportType } from '@/gql/graphql';
+import { Calendar, Clock } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ActivityHeaderProps {
   activity: ActivityDetail;
@@ -23,8 +24,8 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
     <div className="space-y-4">
       <div className="flex items-start gap-4">
         {Icon && (
-          <div className="p-3 rounded-lg bg-strava-orange/10">
-            <Icon className="h-8 w-8 text-strava-orange" aria-hidden="true" />
+          <div className="p-3 rounded-lg bg-primary/10">
+            <Icon className="h-8 w-8 text-primary" aria-hidden="true" />
           </div>
         )}
         <div className="flex-1">
@@ -40,9 +41,12 @@ export function ActivityHeader({ activity }: ActivityHeaderProps) {
             </span>
           </div>
         </div>
-        <Badge className="bg-strava-orange hover:bg-strava-orange/90 px-3 py-1.5">
-          {t(`sportTypes.${activity.type.toLowerCase()}`)}
-        </Badge>
+        <div className="flex items-center gap-2">
+          <Badge className="bg-primary hover:bg-primary/90 px-3 py-1.5">
+            {t(`sportTypes.${activity.type.toLowerCase()}`)}
+          </Badge>
+          <ViewOnStravaLink variant="button" stravaId={activity.stravaId} />
+        </div>
       </div>
     </div>
   );

@@ -1,8 +1,8 @@
-# Stravanalytics
+# StrivPath
 
 > Advanced sports analytics and motivation platform for athletes
 
-Stravanalytics is a comprehensive full-stack application that imports activity data from Strava via OAuth 2.0, performs advanced statistical analysis, and provides personalized insights, goal tracking, and motivational feedback to athletes across multiple sports disciplines.
+StrivPath is a comprehensive full-stack application that imports activity data from Strava via OAuth 2.0, performs advanced statistical analysis, and provides personalized insights, goal tracking, and motivational feedback to athletes across multiple sports disciplines.
 
 ## Core Features
 
@@ -62,7 +62,7 @@ docker compose up -d
 **Backend (`apps/api/.env`)**:
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/stravanalytics"
+DATABASE_URL="postgresql://user:password@localhost:5432/strivpath"
 STRAVA_CLIENT_ID="your_strava_client_id"
 STRAVA_CLIENT_SECRET="your_strava_client_secret"
 STRAVA_CALLBACK_URL="http://localhost:3011/v1/auth/strava/callback"

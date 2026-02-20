@@ -48,7 +48,7 @@ export function GoalTemplateSelector({
       </div>
 
       <Card
-        className="cursor-pointer transition-all hover:shadow-lg hover:border-strava-orange/50"
+        className="cursor-pointer transition-all hover:shadow-lg hover:border-primary/50"
         onClick={onSelectCustom}
         role="button"
         tabIndex={0}
@@ -60,8 +60,8 @@ export function GoalTemplateSelector({
         }}
       >
         <CardContent className="flex items-center gap-4 p-6">
-          <div className="p-3 rounded-lg bg-strava-orange/10">
-            <PlusCircle className="h-6 w-6 text-strava-orange" aria-hidden="true" />
+          <div className="p-3 rounded-lg bg-primary/10">
+            <PlusCircle className="h-6 w-6 text-primary" aria-hidden="true" />
           </div>
           <div>
             <h3 className="font-semibold">{t('create.templateSelector.custom.title')}</h3>

@@ -42,9 +42,9 @@ describe('GoalsEmptyState', () => {
   it('should render target icon', () => {
     const { container } = render(<GoalsEmptyState />);
 
-    const iconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const iconContainer = container.querySelector('.bg-primary\\/10');
     expect(iconContainer).toBeInTheDocument();
-    expect(container.querySelector('.text-strava-orange')).toBeInTheDocument();
+    expect(container.querySelector('.text-primary')).toBeInTheDocument();
   });
 
   it('should apply custom className', () => {

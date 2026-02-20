@@ -1,7 +1,7 @@
-import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
-import { GoalStatusBadge } from './goal-status-badge';
 import { GoalStatus } from '@/gql/graphql';
+import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
+import { GoalStatusBadge } from './goal-status-badge';
 
 const mockUseTranslations = (namespace?: string) => (key: string) => {
   const translations: Record<string, string> = {
@@ -24,9 +24,9 @@ describe('GoalStatusBadge', () => {
 
     expect(screen.getByText('Active')).toBeInTheDocument();
 
-    const badge = container.querySelector('.bg-goal-progress');
+    const badge = container.querySelector('.bg-accent-blue');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('text-white', 'hover:bg-goal-progress/90');
+    expect(badge).toHaveClass('text-white', 'hover:bg-accent-blue/90');
   });
 
   it('should render COMPLETED status with correct text and styles', () => {
@@ -50,8 +50,8 @@ describe('GoalStatusBadge', () => {
 
     expect(screen.getByText('Archived')).toBeInTheDocument();
 
-    const badge = container.querySelector('.bg-strava-orange');
+    const badge = container.querySelector('.bg-primary');
     expect(badge).toBeInTheDocument();
-    expect(badge).toHaveClass('text-white', 'hover:bg-strava-orange/90');
+    expect(badge).toHaveClass('text-white', 'hover:bg-primary/90');
   });
 });

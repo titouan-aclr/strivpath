@@ -205,7 +205,7 @@ describe('SportsSection', () => {
     });
   });
 
-  it('should render sport icons with strava-orange color', () => {
+  it('should render sport icons with primary color', () => {
     vi.mocked(useUserPreferencesHook.useUserPreferences).mockReturnValue({
       preferences: createMockPreferences([SportType.Run]),
       loading: false,
@@ -215,7 +215,7 @@ describe('SportsSection', () => {
 
     const { container } = render(<SportsSection />);
 
-    const sportIcon = container.querySelector('.text-strava-orange');
+    const sportIcon = container.querySelector('.text-primary');
     expect(sportIcon).toBeInTheDocument();
   });
 

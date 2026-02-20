@@ -4,7 +4,7 @@ import { PrismaClient } from './prisma-client';
 const E2E_DATABASE_URL =
   process.env.E2E_DATABASE_URL ||
   process.env.DATABASE_URL ||
-  'postgresql://postgres:password@127.0.0.1:5432/stravanalytics_test_e2e';
+  'postgresql://postgres:password@127.0.0.1:5432/strivpath_test_e2e';
 
 async function globalSetup() {
   console.log('🔧 Setting up E2E test environment...');

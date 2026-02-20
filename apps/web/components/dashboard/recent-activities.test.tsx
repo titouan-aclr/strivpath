@@ -191,7 +191,7 @@ describe('RecentActivities', () => {
       };
       const { container } = renderWithIntl(<RecentActivities activities={mockActivities} sportColor={sportColor} />);
       expect(container.querySelector('.text-lime-500')).toBeInTheDocument();
-      expect(container.querySelector('.text-strava-orange')).not.toBeInTheDocument();
+      expect(container.querySelector('.text-primary')).not.toBeInTheDocument();
     });
   });
 });

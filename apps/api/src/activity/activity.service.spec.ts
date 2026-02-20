@@ -28,6 +28,7 @@ describe('ActivityService', () => {
       findFirst: jest.fn(),
       upsert: jest.fn(),
       update: jest.fn(),
+      deleteMany: jest.fn(),
     },
   };
 
@@ -1170,6 +1171,43 @@ describe('ActivityService', () => {
         userId,
         expect.objectContaining({ after: expect.any(Number) }),
       );
+    });
+  });
+
+  describe('deleteByStravaId', () => {
+    it('should return true when activity is deleted', async () => {
+      const stravaId = BigInt(123);
+      const userId = 1;
+
+      mockPrismaService.activity.deleteMany.mockResolvedValue({ count: 1 });
+
+      const result = await service.deleteByStravaId(stravaId, userId);
+
+      expect(result).toBe(true);
+    });
+
+    it('should return false when activity not found', async () => {
+      const stravaId = BigInt(999);
+      const userId = 1;
+
+      mockPrismaService.activity.deleteMany.mockResolvedValue({ count: 0 });
+
+      const result = await service.deleteByStravaId(stravaId, userId);
+
+      expect(result).toBe(false);
+    });
+
+    it('should filter by both stravaId and userId', async () => {
+      const stravaId = BigInt(555);
+      const userId = 7;
+
+      mockPrismaService.activity.deleteMany.mockResolvedValue({ count: 1 });
+
+      await service.deleteByStravaId(stravaId, userId);
+
+      expect(prismaService.activity.deleteMany).toHaveBeenCalledWith({
+        where: { stravaId, userId },
+      });
     });
   });
 

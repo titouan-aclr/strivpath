@@ -137,8 +137,8 @@ export function ActivityHeatmap({ calendarData, year: initialYear, className }: 
   return (
     <Card className={cn('overflow-hidden h-full flex flex-col', className)}>
       <CardHeader className="flex flex-row items-center gap-2 space-y-0 pb-2">
-        <div className="p-2 rounded-lg bg-strava-orange/10">
-          <Calendar className="h-4 w-4 text-strava-orange" aria-hidden="true" />
+        <div className="p-2 rounded-lg bg-primary/10">
+          <Calendar className="h-4 w-4 text-primary" aria-hidden="true" />
         </div>
         <div>
           <CardTitle className="text-base font-medium">{t('title')}</CardTitle>
@@ -189,7 +189,7 @@ export function ActivityHeatmap({ calendarData, year: initialYear, className }: 
                                 'w-[10px] h-[10px] rounded-[2px] transition-colors',
                                 !day.isCurrentYear && 'opacity-30',
                                 day.hasActivity
-                                  ? 'bg-strava-orange hover:bg-strava-orange/80'
+                                  ? 'bg-primary hover:bg-primary/80'
                                   : 'bg-muted hover:bg-muted-foreground/20',
                                 isToday && 'ring-1 ring-offset-1 ring-foreground/50',
                               )}
@@ -214,7 +214,7 @@ export function ActivityHeatmap({ calendarData, year: initialYear, className }: 
               <span>{t('legend.noActivity')}</span>
               <div className="flex items-center gap-[2px]">
                 <div className="w-[10px] h-[10px] rounded-[2px] bg-muted" />
-                <div className="w-[10px] h-[10px] rounded-[2px] bg-strava-orange" />
+                <div className="w-[10px] h-[10px] rounded-[2px] bg-primary" />
               </div>
               <span>{t('legend.withActivity')}</span>
             </div>

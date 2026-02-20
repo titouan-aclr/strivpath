@@ -97,7 +97,7 @@ describe('GoalCard', () => {
   it('displays correct sport icon for running', () => {
     const { container } = render(<GoalCard goal={mockGoal} onArchive={mockOnArchive} onDelete={mockOnDelete} />);
 
-    const sportIconContainer = container.querySelector('.bg-strava-orange\\/10');
+    const sportIconContainer = container.querySelector('.bg-primary\\/10');
     expect(sportIconContainer).toBeInTheDocument();
   });
 
@@ -194,6 +194,6 @@ describe('GoalCard', () => {
 
     const card = container.querySelector('.hover\\:shadow-lg');
     expect(card).toBeInTheDocument();
-    expect(card).toHaveClass('hover:border-strava-orange/50', 'cursor-pointer');
+    expect(card).toHaveClass('hover:border-primary/50', 'cursor-pointer');
   });
 });
