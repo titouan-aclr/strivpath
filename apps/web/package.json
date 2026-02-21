@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "pnpm codegen && next build",
+    "build:docker": "next build",
     "start": "next start",
     "lint": "eslint . --max-warnings 0",
     "test": "vitest --run --passWithNoTests",
