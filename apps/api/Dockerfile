@@ -20,8 +20,8 @@
 # -----------------------------------------------------------------------------
 # Stage 1: Pruner - Extract API workspace with turbo prune
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS pruner
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
+FROM node:24-alpine AS pruner
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 WORKDIR /app
 
 COPY . .
@@ -30,8 +30,8 @@ RUN pnpm dlx turbo@^2 prune api --docker
 # -----------------------------------------------------------------------------
 # Stage 2: Builder - Install all dependencies and build the application
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS builder
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
+FROM node:24-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 WORKDIR /app
 
 # Copy lockfile and package.json files from pruned output
@@ -56,8 +56,8 @@ RUN pnpm --filter api exec tsc prisma/seed.ts --outDir dist/prisma --esModuleInt
 # -----------------------------------------------------------------------------
 # Stage 3: Production Dependencies - Install only production deps
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS prod-deps
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
+FROM node:24-alpine AS prod-deps
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 WORKDIR /app
 
 # Copy package files from pruned output
@@ -80,7 +80,7 @@ COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 # -----------------------------------------------------------------------------
 # Stage 4: Runner - Minimal production image
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 # Install wget for healthcheck and dumb-init for proper signal handling
 RUN apk add --no-cache wget dumb-init
