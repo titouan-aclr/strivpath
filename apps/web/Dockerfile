@@ -14,49 +14,38 @@
 #
 # Build command (from monorepo root):
 #   docker build -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_GRAPHQL_URL=https://api.example.com/graphql -t strivpath-web .
+#
+# Pre-build requirements:
+#   gql/ types must be pre-generated: pnpm --filter web codegen
 # =============================================================================
 
 # -----------------------------------------------------------------------------
-# Stage 1: Pruner - Extract web workspace with turbo prune
+# Stage 1: Builder - Install dependencies and build the application
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS pruner
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
+FROM node:24-alpine AS builder
+RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 WORKDIR /app
 
-COPY . .
-RUN pnpm dlx turbo@^2 prune web --docker
-
-# -----------------------------------------------------------------------------
-# Stage 2: Builder - Install dependencies and build the application
-# -----------------------------------------------------------------------------
-FROM node:22-alpine AS builder
-RUN corepack enable && corepack prepare pnpm@10.8.1 --activate
-WORKDIR /app
-
-# Build argument for GraphQL URL (needed at build time for codegen)
+# Build argument for GraphQL URL (needed at build time)
 ARG NEXT_PUBLIC_GRAPHQL_URL
 ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
 
-# Copy lockfile and package.json files from pruned output
-COPY --from=pruner /app/out/json/ .
+# Copy full monorepo source (node_modules and build artifacts excluded via .dockerignore)
+COPY . .
 
-# Install all dependencies (including devDependencies for build)
-RUN echo "shamefully-hoist=true" >> .npmrc && \
-    pnpm install --frozen-lockfile --ignore-scripts
+# Install all workspace dependencies using the full lockfile.
+# --frozen-lockfile ensures peer dependency hashes match exactly, preventing
+# the binary shim path mismatch that occurs with turbo prune's generated lockfiles.
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
-# Copy source code from pruned output
-COPY --from=pruner /app/out/full/ .
-
-# Copy the API schema for codegen (needed to generate GraphQL types)
-COPY --from=pruner /app/apps/api/src/schema.gql ./apps/api/src/schema.gql
-
-# Build the Next.js application (includes codegen via build script)
-RUN pnpm --filter web build
+# Build the Next.js application.
+# gql/ types must be pre-generated before docker build (run: pnpm --filter web codegen)
+RUN pnpm --filter web build:docker
 
 # -----------------------------------------------------------------------------
-# Stage 3: Runner - Minimal production image with standalone output
+# Stage 2: Runner - Minimal production image with standalone output
 # -----------------------------------------------------------------------------
-FROM node:22-alpine AS runner
+FROM node:24-alpine AS runner
 
 # Install wget for healthcheck and dumb-init for proper signal handling
 RUN apk add --no-cache wget dumb-init

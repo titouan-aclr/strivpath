@@ -1,14 +1,14 @@
 # Dependencies
-node_modules
+**/node_modules
 .pnpm-store
 
 # Build outputs
-dist
-.next
-.turbo
+**/dist
+**/.next
+**/.turbo
 
 # Test & coverage
-coverage
+**/coverage
 playwright-report
 test-results
 
