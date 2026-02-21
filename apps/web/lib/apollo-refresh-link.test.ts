@@ -125,15 +125,22 @@ describe('apollo-refresh-link', () => {
     testClient = createTestClient();
 
     originalLocation = window.location;
-    delete (window as { location?: Location }).location;
-    window.location = { href: '' } as Location;
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      configurable: true,
+      value: { href: '' },
+    });
 
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
   });
 
   afterEach(async () => {
-    window.location = originalLocation;
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      configurable: true,
+      value: originalLocation,
+    });
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
     await testClient.clearStore();
