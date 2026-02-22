@@ -12,8 +12,12 @@ type Props = {
   params: Promise<{ locale: string }>;
 };
 
+function getAppUrl(): string {
+  return process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+}
+
 function getCanonicalUrl(locale: string): string {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  const appUrl = getAppUrl();
   return locale === routing.defaultLocale ? appUrl : `${appUrl}/${locale}`;
 }
 
@@ -21,16 +25,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'landing.meta' });
   const canonicalUrl = getCanonicalUrl(locale);
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
 
   return {
     title: t('title'),
     description: t('description'),
     alternates: {
       canonical: canonicalUrl,
-      languages: Object.fromEntries(
-        routing.locales.map(l => [l, l === routing.defaultLocale ? appUrl : `${appUrl}/${l}`]),
-      ),
+      languages: Object.fromEntries(routing.locales.map(l => [l, getCanonicalUrl(l)])),
     },
     openGraph: {
       title: t('title'),

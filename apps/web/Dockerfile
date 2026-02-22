@@ -6,14 +6,19 @@
 #
 # Required environment variables at runtime:
 #   - NEXT_PUBLIC_GRAPHQL_URL: GraphQL API endpoint for browser (e.g., https://api.example.com/graphql)
+#   - NEXT_PUBLIC_APP_URL: Public base URL of the app (e.g., https://example.com)
 #   - GRAPHQL_URL_INTERNAL: (Optional) GraphQL API endpoint for SSR in Docker (e.g., http://api:3011/graphql)
 #                          If not set, falls back to NEXT_PUBLIC_GRAPHQL_URL
 #
 # Build-time arguments:
 #   - NEXT_PUBLIC_GRAPHQL_URL: GraphQL API endpoint for build
+#   - NEXT_PUBLIC_APP_URL: Public base URL of the app for build
 #
 # Build command (from monorepo root):
-#   docker build -f apps/web/Dockerfile --build-arg NEXT_PUBLIC_GRAPHQL_URL=https://api.example.com/graphql -t strivpath-web .
+#   docker build -f apps/web/Dockerfile \
+#     --build-arg NEXT_PUBLIC_GRAPHQL_URL=https://api.example.com/graphql \
+#     --build-arg NEXT_PUBLIC_APP_URL=https://example   .com \
+#     -t strivpath-web .
 #
 # Pre-build requirements:
 #   gql/ types must be pre-generated: pnpm --filter web codegen
@@ -26,9 +31,12 @@ FROM node:24-alpine AS builder
 RUN corepack enable && corepack prepare pnpm@10.30.1 --activate
 WORKDIR /app
 
-# Build argument for GraphQL URL (needed at build time)
+# Build arguments for NEXT_PUBLIC_* vars (baked into client bundle at build time)
 ARG NEXT_PUBLIC_GRAPHQL_URL
 ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
+
+ARG NEXT_PUBLIC_APP_URL
+ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
 
 # Copy full monorepo source (node_modules and build artifacts excluded via .dockerignore)
 COPY . .

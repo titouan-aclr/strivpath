@@ -118,6 +118,8 @@ services:
       PORT: 3000
       # GraphQL URL for browser (external, via Traefik)
       NEXT_PUBLIC_GRAPHQL_URL: https://api.${DOMAIN}/graphql
+      # Public base URL of the application
+      NEXT_PUBLIC_APP_URL: https://${DOMAIN}
       # GraphQL URL for SSR (internal Docker network)
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
       # Legal pages base URL

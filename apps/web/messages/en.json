@@ -5,6 +5,10 @@
     "error": "An error occurred"
   },
   "landing": {
+    "meta": {
+      "title": "StrivPath — Track your athletic goals",
+      "description": "Set meaningful goals, follow your progress across every sport, and celebrate each milestone on your personal path."
+    },
     "header": {
       "features": "Features",
       "howItWorks": "How it works",
