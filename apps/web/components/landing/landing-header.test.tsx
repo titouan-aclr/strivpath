@@ -2,6 +2,21 @@ import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { LandingHeader } from './landing-header';
 
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string) => {
+    const messages: Record<string, string> = {
+      features: 'Features',
+      howItWorks: 'How it works',
+      openSource: 'Open Source',
+      getStarted: 'Get Started',
+      openDashboard: 'Open Dashboard',
+      openMenu: 'Open navigation menu',
+      mobileNavTitle: 'Navigation',
+    };
+    return messages[key] ?? key;
+  },
+}));
+
 vi.mock('next/image', () => ({
   default: ({ alt, ...props }: React.ImgHTMLAttributes<HTMLImageElement> & { alt: string }) => (
     // eslint-disable-next-line @next/next/no-img-element
