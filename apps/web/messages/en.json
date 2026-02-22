@@ -66,6 +66,26 @@
         "comingSoon": "Coming soon"
       }
     },
+    "stats": {
+      "sectionLabel": "By the numbers",
+      "heading": "Built around what matters",
+      "stat1": { "label": "Goal types to set" },
+      "stat2": { "label": "Sports tracked in one place" },
+      "stat3": { "label": "Milestones to unlock" }
+    },
+    "goalPreview": {
+      "sectionLabel": "Goal tracking",
+      "heading": "Set it. Track it. Celebrate it.",
+      "subheading": "Define your target, and watch every Strava activity contribute to it. Progress updates automatically — no manual entry, no friction.",
+      "bullet1": "Distance, duration, elevation, or frequency",
+      "bullet2": "Weekly, monthly, or yearly periods",
+      "bullet3": "Automatic progress with every sync",
+      "goalTitle": "Run 100 km this month",
+      "goalSport": "🏃 Running",
+      "goalProgress": "74 km of 100 km",
+      "goalDaysLeft": "8 days left",
+      "chartLabel": "Weekly distance (km)"
+    },
     "problem": {
       "heading": {
         "line1Intro": "Strava is great at recording",
