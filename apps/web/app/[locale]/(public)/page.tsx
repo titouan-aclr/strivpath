@@ -9,6 +9,8 @@ import { HeroSection } from '@/components/landing/hero-section';
 import { ProblemSolutionSection } from '@/components/landing/problem-solution-section';
 import { FeaturesSection } from '@/components/landing/features-section';
 import { HowItWorksSection } from '@/components/landing/how-it-works-section';
+import { StatsSection } from '@/components/landing/stats-section';
+import { GoalPreviewSection } from '@/components/landing/goal-preview-section';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -86,6 +88,8 @@ export default async function LandingPage({ params }: Props) {
         <ProblemSolutionSection />
         <FeaturesSection />
         <HowItWorksSection />
+        <StatsSection />
+        <GoalPreviewSection />
       </main>
     </>
   );
