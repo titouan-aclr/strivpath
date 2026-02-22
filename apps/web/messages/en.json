@@ -28,6 +28,28 @@
       "ctaSecondary": "See how it works ↓",
       "sports": "🏃 Running · 🚴 Cycling · 🏊 Swimming"
     },
+    "features": {
+      "sectionLabel": "Features",
+      "heading": "Everything you need to reach your goals",
+      "subheading": "Built for athletes who want to turn their Strava data into real progress.",
+      "card1": {
+        "title": "Goal Tracking",
+        "description": "Set meaningful targets and watch your progress build week after week."
+      },
+      "card2": {
+        "title": "Progress Insights",
+        "description": "Visualize your performance trends over time. Spot when you're peaking and when to rest."
+      },
+      "card3": {
+        "title": "Multi-Sport Support",
+        "description": "Running, cycling, swimming — all your sports unified in one personal dashboard."
+      },
+      "card4": {
+        "title": "Achievements",
+        "description": "Earn badges for milestones, consistency, and personal records. Every effort worth celebrating.",
+        "comingSoon": "Coming soon"
+      }
+    },
     "problem": {
       "heading": {
         "line1Intro": "Strava is great at recording",
