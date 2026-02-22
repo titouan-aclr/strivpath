@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -21,7 +22,10 @@ export default async function AuthErrorPage({ params, searchParams }: Props) {
   return (
     <div className="flex min-h-screen flex-col">
       <header className="flex items-center justify-between p-6">
-        <h1 className="text-2xl font-bold">StrivPath</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold">
+          <Image src="/logo.svg" alt="StrivPath logo" width={28} height={28} className="h-7 w-7" />
+          StrivPath
+        </h1>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
           <ModeToggle />
