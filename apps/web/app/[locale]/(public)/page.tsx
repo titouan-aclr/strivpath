@@ -7,6 +7,7 @@ import { LandingHeader } from '@/components/landing/landing-header';
 import { TopoGlowSection } from '@/components/landing/topo-glow-section';
 import { HeroSection } from '@/components/landing/hero-section';
 import { ProblemSolutionSection } from '@/components/landing/problem-solution-section';
+import { FeaturesSection } from '@/components/landing/features-section';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -82,6 +83,7 @@ export default async function LandingPage({ params }: Props) {
           <HeroSection isAuthenticated={isAuthenticated} />
         </TopoGlowSection>
         <ProblemSolutionSection />
+        <FeaturesSection />
       </main>
     </>
   );
