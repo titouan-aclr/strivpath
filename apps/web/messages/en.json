@@ -28,6 +28,22 @@
       "ctaSecondary": "See how it works ↓",
       "sports": "🏃 Running · 🚴 Cycling · 🏊 Swimming"
     },
+    "howItWorks": {
+      "sectionLabel": "How it works",
+      "heading": "From Strava to your goals in 3 steps",
+      "step1": {
+        "title": "Connect Strava",
+        "description": "Log in with your Strava account. We securely import your activities — no manual entry needed."
+      },
+      "step2": {
+        "title": "Set your goals",
+        "description": "Choose a target: distance, duration, elevation. Set a deadline and let StrivPath do the tracking."
+      },
+      "step3": {
+        "title": "Celebrate progress",
+        "description": "Watch your goals advance with every Strava sync. Earn badges and celebrate milestones as you go."
+      }
+    },
     "features": {
       "sectionLabel": "Features",
       "heading": "Everything you need to reach your goals",

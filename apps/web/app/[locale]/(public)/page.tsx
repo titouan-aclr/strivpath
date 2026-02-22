@@ -8,6 +8,7 @@ import { TopoGlowSection } from '@/components/landing/topo-glow-section';
 import { HeroSection } from '@/components/landing/hero-section';
 import { ProblemSolutionSection } from '@/components/landing/problem-solution-section';
 import { FeaturesSection } from '@/components/landing/features-section';
+import { HowItWorksSection } from '@/components/landing/how-it-works-section';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -84,6 +85,7 @@ export default async function LandingPage({ params }: Props) {
         </TopoGlowSection>
         <ProblemSolutionSection />
         <FeaturesSection />
+        <HowItWorksSection />
       </main>
     </>
   );
