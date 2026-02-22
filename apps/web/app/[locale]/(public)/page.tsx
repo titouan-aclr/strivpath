@@ -1,38 +1,87 @@
-import { Button } from '@/components/ui/button';
-import { ModeToggle } from '@/components/mode-toggle';
-import { LanguageSwitcher } from '@/components/language-switcher';
-import Link from 'next/link';
+import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+
+import { routing } from '@/i18n/routing';
+import { verifyAuth } from '@/lib/auth/dal';
+import { LandingHeader } from '@/components/landing/landing-header';
+import { TopoGlowSection } from '@/components/landing/topo-glow-section';
+import { HeroSection } from '@/components/landing/hero-section';
+import { ProblemSolutionSection } from '@/components/landing/problem-solution-section';
 
 type Props = {
   params: Promise<{ locale: string }>;
 };
 
+function getCanonicalUrl(locale: string): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+  return locale === routing.defaultLocale ? appUrl : `${appUrl}/${locale}`;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'landing.meta' });
+  const canonicalUrl = getCanonicalUrl(locale);
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000';
+
+  return {
+    title: t('title'),
+    description: t('description'),
+    alternates: {
+      canonical: canonicalUrl,
+      languages: Object.fromEntries(
+        routing.locales.map(l => [l, l === routing.defaultLocale ? appUrl : `${appUrl}/${l}`]),
+      ),
+    },
+    openGraph: {
+      title: t('title'),
+      description: t('description'),
+      url: canonicalUrl,
+      siteName: 'StrivPath',
+      locale: locale === 'fr' ? 'fr_FR' : 'en_US',
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: t('title'),
+      description: t('description'),
+    },
+  };
+}
+
 export default async function LandingPage({ params }: Props) {
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const t = await getTranslations('auth.login');
+  const [isAuthenticated, t] = await Promise.all([
+    verifyAuth(),
+    getTranslations({ locale, namespace: 'landing.meta' }),
+  ]);
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: 'StrivPath',
+    description: t('description'),
+    url: getCanonicalUrl(locale),
+    applicationCategory: 'SportsApplication',
+    operatingSystem: 'Web',
+    offers: {
+      '@type': 'Offer',
+      price: '0',
+      priceCurrency: 'USD',
+    },
+  };
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between p-6">
-        <h1 className="text-2xl font-bold">StrivPath</h1>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ModeToggle />
-        </div>
-      </header>
-
-      <main className="flex flex-1 items-center justify-center px-6">
-        <div className="w-full max-w-md text-center">
-          <h2 className="mb-4 text-4xl font-bold">{t('title')}</h2>
-          <p className="mb-8 text-lg text-muted-foreground">{t('description')}</p>
-          <Button asChild size="lg">
-            <Link href="/login">{t('connectButton')}</Link>
-          </Button>
-        </div>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <LandingHeader isAuthenticated={isAuthenticated} />
+      <main>
+        <TopoGlowSection>
+          <HeroSection isAuthenticated={isAuthenticated} />
+        </TopoGlowSection>
+        <ProblemSolutionSection />
       </main>
-    </div>
+    </>
   );
 }

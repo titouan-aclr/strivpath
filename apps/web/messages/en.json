@@ -4,6 +4,49 @@
     "loading": "Loading...",
     "error": "An error occurred"
   },
+  "landing": {
+    "header": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "openSource": "Open Source",
+      "getStarted": "Get Started",
+      "openDashboard": "Open Dashboard",
+      "openMenu": "Open navigation menu",
+      "mobileNavTitle": "Navigation"
+    },
+    "hero": {
+      "badge": "✦ For Strava athletes who want more",
+      "headline1": "Stop logging workouts.",
+      "headline2": "Start tracking progress.",
+      "subtitle": "Set meaningful goals, follow your journey across every sport, and celebrate each milestone on your personal path.",
+      "cta": "Start your path",
+      "ctaAuthenticated": "Open Dashboard",
+      "ctaSecondary": "See how it works ↓",
+      "sports": "🏃 Running · 🚴 Cycling · 🏊 Swimming"
+    },
+    "problem": {
+      "heading": {
+        "line1Intro": "Strava is great at recording",
+        "line1Emphasis": "what you did.",
+        "line2Intro": "But what about",
+        "line2Emphasis": "where you're going?"
+      },
+      "without": {
+        "title": "Without StrivPath",
+        "headline": "Lots of logged activities with no sense of direction.",
+        "point1": "Sessions logged, purpose unknown",
+        "point2": "Numbers without narrative",
+        "point3": "No milestone to celebrate"
+      },
+      "with": {
+        "title": "With StrivPath",
+        "headline": "Goals that give meaning to every session you do.",
+        "point1": "Every activity moves you forward",
+        "point2": "Progress visible in real time",
+        "point3": "Milestones worth celebrating"
+      }
+    }
+  },
   "home": {
     "title": "StrivPath",
     "usersFromApi": "Users from GraphQL API:",
