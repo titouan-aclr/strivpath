@@ -1,6 +1,3 @@
-import { redirectIfAuthenticated } from '@/lib/auth/dal';
-
-export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  await redirectIfAuthenticated();
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
