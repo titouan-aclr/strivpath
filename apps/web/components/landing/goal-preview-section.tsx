@@ -31,13 +31,19 @@ export function GoalPreviewSection() {
   const bullets = [t('bullet1'), t('bullet2'), t('bullet3')];
 
   return (
-    <section id="goal-preview" className="bg-muted dark:bg-muted/20 py-24 md:py-32">
+    <section
+      id="goal-preview"
+      aria-labelledby="goal-preview-heading"
+      className="scroll-mt-28 bg-muted dark:bg-muted/20 py-24 md:py-32"
+    >
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid items-center gap-16 md:grid-cols-2">
           <BlurFade delay={0} inView>
             <div>
               <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">{t('sectionLabel')}</p>
-              <h2 className="mb-4 text-3xl font-bold md:text-4xl">{t('heading')}</h2>
+              <h2 id="goal-preview-heading" className="mb-4 text-3xl font-bold md:text-4xl">
+                {t('heading')}
+              </h2>
               <p className="mb-8 leading-relaxed text-muted-foreground">{t('subheading')}</p>
               <ul className="space-y-3">
                 {bullets.map(bullet => (

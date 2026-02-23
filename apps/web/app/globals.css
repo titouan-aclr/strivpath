@@ -273,6 +273,14 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-slow,
+  .progress-shimmer::after,
+  .topo-glow-overlay {
+    animation: none;
+  }
+}
+
 @layer components {
   .icon-container {
     @apply p-2 rounded-lg bg-primary/10;

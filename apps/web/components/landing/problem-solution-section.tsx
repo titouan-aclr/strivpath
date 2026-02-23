@@ -8,10 +8,14 @@ export function ProblemSolutionSection() {
   const t = useTranslations('landing.problem');
 
   return (
-    <section id="problem" className="py-24 md:py-32 bg-muted dark:bg-muted/20">
+    <section
+      id="problem"
+      aria-labelledby="problem-heading"
+      className="scroll-mt-28 py-24 md:py-32 bg-muted dark:bg-muted/20"
+    >
       <div className="mx-auto max-w-6xl px-6">
         <BlurFade delay={0} inView>
-          <h2 className="text-center text-3xl font-bold md:text-4xl">
+          <h2 id="problem-heading" className="text-center text-3xl font-bold md:text-4xl">
             <span className="text-muted-foreground">{t('heading.line1Intro')} </span>
             <span className="text-foreground">{t('heading.line1Emphasis')}</span>
             <br />
