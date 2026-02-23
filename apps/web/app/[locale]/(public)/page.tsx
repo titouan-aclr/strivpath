@@ -11,6 +11,8 @@ import { FeaturesSection } from '@/components/landing/features-section';
 import { HowItWorksSection } from '@/components/landing/how-it-works-section';
 import { StatsSection } from '@/components/landing/stats-section';
 import { GoalPreviewSection } from '@/components/landing/goal-preview-section';
+import { CtaSection } from '@/components/landing/cta-section';
+import { LandingFooter } from '@/components/landing/landing-footer';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -90,7 +92,9 @@ export default async function LandingPage({ params }: Props) {
         <HowItWorksSection />
         <StatsSection />
         <GoalPreviewSection />
+        <CtaSection isAuthenticated={isAuthenticated} />
       </main>
+      <LandingFooter />
     </>
   );
 }

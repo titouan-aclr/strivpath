@@ -31,7 +31,7 @@ export function GoalPreviewSection() {
   const bullets = [t('bullet1'), t('bullet2'), t('bullet3')];
 
   return (
-    <section id="goal-preview" className="bg-background py-24 md:py-32">
+    <section id="goal-preview" className="bg-muted dark:bg-muted/20 py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <div className="grid items-center gap-16 md:grid-cols-2">
           <BlurFade delay={0} inView>

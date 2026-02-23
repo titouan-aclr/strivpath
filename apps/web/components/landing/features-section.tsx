@@ -64,7 +64,7 @@ export function FeaturesSection() {
   ];
 
   return (
-    <section id="features" className="bg-muted dark:bg-muted/20 py-24 md:py-32">
+    <section id="features" className="bg-background py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <BlurFade delay={0} inView>
           <div className="mb-16 text-center">

@@ -1,8 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
 import { motion, useInView } from 'motion/react';
 import { useTranslations } from 'next-intl';
+import { useEffect, useRef, useState } from 'react';
 
 import { BlurFade } from '@/components/ui/blur-fade';
 import { NumberTicker } from '@/components/ui/number-ticker';
@@ -68,7 +68,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section id="stats" className="bg-muted py-24 dark:bg-muted/20 md:py-32">
+    <section id="stats" className="bg-background py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <BlurFade delay={0} inView>
           <div className="mb-16 text-center">

@@ -8,7 +8,7 @@ export function ProblemSolutionSection() {
   const t = useTranslations('landing.problem');
 
   return (
-    <section id="problem" className="py-24 md:py-32 bg-background">
+    <section id="problem" className="py-24 md:py-32 bg-muted dark:bg-muted/20">
       <div className="mx-auto max-w-6xl px-6">
         <BlurFade delay={0} inView>
           <h2 className="text-center text-3xl font-bold md:text-4xl">

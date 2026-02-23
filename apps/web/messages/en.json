@@ -86,6 +86,22 @@
       "goalDaysLeft": "8 days left",
       "chartLabel": "Weekly distance (km)"
     },
+    "cta": {
+      "heading": "Your next milestone is waiting.",
+      "cta": "Start your path →",
+      "ctaAuthenticated": "Open Dashboard →",
+      "reassurance": "Free · Open source · Non-commercial · Your data stays yours"
+    },
+    "footer": {
+      "tagline": "Built for athletes who want to grow, not compete.",
+      "github": "GitHub",
+      "legalNotice": "Legal Notice",
+      "privacy": "Privacy Policy",
+      "terms": "Terms",
+      "disclaimer": "Not affiliated with Strava, Inc.",
+      "nonCommercial": "Non-commercial open source project. Your Strava data is never sold or shared.",
+      "copyright": "© 2026 StrivPath contributors"
+    },
     "problem": {
       "heading": {
         "line1Intro": "Strava is great at recording",
