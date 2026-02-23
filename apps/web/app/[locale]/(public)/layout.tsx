@@ -1,3 +1,5 @@
+import { MotionProvider } from '@/components/motion-provider';
+
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <MotionProvider>{children}</MotionProvider>;
 }

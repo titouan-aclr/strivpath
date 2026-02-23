@@ -68,12 +68,14 @@ export function StatsSection() {
   ];
 
   return (
-    <section id="stats" className="bg-background py-24 md:py-32">
+    <section id="stats" aria-labelledby="stats-heading" className="scroll-mt-28 bg-background py-24 md:py-32">
       <div className="mx-auto max-w-6xl px-6">
         <BlurFade delay={0} inView>
           <div className="mb-16 text-center">
             <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-primary">{t('sectionLabel')}</p>
-            <h2 className="text-3xl font-bold md:text-4xl">{t('heading')}</h2>
+            <h2 id="stats-heading" className="text-3xl font-bold md:text-4xl">
+              {t('heading')}
+            </h2>
           </div>
         </BlurFade>
 
