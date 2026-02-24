@@ -792,6 +792,11 @@
       }
     }
   },
+  "legal": {
+    "legalNotice": "Legal Notice",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
   "strava": {
     "poweredBy": { "alt": "Powered by Strava" },
     "viewOnStrava": { "label": "View on Strava", "ariaLabel": "View this activity on Strava" },
