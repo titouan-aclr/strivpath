@@ -24,13 +24,15 @@ describe('LegalLinksFooter', () => {
     mockGetLegalLinks.mockReset();
   });
 
-  it('renders all three legal links with correct hrefs and target="_blank"', () => {
+  it('renders a <footer> landmark with all three legal links', () => {
     mockGetLegalLinks.mockReturnValue({
       legalNotice: 'https://example.com/legal-notice',
       privacy: 'https://example.com/strivpath/privacy',
       terms: 'https://example.com/strivpath/terms',
     });
     render(<LegalLinksFooter />);
+
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument();
 
     const legalNoticeLink = screen.getByRole('link', { name: 'Legal Notice' });
     expect(legalNoticeLink).toHaveAttribute('href', 'https://example.com/legal-notice');
