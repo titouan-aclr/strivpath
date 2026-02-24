@@ -16,7 +16,7 @@ export function LegalLinksFooter() {
   if (!links) return null;
 
   return (
-    <div className="flex items-center justify-center gap-3 py-6 text-xs text-muted-foreground">
+    <footer className="flex items-center justify-center gap-3 py-6 text-xs text-muted-foreground">
       <a
         href={links.legalNotice}
         target="_blank"
@@ -43,6 +43,6 @@ export function LegalLinksFooter() {
       >
         {t('terms')}
       </a>
-    </div>
+    </footer>
   );
 }
