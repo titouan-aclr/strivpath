@@ -124,6 +124,10 @@ services:
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
       # Legal pages base URL
       NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:?NEXT_PUBLIC_LEGAL_BASE_URL is required}
+      # Umami Analytics
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${DOMAIN}
     labels:
       # Traefik configuration
       - "traefik.enable=true"

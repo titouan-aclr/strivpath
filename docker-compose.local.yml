@@ -110,6 +110,10 @@ services:
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
       NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:-https://example.com}
+      # Umami Analytics
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${NEXT_PUBLIC_UMAMI_DOMAINS:-}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3000/api/health"]
       interval: 30s

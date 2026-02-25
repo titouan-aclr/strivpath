@@ -21,7 +21,6 @@ export default function Image() {
         fontFamily: 'sans-serif',
       }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={`${appUrl}/logo.svg`} width={220} height={220} alt="StrivPath logo" />
       <div
         style={{
