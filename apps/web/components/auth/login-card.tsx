@@ -20,7 +20,7 @@ export function LoginCard({ stravaAuthUrl, error }: LoginCardProps) {
   return (
     <BlurFade delay={0.1} duration={0.4}>
       <Card className="relative w-full max-w-sm overflow-hidden">
-        <BorderBeam size={120} duration={12} colorFrom="oklch(0.6216 0.198 32.23)" colorTo="oklch(0.78 0.12 45)" />
+        <BorderBeam size={120} duration={12} colorFrom="transparent" colorTo="var(--primary)" />
 
         <CardHeader className="items-center text-center">
           <div className="mb-2 rounded-lg bg-primary/10 p-2">

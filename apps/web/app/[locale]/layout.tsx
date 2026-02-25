@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -49,6 +50,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={inter.variable}>
+        {process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL && process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+          <Script
+            src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+            strategy="afterInteractive"
+          />
+        )}
         <ApolloWrapper>
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

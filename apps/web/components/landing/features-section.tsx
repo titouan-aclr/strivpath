@@ -109,11 +109,11 @@ export function FeaturesSection() {
                   )}
                   {feature.comingSoon && (
                     <>
-                      <BorderBeam duration={8} size={250} colorFrom="transparent" colorTo="var(--primary)" />
+                      <BorderBeam duration={10} size={180} colorFrom="transparent" colorTo="var(--primary)" />
                       <BorderBeam
                         duration={8}
                         delay={4}
-                        size={250}
+                        size={180}
                         colorFrom="transparent"
                         colorTo="var(--primary)"
                         reverse
