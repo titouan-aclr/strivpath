@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import { NextIntlClientProvider, hasLocale } from 'next-intl';
-import { getMessages } from 'next-intl/server';
-import { setRequestLocale } from 'next-intl/server';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { ApolloWrapper } from '@/lib/apollo-wrapper';
@@ -18,8 +18,13 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'StrivPath',
-  description: 'Advanced sports analytics and motivation platform for athletes',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'),
+  title: {
+    default: 'StrivPath',
+    template: '%s | StrivPath',
+  },
+  description:
+    'Set meaningful goals, follow your progress across every sport, and celebrate each milestone on your personal path.',
 };
 
 export function generateStaticParams() {
@@ -45,6 +50,14 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className={inter.variable}>
+        {process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL && process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID && (
+          <Script
+            src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL}
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID}
+            data-domains={process.env.NEXT_PUBLIC_UMAMI_DOMAINS || undefined}
+            strategy="afterInteractive"
+          />
+        )}
         <ApolloWrapper>
           <NextIntlClientProvider messages={messages}>
             <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>

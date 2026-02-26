@@ -1,6 +1,7 @@
 'use client';
 
 import { LayoutDashboard, Activity, Target, Award, Settings } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -31,7 +32,10 @@ export function Sidebar() {
   return (
     <aside className="hidden w-64 flex-col border-r bg-card md:flex">
       <div className="p-6">
-        <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold">
+          <Image src="/logo.svg" alt="StrivPath logo" width={28} height={28} className="h-7 w-7" />
+          {t('common.appName')}
+        </h1>
       </div>
 
       <Separator />

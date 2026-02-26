@@ -118,10 +118,16 @@ services:
       PORT: 3000
       # GraphQL URL for browser (external, via Traefik)
       NEXT_PUBLIC_GRAPHQL_URL: https://api.${DOMAIN}/graphql
+      # Public base URL of the application
+      NEXT_PUBLIC_APP_URL: https://${DOMAIN}
       # GraphQL URL for SSR (internal Docker network)
       GRAPHQL_URL_INTERNAL: http://api:3011/graphql
       # Legal pages base URL
       NEXT_PUBLIC_LEGAL_BASE_URL: ${NEXT_PUBLIC_LEGAL_BASE_URL:?NEXT_PUBLIC_LEGAL_BASE_URL is required}
+      # Umami Analytics
+      NEXT_PUBLIC_UMAMI_SCRIPT_URL: ${NEXT_PUBLIC_UMAMI_SCRIPT_URL:-}
+      NEXT_PUBLIC_UMAMI_WEBSITE_ID: ${NEXT_PUBLIC_UMAMI_WEBSITE_ID:-}
+      NEXT_PUBLIC_UMAMI_DOMAINS: ${DOMAIN}
     labels:
       # Traefik configuration
       - "traefik.enable=true"

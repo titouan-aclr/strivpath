@@ -4,6 +4,127 @@
     "loading": "Loading...",
     "error": "An error occurred"
   },
+  "landing": {
+    "meta": {
+      "title": "StrivPath — Track your athletic goals",
+      "description": "Set meaningful goals, follow your progress across every sport, and celebrate each milestone on your personal path."
+    },
+    "header": {
+      "features": "Features",
+      "howItWorks": "How it works",
+      "openSource": "Open Source",
+      "getStarted": "Get Started",
+      "openDashboard": "Open Dashboard",
+      "openMenu": "Open navigation menu",
+      "mobileNavTitle": "Navigation"
+    },
+    "hero": {
+      "badge": "✦ For Strava athletes who want more",
+      "headline1": "Stop logging workouts.",
+      "headline2": "Start tracking progress.",
+      "subtitle": "Set meaningful goals, follow your journey across every sport, and celebrate each milestone on your personal path.",
+      "cta": "Start your path",
+      "ctaAuthenticated": "Open Dashboard",
+      "ctaSecondary": "See how it works ↓",
+      "sports": "🏃 Running · 🚴 Cycling · 🏊 Swimming"
+    },
+    "howItWorks": {
+      "sectionLabel": "How it works",
+      "heading": "From Strava to your goals in 3 steps",
+      "step1": {
+        "title": "Connect Strava",
+        "description": "Log in with your Strava account. We securely import your activities — no manual entry needed."
+      },
+      "step2": {
+        "title": "Set your goals",
+        "description": "Choose a target: distance, duration, elevation. Set a deadline and let StrivPath do the tracking."
+      },
+      "step3": {
+        "title": "Celebrate progress",
+        "description": "Watch your goals advance with every Strava sync. Earn badges and celebrate milestones as you go."
+      }
+    },
+    "features": {
+      "sectionLabel": "Features",
+      "heading": "Everything you need to reach your goals",
+      "subheading": "Built for athletes who want to turn their Strava data into real progress.",
+      "card1": {
+        "title": "Goal Tracking",
+        "description": "Set meaningful targets and watch your progress build week after week."
+      },
+      "card2": {
+        "title": "Progress Insights",
+        "description": "Visualize your performance trends over time. Spot when you're peaking and when to rest."
+      },
+      "card3": {
+        "title": "Multi-Sport Support",
+        "description": "Running, cycling, swimming — all your sports unified in one personal dashboard."
+      },
+      "card4": {
+        "title": "Achievements",
+        "description": "Earn badges for milestones, consistency, and personal records. Every effort worth celebrating.",
+        "comingSoon": "Coming soon"
+      }
+    },
+    "stats": {
+      "sectionLabel": "By the numbers",
+      "heading": "Built around what matters",
+      "stat1": { "label": "Goal types to set" },
+      "stat2": { "label": "Sports tracked in one place" },
+      "stat3": { "label": "Milestones to unlock" }
+    },
+    "goalPreview": {
+      "sectionLabel": "Goal tracking",
+      "heading": "Set it. Track it. Celebrate it.",
+      "subheading": "Define your target, and watch every Strava activity contribute to it. Progress updates automatically — no manual entry, no friction.",
+      "bullet1": "Distance, duration, elevation, or frequency",
+      "bullet2": "Weekly, monthly, or yearly periods",
+      "bullet3": "Automatic progress with every sync",
+      "goalTitle": "Run 100 km this month",
+      "goalSport": "🏃 Running",
+      "goalProgress": "74 km of 100 km",
+      "goalDaysLeft": "8 days left",
+      "chartLabel": "Weekly distance (km)"
+    },
+    "cta": {
+      "heading": "Your next milestone is waiting.",
+      "cta": "Start your path →",
+      "ctaAuthenticated": "Open Dashboard →",
+      "reassurance": "Free · Open source · Non-commercial · Your data stays yours"
+    },
+    "footer": {
+      "tagline": "Built for athletes who want to grow, not compete.",
+      "github": "GitHub",
+      "legalNotice": "Legal Notice",
+      "privacy": "Privacy Policy",
+      "terms": "Terms",
+      "disclaimer": "Not affiliated with Strava, Inc.",
+      "nonCommercial": "Non-commercial open source project. Your Strava data is never sold or shared.",
+      "copyright": "© 2026 StrivPath contributors"
+    },
+    "problem": {
+      "heading": {
+        "line1Intro": "Strava is great at recording",
+        "line1Emphasis": "what you did.",
+        "line2Intro": "But what about",
+        "line2Emphasis": "where you're going?"
+      },
+      "without": {
+        "title": "Without StrivPath",
+        "headline": "Lots of logged activities with no sense of direction.",
+        "point1": "Sessions logged, purpose unknown",
+        "point2": "Numbers without narrative",
+        "point3": "No milestone to celebrate"
+      },
+      "with": {
+        "title": "With StrivPath",
+        "headline": "Goals that give meaning to every session you do.",
+        "point1": "Every activity moves you forward",
+        "point2": "Progress visible in real time",
+        "point3": "Milestones worth celebrating"
+      }
+    }
+  },
   "home": {
     "title": "StrivPath",
     "usersFromApi": "Users from GraphQL API:",
@@ -254,6 +375,7 @@
       "title": "Welcome to StrivPath",
       "description": "Connect your Strava account to start tracking your progress and achieving your goals",
       "connectButton": "Connect with Strava",
+      "oauthNote": "Secure OAuth connection · Read-only access to your activities",
       "errors": {
         "unauthorized": "You must be logged in to access this page.",
         "session_expired": "Your session has expired. Please log in again.",
@@ -670,6 +792,11 @@
         }
       }
     }
+  },
+  "legal": {
+    "legalNotice": "Legal Notice",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
   },
   "strava": {
     "poweredBy": { "alt": "Powered by Strava" },
