@@ -1,10 +1,9 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ModeToggle } from '@/components/mode-toggle';
-import { LanguageSwitcher } from '@/components/language-switcher';
 import { AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
+import { PublicPageHeader } from '@/components/layout/public-page-header';
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -19,14 +18,8 @@ export default async function AuthErrorPage({ params, searchParams }: Props) {
   const t = await getTranslations('auth.error');
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="flex items-center justify-between p-6">
-        <h1 className="text-2xl font-bold">StrivPath</h1>
-        <div className="flex items-center gap-2">
-          <LanguageSwitcher />
-          <ModeToggle />
-        </div>
-      </header>
+    <div className="bg-pattern-topo-subtle flex min-h-screen flex-col">
+      <PublicPageHeader />
 
       <main className="flex flex-1 items-center justify-center px-6">
         <Card className="w-full max-w-md">

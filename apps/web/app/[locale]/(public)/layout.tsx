@@ -1,6 +1,5 @@
-import { redirectIfAuthenticated } from '@/lib/auth/dal';
+import { MotionProvider } from '@/components/motion-provider';
 
-export default async function PublicLayout({ children }: { children: React.ReactNode }) {
-  await redirectIfAuthenticated();
-  return <>{children}</>;
+export default function PublicLayout({ children }: { children: React.ReactNode }) {
+  return <MotionProvider>{children}</MotionProvider>;
 }

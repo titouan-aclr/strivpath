@@ -29,6 +29,12 @@
   --color-ring: var(--ring);
   --color-accent-blue: var(--accent-blue);
   --color-strava-brand: var(--strava-brand);
+  --animate-gradient: gradient 8s linear infinite;
+  @keyframes gradient {
+  to {
+    background-position: var(--bg-size, 300%) 0;
+    }
+  }
 }
 
 :root {
@@ -80,6 +86,9 @@
 }
 
 @layer base {
+  html {
+    scroll-behavior: smooth;
+  }
   * {
     @apply border-border outline-ring/50;
   }
@@ -143,7 +152,7 @@
   background-image: url('/topographic-pattern.svg');
   background-size: 800px 800px;
   background-repeat: repeat;
-  opacity: 0.2;
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
   filter: grayscale(100%) brightness(0);
@@ -151,7 +160,7 @@
 
 .dark .bg-pattern-topo-subtle::before {
   filter: invert(1);
-  opacity: 0.12;
+  opacity: 0.04;
 }
 
 .bg-pattern-topo-subtle > * {
@@ -171,7 +180,7 @@
   background-size: 100% auto;
   background-repeat: no-repeat;
   background-position: bottom center;
-  opacity: 0.2;
+  opacity: 0.06;
   pointer-events: none;
   z-index: 0;
   filter: grayscale(100%) brightness(0);
@@ -179,12 +188,97 @@
 
 .dark .bg-pattern-topo-bottom::before {
   filter: invert(1);
-  opacity: 0.12;
+  opacity: 0.04;
 }
 
 .bg-pattern-topo-bottom > * {
   position: relative;
   z-index: 1;
+}
+
+/* ===== Landing page — topo glow (hero section mouse tracking) ===== */
+
+.topo-glow-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.topo-base-layer {
+  position: absolute;
+  inset: 0;
+  background-image: url('/topographic-pattern.svg');
+  background-size: 800px 800px;
+  background-repeat: repeat;
+  opacity: 0.06;
+  pointer-events: none;
+  filter: grayscale(100%) brightness(0);
+  z-index: 0;
+}
+
+.dark .topo-base-layer {
+  filter: invert(1);
+  opacity: 0.04;
+}
+
+.topo-glow-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: var(--primary);
+  opacity: 0.7;
+  mask-image: url('/topographic-pattern.svg'),
+    radial-gradient(
+      circle 250px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+      black 0%,
+      transparent 100%
+    );
+  mask-size: 800px 800px, 100% 100%;
+  mask-repeat: repeat, no-repeat;
+  mask-composite: intersect;
+  -webkit-mask-image: url('/topographic-pattern.svg'),
+    radial-gradient(
+      circle 250px at var(--mouse-x, -1000px) var(--mouse-y, -1000px),
+      black 0%,
+      transparent 100%
+    );
+  -webkit-mask-size: 800px 800px, 100% 100%;
+  -webkit-mask-repeat: repeat, no-repeat;
+  -webkit-mask-composite: source-in;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.dark .topo-glow-overlay {
+  opacity: 0.5;
+}
+
+@media (hover: none) {
+  .topo-glow-overlay {
+    mask-image: url('/topographic-pattern.svg'),
+      radial-gradient(circle 280px at var(--pulse-x, 30%) var(--pulse-y, 50%), black 0%, transparent 100%);
+    -webkit-mask-image: url('/topographic-pattern.svg'),
+      radial-gradient(circle 280px at var(--pulse-x, 30%) var(--pulse-y, 50%), black 0%, transparent 100%);
+    animation: topo-pulse-1 5s ease-in-out infinite;
+  }
+
+  @keyframes topo-pulse-1 {
+    0%, 100% {
+      opacity: 0.2;
+    }
+    33% {
+      opacity: 0.45;
+    }
+    66% {
+      opacity: 0.3;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-pulse-slow,
+  .progress-shimmer::after,
+  .topo-glow-overlay {
+    animation: none;
+  }
 }
 
 @layer components {

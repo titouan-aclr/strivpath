@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -21,7 +22,10 @@ export function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col bg-pattern-topo-subtle">
       <header className="flex items-center justify-between p-6">
-        <h1 className="text-2xl font-bold">{t('common.appName')}</h1>
+        <h1 className="flex items-center gap-2 text-xl font-bold">
+          <Image src="/logo.svg" alt="StrivPath logo" width={28} height={28} className="h-7 w-7" />
+          {t('common.appName')}
+        </h1>
         <ModeToggle />
       </header>
 
