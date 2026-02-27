@@ -186,4 +186,23 @@ describe('StatsGrid', () => {
 
     expect(screen.getByText(/stats.elapsed/)).toBeInTheDocument();
   });
+
+  it('should render primary stats in a 2-column grid on mobile', () => {
+    const { container } = render(<StatsGrid activity={baseActivity} detailsLoading={false} />);
+
+    const primaryGrid = container.querySelector('.grid-cols-2.lg\\:grid-cols-4');
+    expect(primaryGrid).toBeInTheDocument();
+  });
+
+  it('should render secondary stats in a 2-column grid on mobile', () => {
+    const activityWithStats = {
+      ...baseActivity,
+      averageHeartrate: 145,
+      maxHeartrate: 165,
+    };
+    const { container } = render(<StatsGrid activity={activityWithStats} detailsLoading={false} />);
+
+    const secondaryGrid = container.querySelector('.grid-cols-2.lg\\:grid-cols-3');
+    expect(secondaryGrid).toBeInTheDocument();
+  });
 });

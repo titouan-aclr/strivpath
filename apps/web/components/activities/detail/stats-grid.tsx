@@ -97,14 +97,14 @@ export function StatsGrid({ activity, detailsLoading }: StatsGridProps) {
 
   return (
     <div className="space-y-6">
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {primaryStats.map(stat => (
           <StatCard key={stat.label} {...stat} highlight />
         ))}
       </div>
 
       {(secondaryStats.length > 0 || showCaloriesSkeleton) && (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
           {secondaryStats.map(stat => (
             <StatCard key={stat.label} {...stat} />
           ))}
