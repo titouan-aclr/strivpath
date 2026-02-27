@@ -57,7 +57,7 @@ export function SplitsChart({ activity }: SplitsChartProps) {
             accessibilityLayer
             data={chartData}
             margin={{
-              left: 12,
+              left: 0,
               right: 12,
               top: 12,
             }}
@@ -68,12 +68,14 @@ export function SplitsChart({ activity }: SplitsChartProps) {
               tickLine={false}
               axisLine={false}
               tickMargin={8}
+              padding={{ left: 0 }}
               tickFormatter={value => `${value}km`}
             />
             <YAxis
+              width={48}
               tickLine={false}
               axisLine={false}
-              tickMargin={8}
+              tickMargin={4}
               tickFormatter={(value: number) => (isPaceMetric ? formatPaceValue(value) : `${value.toFixed(1)}`)}
             />
             <ChartTooltip
