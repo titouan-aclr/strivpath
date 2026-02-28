@@ -144,6 +144,35 @@ describe('GoalDetailHeader', () => {
 
       expect(screen.getByRole('button', { name: /actions menu/i })).toBeInTheDocument();
     });
+
+    it('should render title with mobile-friendly font size', () => {
+      const goal = createMockGoal({ title: 'Test Goal Title' });
+      render(<GoalDetailHeader goal={goal} />);
+
+      const title = screen.getByRole('heading', { level: 1 });
+      expect(title).toHaveClass('text-2xl');
+    });
+
+    it('should render status badge inside the content area, not alongside the icon', () => {
+      const goal = createMockGoal();
+      const { container } = render(<GoalDetailHeader goal={goal} />);
+
+      const outerFlex = container.querySelector('.flex.items-start.gap-4');
+      const contentArea = outerFlex?.querySelector('.flex-1');
+      const badge = contentArea?.querySelector('[data-testid="status-badge"]');
+      expect(badge).toBeInTheDocument();
+    });
+
+    it('should render actions menu button outside the content area at top level', () => {
+      const goal = createMockGoal();
+      const { container } = render(<GoalDetailHeader goal={goal} />);
+
+      const outerFlex = container.querySelector('.flex.items-start.gap-4');
+      const contentArea = outerFlex?.querySelector('.flex-1');
+      const menuButton = screen.getByRole('button', { name: /actions menu/i });
+      expect(menuButton).toBeInTheDocument();
+      expect(contentArea?.contains(menuButton)).toBe(false);
+    });
   });
 
   describe('edit action', () => {
