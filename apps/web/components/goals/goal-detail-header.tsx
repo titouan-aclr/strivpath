@@ -61,22 +61,21 @@ export function GoalDetailHeader({ goal }: GoalDetailHeaderProps) {
   return (
     <>
       <div className="flex items-start gap-4">
-        <div className="p-3 rounded-lg bg-primary/10">
+        <div className="shrink-0 p-3 rounded-lg bg-primary/10">
           <SportIcon className="h-8 w-8 text-primary" />
         </div>
 
-        <div className="flex-1">
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-3xl font-bold">{goal.title}</h1>
+        <div className="flex-1 min-w-0 space-y-1.5">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h1 className="text-2xl sm:text-3xl font-bold w-full sm:w-auto">{goal.title}</h1>
             <GoalStatusBadge status={goal.status} />
           </div>
-
           {goal.description && <p className="text-muted-foreground">{goal.description}</p>}
         </div>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
               <MoreVertical className="h-4 w-4" />
               <span className="sr-only">{t('actions.menu')}</span>
             </Button>

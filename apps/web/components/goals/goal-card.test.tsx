@@ -196,4 +196,11 @@ describe('GoalCard', () => {
     expect(card).toBeInTheDocument();
     expect(card).toHaveClass('hover:border-primary/50', 'cursor-pointer');
   });
+
+  it('should have min-w-0 on the icon+title wrapper to allow title truncation', () => {
+    const { container } = render(<GoalCard goal={mockGoal} onArchive={mockOnArchive} onDelete={mockOnDelete} />);
+
+    const wrapper = container.querySelector('.flex.items-center.gap-3.flex-1.min-w-0');
+    expect(wrapper).toBeInTheDocument();
+  });
 });
