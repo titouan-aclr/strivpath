@@ -1,6 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
+import { cn } from '@/lib/utils';
 
 interface Step {
   path: string;
@@ -17,26 +18,41 @@ export function StepProgressBar({ steps, currentStepIndex }: StepProgressBarProp
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-center">
-        {steps.map((step, index) => (
-          <div key={step.path} className="flex items-center">
+      <div className="flex w-full max-w-xs items-center mx-auto sm:max-w-sm">
+        {steps.flatMap((step, index) => {
+          const isActive = index <= currentStepIndex;
+          const isCompleted = index < currentStepIndex;
+
+          const circle = (
             <div
-              className={`flex h-12 w-12 items-center justify-center rounded-full text-sm font-medium transition-colors duration-200 relative z-10 ${
-                index <= currentStepIndex ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'
-              }`}
+              key={`step-${step.path}`}
+              className={cn(
+                'flex shrink-0 items-center justify-center rounded-full font-medium transition-colors duration-200',
+                'h-8 w-8 text-xs sm:h-10 sm:w-10 sm:text-sm',
+                isActive ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground',
+              )}
             >
               {index + 1}
             </div>
-            {index < steps.length - 1 && (
+          );
+
+          if (index < steps.length - 1) {
+            return [
+              circle,
               <div
-                className={`h-2 w-32 -mx-1 transition-colors duration-300 ${
-                  index < currentStepIndex ? 'bg-primary' : 'bg-muted'
-                }`}
-              />
-            )}
-          </div>
-        ))}
+                key={`connector-${step.path}`}
+                className={cn(
+                  'flex-1 h-1.5 sm:h-2 transition-colors duration-300',
+                  isCompleted ? 'bg-primary' : 'bg-muted',
+                )}
+              />,
+            ];
+          }
+
+          return [circle];
+        })}
       </div>
+
       {currentStepIndex >= 0 && currentStepIndex < steps.length && (
         <p className="text-center text-sm text-muted-foreground">{t(steps[currentStepIndex].label)}</p>
       )}

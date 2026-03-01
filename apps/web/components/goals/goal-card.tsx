@@ -43,7 +43,7 @@ export function GoalCard({ goal, onArchive, onDelete, disabled }: GoalCardProps)
       <Link href={`/goals/${goal.id}`} className="block">
         <Card className={cn('transition-all hover:shadow-lg cursor-pointer', statusColors.hoverBorder)}>
           <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
-            <div className="flex items-center gap-3 flex-1">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
               <div className={cn('p-2 rounded-lg', statusColors.bgSubtle)}>
                 <SportIcon className={cn('h-5 w-5', statusColors.text)} aria-hidden="true" />
               </div>

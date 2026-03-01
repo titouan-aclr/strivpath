@@ -47,4 +47,22 @@ describe('ActivityDetailSkeleton', () => {
     const mainContainer = container.querySelector('.space-y-6');
     expect(mainContainer).toBeInTheDocument();
   });
+
+  it('should render stat grids with 2-column mobile layout', () => {
+    const { container } = render(<ActivityDetailSkeleton />);
+
+    const primaryGrid = container.querySelector('.grid-cols-2.lg\\:grid-cols-4');
+    const secondaryGrid = container.querySelector('.grid-cols-2.lg\\:grid-cols-3');
+    expect(primaryGrid).toBeInTheDocument();
+    expect(secondaryGrid).toBeInTheDocument();
+  });
+
+  it('should render badge skeleton inside the content area, not alongside the icon', () => {
+    const { container } = render(<ActivityDetailSkeleton />);
+
+    const headerFlex = container.querySelector('.flex.items-start.gap-4');
+    const contentArea = headerFlex?.querySelector('.flex-1');
+    const badgeSkeleton = contentArea?.querySelector('.rounded-full');
+    expect(badgeSkeleton).toBeInTheDocument();
+  });
 });

@@ -106,14 +106,14 @@ export function GoalsPageContent() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
           <p className="text-muted-foreground mt-2">{t('description')}</p>
         </div>
-        <Button asChild size="lg">
+        <Button asChild size="default" className="shrink-0">
           <Link href="/goals/new">
-            <Plus className="mr-2 h-5 w-5" />
+            <Plus className="mr-2 h-4 w-4" />
             {t('newGoal')}
           </Link>
         </Button>

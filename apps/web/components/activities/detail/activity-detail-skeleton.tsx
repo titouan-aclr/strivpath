@@ -5,21 +5,25 @@ export function ActivityDetailSkeleton() {
   return (
     <div className="space-y-6" role="status" aria-live="polite" aria-label="Loading activity details">
       <div className="flex items-start gap-4">
-        <Skeleton className="h-16 w-16 rounded-lg flex-shrink-0" />
+        <Skeleton className="h-16 w-16 rounded-lg shrink-0" />
 
-        <div className="flex-1 space-y-3">
-          <Skeleton className="h-8 w-3/4" />
+        <div className="flex-1 min-w-0 space-y-2">
+          <div className="flex flex-col sm:flex-row sm:justify-between gap-2">
+            <Skeleton className="h-8 w-3/4" />
+            <div className="flex items-center gap-2 shrink-0">
+              <Skeleton className="h-6 w-16 rounded-full" />
+              <Skeleton className="h-8 w-28 rounded-lg" />
+            </div>
+          </div>
 
           <div className="flex flex-wrap gap-3">
             <Skeleton className="h-4 w-32" />
             <Skeleton className="h-4 w-24" />
           </div>
         </div>
-
-        <Skeleton className="h-6 w-20 rounded-full" />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         {Array.from({ length: 4 }, (_, i) => (
           <Card key={`primary-${i}`}>
             <CardHeader className="pb-2">
@@ -36,7 +40,7 @@ export function ActivityDetailSkeleton() {
         ))}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-3 grid-cols-2 lg:grid-cols-3">
         {Array.from({ length: 3 }, (_, i) => (
           <Card key={`secondary-${i}`}>
             <CardHeader className="pb-2">

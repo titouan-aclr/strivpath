@@ -68,7 +68,7 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="container mx-auto p-4 sm:p-6 space-y-6">
       {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={200} />}
 
       <Button asChild variant="ghost" size="sm">

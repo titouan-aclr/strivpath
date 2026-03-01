@@ -1,9 +1,7 @@
 'use client';
 
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { useTranslations } from 'next-intl';
-import { ModeToggle } from '@/components/mode-toggle';
+import { PublicPageHeader } from '@/components/layout/public-page-header';
 import { StepProgressBar } from '@/components/onboarding/step-progress-bar';
 
 const STEPS = [
@@ -13,7 +11,6 @@ const STEPS = [
 ];
 
 export function OnboardingLayout({ children }: { children: React.ReactNode }) {
-  const t = useTranslations();
   const pathname = usePathname();
 
   const pathnameWithoutLocale = pathname.replace(/^\/(en|fr)/, '');
@@ -21,13 +18,7 @@ export function OnboardingLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col bg-pattern-topo-subtle">
-      <header className="flex items-center justify-between p-6">
-        <h1 className="flex items-center gap-2 text-xl font-bold">
-          <Image src="/logo.svg" alt="StrivPath logo" width={28} height={28} className="h-7 w-7" />
-          {t('common.appName')}
-        </h1>
-        <ModeToggle />
-      </header>
+      <PublicPageHeader />
 
       <div className="mx-auto w-full max-w-5xl px-6 py-4">
         <StepProgressBar steps={STEPS} currentStepIndex={currentStepIndex} />

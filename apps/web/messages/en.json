@@ -139,6 +139,8 @@
     "goals": "Goals",
     "badges": "Badges",
     "settings": "Settings",
+    "openMenu": "Open navigation menu",
+    "mobileNavTitle": "Navigation",
     "sports": {
       "title": "Sports",
       "running": "Running",
@@ -673,6 +675,26 @@
         "description": "The goal you're looking for doesn't exist or has been deleted.",
         "goBack": "Back to Goals"
       }
+    }
+  },
+  "badges": {
+    "meta": {
+      "title": "Badges - StrivPath",
+      "description": "Your achievements and rewards"
+    },
+    "title": "Badges",
+    "subtitle": "Your achievements and rewards",
+    "comingSoon": {
+      "badge": "Coming soon",
+      "heading": "Achievements are on the way",
+      "description": "Earn badges for distance milestones, training consistency, and personal records. Every effort worth celebrating.",
+      "categories": {
+        "distance": "Distance milestones",
+        "consistency": "Consistency streaks",
+        "records": "Personal records",
+        "elevation": "Elevation challenges"
+      },
+      "cta": "Set a goal in the meantime"
     }
   },
   "settings": {

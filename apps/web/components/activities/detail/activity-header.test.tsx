@@ -116,4 +116,20 @@ describe('ActivityHeader', () => {
     expect(children?.[0]?.textContent).toBe('sportTypes.run');
     expect(children?.[1]?.tagName).toBe('A');
   });
+
+  it('should render badge and strava link inside the content area, not alongside the icon', () => {
+    const { container } = render(<ActivityHeader activity={mockActivity} />);
+
+    const outerFlex = container.querySelector('.flex.items-start.gap-4');
+    const contentArea = outerFlex?.querySelector('.flex-1');
+    const badgeContainer = contentArea?.querySelector('.flex.items-center.gap-2');
+    expect(badgeContainer).toBeInTheDocument();
+  });
+
+  it('should render title with mobile-friendly font size', () => {
+    render(<ActivityHeader activity={mockActivity} />);
+
+    const title = screen.getByRole('heading', { level: 1 });
+    expect(title).toHaveClass('text-2xl');
+  });
 });
