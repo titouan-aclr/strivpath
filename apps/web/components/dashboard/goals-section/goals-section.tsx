@@ -45,11 +45,11 @@ export function GoalsSection({ primaryGoal, secondaryGoals, className }: GoalsSe
         </Button>
       </div>
 
-      <div className="grid gap-4">
+      <div className="grid grid-cols-1 gap-4">
         {primaryGoal && <PrimaryGoalCard goal={primaryGoal} />}
 
         {secondaryGoals.length > 0 && (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             {secondaryGoals.map(goal => (
               <SecondaryGoalCard key={goal.id} goal={goal} />
             ))}
