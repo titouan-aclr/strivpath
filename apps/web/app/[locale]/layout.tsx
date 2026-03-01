@@ -60,7 +60,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         )}
         <ApolloWrapper>
           <NextIntlClientProvider messages={messages}>
-            <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+            <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
               {children}
               <Toaster />
             </ThemeProvider>
