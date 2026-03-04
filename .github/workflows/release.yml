@@ -197,6 +197,8 @@ jobs:
             ${{ env.WEB_IMAGE }}:latest
           build-args: |
             NEXT_PUBLIC_GRAPHQL_URL=https://api.strivpath.${{ secrets.MY_DOMAIN }}/graphql
+            NEXT_PUBLIC_APP_URL=https://strivpath.${{ secrets.MY_DOMAIN }}
+            NEXT_PUBLIC_LEGAL_BASE_URL=https://${{ secrets.MY_DOMAIN }}
           cache-from: type=gha,scope=web
           cache-to: type=gha,mode=max,scope=web
           platforms: linux/amd64,linux/arm64

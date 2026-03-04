@@ -7,6 +7,21 @@ import cookieParser from 'cookie-parser';
 import { generateTestAccessToken } from './test-db';
 import { SportType } from '../src/user-preferences/enums/sport-type.enum';
 
+const nextMonthStart = (): string => {
+  const d = new Date();
+  const next = new Date(d.getFullYear(), d.getMonth() + 1, 1);
+  const y = next.getFullYear();
+  const m = String(next.getMonth() + 1).padStart(2, '0');
+  return `${y}-${m}-01`;
+};
+
+const nextMonthEnd = (): Date => {
+  const d = new Date();
+  return new Date(d.getFullYear(), d.getMonth() + 2, 0);
+};
+
+const nextMonthDate = (day: number): Date => new Date(new Date().getFullYear(), new Date().getMonth() + 1, day);
+
 describe('GoalResolver (E2E Authenticated)', () => {
   let app: INestApplication;
   let prisma: PrismaService;
@@ -115,7 +130,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
                 targetType: DISTANCE
                 targetValue: 50
                 periodType: MONTHLY
-                startDate: "2026-02-01"
+                startDate: "${nextMonthStart()}"
                 sportType: RUN
               }) {
                 id
@@ -293,7 +308,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
                 targetType: DISTANCE
                 targetValue: 50
                 periodType: MONTHLY
-                startDate: "2026-02-01"
+                startDate: "${nextMonthStart()}"
               }) {
                 id
               }
@@ -422,7 +437,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
             mutation {
               createGoalFromTemplate(input: {
                 templateId: ${template1Id}
-                startDate: "2026-02-01"
+                startDate: "${nextMonthStart()}"
               }) {
                 id
                 title
@@ -446,7 +461,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
             mutation {
               createGoalFromTemplate(input: {
                 templateId: ${template1Id}
-                startDate: "2026-02-01"
+                startDate: "${nextMonthStart()}"
                 customTitle: "My Custom Goal"
               }) {
                 id
@@ -471,7 +486,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
             mutation {
               createGoalFromTemplate(input: {
                 templateId: ${template2Id}
-                startDate: "2026-02-01"
+                startDate: "${nextMonthStart()}"
               }) {
                 id
                 title
@@ -622,8 +637,8 @@ describe('GoalResolver (E2E Authenticated)', () => {
           targetType: 'DISTANCE',
           targetValue: 50,
           periodType: 'MONTHLY',
-          startDate: new Date('2026-02-01'),
-          endDate: new Date('2026-02-28'),
+          startDate: nextMonthDate(1),
+          endDate: nextMonthEnd(),
           sportType: 'RUN',
           status: 'ACTIVE',
           currentValue: 0,
@@ -1376,7 +1391,7 @@ describe('GoalResolver (E2E Authenticated)', () => {
                 targetType: DISTANCE
                 targetValue: 25
                 periodType: MONTHLY
-                startDate: "2026-06-01"
+                startDate: "${nextMonthStart()}"
               }) {
                 id
                 status
@@ -1400,8 +1415,8 @@ describe('GoalResolver (E2E Authenticated)', () => {
           movingTime: 3600,
           elapsedTime: 3600,
           totalElevationGain: 50,
-          startDate: new Date('2026-06-05'),
-          startDateLocal: new Date('2026-06-05'),
+          startDate: nextMonthDate(5),
+          startDateLocal: nextMonthDate(5),
           timezone: '(GMT+00:00) UTC',
           averageSpeed: 2.78,
           maxSpeed: 3.5,
@@ -1430,8 +1445,8 @@ describe('GoalResolver (E2E Authenticated)', () => {
           movingTime: 5400,
           elapsedTime: 5400,
           totalElevationGain: 50,
-          startDate: new Date('2026-06-12'),
-          startDateLocal: new Date('2026-06-12'),
+          startDate: nextMonthDate(12),
+          startDateLocal: nextMonthDate(12),
           timezone: '(GMT+00:00) UTC',
           averageSpeed: 2.78,
           maxSpeed: 3.5,
