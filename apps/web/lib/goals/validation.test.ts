@@ -10,6 +10,12 @@ const mockT = vi.fn((key: string, values?: Record<string, string | number>) => {
   return key;
 });
 
+const tomorrow = (): Date => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d;
+};
+
 const createMockFormData = (overrides: Partial<GoalFormData> = {}): GoalFormData => ({
   title: 'Test Goal',
   description: 'Test description',
@@ -18,7 +24,7 @@ const createMockFormData = (overrides: Partial<GoalFormData> = {}): GoalFormData
   periodType: GoalPeriodType.Monthly,
   sportType: SportType.Run,
   isRecurring: false,
-  startDate: new Date('2026-06-01'),
+  startDate: tomorrow(),
   endDate: null,
   ...overrides,
 });
@@ -191,7 +197,7 @@ describe('validateGoalForm', () => {
     const formData = createMockFormData({
       title: 'Valid Goal',
       targetValue: 50,
-      startDate: new Date('2026-06-01'),
+      startDate: tomorrow(),
     });
     const errors = validateGoalForm(formData, mockT);
     expect(errors).toEqual({});
@@ -216,7 +222,7 @@ describe('validateGoalForm', () => {
     const formData = createMockFormData({
       title: '',
       targetValue: 100,
-      startDate: new Date('2026-06-01'),
+      startDate: tomorrow(),
     });
     const errors = validateGoalForm(formData, mockT);
     expect(errors.title).toBeTruthy();

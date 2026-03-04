@@ -18,9 +18,12 @@ describe('Goal Auto-Update on Activity Sync', () => {
   let prisma: ReturnType<typeof getTestPrismaClient>;
 
   const getTestDates = () => {
-    const startOfMonth = new Date('2026-06-01T00:00:00.000Z');
-    const endOfMonth = new Date('2026-06-30T23:59:59.999Z');
-    const testActivityDate = '2026-06-15T10:00:00.000Z';
+    const now = new Date();
+    const nextMonthYear = now.getUTCMonth() === 11 ? now.getUTCFullYear() + 1 : now.getUTCFullYear();
+    const nextMonth = (now.getUTCMonth() + 1) % 12;
+    const startOfMonth = new Date(Date.UTC(nextMonthYear, nextMonth, 1, 0, 0, 0, 0));
+    const endOfMonth = new Date(Date.UTC(nextMonthYear, nextMonth + 1, 0, 23, 59, 59, 999));
+    const testActivityDate = new Date(Date.UTC(nextMonthYear, nextMonth, 15, 10, 0, 0)).toISOString();
 
     return {
       startOfMonth,
@@ -30,7 +33,7 @@ describe('Goal Auto-Update on Activity Sync', () => {
   };
 
   const createMockStravaActivity = (id: number, overrides?: Partial<StravaActivitySummary>): StravaActivitySummary => {
-    const defaultDate = '2026-06-15T10:00:00.000Z';
+    const { testActivityDate: defaultDate } = getTestDates();
     const startDate = overrides?.start_date || defaultDate;
 
     return {
@@ -308,8 +311,9 @@ describe('Goal Auto-Update on Activity Sync', () => {
       data: { selectedSports: [SportType.RUN] },
     });
 
-    const lastMonthStart = new Date('2026-05-01T00:00:00.000Z');
-    const lastMonthEnd = new Date('2026-05-31T23:59:59.999Z');
+    const now = new Date();
+    const lastMonthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0, 0));
+    const lastMonthEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 0, 23, 59, 59, 999));
 
     const expiredGoal = await prisma.goal.create({
       data: {
@@ -327,7 +331,7 @@ describe('Goal Auto-Update on Activity Sync', () => {
       },
     });
 
-    const futureEnd = new Date('2026-08-31T23:59:59.999Z');
+    const futureEnd = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 4, 0, 23, 59, 59, 999));
 
     const activeGoal = await prisma.goal.create({
       data: {

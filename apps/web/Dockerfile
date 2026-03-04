@@ -13,6 +13,7 @@
 # Build-time arguments:
 #   - NEXT_PUBLIC_GRAPHQL_URL: GraphQL API endpoint for build
 #   - NEXT_PUBLIC_APP_URL: Public base URL of the app for build
+#   - NEXT_PUBLIC_LEGAL_BASE_URL: Base URL for legal pages
 #
 # Build command (from monorepo root):
 #   docker build -f apps/web/Dockerfile \
@@ -37,6 +38,9 @@ ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
 
 ARG NEXT_PUBLIC_APP_URL
 ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+
+ARG NEXT_PUBLIC_LEGAL_BASE_URL
+ENV NEXT_PUBLIC_LEGAL_BASE_URL=${NEXT_PUBLIC_LEGAL_BASE_URL}
 
 # Copy full monorepo source (node_modules and build artifacts excluded via .dockerignore)
 COPY . .
