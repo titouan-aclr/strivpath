@@ -8,7 +8,7 @@ import { StravaWebhookEvent } from './types/strava-webhook-event.interface';
 describe('StravaWebhookService', () => {
   let service: StravaWebhookService;
   let userService: { findByStravaId: jest.Mock; deleteAccount: jest.Mock };
-  let activityService: { deleteByStravaId: jest.Mock };
+  let activityService: { deleteByStravaId: jest.Mock; fetchAndStoreSingleActivity: jest.Mock };
 
   const VERIFY_TOKEN = 'test-verify-token';
 
@@ -19,6 +19,7 @@ describe('StravaWebhookService', () => {
 
   const mockActivityService = {
     deleteByStravaId: jest.fn(),
+    fetchAndStoreSingleActivity: jest.fn(),
   };
 
   const mockConfigService = {
@@ -95,7 +96,7 @@ describe('StravaWebhookService', () => {
       expect(userService.deleteAccount).not.toHaveBeenCalled();
     });
 
-    it('should not delete user for activity create events', async () => {
+    it('should not trigger deauthorization for activity create events', async () => {
       const activityEvent: StravaWebhookEvent = {
         aspect_type: 'create',
         event_time: 1234567890,
@@ -105,11 +106,14 @@ describe('StravaWebhookService', () => {
         subscription_id: 1,
         updates: {},
       };
+      userService.findByStravaId.mockResolvedValue({ id: 42 } as any);
+      activityService.fetchAndStoreSingleActivity.mockResolvedValue(undefined);
 
       await service.handleEvent(activityEvent);
 
       expect(userService.deleteAccount).not.toHaveBeenCalled();
       expect(activityService.deleteByStravaId).not.toHaveBeenCalled();
+      expect(activityService.fetchAndStoreSingleActivity).toHaveBeenCalledWith(42, 99999);
     });
 
     it('should not delete user for athlete events without authorized=false', async () => {
@@ -169,7 +173,7 @@ describe('StravaWebhookService', () => {
       expect(activityService.deleteByStravaId).toHaveBeenCalledWith(BigInt(99999), 42);
     });
 
-    it('should not handle activity update events', async () => {
+    it('should not delete activity on update events', async () => {
       const activityUpdateEvent: StravaWebhookEvent = {
         ...activityDeleteEvent,
         aspect_type: 'update',
@@ -178,6 +182,66 @@ describe('StravaWebhookService', () => {
       await service.handleEvent(activityUpdateEvent);
 
       expect(activityService.deleteByStravaId).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('handleEvent — activity create and update', () => {
+    const activityCreateEvent: StravaWebhookEvent = {
+      aspect_type: 'create',
+      event_time: 1234567890,
+      object_id: 99999,
+      object_type: 'activity',
+      owner_id: 67890,
+      subscription_id: 1,
+      updates: {},
+    };
+
+    it('should call fetchAndStoreSingleActivity on create event', async () => {
+      userService.findByStravaId.mockResolvedValue({ id: 42 } as any);
+      activityService.fetchAndStoreSingleActivity.mockResolvedValue(undefined);
+
+      await service.handleEvent(activityCreateEvent);
+
+      expect(userService.findByStravaId).toHaveBeenCalledWith(67890);
+      expect(activityService.fetchAndStoreSingleActivity).toHaveBeenCalledWith(42, 99999);
+    });
+
+    it('should call fetchAndStoreSingleActivity on update event', async () => {
+      const activityUpdateEvent: StravaWebhookEvent = { ...activityCreateEvent, aspect_type: 'update' };
+      userService.findByStravaId.mockResolvedValue({ id: 42 } as any);
+      activityService.fetchAndStoreSingleActivity.mockResolvedValue(undefined);
+
+      await service.handleEvent(activityUpdateEvent);
+
+      expect(userService.findByStravaId).toHaveBeenCalledWith(67890);
+      expect(activityService.fetchAndStoreSingleActivity).toHaveBeenCalledWith(42, 99999);
+    });
+
+    it('should log warning and not sync when user is not found', async () => {
+      userService.findByStravaId.mockResolvedValue(null);
+
+      await expect(service.handleEvent(activityCreateEvent)).resolves.toBeUndefined();
+
+      expect(activityService.fetchAndStoreSingleActivity).not.toHaveBeenCalled();
+    });
+
+    it('should not affect delete handling (non-regression)', async () => {
+      const activityDeleteEvent: StravaWebhookEvent = { ...activityCreateEvent, aspect_type: 'delete' };
+      userService.findByStravaId.mockResolvedValue({ id: 42 } as any);
+      activityService.deleteByStravaId.mockResolvedValue(true);
+
+      await service.handleEvent(activityDeleteEvent);
+
+      expect(userService.findByStravaId).toHaveBeenCalledWith(67890);
+      expect(activityService.deleteByStravaId).toHaveBeenCalledWith(BigInt(99999), 42);
+      expect(activityService.fetchAndStoreSingleActivity).not.toHaveBeenCalled();
+    });
+
+    it('should propagate exceptions from fetchAndStoreSingleActivity', async () => {
+      userService.findByStravaId.mockResolvedValue({ id: 42 } as any);
+      activityService.fetchAndStoreSingleActivity.mockRejectedValue(new Error('Strava API error'));
+
+      await expect(service.handleEvent(activityCreateEvent)).rejects.toThrow('Strava API error');
     });
   });
 });
