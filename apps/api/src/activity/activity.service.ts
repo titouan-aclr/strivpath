@@ -130,6 +130,75 @@ export class ActivityService {
     return allActivities;
   }
 
+  private buildActivityUpsertData(
+    stravaActivity: StravaActivitySummary,
+    userId: number,
+    normalizedType: SportType,
+  ): { create: Prisma.ActivityUncheckedCreateInput; update: Prisma.ActivityUncheckedUpdateInput } {
+    const commonFields = {
+      name: stravaActivity.name,
+      type: normalizedType,
+      distance: stravaActivity.distance,
+      movingTime: stravaActivity.moving_time,
+      elapsedTime: stravaActivity.elapsed_time,
+      totalElevationGain: stravaActivity.total_elevation_gain,
+      startDate: new Date(stravaActivity.start_date),
+      startDateLocal: new Date(stravaActivity.start_date_local),
+      timezone: stravaActivity.timezone,
+      averageSpeed: stravaActivity.average_speed,
+      maxSpeed: stravaActivity.max_speed,
+      averageHeartrate: stravaActivity.average_heartrate,
+      maxHeartrate: stravaActivity.max_heartrate,
+      kilojoules: stravaActivity.kilojoules,
+      deviceWatts: stravaActivity.device_watts,
+      hasKudoed: stravaActivity.has_kudoed,
+      kudosCount: stravaActivity.kudos_count,
+      averageCadence: stravaActivity.average_cadence,
+      elevHigh: stravaActivity.elev_high,
+      elevLow: stravaActivity.elev_low,
+      averageWatts: stravaActivity.average_watts,
+      weightedAverageWatts: stravaActivity.weighted_average_watts,
+      maxWatts: stravaActivity.max_watts,
+      raw: stripGeographicData(stravaActivity) as unknown as Prisma.InputJsonValue,
+    };
+
+    return {
+      create: {
+        stravaId: BigInt(stravaActivity.id),
+        userId,
+        ...commonFields,
+      },
+      update: commonFields,
+    };
+  }
+
+  async fetchAndStoreSingleActivity(userId: number, stravaActivityId: number): Promise<void> {
+    const preferences = await this.prisma.userPreferences.findUnique({
+      where: { userId },
+    });
+
+    const selectedSports = (preferences?.selectedSports as SportType[] | null) ?? [];
+
+    if (!preferences || selectedSports.length === 0) {
+      return;
+    }
+
+    const activity = await this.stravaService.getActivityDetail(userId, stravaActivityId);
+
+    const normalizedType = getSportTypeFromStravaType(activity.type);
+
+    if (!normalizedType || !selectedSports.includes(normalizedType)) {
+      return;
+    }
+
+    await this.prisma.activity.upsert({
+      where: { stravaId: BigInt(stravaActivityId) },
+      ...this.buildActivityUpsertData(activity, userId, normalizedType),
+    });
+
+    await this.goalProgressUpdateService.updateAllGoalsForUser(userId, new Date(activity.start_date));
+  }
+
   private async storeActivities(
     activities: StravaActivitySummary[],
     userId: number,
@@ -151,60 +220,7 @@ export class ActivityService {
 
       await this.prisma.activity.upsert({
         where: { stravaId: BigInt(stravaActivity.id) },
-        create: {
-          stravaId: BigInt(stravaActivity.id),
-          userId,
-          name: stravaActivity.name,
-          type: normalizedType,
-          distance: stravaActivity.distance,
-          movingTime: stravaActivity.moving_time,
-          elapsedTime: stravaActivity.elapsed_time,
-          totalElevationGain: stravaActivity.total_elevation_gain,
-          startDate: new Date(stravaActivity.start_date),
-          startDateLocal: new Date(stravaActivity.start_date_local),
-          timezone: stravaActivity.timezone,
-          averageSpeed: stravaActivity.average_speed,
-          maxSpeed: stravaActivity.max_speed,
-          averageHeartrate: stravaActivity.average_heartrate,
-          maxHeartrate: stravaActivity.max_heartrate,
-          kilojoules: stravaActivity.kilojoules,
-          deviceWatts: stravaActivity.device_watts,
-          hasKudoed: stravaActivity.has_kudoed,
-          kudosCount: stravaActivity.kudos_count,
-          averageCadence: stravaActivity.average_cadence,
-          elevHigh: stravaActivity.elev_high,
-          elevLow: stravaActivity.elev_low,
-          averageWatts: stravaActivity.average_watts,
-          weightedAverageWatts: stravaActivity.weighted_average_watts,
-          maxWatts: stravaActivity.max_watts,
-          raw: stripGeographicData(stravaActivity) as unknown as Prisma.InputJsonValue,
-        },
-        update: {
-          name: stravaActivity.name,
-          type: normalizedType,
-          distance: stravaActivity.distance,
-          movingTime: stravaActivity.moving_time,
-          elapsedTime: stravaActivity.elapsed_time,
-          totalElevationGain: stravaActivity.total_elevation_gain,
-          startDate: new Date(stravaActivity.start_date),
-          startDateLocal: new Date(stravaActivity.start_date_local),
-          timezone: stravaActivity.timezone,
-          averageSpeed: stravaActivity.average_speed,
-          maxSpeed: stravaActivity.max_speed,
-          averageHeartrate: stravaActivity.average_heartrate,
-          maxHeartrate: stravaActivity.max_heartrate,
-          kilojoules: stravaActivity.kilojoules,
-          deviceWatts: stravaActivity.device_watts,
-          hasKudoed: stravaActivity.has_kudoed,
-          kudosCount: stravaActivity.kudos_count,
-          averageCadence: stravaActivity.average_cadence,
-          elevHigh: stravaActivity.elev_high,
-          elevLow: stravaActivity.elev_low,
-          averageWatts: stravaActivity.average_watts,
-          weightedAverageWatts: stravaActivity.weighted_average_watts,
-          maxWatts: stravaActivity.max_watts,
-          raw: stripGeographicData(stravaActivity) as unknown as Prisma.InputJsonValue,
-        },
+        ...this.buildActivityUpsertData(stravaActivity, userId, normalizedType),
       });
 
       if ((i + 1) % 10 === 0 || i === activities.length - 1) {
