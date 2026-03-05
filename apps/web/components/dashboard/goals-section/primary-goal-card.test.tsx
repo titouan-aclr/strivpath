@@ -83,8 +83,8 @@ const createMockGoal = (overrides: Partial<PrimaryGoal> = {}): PrimaryGoal => ({
   id: '1',
   title: 'Monthly Running Goal',
   targetType: GoalTargetType.Distance,
-  targetValue: 100000,
-  currentValue: 65000,
+  targetValue: 100,
+  currentValue: 65,
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-01-31'),
   sportType: SportType.Run,
@@ -210,8 +210,8 @@ describe('PrimaryGoalCard', () => {
       <PrimaryGoalCard
         goal={createMockGoal({
           targetType: GoalTargetType.Duration,
-          targetValue: 36000,
-          currentValue: 19800,
+          targetValue: 10,
+          currentValue: 5.5,
         })}
       />,
     );
@@ -225,8 +225,8 @@ describe('PrimaryGoalCard', () => {
       <PrimaryGoalCard
         goal={createMockGoal({
           targetType: GoalTargetType.Duration,
-          targetValue: 36000,
-          currentValue: 18000,
+          targetValue: 10,
+          currentValue: 5,
         })}
       />,
     );
@@ -239,8 +239,8 @@ describe('PrimaryGoalCard', () => {
       <PrimaryGoalCard
         goal={createMockGoal({
           targetType: GoalTargetType.Duration,
-          targetValue: 7200,
-          currentValue: 1800,
+          targetValue: 2,
+          currentValue: 0.5,
         })}
       />,
     );
