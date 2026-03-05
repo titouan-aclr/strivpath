@@ -72,6 +72,7 @@ services:
       STRAVA_CLIENT_ID: ${STRAVA_CLIENT_ID:?STRAVA_CLIENT_ID is required}
       STRAVA_CLIENT_SECRET: ${STRAVA_CLIENT_SECRET:?STRAVA_CLIENT_SECRET is required}
       STRAVA_REDIRECT_URI: https://api.${DOMAIN}/v1/auth/strava/callback
+      STRAVA_WEBHOOK_VERIFY_TOKEN: ${STRAVA_WEBHOOK_VERIFY_TOKEN:?STRAVA_WEBHOOK_VERIFY_TOKEN is required}
       # CORS
       FRONTEND_URL: https://${DOMAIN}
       # Cookies (cross-subdomain)

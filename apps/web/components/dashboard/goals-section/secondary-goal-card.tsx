@@ -6,7 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { SecondaryGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, normalizeGoalValue } from '@/components/goals/constants';
+import { UNIT_LABELS } from '@/components/goals/constants';
 import { getSportIcon, type SportColorConfig } from '@/lib/sports/config';
 import { ProgressStatusBadge } from './progress-status-badge';
 import { getEffectiveStatusColors } from './utils';
@@ -26,8 +26,8 @@ export function SecondaryGoalCard({ goal, className, sportColor }: SecondaryGoal
   const unit = UNIT_LABELS[goal.targetType];
   const statusColors = getEffectiveStatusColors(goal.status, sportColor);
 
-  const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
-  const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);
+  const displayCurrentValue = goal.currentValue;
+  const displayTargetValue = goal.targetValue;
 
   const daysRemainingText =
     goal.isExpired || goal.daysRemaining === null

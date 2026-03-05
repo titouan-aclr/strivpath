@@ -12,42 +12,20 @@ export function getUnitLabel(targetType: GoalTargetType): string {
   return units[targetType];
 }
 
-/**
- * Converts goal values from storage units (meters, seconds) to display units (km, hours).
- * - Distance: meters → km (÷ 1000)
- * - Duration: seconds → hours (÷ 3600)
- * - Elevation: meters → meters (no conversion)
- * - Frequency: count → count (no conversion)
- */
-export function normalizeGoalValue(value: number, targetType: GoalTargetType): number {
-  switch (targetType) {
-    case GoalTargetType.Distance:
-      return value / 1000;
-    case GoalTargetType.Duration:
-      return value / 3600;
-    default:
-      return value;
-  }
-}
-
 export function formatCurrentValue(goal: Goal): string {
-  const value = normalizeGoalValue(goal.currentValue, goal.targetType);
   const unit = getUnitLabel(goal.targetType);
-
   if (goal.targetType === GoalTargetType.Frequency) {
-    return `${Math.floor(value)} ${unit}`;
+    return `${Math.floor(goal.currentValue)} ${unit}`;
   }
-  return `${value.toFixed(1)} ${unit}`;
+  return `${goal.currentValue.toFixed(1)} ${unit}`;
 }
 
 export function formatTargetValue(goal: Goal): string {
-  const value = normalizeGoalValue(goal.targetValue, goal.targetType);
   const unit = getUnitLabel(goal.targetType);
-
   if (goal.targetType === GoalTargetType.Frequency) {
-    return `${Math.floor(value)} ${unit}`;
+    return `${Math.floor(goal.targetValue)} ${unit}`;
   }
-  return `${value.toFixed(0)} ${unit}`;
+  return `${goal.targetValue.toFixed(0)} ${unit}`;
 }
 
 export function formatPeriod(startDate: Date | string, endDate: Date | string, locale: string): string {
@@ -113,9 +91,8 @@ export function getProgressColorForChart(status: GoalStatus): string {
 }
 
 export function formatValueOnly(value: number, targetType: GoalTargetType): string {
-  const normalized = normalizeGoalValue(value, targetType);
   if (targetType === GoalTargetType.Frequency || targetType === GoalTargetType.Elevation) {
-    return Math.floor(normalized).toString();
+    return Math.floor(value).toString();
   }
-  return normalized.toFixed(1);
+  return value.toFixed(1);
 }
