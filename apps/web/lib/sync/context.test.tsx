@@ -45,6 +45,15 @@ vi.mock('@/lib/onboarding/error-handling', () => ({
   logOnboardingError: vi.fn(),
 }));
 
+const mockRefetchQueries = vi.fn();
+vi.mock('@apollo/client/react', async importOriginal => {
+  const actual = await importOriginal<typeof import('@apollo/client/react')>();
+  return {
+    ...actual,
+    useApolloClient: () => ({ refetchQueries: mockRefetchQueries }),
+  };
+});
+
 import { toast } from 'sonner';
 import { classifyOnboardingError, logOnboardingError } from '@/lib/onboarding/error-handling';
 
@@ -1440,6 +1449,254 @@ describe('SyncContext', () => {
       });
 
       expect(mutationSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('post-sync data refresh', () => {
+    it('should refetch dashboard and goals queries when sync completes', async () => {
+      let queryCount = 0;
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          queryCount++;
+          if (queryCount === 1) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '1',
+                  status: SyncStatus.Completed,
+                  stage: SyncStage.Done,
+                }),
+              },
+            });
+          }
+          if (queryCount === 2) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '2',
+                  status: SyncStatus.InProgress,
+                  stage: SyncStage.Fetching,
+                }),
+              },
+            });
+          }
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '2',
+                status: SyncStatus.Completed,
+                stage: SyncStage.Done,
+              }),
+            },
+          });
+        }),
+        graphql.mutation('SyncActivities', () => {
+          return HttpResponse.json({
+            data: {
+              syncActivities: createMockSyncHistory({ id: '2', status: SyncStatus.Pending }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.syncHistory?.id).toBe('1');
+      });
+
+      act(() => {
+        result.current.triggerSync('manual');
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPolling).toBe(false);
+      });
+
+      expect(mockRefetchQueries).toHaveBeenCalledWith({
+        include: ['DashboardData', 'Goals', 'ActiveGoals'],
+      });
+    });
+
+    it('should not refetch when sync fails', async () => {
+      let queryCount = 0;
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          queryCount++;
+          if (queryCount === 1) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '1',
+                  status: SyncStatus.Completed,
+                  stage: SyncStage.Done,
+                }),
+              },
+            });
+          }
+          if (queryCount === 2) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '2',
+                  status: SyncStatus.InProgress,
+                  stage: SyncStage.Fetching,
+                }),
+              },
+            });
+          }
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '2',
+                status: SyncStatus.Failed,
+                errorMessage: 'Sync failed',
+              }),
+            },
+          });
+        }),
+        graphql.mutation('SyncActivities', () => {
+          return HttpResponse.json({
+            data: {
+              syncActivities: createMockSyncHistory({ id: '2', status: SyncStatus.Pending }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.syncHistory?.id).toBe('1');
+      });
+
+      act(() => {
+        result.current.triggerSync();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPolling).toBe(false);
+      });
+
+      expect(mockRefetchQueries).not.toHaveBeenCalled();
+    });
+
+    it('should refetch when auto-triggered sync completes', async () => {
+      let queryCount = 0;
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          queryCount++;
+          if (queryCount === 1) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '1',
+                  status: SyncStatus.Completed,
+                  stage: SyncStage.Done,
+                  completedAt: new Date(Date.now() - SYNC_STALENESS_THRESHOLD_MS - 60 * 60 * 1000),
+                }),
+              },
+            });
+          }
+          if (queryCount === 2) {
+            return HttpResponse.json({
+              data: {
+                latestSyncHistory: createMockSyncHistory({
+                  id: '2',
+                  status: SyncStatus.InProgress,
+                  stage: SyncStage.Fetching,
+                }),
+              },
+            });
+          }
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '2',
+                status: SyncStatus.Completed,
+                stage: SyncStage.Done,
+              }),
+            },
+          });
+        }),
+        graphql.mutation('SyncActivities', () => {
+          return HttpResponse.json({
+            data: {
+              syncActivities: createMockSyncHistory({ id: '2', status: SyncStatus.Pending }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.triggerSource).toBe('auto');
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await act(async () => {
+        await result.current.refreshStatus();
+      });
+
+      await waitFor(() => {
+        expect(result.current.isPolling).toBe(false);
+      });
+
+      expect(mockRefetchQueries).toHaveBeenCalledWith({
+        include: ['DashboardData', 'Goals', 'ActiveGoals'],
+      });
+    });
+
+    it('should not refetch when no polling was active at load', async () => {
+      server.use(
+        graphql.query('LatestSyncHistory', () => {
+          return HttpResponse.json({
+            data: {
+              latestSyncHistory: createMockSyncHistory({
+                id: '1',
+                status: SyncStatus.Completed,
+                stage: SyncStage.Done,
+                completedAt: new Date(),
+              }),
+            },
+          });
+        }),
+      );
+
+      const { result } = renderHook(() => useSync(), { wrapper: createWrapper() });
+
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(false);
+        expect(result.current.syncHistory?.status).toBe(SyncStatus.Completed);
+      });
+
+      await act(async () => {
+        await new Promise(r => setTimeout(r, 50));
+      });
+
+      expect(mockRefetchQueries).not.toHaveBeenCalled();
     });
   });
 });
