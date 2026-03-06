@@ -3,6 +3,7 @@
 import { createContext, useContext, useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { useApolloClient } from '@apollo/client/react';
 import { useQuery, useMutation } from '@/lib/graphql';
 import { SyncActivitiesDocument, LatestSyncHistoryDocument, SyncStatus, type SyncHistory } from '@/gql/graphql';
 import { useAuth } from '@/lib/auth/context';
@@ -22,6 +23,7 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
   const t = useTranslations();
   const { user } = useAuth();
   const { notifyGoalUpdates } = useGoalSyncNotifications();
+  const client = useApolloClient();
 
   const [isPolling, setIsPolling] = useState(false);
   const [error, setError] = useState<OnboardingError | null>(null);
@@ -122,6 +124,7 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
         }
 
         toast.success(t('settings.sync.syncSuccess'));
+        void client.refetchQueries({ include: ['DashboardData', 'Goals', 'ActiveGoals'] });
       }
 
       if (syncHistory.status === SyncStatus.Failed) {
@@ -154,7 +157,7 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
     if (syncHistory.status === SyncStatus.InProgress && !isPolling && !error) {
       startPolling();
     }
-  }, [syncHistory, isPolling, stopPolling, startPolling, notifyGoalUpdates, t, user?.id, error]);
+  }, [syncHistory, isPolling, stopPolling, startPolling, notifyGoalUpdates, t, user?.id, error, client]);
 
   useEffect(() => {
     return () => {
@@ -220,7 +223,7 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
 
     hasCheckedStaleness.current = true;
 
-    const completedAt = syncHistory.completedAt ? new Date(syncHistory.completedAt as string) : null;
+    const completedAt = syncHistory.completedAt ? new Date(String(syncHistory.completedAt)) : null;
     const staleThreshold = new Date(Date.now() - SYNC_STALENESS_THRESHOLD_MS);
 
     if (!completedAt || completedAt < staleThreshold) {
