@@ -9,6 +9,7 @@ import { useAuth } from '@/lib/auth/context';
 import { useGoalSyncNotifications } from '@/lib/goals/use-goal-sync-notifications';
 import { classifyOnboardingError, logOnboardingError, type OnboardingError } from '@/lib/onboarding/error-handling';
 import { SYNC_POLL_INTERVAL, SYNC_TIMEOUT_MS, ONBOARDING_TOAST_CONFIG } from '@/lib/onboarding/constants';
+import { SYNC_STALENESS_THRESHOLD_MS } from './constants';
 import type { SyncContextValue, SyncTriggerSource } from './types';
 
 const SyncContext = createContext<SyncContextValue | undefined>(undefined);
@@ -30,6 +31,7 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastCompletedSyncIdRef = useRef<string | null>(null);
   const initializedRef = useRef(false);
+  const hasCheckedStaleness = useRef(false);
 
   const [syncActivitiesMutation] = useMutation(SyncActivitiesDocument);
   const {
@@ -202,6 +204,29 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
   const clearError = useCallback(() => {
     setError(null);
   }, []);
+
+  useEffect(() => {
+    if (!syncHistory || hasCheckedStaleness.current) return;
+
+    if (syncHistory.status !== SyncStatus.Completed) {
+      hasCheckedStaleness.current = true;
+      return;
+    }
+
+    if (isSyncing || isPolling) {
+      hasCheckedStaleness.current = true;
+      return;
+    }
+
+    hasCheckedStaleness.current = true;
+
+    const completedAt = syncHistory.completedAt ? new Date(syncHistory.completedAt as string) : null;
+    const staleThreshold = new Date(Date.now() - SYNC_STALENESS_THRESHOLD_MS);
+
+    if (!completedAt || completedAt < staleThreshold) {
+      triggerSync('auto');
+    }
+  }, [syncHistory, isSyncing, isPolling, triggerSync]);
 
   const value: SyncContextValue = {
     syncHistory,
