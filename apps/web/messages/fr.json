@@ -1,0 +1,1018 @@
+{
+  "common": {
+    "appName": "StrivPath",
+    "loading": "Chargement...",
+    "error": "Une erreur s'est produite",
+    "timeAgo": {
+      "justNow": "il y a quelques secondes",
+      "minutesAgo": "{count, plural, =1 {il y a 1 minute} other {il y a # minutes}}",
+      "hoursAgo": "{count, plural, =1 {il y a 1 heure} other {il y a # heures}}",
+      "daysAgo": "{count, plural, =1 {il y a 1 jour} other {il y a # jours}}"
+    }
+  },
+  "landing": {
+    "meta": {
+      "title": "StrivPath — Suivez vos objectifs sportifs",
+      "description": "Fixez-vous des objectifs concrets, suivez votre progression dans chaque sport et célébrez chaque étape de votre parcours."
+    },
+    "header": {
+      "features": "Fonctionnalités",
+      "howItWorks": "Comment ça marche",
+      "openSource": "Open Source",
+      "getStarted": "Commencer",
+      "openDashboard": "Ouvrir le tableau de bord",
+      "openMenu": "Ouvrir le menu de navigation",
+      "mobileNavTitle": "Navigation"
+    },
+    "hero": {
+      "badge": "✦ Pour les athlètes Strava qui visent plus loin",
+      "headline1": "Arrêtez d'accumuler des séances.",
+      "headline2": "Suivez votre progression.",
+      "subtitle": "Fixez-vous des objectifs concrets, suivez votre parcours dans chaque sport et célébrez chaque étape de votre chemin.",
+      "cta": "Démarrez votre parcours",
+      "ctaAuthenticated": "Ouvrir le tableau de bord",
+      "ctaSecondary": "Voir comment ça marche ↓",
+      "sports": "🏃 Course · 🚴 Vélo · 🏊 Natation"
+    },
+    "howItWorks": {
+      "sectionLabel": "Comment ça marche",
+      "heading": "De Strava à vos objectifs en 3 étapes",
+      "step1": {
+        "title": "Connecter Strava",
+        "description": "Connectez-vous avec votre compte Strava. Vos activités sont importées en toute sécurité — aucune saisie manuelle requise."
+      },
+      "step2": {
+        "title": "Définir vos objectifs",
+        "description": "Choisissez un objectif : distance, durée, dénivelé ou fréquence. Fixez une échéance et laissez StrivPath s'occuper du suivi."
+      },
+      "step3": {
+        "title": "Célébrer la progression",
+        "description": "Regardez vos objectifs avancer à chaque connexion. Gagnez des badges et célébrez vos étapes."
+      }
+    },
+    "features": {
+      "sectionLabel": "Fonctionnalités",
+      "heading": "Tout ce qu'il vous faut pour atteindre vos objectifs",
+      "subheading": "Conçu pour les athlètes qui veulent transformer leurs données Strava en vraie progression.",
+      "card1": {
+        "title": "Suivi des objectifs",
+        "description": "Fixez-vous des objectifs concrets et regardez vos progrès se construire semaine après semaine."
+      },
+      "card2": {
+        "title": "Analyse de la progression",
+        "description": "Visualisez vos tendances de performance dans le temps. Détectez vos pics et vos moments de récupération."
+      },
+      "card3": {
+        "title": "Multi-sports",
+        "description": "Course, vélo, natation — tous vos sports réunis en un seul endroit."
+      },
+      "card4": {
+        "title": "Récompenses",
+        "description": "Gagnez des badges pour vos étapes, votre régularité et vos records personnels. Chaque effort mérite d'être célébré.",
+        "comingSoon": "Bientôt disponible"
+      }
+    },
+    "stats": {
+      "sectionLabel": "En chiffres",
+      "heading": "Pensé pour ce qui compte vraiment",
+      "stat1": { "label": "Types d'objectifs à définir" },
+      "stat2": { "label": "Sports suivis au même endroit" },
+      "stat3": { "label": "Objectifs à dépasser" }
+    },
+    "goalPreview": {
+      "sectionLabel": "Suivi des objectifs",
+      "heading": "Définissez-le. Suivez-le. Célébrez-le.",
+      "subheading": "Définissez votre objectif et regardez chaque activité Strava y contribuer. La progression se met à jour automatiquement — sans saisie manuelle, sans friction.",
+      "bullet1": "Distance, durée, dénivelé ou fréquence",
+      "bullet2": "Périodes hebdomadaires, mensuelles ou annuelles",
+      "bullet3": "Progression mise à jour automatiquement",
+      "goalTitle": "Courir 100 km ce mois-ci",
+      "goalSport": "🏃 Course",
+      "goalProgress": "74 km sur 100 km",
+      "goalDaysLeft": "8 jours restants",
+      "chartLabel": "Distance hebdomadaire (km)"
+    },
+    "cta": {
+      "heading": "Votre prochain défi vous attend.",
+      "cta": "Démarrez votre parcours →",
+      "ctaAuthenticated": "Ouvrir le tableau de bord →",
+      "reassurance": "Gratuit · Open source · Non commercial · Vos données vous appartiennent"
+    },
+    "footer": {
+      "tagline": "Conçu pour les athlètes qui veulent progresser, pas rivaliser.",
+      "github": "GitHub",
+      "legalNotice": "Mentions légales",
+      "privacy": "Politique de confidentialité",
+      "terms": "CGU",
+      "disclaimer": "Non affilié à Strava, Inc.",
+      "nonCommercial": "Projet open source non commercial. Vos données Strava ne sont jamais vendues ni partagées.",
+      "copyright": "© 2026 contributeurs de StrivPath"
+    },
+    "problem": {
+      "heading": {
+        "line1Intro": "Strava est excellent pour enregistrer",
+        "line1Emphasis": "ce que vous avez fait.",
+        "line2Intro": "Mais où tout ça",
+        "line2Emphasis": "vous mène-t-il ?"
+      },
+      "without": {
+        "title": "Sans StrivPath",
+        "headline": "Des activités enregistrées, mais sans but.",
+        "point1": "Sessions enregistrées, but inconnu",
+        "point2": "Des chiffres sans récit",
+        "point3": "Aucune étape à célébrer"
+      },
+      "with": {
+        "title": "Avec StrivPath",
+        "headline": "Des objectifs qui donnent du sens à chaque séance.",
+        "point1": "Chaque activité vous fait avancer",
+        "point2": "Progression visible en temps réel",
+        "point3": "Des étapes qui méritent d'être célébrées"
+      }
+    }
+  },
+  "home": {
+    "title": "StrivPath",
+    "usersFromApi": "Utilisateurs via l'API GraphQL :",
+    "demoButton": "Bouton de démonstration",
+    "noUsers": "Aucun utilisateur trouvé",
+    "failedToLoadUsers": "Impossible de charger les utilisateurs",
+    "userLabel": "Utilisateur {id}"
+  },
+  "navigation": {
+    "dashboard": "Tableau de bord",
+    "activities": "Activités",
+    "goals": "Objectifs",
+    "badges": "Badges",
+    "settings": "Paramètres",
+    "openMenu": "Ouvrir le menu de navigation",
+    "mobileNavTitle": "Navigation",
+    "sports": {
+      "title": "Sports",
+      "running": "Course",
+      "cycling": "Vélo",
+      "swimming": "Natation"
+    }
+  },
+  "activities": {
+    "page": {
+      "title": "Activités",
+      "description": "Consultez et analysez toutes vos activités"
+    },
+    "sportTypes": {
+      "run": "Course",
+      "ride": "Vélo",
+      "swim": "Natation",
+      "other": "Autre"
+    },
+    "card": {
+      "distance": "Distance",
+      "duration": "Durée",
+      "elevation": "Dénivelé",
+      "pace": "Allure",
+      "speed": "Vitesse",
+      "kudos": "kudos"
+    },
+    "list": {
+      "empty": {
+        "title": "Aucune activité trouvée",
+        "description": "Essayez d'ajuster vos filtres ou la plage de dates"
+      },
+      "error": {
+        "title": "Impossible de charger les activités",
+        "description": "Une erreur s'est produite lors du chargement de vos activités. Veuillez réessayer.",
+        "retry": "Réessayer"
+      },
+      "loading": "Chargement des activités...",
+      "loadingMore": "Chargement d'autres activités..."
+    },
+    "filters": {
+      "title": "Filtres",
+      "showFilters": "Afficher les filtres",
+      "apply": "Appliquer",
+      "clear": "Effacer les filtres",
+      "sportType": {
+        "label": "Type de sport",
+        "all": "Tous les sports"
+      },
+      "dateRange": {
+        "label": "Plage de dates",
+        "quickSelect": "Sélection rapide",
+        "customRange": "Plage personnalisée",
+        "apply": "Appliquer",
+        "cancel": "Annuler",
+        "last7Days": "7 derniers jours",
+        "last30Days": "30 derniers jours",
+        "last90Days": "90 derniers jours",
+        "thisYear": "Cette année",
+        "allTime": "Toutes les dates"
+      },
+      "sort": {
+        "label": "Trier par"
+      }
+    },
+    "sort": {
+      "dateDesc": "Plus récent en premier",
+      "dateAsc": "Plus ancien en premier",
+      "distanceDesc": "Distance la plus longue",
+      "distanceAsc": "Distance la plus courte",
+      "durationDesc": "Durée la plus longue",
+      "durationAsc": "Durée la plus courte"
+    },
+    "detail": {
+      "backButton": "Retour aux activités",
+      "invalidId": {
+        "title": "ID d'activité invalide",
+        "description": "L'ID d'activité fourni n'est pas valide. Vérifiez l'URL et réessayez.",
+        "backButton": "Retour aux activités"
+      },
+      "error": {
+        "title": "Impossible de charger l'activité",
+        "description": "Une erreur s'est produite lors du chargement des détails de l'activité. Veuillez réessayer.",
+        "retry": "Réessayer",
+        "backButton": "Retour aux activités"
+      },
+      "notFound": {
+        "title": "Activité introuvable",
+        "description": "Cette activité n'existe pas ou vous n'y avez pas accès.",
+        "backButton": "Retour aux activités"
+      },
+      "stats": {
+        "distance": "Distance",
+        "duration": "Durée",
+        "elevation": "Dénivelé positif",
+        "pace": "Allure",
+        "speed": "Vitesse",
+        "elapsed": "Temps total",
+        "avgHr": "FC moyenne",
+        "maxHr": "FC maximale",
+        "cadence": "Cadence",
+        "altitude": "Plage d'altitude",
+        "calories": "Calories",
+        "power": "Puissance moyenne"
+      },
+      "splits": {
+        "title": "Analyse des splits",
+        "description": "Évolution de l'allure par kilomètre",
+        "loading": "Chargement des données de splits...",
+        "kmLabel": "Kilomètre",
+        "paceLabel": "Allure (min/km)",
+        "speedLabel": "Vitesse (km/h)"
+      },
+      "description": {
+        "title": "Description"
+      },
+      "details": {
+        "error": {
+          "title": "Impossible de charger les détails de l'activité",
+          "description": "Certains détails (calories, splits) n'ont pas pu être chargés depuis Strava.",
+          "retry": "Réessayer"
+        }
+      },
+      "sportTypes": {
+        "run": "Course",
+        "ride": "Vélo",
+        "swim": "Natation",
+        "walk": "Marche",
+        "hike": "Randonnée",
+        "alpineski": "Ski alpin",
+        "backcountryski": "Ski de randonnée",
+        "nordicski": "Ski nordique"
+      }
+    }
+  },
+  "layout": {
+    "userMenu": {
+      "profile": "Profil",
+      "viewOnStrava": "Voir sur Strava",
+      "settings": "Paramètres",
+      "logout": "Déconnexion",
+      "loggingOut": "Déconnexion en cours...",
+      "refreshing": "Actualisation..."
+    },
+    "themeSwitcher": {
+      "light": "Clair",
+      "dark": "Sombre",
+      "system": "Système"
+    }
+  },
+  "onboarding": {
+    "steps": {
+      "selectSports": "Choisir vos sports",
+      "syncActivities": "Synchroniser vos activités",
+      "confirmation": "Tout est prêt !"
+    },
+    "sports": {
+      "title": "Choisissez vos sports",
+      "description": "Sélectionnez au moins un sport à suivre avec StrivPath",
+      "run": {
+        "title": "Course",
+        "description": "Suivez vos courses et améliorez votre allure"
+      },
+      "ride": {
+        "title": "Vélo",
+        "description": "Surveillez vos sorties et parcours"
+      },
+      "swim": {
+        "title": "Natation",
+        "description": "Enregistrez vos séances de natation"
+      },
+      "validation": {
+        "minOne": "Sélectionnez au moins un sport",
+        "maxThree": "Vous pouvez sélectionner jusqu'à 3 sports"
+      },
+      "continue": "Continuer vers la synchronisation",
+      "saving": "Enregistrement des préférences..."
+    },
+    "sync": {
+      "title": "Synchronisation de vos activités",
+      "description": "Importation de vos activités Strava",
+      "status": {
+        "pending": "Préparation de la synchronisation...",
+        "fetching": "Téléchargement des activités depuis Strava",
+        "storing": "Sauvegarde des activités",
+        "computing": "Calcul de vos statistiques",
+        "done": "Synchronisation terminée !",
+        "failed": "Échec de la synchronisation"
+      },
+      "progress": "{current} sur {total} activités",
+      "retry": "Réessayer la synchronisation",
+      "timeout": "La synchronisation a pris plus de temps que prévu (délai de 60s). Veuillez réessayer."
+    },
+    "confirmation": {
+      "title": "Tout est prêt !",
+      "description": "Vos activités ont été importées avec succès",
+      "activitiesImported": "activités importées",
+      "whatsNext": {
+        "title": "Et maintenant ?",
+        "viewDashboard": "Voir votre tableau de bord personnalisé",
+        "trackProgress": "Suivez votre progression et vos performances",
+        "setGoals": "Fixez-vous des objectifs et gagnez des badges"
+      },
+      "goToDashboard": "Aller au tableau de bord",
+      "autoRedirect": "Redirection automatique dans {seconds} secondes..."
+    },
+    "error": {
+      "title": "Erreur de configuration",
+      "description": "Une erreur s'est produite lors de la configuration. Veuillez réessayer.",
+      "tryAgain": "Réessayer",
+      "goToLogin": "Aller à la connexion"
+    },
+    "errors": {
+      "saveFailed": "Impossible d'enregistrer vos préférences",
+      "syncFailed": "Impossible de synchroniser les activités",
+      "pleaseTryAgain": "Veuillez réessayer",
+      "network": "Erreur de connexion",
+      "networkDescription": "Impossible de contacter le serveur. Vérifiez votre connexion.",
+      "tokenExpired": "Connexion Strava expirée",
+      "tokenExpiredDescription": "Reconnectez votre compte Strava pour continuer",
+      "reconnectButton": "Reconnecter Strava",
+      "rateLimitTitle": "Limite de l'API Strava atteinte",
+      "rateLimitDescription": "La limite d'API de 15 minutes a été atteinte. Patientez quelques minutes et réessayez.",
+      "rateLimitDailyTitle": "Limite journalière Strava atteinte",
+      "rateLimitDailyDescription": "La limite journalière de l'API a été atteinte. Réessayez demain.",
+      "unknownError": "Une erreur inattendue s'est produite",
+      "contactSupport": "Contacter le support",
+      "errorCode": "Code d'erreur : {code}",
+      "supportId": "ID de support",
+      "timeoutHint": "Cela peut arriver avec un historique d'activités important (1000+ activités). Plusieurs tentatives peuvent être nécessaires."
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bienvenue sur StrivPath",
+      "description": "Connectez votre compte Strava pour commencer à suivre votre progression et atteindre vos objectifs",
+      "connectButton": "Se connecter avec Strava",
+      "oauthNote": "Connexion OAuth sécurisée · Accès en lecture seule à vos activités",
+      "errors": {
+        "unauthorized": "Vous devez être connecté pour accéder à cette page.",
+        "session_expired": "Votre session a expiré. Veuillez vous reconnecter.",
+        "auth_failed": "L'authentification a échoué. Veuillez réessayer.",
+        "missing_code": "Le code d'authentification est manquant."
+      }
+    },
+    "error": {
+      "title": "Erreur d'authentification",
+      "description": "Une erreur s'est produite lors de l'authentification. Veuillez réessayer.",
+      "tryAgain": "Réessayer"
+    },
+    "errors": {
+      "networkError": "Erreur réseau",
+      "retrying": "Nouvelle tentative automatique...",
+      "authFailed": "Authentification échouée",
+      "pleaseLogin": "Veuillez vous reconnecter",
+      "unexpectedError": "Une erreur inattendue s'est produite",
+      "sessionExpired": "Votre session a expiré"
+    },
+    "refreshing": "Actualisation de la session..."
+  },
+  "goals": {
+    "title": "Mes objectifs",
+    "description": "Suivez votre progression et atteignez vos objectifs",
+    "newGoal": "Nouvel objectif",
+    "meta": {
+      "title": "Objectifs - StrivPath",
+      "description": "Définissez et suivez vos objectifs sportifs"
+    },
+    "filters": {
+      "showFilters": "Filtres",
+      "title": "Filtrer les objectifs",
+      "clear": "Effacer",
+      "apply": "Appliquer",
+      "moreFilters": "Plus de filtres",
+      "sport": {
+        "label": "Type de sport",
+        "all": "Tous les sports",
+        "run": "Course",
+        "ride": "Vélo",
+        "swim": "Natation"
+      },
+      "status": {
+        "label": "Statut",
+        "all": "Tous",
+        "active": "En cours",
+        "completed": "Terminé",
+        "failed": "Échoué",
+        "archived": "Archivé"
+      },
+      "period": {
+        "label": "Période",
+        "all": "Toutes les périodes",
+        "weekly": "Hebdomadaire",
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "custom": "Personnalisé"
+      },
+      "target": {
+        "label": "Type",
+        "all": "Tous les types",
+        "distance": "Distance",
+        "duration": "Durée",
+        "elevation": "Dénivelé",
+        "frequency": "Fréquence"
+      },
+      "sort": {
+        "label": "Trier par",
+        "progressDesc": "Progression (décroissante)",
+        "progressAsc": "Progression (croissante)",
+        "deadlineAsc": "Échéance (la plus proche)",
+        "deadlineDesc": "Échéance (la plus lointaine)",
+        "createdDesc": "Créés récemment",
+        "createdAsc": "Les plus anciens"
+      }
+    },
+    "status": {
+      "active": "En cours",
+      "completed": "Terminé",
+      "failed": "Expiré",
+      "archived": "Archivé"
+    },
+    "progress": {
+      "label": "{current} sur {target} {unit}"
+    },
+    "daysRemaining": {
+      "expired": "Expiré",
+      "today": "Se termine aujourd'hui",
+      "tomorrow": "1 jour restant",
+      "days": "{count} jours restants"
+    },
+    "actions": {
+      "menu": "Actions sur l'objectif",
+      "edit": "Modifier",
+      "archive": "Archiver",
+      "delete": "Supprimer",
+      "archiveSuccess": "Objectif archivé avec succès",
+      "deleteSuccess": "Objectif supprimé avec succès"
+    },
+    "deleteDialog": {
+      "title": "Supprimer l'objectif",
+      "description": "Êtes-vous sûr de vouloir supprimer « {title} » ? Cette action est irréversible.",
+      "cancel": "Annuler",
+      "confirm": "Supprimer"
+    },
+    "empty": {
+      "title": "Aucun objectif pour l'instant",
+      "description": "Créez votre premier objectif pour commencer à suivre votre progression",
+      "createButton": "Créer un objectif"
+    },
+    "error": {
+      "title": "Impossible de charger les objectifs",
+      "description": "Une erreur s'est produite lors du chargement de vos objectifs. Veuillez réessayer.",
+      "retry": "Réessayer"
+    },
+    "create": {
+      "success": "Objectif créé avec succès",
+      "error": "Impossible de créer l'objectif",
+      "steps": {
+        "template": "Modèle",
+        "details": "Détails"
+      },
+      "templateSelector": {
+        "title": "Créer un objectif",
+        "description": "Choisissez un modèle prédéfini ou créez un objectif personnalisé",
+        "custom": {
+          "title": "Objectif personnalisé",
+          "description": "Créez votre propre objectif avec tous les paramètres"
+        },
+        "categories": {
+          "beginner": "Débutant",
+          "intermediate": "Intermédiaire",
+          "advanced": "Avancé",
+          "challenge": "Défi"
+        },
+        "recurring": "Récurrent"
+      },
+      "form": {
+        "title": "Détails de l'objectif",
+        "description": "Renseignez les informations de votre objectif",
+        "validationError": "Corrigez les erreurs avant de continuer",
+        "sections": {
+          "basic": "Informations de base",
+          "target": "Cible",
+          "period": "Période"
+        },
+        "fields": {
+          "optional": "(optionnel)",
+          "title": {
+            "label": "Titre",
+            "placeholder": "Ex. : Courir 50 km ce mois-ci"
+          },
+          "description": {
+            "label": "Description",
+            "placeholder": "Décrivez votre objectif..."
+          },
+          "sportType": {
+            "label": "Sport",
+            "allSports": "Tous les sports"
+          },
+          "targetType": {
+            "label": "Type d'objectif"
+          },
+          "targetValue": {
+            "label": "Valeur cible"
+          },
+          "periodType": {
+            "label": "Période"
+          },
+          "startDate": {
+            "label": "Date de début",
+            "placeholder": "Choisir une date"
+          },
+          "endDate": {
+            "label": "Date de fin",
+            "placeholder": "Choisir une date"
+          },
+          "isRecurring": {
+            "label": "Objectif récurrent",
+            "description": "Crée automatiquement un nouvel objectif à chaque période"
+          }
+        },
+        "hints": {
+          "distance": "Distance totale à parcourir",
+          "duration": "Temps total d'activité",
+          "frequency": "Nombre de séances à réaliser",
+          "elevation": "Dénivelé positif cumulé"
+        },
+        "errors": {
+          "titleRequired": "Le titre est requis",
+          "titleTooLong": "Le titre ne doit pas dépasser 100 caractères",
+          "targetValuePositive": "La valeur cible doit être supérieure à 0",
+          "targetValueTooHigh": "La valeur doit être inférieure ou égale à {limit}",
+          "startDateRequired": "La date de début est requise",
+          "startDatePast": "La date de début ne peut pas être dans le passé",
+          "endDateRequired": "La date de fin est requise pour une période personnalisée",
+          "endDateAfterStart": "La date de fin doit être après la date de début"
+        },
+        "actions": {
+          "back": "Retour",
+          "create": "Créer l'objectif"
+        }
+      }
+    },
+    "edit": {
+      "form": {
+        "title": "Modifier l'objectif",
+        "description": "Modifiez les détails de votre objectif. Certains champs ne peuvent pas être modifiés après la création.",
+        "fields": {
+          "readOnly": "(lecture seule)",
+          "cannotChangeSport": "Le type de sport ne peut pas être modifié après la création",
+          "cannotChangeTargetType": "Le type de cible ne peut pas être modifié après la création",
+          "cannotChangePeriod": "Le type de période ne peut pas être modifié après la création",
+          "cannotChangeStartDate": "La date de début ne peut pas être modifiée après la création",
+          "recurringGoalNote": "Ceci est un objectif récurrent. Les modifications n'affecteront que cette instance."
+        },
+        "actions": {
+          "save": "Enregistrer les modifications"
+        },
+        "noChanges": "Aucune modification détectée. Apportez des changements pour enregistrer."
+      }
+    },
+    "update": {
+      "success": "Objectif mis à jour avec succès",
+      "error": "Impossible de mettre à jour l'objectif"
+    },
+    "delete": {
+      "success": "Objectif supprimé avec succès",
+      "error": "Impossible de supprimer l'objectif"
+    },
+    "archive": {
+      "success": "Objectif archivé avec succès",
+      "error": "Impossible d'archiver l'objectif"
+    },
+    "sync": {
+      "goalsUpdated": "{count, plural, =0 {Aucun objectif mis à jour} =1 {1 objectif mis à jour} other {# objectifs mis à jour}}",
+      "goalCompleted": "🎉 Objectif atteint : {goalTitle}",
+      "goalsCompleted": "🎉 {count, plural, =1 {1 objectif atteint} other {# objectifs atteints}} !",
+      "viewGoals": "Voir les objectifs"
+    },
+    "targetTypes": {
+      "distance": "Distance",
+      "duration": "Durée",
+      "frequency": "Fréquence",
+      "elevation": "Dénivelé"
+    },
+    "periodTypes": {
+      "weekly": "Hebdomadaire",
+      "monthly": "Mensuel",
+      "yearly": "Annuel",
+      "custom": "Personnalisé"
+    },
+    "sportTypes": {
+      "run": "Course",
+      "ride": "Vélo",
+      "swim": "Natation"
+    },
+    "detail": {
+      "progress": "Progression",
+      "information": "Informations",
+      "period": "Période",
+      "daysRemaining": "Jours restants",
+      "daysRemainingValue": "{days, plural, =0 {Dernier jour !} =1 {1 jour restant} other {# jours restants}}",
+      "target": "Cible",
+      "sport": "Sport",
+      "allSports": "Tous les sports",
+      "createdAt": "Créé le",
+      "updatedAt": "Dernière mise à jour",
+      "backButton": "Retour aux objectifs",
+      "actions": {
+        "title": "Actions",
+        "edit": "Modifier l'objectif",
+        "editComingSoon": "Fonctionnalité de modification disponible dans la prochaine mise à jour",
+        "archive": "Archiver l'objectif",
+        "delete": "Supprimer l'objectif",
+        "deleteConfirm": {
+          "title": "Êtes-vous sûr ?",
+          "description": "Cette action est irréversible. Votre objectif sera définitivement supprimé.",
+          "cancel": "Annuler",
+          "confirm": "Supprimer"
+        }
+      },
+      "completed": {
+        "title": "Félicitations ! 🎉",
+        "message": "Vous avez réussi à atteindre cet objectif. Continuez comme ça !"
+      },
+      "failed": {
+        "title": "Objectif non atteint",
+        "message": "Ne vous découragez pas ! Chaque tentative est un pas en avant. Fixez un nouvel objectif et recommencez.",
+        "createNew": "Créer un nouvel objectif"
+      },
+      "error": {
+        "title": "Objectif introuvable",
+        "description": "L'objectif que vous recherchez n'existe pas ou a été supprimé.",
+        "goBack": "Retour aux objectifs"
+      }
+    }
+  },
+  "badges": {
+    "meta": {
+      "title": "Badges - StrivPath",
+      "description": "Vos récompenses et accomplissements"
+    },
+    "title": "Badges",
+    "subtitle": "Vos récompenses et accomplissements",
+    "comingSoon": {
+      "badge": "Bientôt disponible",
+      "heading": "Les récompenses arrivent bientôt",
+      "description": "Gagnez des badges pour vos étapes de distance, votre régularité et vos records personnels. Chaque effort mérite d'être célébré.",
+      "categories": {
+        "distance": "Étapes de distance",
+        "consistency": "Régularité",
+        "records": "Records personnels",
+        "elevation": "Défis de dénivelé"
+      },
+      "cta": "Créer un objectif en attendant"
+    }
+  },
+  "settings": {
+    "meta": {
+      "title": "Paramètres - StrivPath",
+      "description": "Gérez votre compte et vos préférences"
+    },
+    "title": "Paramètres",
+    "description": "Gérez votre compte et vos préférences",
+    "profile": {
+      "title": "Profil",
+      "description": "Informations de votre compte Strava",
+      "connectedVia": "Connecté via Strava",
+      "location": "Localisation",
+      "memberSince": "Membre depuis"
+    },
+    "sports": {
+      "title": "Sports",
+      "description": "Gérez les sports que vous souhaitez suivre",
+      "add": "Ajouter un sport",
+      "addSuccess": "Sport ajouté avec succès",
+      "addError": "Impossible d'ajouter le sport",
+      "removeSuccess": "Sport retiré avec succès",
+      "removeError": "Impossible de retirer le sport",
+      "lastSport": "Vous devez avoir au moins un sport sélectionné",
+      "addDialog": {
+        "title": "Ajouter un sport",
+        "description": "Sélectionnez un sport à ajouter à vos sports suivis",
+        "noSportsAvailable": "Tous les sports sont déjà suivis",
+        "cancel": "Annuler",
+        "confirm": "Ajouter le sport"
+      },
+      "removalDialog": {
+        "title": "Retirer {sport} ?",
+        "description": "Vous avez {activitiesCount} activités et {goalsCount} objectifs liés à ce sport.",
+        "noData": "Aucune activité ou objectif n'est lié à ce sport.",
+        "keepData": "Conserver mes données",
+        "keepDataDescription": "Les activités seront conservées et les objectifs seront archivés.",
+        "deleteData": "Supprimer les données",
+        "deleteDataDescription": "Toutes les activités et objectifs seront définitivement supprimés.",
+        "cancel": "Annuler",
+        "confirm": "Confirmer"
+      }
+    },
+    "sync": {
+      "title": "Synchronisation",
+      "description": "Gérez la synchronisation de vos activités",
+      "lastSync": "Dernière sync",
+      "never": "Jamais synchronisé",
+      "syncNow": "Synchroniser maintenant",
+      "syncing": "Synchronisation...",
+      "syncSuccess": "Activités synchronisées avec succès",
+      "syncError": "Impossible de synchroniser les activités",
+      "rateLimitError": "Quota Strava atteint. Attendez quelques minutes avant de réessayer.",
+      "rateLimitDailyError": "Quota journalier Strava atteint. Réessayez demain.",
+      "rateLimitMessage": "Quota Strava atteint — attendez quelques minutes avant de synchroniser à nouveau.",
+      "rateLimitDailyMessage": "Quota journalier Strava atteint — réessayez demain.",
+      "activitiesImported": "{count} activités importées",
+      "status": {
+        "pending": "En attente",
+        "fetching": "Récupération depuis Strava",
+        "storing": "Enregistrement des activités",
+        "computing": "Calcul des statistiques",
+        "done": "Terminé",
+        "failed": "Échoué"
+      }
+    },
+    "appearance": {
+      "title": "Apparence",
+      "description": "Personnalisez l'apparence de l'application",
+      "theme": {
+        "label": "Thème",
+        "light": "Clair",
+        "dark": "Sombre",
+        "system": "Système"
+      },
+      "language": {
+        "label": "Langue"
+      }
+    },
+    "session": {
+      "title": "Session",
+      "description": "Gérez votre session actuelle",
+      "logout": "Se déconnecter",
+      "loggingOut": "Déconnexion en cours..."
+    },
+    "dangerZone": {
+      "title": "Zone dangereuse",
+      "description": "Actions irréversibles",
+      "warning": "Ces actions ne peuvent pas être annulées. Procédez avec prudence.",
+      "deleteData": {
+        "title": "Supprimer toutes mes données",
+        "description": "Supprimez toutes vos activités, objectifs et historique de synchronisation. Votre compte restera actif.",
+        "button": "Supprimer mes données",
+        "success": "Toutes vos données ont été supprimées",
+        "error": "Impossible de supprimer vos données",
+        "dialog": {
+          "title": "Supprimer toutes vos données ?",
+          "description": "Cela supprimera définitivement toutes vos activités, objectifs et historique de synchronisation. Votre compte restera actif mais vous devrez re-synchroniser.",
+          "warning": "Cette action est irréversible.",
+          "cancel": "Annuler",
+          "confirm": "Supprimer toutes les données"
+        }
+      },
+      "deleteAccount": {
+        "title": "Supprimer mon compte",
+        "description": "Supprimez définitivement votre compte et toutes les données associées. Cette action est irréversible.",
+        "button": "Supprimer le compte",
+        "success": "Votre compte a été supprimé",
+        "error": "Impossible de supprimer votre compte",
+        "dialog": {
+          "title": "Supprimer votre compte ?",
+          "description": "Cela supprimera définitivement votre compte et toutes vos données, y compris les activités, objectifs et préférences.",
+          "warning": "Cette action est irréversible. Vous devrez vous reconnecter avec Strava pour utiliser l'application à nouveau.",
+          "cancel": "Annuler",
+          "confirm": "Supprimer mon compte"
+        }
+      }
+    }
+  },
+  "legal": {
+    "legalNotice": "Mentions légales",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions d'utilisation"
+  },
+  "strava": {
+    "poweredBy": { "alt": "Propulsé par Strava" },
+    "viewOnStrava": { "label": "Voir sur Strava", "ariaLabel": "Voir cette activité sur Strava" },
+    "connectButton": { "alt": "Se connecter avec Strava" }
+  },
+  "errors": {
+    "unexpected": {
+      "title": "Une erreur s'est produite",
+      "description": "Une erreur inattendue s'est produite. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "goHome": "Aller aux objectifs"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas",
+      "goHome": "Retourner à l'accueil"
+    }
+  },
+  "sportDashboard": {
+    "header": {
+      "title": "Tableau de bord {sport}",
+      "lastSync": "Dernière sync {time}",
+      "neverSynced": "Jamais synchronisé"
+    },
+    "performanceOverview": {
+      "title": "Performance",
+      "tabs": {
+        "volume": "Volume",
+        "averages": "Moyennes"
+      },
+      "periods": {
+        "week": "Semaine",
+        "month": "Mois",
+        "year": "Année"
+      }
+    },
+    "stats": {
+      "title": "Statistiques",
+      "distance": "Distance",
+      "duration": "Durée",
+      "sessions": "Séances",
+      "elevation": "Dénivelé",
+      "periods": {
+        "week": "Semaine",
+        "month": "Mois",
+        "year": "Année"
+      }
+    },
+    "averageMetrics": {
+      "title": "Métriques moyennes",
+      "pace": "Allure moy.",
+      "speed": "Vitesse moy.",
+      "heartRate": "FC moyenne",
+      "cadence": "Cadence moy.",
+      "power": "Puissance moy.",
+      "periods": {
+        "week": "Semaine",
+        "month": "Mois",
+        "year": "Année"
+      }
+    },
+    "progression": {
+      "title": "Ma progression",
+      "empty": "Aucune donnée disponible pour cette période",
+      "metrics": {
+        "distance": "Distance",
+        "duration": "Durée",
+        "pace": "Allure",
+        "speed": "Vitesse",
+        "sessions": "Séances",
+        "elevation": "Dénivelé"
+      },
+      "periods": {
+        "weekly": "Hebdomadaire",
+        "monthly": "Mensuel"
+      }
+    },
+    "goals": {
+      "title": "Objectifs",
+      "viewAll": "Voir tous les objectifs",
+      "empty": {
+        "title": "Aucun objectif pour l'instant",
+        "description": "Fixez-vous des objectifs pour suivre votre progression et rester motivé.",
+        "cta": "Créer un objectif"
+      }
+    },
+    "records": {
+      "title": "Records personnels",
+      "empty": "Aucun record pour l'instant. Continuez à vous entraîner pour établir vos premiers records !",
+      "achievedOn": "Réalisé le {date}",
+      "types": {
+        "longest_distance": "Distance la plus longue",
+        "longest_duration": "Durée la plus longue",
+        "most_elevation": "Dénivelé maximal",
+        "best_pace": "Meilleure allure",
+        "best_speed": "Meilleure vitesse"
+      }
+    },
+    "recentActivities": {
+      "empty": "Aucune activité récente pour ce sport"
+    },
+    "empty": {
+      "title": "Aucune activité pour l'instant",
+      "description": "Commencez à enregistrer des activités {sport} sur Strava et synchronisez-les pour voir votre tableau de bord."
+    }
+  },
+  "dashboard": {
+    "greeting": "Bonjour, {name}",
+    "greetingFallback": "Bonjour",
+    "sync": {
+      "lastSync": "Dernière sync {time}",
+      "never": "Jamais synchronisé",
+      "syncNow": "Synchroniser",
+      "syncing": "Synchronisation..."
+    },
+    "stats": {
+      "title": "Statistiques",
+      "totalTime": "Temps d'entraînement",
+      "activityCount": "Activités",
+      "averageTime": "Moy. par séance",
+      "periods": {
+        "week": "Semaine",
+        "month": "Mois",
+        "year": "Année"
+      }
+    },
+    "goals": {
+      "title": "Objectifs",
+      "viewAll": "Voir tout",
+      "daysLeft": "{count} jours restants",
+      "expired": "Expiré",
+      "today": "Se termine aujourd'hui",
+      "ahead": "En avance",
+      "behind": "En retard",
+      "onTrack": "Dans les temps",
+      "oneMore": "Plus qu'un !",
+      "remaining": "{count} restants",
+      "completed": "Terminé !",
+      "progressComplete": "{percentage} % accompli",
+      "daysRemaining": {
+        "expired": "Expiré",
+        "today": "Se termine aujourd'hui",
+        "tomorrow": "1 jour restant",
+        "days": "{count} jours restants"
+      },
+      "chart": {
+        "progress": "Progression",
+        "target": "Cible"
+      },
+      "empty": {
+        "title": "Définissez votre premier objectif",
+        "description": "Suivez votre progression et restez motivé",
+        "cta": "Créer un objectif"
+      },
+      "suggestions": {
+        "title": "Suggestions rapides"
+      }
+    },
+    "heatmap": {
+      "title": "Calendrier d'activité",
+      "totalActivities": "{count} activités",
+      "thisYear": "cette année",
+      "legend": {
+        "noActivity": "Aucune activité",
+        "withActivity": "Avec activité"
+      }
+    },
+    "sportDistribution": {
+      "title": "Répartition par sport",
+      "thisMonth": "ce mois-ci"
+    },
+    "recentActivities": {
+      "title": "Activités récentes",
+      "viewAll": "Voir tout",
+      "empty": "Aucune activité récente"
+    },
+    "newUser": {
+      "title": "Importez vos activités Strava",
+      "description": "Synchronisez vos données pour commencer à suivre vos performances et définir vos objectifs.",
+      "cta": "Synchroniser maintenant"
+    },
+    "error": {
+      "title": "Impossible de charger le tableau de bord",
+      "description": "Une erreur s'est produite lors du chargement de votre tableau de bord. Veuillez réessayer.",
+      "networkDescription": "Impossible de se connecter au serveur. Vérifiez votre connexion et réessayez.",
+      "retry": "Réessayer",
+      "home": "Accueil"
+    }
+  }
+}

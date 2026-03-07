@@ -11,7 +11,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-const LOCALES = [{ code: 'en', label: 'English', flag: '🇺🇸' }];
+const LOCALES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+];
 
 export function LanguageSwitcher() {
   const locale = useLocale();
@@ -19,8 +22,7 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
 
   const switchLocale = (newLocale: string) => {
-    const newPath = pathname.replace(`/${locale}`, `/${newLocale}`);
-    router.push(newPath);
+    router.replace(pathname, { locale: newLocale });
   };
 
   return (

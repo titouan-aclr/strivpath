@@ -17,7 +17,10 @@ const THEMES = [
   { value: 'system', icon: Monitor, labelKey: 'system' },
 ] as const;
 
-const LOCALES = [{ code: 'en', label: 'English', flag: '🇺🇸' }];
+const LOCALES = [
+  { code: 'en', label: 'English', flag: '🇬🇧' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷' },
+];
 
 export function AppearanceSection() {
   const t = useTranslations('settings.appearance');
@@ -32,8 +35,7 @@ export function AppearanceSection() {
   }, []);
 
   const handleLocaleChange = (newLocale: string) => {
-    router.push(pathname, { locale: newLocale });
-    router.refresh();
+    router.replace(pathname, { locale: newLocale });
   };
 
   return (
