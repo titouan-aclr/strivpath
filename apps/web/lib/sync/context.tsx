@@ -124,7 +124,17 @@ export function SyncContextProvider({ children }: SyncContextProviderProps) {
         }
 
         toast.success(t('settings.sync.syncSuccess'));
-        void client.refetchQueries({ include: ['DashboardData', 'Goals', 'ActiveGoals'] });
+        void client.refetchQueries({
+          include: [
+            'DashboardData',
+            'Goals',
+            'ActiveGoals',
+            'SportPeriodStatistics',
+            'SportProgressionData',
+            'SportAverageMetrics',
+            'PersonalRecords',
+          ],
+        });
       }
 
       if (syncHistory.status === SyncStatus.Failed) {
