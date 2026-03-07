@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 import { ProgressBar } from './progress-bar';
 import { GoalStatusBadge } from './goal-status-badge';
 import { GoalDeleteDialog } from './goal-delete-dialog';
-import { UNIT_LABELS, getGoalStatusColors, normalizeGoalValue } from './constants';
+import { UNIT_LABELS, getGoalStatusColors } from './constants';
 import { getSportIcon } from '@/lib/sports/config';
 import { GoalTargetType } from '@/gql/graphql';
 import type { GoalCardFragment } from '@/gql/graphql';
@@ -110,8 +110,8 @@ export function GoalCard({ goal, onArchive, onDelete, disabled }: GoalCardProps)
 
           <CardContent className="space-y-4">
             <ProgressBar
-              current={normalizeGoalValue(goal.currentValue, goal.targetType)}
-              target={normalizeGoalValue(goal.targetValue, goal.targetType)}
+              current={goal.currentValue}
+              target={goal.targetValue}
               unit={getUnitLabel(goal.targetType)}
               status={goal.status}
               percentage={goal.progressPercentage}

@@ -1302,4 +1302,117 @@ describe('ActivityService', () => {
       });
     });
   });
+
+  describe('fetchAndStoreSingleActivity', () => {
+    const userId = 1;
+    const stravaActivityId = 99999;
+
+    const mockActivityDetail = {
+      id: stravaActivityId,
+      name: 'Morning Run',
+      type: 'Run',
+      sport_type: 'Run',
+      distance: 5000,
+      moving_time: 1800,
+      elapsed_time: 1900,
+      total_elevation_gain: 50,
+      start_date: '2024-01-15T08:00:00Z',
+      start_date_local: '2024-01-15T09:00:00Z',
+      timezone: '(GMT+01:00) Europe/Paris',
+      average_speed: 2.77,
+      max_speed: 3.5,
+      kudos_count: 0,
+      has_kudoed: false,
+    };
+
+    it('should return silently when user preferences are not found', async () => {
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue(null);
+
+      await service.fetchAndStoreSingleActivity(userId, stravaActivityId);
+
+      expect(stravaService.getActivityDetail).not.toHaveBeenCalled();
+      expect(prismaService.activity.upsert).not.toHaveBeenCalled();
+      expect(goalProgressUpdateService.updateAllGoalsForUser).not.toHaveBeenCalled();
+    });
+
+    it('should return silently when selected sports list is empty', async () => {
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId,
+        selectedSports: [],
+      });
+
+      await service.fetchAndStoreSingleActivity(userId, stravaActivityId);
+
+      expect(stravaService.getActivityDetail).not.toHaveBeenCalled();
+      expect(prismaService.activity.upsert).not.toHaveBeenCalled();
+      expect(goalProgressUpdateService.updateAllGoalsForUser).not.toHaveBeenCalled();
+    });
+
+    it('should return silently when activity type is not in selected sports', async () => {
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId,
+        selectedSports: [SportType.RIDE],
+      });
+      mockStravaService.getActivityDetail.mockResolvedValue({ ...mockActivityDetail, type: 'Run' });
+
+      await service.fetchAndStoreSingleActivity(userId, stravaActivityId);
+
+      expect(stravaService.getActivityDetail).toHaveBeenCalledWith(userId, stravaActivityId);
+      expect(prismaService.activity.upsert).not.toHaveBeenCalled();
+      expect(goalProgressUpdateService.updateAllGoalsForUser).not.toHaveBeenCalled();
+    });
+
+    it('should upsert activity and update goals for a matching sport', async () => {
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId,
+        selectedSports: [SportType.RUN],
+      });
+      mockStravaService.getActivityDetail.mockResolvedValue(mockActivityDetail);
+      mockPrismaService.activity.upsert.mockResolvedValue({});
+      mockGoalProgressUpdateService.updateAllGoalsForUser.mockResolvedValue({
+        totalGoals: 1,
+        successCount: 1,
+        failureCount: 0,
+        completedGoalIds: [],
+        failedGoalIds: [],
+        errors: [],
+      });
+
+      await service.fetchAndStoreSingleActivity(userId, stravaActivityId);
+
+      expect(stravaService.getActivityDetail).toHaveBeenCalledWith(userId, stravaActivityId);
+      expect(prismaService.activity.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { stravaId: BigInt(stravaActivityId) },
+          create: expect.objectContaining({
+            stravaId: BigInt(stravaActivityId),
+            userId,
+            name: 'Morning Run',
+            type: SportType.RUN,
+          }),
+          update: expect.objectContaining({
+            name: 'Morning Run',
+            type: SportType.RUN,
+          }),
+        }),
+      );
+      expect(goalProgressUpdateService.updateAllGoalsForUser).toHaveBeenCalledWith(
+        userId,
+        new Date(mockActivityDetail.start_date),
+      );
+    });
+
+    it('should propagate exceptions thrown by getActivityDetail', async () => {
+      mockPrismaService.userPreferences.findUnique.mockResolvedValue({
+        userId,
+        selectedSports: [SportType.RUN],
+      });
+      mockStravaService.getActivityDetail.mockRejectedValue(new Error('Strava API error'));
+
+      await expect(service.fetchAndStoreSingleActivity(userId, stravaActivityId)).rejects.toThrow('Strava API error');
+
+      expect(prismaService.activity.upsert).not.toHaveBeenCalled();
+      expect(goalProgressUpdateService.updateAllGoalsForUser).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -44,8 +44,8 @@ const createMockGoal = (overrides?: Partial<Goal>): Goal => ({
   startDate: new Date('2024-01-01T00:00:00.000Z'),
   endDate: new Date('2024-01-31T00:00:00.000Z'),
   targetType: GoalTargetType.Distance,
-  targetValue: 50000,
-  currentValue: 30000,
+  targetValue: 50,
+  currentValue: 30,
   progressPercentage: 60,
   status: GoalStatus.Active,
   periodType: GoalPeriodType.Monthly,
@@ -133,7 +133,7 @@ describe('GoalDetailsCard', () => {
     it('should display target value for DISTANCE', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Distance,
-        targetValue: 100000,
+        targetValue: 100,
       });
       render(<GoalDetailsCard goal={goal} />);
 
@@ -144,7 +144,7 @@ describe('GoalDetailsCard', () => {
     it('should display target value for DURATION', () => {
       const goal = createMockGoal({
         targetType: GoalTargetType.Duration,
-        targetValue: 72000,
+        targetValue: 20,
       });
       render(<GoalDetailsCard goal={goal} />);
 

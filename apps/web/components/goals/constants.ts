@@ -102,9 +102,6 @@ export const UNIT_LABELS = {
   [GoalTargetType.Frequency]: 'sessions',
 };
 
-// Re-export normalization function from lib for convenience
-export { normalizeGoalValue } from '@/lib/goals/formatting';
-
 // Goal status color configuration
 export interface GoalStatusColorConfig {
   text: string;

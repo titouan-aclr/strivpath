@@ -38,8 +38,8 @@ const createMockGoal = (overrides: Partial<SecondaryGoal> = {}): SecondaryGoal =
   id: '1',
   title: 'Run 50km this month',
   targetType: GoalTargetType.Distance,
-  targetValue: 50000,
-  currentValue: 25000,
+  targetValue: 50,
+  currentValue: 25,
   startDate: new Date('2024-01-01'),
   endDate: new Date('2024-01-31'),
   sportType: SportType.Run,
@@ -155,8 +155,8 @@ describe('SecondaryGoalCard', () => {
       <SecondaryGoalCard
         goal={createMockGoal({
           targetType: GoalTargetType.Distance,
-          currentValue: 25500,
-          targetValue: 50000,
+          currentValue: 25.5,
+          targetValue: 50,
         })}
       />,
     );

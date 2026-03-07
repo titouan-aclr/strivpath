@@ -36,7 +36,7 @@ describe('getUnitLabel', () => {
 describe('formatCurrentValue', () => {
   it('should format DISTANCE with one decimal', () => {
     const goal = {
-      currentValue: 42567,
+      currentValue: 42.567,
       targetType: GoalTargetType.Distance,
     } as Goal;
     expect(formatCurrentValue(goal)).toBe('42.6 km');
@@ -44,7 +44,7 @@ describe('formatCurrentValue', () => {
 
   it('should format DURATION with one decimal', () => {
     const goal = {
-      currentValue: 44442,
+      currentValue: 12.34,
       targetType: GoalTargetType.Duration,
     } as Goal;
     expect(formatCurrentValue(goal)).toBe('12.3 hours');
@@ -70,18 +70,18 @@ describe('formatCurrentValue', () => {
 describe('formatTargetValue', () => {
   it('should format DISTANCE as integer', () => {
     const goal = {
-      targetValue: 100567,
+      targetValue: 100,
       targetType: GoalTargetType.Distance,
     } as Goal;
-    expect(formatTargetValue(goal)).toBe('101 km');
+    expect(formatTargetValue(goal)).toBe('100 km');
   });
 
   it('should format DURATION as integer', () => {
     const goal = {
-      targetValue: 92842,
+      targetValue: 10,
       targetType: GoalTargetType.Duration,
     } as Goal;
-    expect(formatTargetValue(goal)).toBe('26 hours');
+    expect(formatTargetValue(goal)).toBe('10 hours');
   });
 
   it('should format ELEVATION as integer', () => {
@@ -236,11 +236,11 @@ describe('getProgressColorForChart', () => {
 
 describe('formatValueOnly', () => {
   it('should format DISTANCE with one decimal', () => {
-    expect(formatValueOnly(42567, GoalTargetType.Distance)).toBe('42.6');
+    expect(formatValueOnly(42.567, GoalTargetType.Distance)).toBe('42.6');
   });
 
   it('should format DURATION with one decimal', () => {
-    expect(formatValueOnly(44442, GoalTargetType.Duration)).toBe('12.3');
+    expect(formatValueOnly(12.34, GoalTargetType.Duration)).toBe('12.3');
   });
 
   it('should format ELEVATION as integer', () => {

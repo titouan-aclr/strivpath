@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { GoalTargetType, GoalStatus } from '@/gql/graphql';
 import { getProgressStatusFromGoal } from '@/lib/dashboard/utils';
 import type { PrimaryGoal } from '@/lib/dashboard/types';
-import { UNIT_LABELS, normalizeGoalValue } from '@/components/goals/constants';
+import { UNIT_LABELS } from '@/components/goals/constants';
 import { getSportIcon, type SportColorConfig } from '@/lib/sports/config';
 import { GoalProgressChart } from './goal-progress-chart';
 import { SessionDotsProgress } from './session-dots-progress';
@@ -31,8 +31,8 @@ export function PrimaryGoalCard({ goal, className, sportColor }: PrimaryGoalCard
   const statusColors = getEffectiveStatusColors(goal.status, sportColor);
   const activeSportColor = sportColor && goal.status === GoalStatus.Active ? sportColor : undefined;
 
-  const displayCurrentValue = normalizeGoalValue(goal.currentValue, goal.targetType);
-  const displayTargetValue = normalizeGoalValue(goal.targetValue, goal.targetType);
+  const displayCurrentValue = goal.currentValue;
+  const displayTargetValue = goal.targetValue;
 
   const daysRemainingText =
     goal.isExpired || goal.daysRemaining === null

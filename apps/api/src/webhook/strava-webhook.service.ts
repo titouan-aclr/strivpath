@@ -38,7 +38,24 @@ export class StravaWebhookService {
       return;
     }
 
+    if (event.object_type === 'activity' && (event.aspect_type === 'create' || event.aspect_type === 'update')) {
+      await this.handleActivityCreateOrUpdate(event.object_id, event.owner_id);
+      return;
+    }
+
     this.logger.log(`Received ${event.object_type} ${event.aspect_type} event for owner ${event.owner_id}`);
+  }
+
+  private async handleActivityCreateOrUpdate(stravaActivityId: number, stravaOwnerId: number): Promise<void> {
+    const user = await this.userService.findByStravaId(stravaOwnerId);
+
+    if (!user) {
+      this.logger.warn(`No user found for Strava athlete ${stravaOwnerId} during activity sync`);
+      return;
+    }
+
+    await this.activityService.fetchAndStoreSingleActivity(user.id, stravaActivityId);
+    this.logger.log(`Synced activity ${stravaActivityId} for user ${user.id} (Strava athlete ${stravaOwnerId})`);
   }
 
   private async handleActivityDeletion(stravaActivityId: number, stravaOwnerId: number): Promise<void> {
