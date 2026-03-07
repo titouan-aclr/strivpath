@@ -108,6 +108,8 @@ model SyncHistory {
   completedAt          DateTime?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
 }
 
 model RefreshToken {

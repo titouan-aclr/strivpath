@@ -1523,7 +1523,15 @@ describe('SyncContext', () => {
       });
 
       expect(mockRefetchQueries).toHaveBeenCalledWith({
-        include: ['DashboardData', 'Goals', 'ActiveGoals'],
+        include: [
+          'DashboardData',
+          'Goals',
+          'ActiveGoals',
+          'SportPeriodStatistics',
+          'SportProgressionData',
+          'SportAverageMetrics',
+          'PersonalRecords',
+        ],
       });
     });
 
@@ -1665,7 +1673,15 @@ describe('SyncContext', () => {
       });
 
       expect(mockRefetchQueries).toHaveBeenCalledWith({
-        include: ['DashboardData', 'Goals', 'ActiveGoals'],
+        include: [
+          'DashboardData',
+          'Goals',
+          'ActiveGoals',
+          'SportPeriodStatistics',
+          'SportProgressionData',
+          'SportAverageMetrics',
+          'PersonalRecords',
+        ],
       });
     });
 
