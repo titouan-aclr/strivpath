@@ -78,10 +78,14 @@ export function GoalProgressChart({
     const isSameDay = (d1: Date, d2: Date) =>
       d1.getFullYear() === d2.getFullYear() && d1.getMonth() === d2.getMonth() && d1.getDate() === d2.getDate();
 
+    const totalDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const intervalDays = Math.max(1, Math.ceil(totalDays / 8));
+
     const data: ChartDataPoint[] = [];
     const current = new Date(start);
     current.setHours(0, 0, 0, 0);
     let lastKnownValue = 0;
+    let dayIndex = 0;
 
     while (current <= end) {
       const dateKey = current.toISOString().split('T')[0];
@@ -93,9 +97,10 @@ export function GoalProgressChart({
 
       const isKeyDate =
         dataMap.has(dateKey) ||
-        current.getTime() === new Date(start).setHours(0, 0, 0, 0) ||
+        dayIndex === 0 ||
         current.getTime() === new Date(end).setHours(0, 0, 0, 0) ||
-        (isInPast && isSameDay(current, today));
+        (isInPast && isSameDay(current, today)) ||
+        dayIndex % intervalDays === 0;
 
       if (isKeyDate) {
         data.push({
@@ -107,6 +112,7 @@ export function GoalProgressChart({
       }
 
       current.setDate(current.getDate() + 1);
+      dayIndex++;
     }
 
     if (data.length === 0) {
