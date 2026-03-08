@@ -1,18 +1,17 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { TrendingDown, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export function GoalFailedMessage() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations('goals.detail.failed');
 
   const handleCreateNew = () => {
-    router.push(`/${locale}/goals/new`);
+    router.push('/goals/new');
   };
 
   return (

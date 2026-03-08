@@ -2,7 +2,7 @@
 
 import { Menu } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 
 import { LanguageSwitcher } from '@/components/language-switcher';
 import { ModeToggle } from '@/components/mode-toggle';
@@ -12,27 +12,29 @@ interface HeaderProps {
   onMenuOpen: () => void;
 }
 
+const SECTION_TRANSLATION_KEYS: Record<string, string> = {
+  activities: 'navigation.activities',
+  goals: 'navigation.goals',
+  badges: 'navigation.badges',
+};
+
 export function Header({ onMenuOpen }: HeaderProps) {
   const t = useTranslations();
   const pathname = usePathname();
 
-  const pathSegments = pathname.split('/').filter(s => Boolean(s) && !['en', 'fr'].includes(s));
+  const pathSegments = pathname.split('/').filter(Boolean);
 
   const getBreadcrumbText = () => {
     if (pathSegments.length === 0) {
-      return 'Dashboard';
+      return t('navigation.dashboard');
     }
 
     if (pathSegments.length === 2 && /^\d+$/.test(pathSegments[1])) {
-      const singularMap: Record<string, string> = {
-        activities: 'Activity',
-        goals: 'Goal',
-        badges: 'Badge',
-      };
       const section = pathSegments[0];
       const id = pathSegments[1];
-      const label = singularMap[section] || section;
-      return `${label.charAt(0).toUpperCase() + label.slice(1)} ${id}`;
+      const key = SECTION_TRANSLATION_KEYS[section];
+      const label = key ? t(key) : section;
+      return `${label} ${id}`;
     }
 
     return pathSegments.map(segment => segment.replace(/-/g, ' ')).join(' / ');

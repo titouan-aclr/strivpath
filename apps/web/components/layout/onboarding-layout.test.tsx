@@ -6,7 +6,7 @@ const { mockUsePathname } = vi.hoisted(() => ({
   mockUsePathname: vi.fn<() => string>(() => '/onboarding'),
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   usePathname: mockUsePathname,
 }));
 
@@ -74,15 +74,15 @@ describe('OnboardingLayout', () => {
       expect(screen.getByTestId('step-progress-bar')).toHaveAttribute('data-step', '2');
     });
 
-    it('should strip the English locale prefix before resolving step', () => {
-      mockUsePathname.mockReturnValue('/en/onboarding');
+    it('should pass step index 0 for /onboarding without locale prefix', () => {
+      mockUsePathname.mockReturnValue('/onboarding');
       render(<OnboardingLayout>Content</OnboardingLayout>);
 
       expect(screen.getByTestId('step-progress-bar')).toHaveAttribute('data-step', '0');
     });
 
-    it('should strip the French locale prefix before resolving step', () => {
-      mockUsePathname.mockReturnValue('/fr/sync');
+    it('should pass step index 1 for /sync without locale prefix', () => {
+      mockUsePathname.mockReturnValue('/sync');
       render(<OnboardingLayout>Content</OnboardingLayout>);
 
       expect(screen.getByTestId('step-progress-bar')).toHaveAttribute('data-step', '1');
