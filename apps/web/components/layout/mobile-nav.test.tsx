@@ -12,8 +12,8 @@ vi.mock('next/image', () => ({
   default: ({ src, alt }: { src: string; alt: string }) => <img src={src} alt={alt} />,
 }));
 
-vi.mock('next/link', () => ({
-  default: ({
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({
     href,
     children,
     onClick,

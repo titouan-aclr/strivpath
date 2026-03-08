@@ -22,8 +22,8 @@ vi.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => mockUseTranslations(namespace),
 }));
 
-vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href} data-testid="create-goal-link">
       {children}
     </a>

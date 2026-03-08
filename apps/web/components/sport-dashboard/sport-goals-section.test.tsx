@@ -19,6 +19,14 @@ vi.mock('next-intl', () => ({
   },
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('@/lib/sport-dashboard/hooks/use-sport-goals', () => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   useSportGoals: (...args: unknown[]) => mockUseSportGoals(...args),

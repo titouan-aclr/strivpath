@@ -45,8 +45,8 @@ vi.mock('next-intl', () => ({
   useLocale: () => mockUseLocale(),
 }));
 
-vi.mock('next/link', () => ({
-  default: ({ children, href }: { children: React.ReactNode; href: string }) => (
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ children, href }: { children: React.ReactNode; href: string }) => (
     <a href={href} data-testid="goal-card-link">
       {children}
     </a>

@@ -20,8 +20,8 @@ vi.mock('next-intl', () => ({
   },
 }));
 
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
 }));
 
 describe('BadgesComingSoon', () => {

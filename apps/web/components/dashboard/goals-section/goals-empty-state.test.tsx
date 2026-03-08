@@ -13,6 +13,14 @@ vi.mock('next-intl', () => ({
   },
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
 describe('GoalsEmptyState', () => {
   it('should render title', () => {
     render(<GoalsEmptyState />);

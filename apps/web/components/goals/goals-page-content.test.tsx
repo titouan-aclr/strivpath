@@ -132,8 +132,8 @@ interface MockLinkProps {
   [key: string]: unknown;
 }
 
-vi.mock('next/link', () => ({
-  default: ({ href, children, ...props }: MockLinkProps) => (
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, ...props }: MockLinkProps) => (
     <a href={href} {...props}>
       {children}
     </a>
