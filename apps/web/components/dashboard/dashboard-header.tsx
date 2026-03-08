@@ -5,7 +5,7 @@ import { RefreshCw, Loader2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSync } from '@/lib/sync/context';
-import { formatTimeAgo } from '@/lib/dashboard/utils';
+import { formatTimeAgo, type TimeAgoTranslations } from '@/lib/dashboard/utils';
 import type { DashboardUser, DashboardSyncHistory } from '@/lib/dashboard/types';
 
 export interface DashboardHeaderProps {
@@ -16,6 +16,7 @@ export interface DashboardHeaderProps {
 
 export function DashboardHeader({ user, syncHistory, loading }: DashboardHeaderProps) {
   const t = useTranslations('dashboard');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
   const { isSyncing, isPolling, triggerSync } = useSync();
 
@@ -31,7 +32,16 @@ export function DashboardHeader({ user, syncHistory, loading }: DashboardHeaderP
 
   const greeting = user?.firstname ? t('greeting', { name: user.firstname }) : t('greetingFallback');
 
-  const lastSyncText = syncHistory?.completedAt ? formatTimeAgo(syncHistory.completedAt, locale) : null;
+  const timeAgoTranslations: TimeAgoTranslations = {
+    justNow: tCommon('timeAgo.justNow'),
+    minutesAgo: (count: number) => tCommon('timeAgo.minutesAgo', { count }),
+    hoursAgo: (count: number) => tCommon('timeAgo.hoursAgo', { count }),
+    daysAgo: (count: number) => tCommon('timeAgo.daysAgo', { count }),
+  };
+
+  const lastSyncText = syncHistory?.completedAt
+    ? formatTimeAgo(syncHistory.completedAt, timeAgoTranslations, locale)
+    : null;
 
   return (
     <header className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
