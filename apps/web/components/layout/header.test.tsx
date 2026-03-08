@@ -7,7 +7,7 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   usePathname: vi.fn(),
 }));
 
@@ -19,12 +19,12 @@ vi.mock('@/components/mode-toggle', () => ({
   ModeToggle: () => <div data-testid="mode-toggle" />,
 }));
 
-import * as navigation from 'next/navigation';
+import * as navigation from '@/i18n/navigation';
 
 describe('Header', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/dashboard');
+    vi.mocked(navigation.usePathname).mockReturnValue('/dashboard');
   });
 
   it('should render a header landmark', () => {
@@ -71,7 +71,7 @@ describe('Header', () => {
   });
 
   it('should render a breadcrumb text element', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/dashboard');
+    vi.mocked(navigation.usePathname).mockReturnValue('/dashboard');
     render(<Header onMenuOpen={vi.fn()} />);
 
     expect(screen.getByText('dashboard')).toBeInTheDocument();
@@ -81,18 +81,18 @@ describe('Header', () => {
     vi.mocked(navigation.usePathname).mockReturnValue('/');
     render(<Header onMenuOpen={vi.fn()} />);
 
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('navigation.dashboard')).toBeInTheDocument();
   });
 
-  it('should render singular label and id for detail routes', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/activities/42');
+  it('should render translated label and id for detail routes', () => {
+    vi.mocked(navigation.usePathname).mockReturnValue('/activities/42');
     render(<Header onMenuOpen={vi.fn()} />);
 
-    expect(screen.getByText('Activity 42')).toBeInTheDocument();
+    expect(screen.getByText('navigation.activities 42')).toBeInTheDocument();
   });
 
   it('should join segments with slash for nested routes without numeric id', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/sports/running');
+    vi.mocked(navigation.usePathname).mockReturnValue('/sports/running');
     render(<Header onMenuOpen={vi.fn()} />);
 
     expect(screen.getByText('sports / running')).toBeInTheDocument();

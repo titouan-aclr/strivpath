@@ -9,12 +9,9 @@ vi.mock('next-intl', () => ({
   useTranslations: () => (key: string) => key,
 }));
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   usePathname: vi.fn(),
-}));
-
-vi.mock('next/link', () => ({
-  default: ({
+  Link: ({
     href,
     children,
     onClick,
@@ -33,7 +30,7 @@ vi.mock('next/link', () => ({
 
 vi.mock('@/lib/sports/hooks');
 
-import * as navigation from 'next/navigation';
+import * as navigation from '@/i18n/navigation';
 import * as sportsHooks from '@/lib/sports/hooks';
 
 const mockRunConfig = SPORT_CONFIGS[SportType.Run];
@@ -42,7 +39,7 @@ const mockRideConfig = SPORT_CONFIGS[SportType.Ride];
 describe('SidebarNavContent', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/dashboard');
+    vi.mocked(navigation.usePathname).mockReturnValue('/dashboard');
     vi.mocked(sportsHooks.useAvailableSports).mockReturnValue({
       sportConfigs: [],
       availableSports: [],
@@ -114,7 +111,7 @@ describe('SidebarNavContent', () => {
   });
 
   it('should apply bg-primary/10 class to the active main nav link', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/dashboard');
+    vi.mocked(navigation.usePathname).mockReturnValue('/dashboard');
     render(<SidebarNavContent />);
 
     const dashboardLink = screen.getByRole('link', { name: /navigation\.dashboard/i });
@@ -122,7 +119,7 @@ describe('SidebarNavContent', () => {
   });
 
   it('should not apply bg-primary/10 class to non-active main nav links', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/dashboard');
+    vi.mocked(navigation.usePathname).mockReturnValue('/dashboard');
     render(<SidebarNavContent />);
 
     const activitiesLink = screen.getByRole('link', { name: /navigation\.activities/i });
@@ -130,7 +127,7 @@ describe('SidebarNavContent', () => {
   });
 
   it('should apply bg-primary/10 class to the Settings link when on /settings path', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/settings');
+    vi.mocked(navigation.usePathname).mockReturnValue('/settings');
     render(<SidebarNavContent />);
 
     const settingsLink = screen.getByRole('link', { name: /navigation\.settings/i });
@@ -138,7 +135,7 @@ describe('SidebarNavContent', () => {
   });
 
   it('should apply bg-primary/10 class to an active sport link', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/sports/running');
+    vi.mocked(navigation.usePathname).mockReturnValue('/sports/running');
     vi.mocked(sportsHooks.useAvailableSports).mockReturnValue({
       sportConfigs: [mockRunConfig, mockRideConfig],
       availableSports: [SportType.Run, SportType.Ride],
@@ -151,7 +148,7 @@ describe('SidebarNavContent', () => {
   });
 
   it('should not apply bg-primary/10 class to an inactive sport link', () => {
-    vi.mocked(navigation.usePathname).mockReturnValue('/en/sports/running');
+    vi.mocked(navigation.usePathname).mockReturnValue('/sports/running');
     vi.mocked(sportsHooks.useAvailableSports).mockReturnValue({
       sportConfigs: [mockRunConfig, mockRideConfig],
       availableSports: [SportType.Run, SportType.Ride],
