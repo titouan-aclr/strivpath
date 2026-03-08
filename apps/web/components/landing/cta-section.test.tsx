@@ -18,8 +18,8 @@ vi.mock('@/components/ui/blur-fade', () => ({
   BlurFade: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
-vi.mock('next/link', () => ({
-  default: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
 }));
 
 describe('CtaSection', () => {

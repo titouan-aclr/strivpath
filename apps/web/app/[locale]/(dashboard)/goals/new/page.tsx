@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '@/i18n/navigation';
 import { GoalCreationProgress } from '@/components/goals/goal-creation-progress';
 import { GoalTemplateSelector } from '@/components/goals/goal-template-selector';
 import { GoalForm } from '@/components/goals/goal-form';

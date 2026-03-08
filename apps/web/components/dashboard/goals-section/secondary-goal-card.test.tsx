@@ -30,6 +30,14 @@ vi.mock('next-intl', () => ({
   },
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('@/lib/dashboard/utils', () => ({
   getProgressStatusFromGoal: vi.fn().mockReturnValue('onTrack'),
 }));

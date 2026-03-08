@@ -2,7 +2,7 @@
 
 import { useTranslations } from 'next-intl';
 import { AlertCircle, RefreshCw, ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ActivityHeader } from '@/components/activities/detail/activity-header';

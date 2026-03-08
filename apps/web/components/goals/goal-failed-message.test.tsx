@@ -23,13 +23,12 @@ const mockUseTranslations = (namespace?: string) => (key: string) => {
   return translations[fullKey] || key;
 };
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
 vi.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => mockUseTranslations(namespace),
-  useLocale: () => 'en',
 }));
 
 describe('GoalFailedMessage', () => {
@@ -80,7 +79,7 @@ describe('GoalFailedMessage', () => {
     const button = screen.getByRole('button', { name: /create new goal/i });
     await user.click(button);
 
-    expect(mockPush).toHaveBeenCalledWith('/en/goals/new');
+    expect(mockPush).toHaveBeenCalledWith('/goals/new');
   });
 
   it('should have correct text colors for light and dark mode', () => {

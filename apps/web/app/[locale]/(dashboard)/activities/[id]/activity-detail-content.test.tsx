@@ -24,6 +24,14 @@ vi.mock('next-intl', () => ({
   },
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('@/lib/activities/use-activity-detail');
 vi.mock('@/components/activities/detail/activity-header', () => ({
   ActivityHeader: () => <div data-testid="activity-header">Activity Header</div>,

@@ -1,18 +1,17 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
-import { useLocale, useTranslations } from 'next-intl';
+import { useRouter } from '@/i18n/navigation';
+import { useTranslations } from 'next-intl';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
 export function GoalDetailError() {
   const router = useRouter();
-  const locale = useLocale();
   const t = useTranslations('goals.detail.error');
 
   const handleGoBack = () => {
-    router.push(`/${locale}/goals`);
+    router.push('/goals');
   };
 
   return (

@@ -10,7 +10,8 @@ export default function proxy(request: NextRequest) {
   const response = intlMiddleware(request);
 
   const { pathname } = request.nextUrl;
-  const pathnameWithoutLocale = pathname.replace(/^\/en/, '') || '/';
+  const localePattern = new RegExp(`^/(${routing.locales.join('|')})`);
+  const pathnameWithoutLocale = pathname.replace(localePattern, '') || '/';
   const authToken = request.cookies.get('Authentication')?.value;
   const refreshToken = request.cookies.get('RefreshToken')?.value;
   const isAuthenticated = !!authToken || !!refreshToken;

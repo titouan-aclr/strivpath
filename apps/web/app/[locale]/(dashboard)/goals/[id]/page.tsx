@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { GoalStatus } from '@/gql/graphql';
 import { useGoalDetail } from '@/lib/goals/use-goal-detail';
 import { AlertCircle, ArrowLeft } from 'lucide-react';
-import { useLocale, useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+import { Link } from '@/i18n/navigation';
 import { use, useEffect, useRef, useState } from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
@@ -27,7 +27,6 @@ interface GoalDetailPageProps {
 
 export default function GoalDetailPage({ params }: GoalDetailPageProps) {
   const unwrappedParams = use(params);
-  const locale = useLocale();
   const t = useTranslations('goals.detail');
   const goalId = parseInt(unwrappedParams.id, 10);
 
@@ -72,7 +71,7 @@ export default function GoalDetailPage({ params }: GoalDetailPageProps) {
       {showConfetti && <Confetti width={width} height={height} recycle={false} numberOfPieces={200} />}
 
       <Button asChild variant="ghost" size="sm">
-        <Link href={`/${locale}/goals`}>
+        <Link href="/goals">
           <ArrowLeft className="mr-2 h-4 w-4" />
           {t('backButton')}
         </Link>

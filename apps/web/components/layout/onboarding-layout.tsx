@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname } from 'next/navigation';
+import { usePathname } from '@/i18n/navigation';
 import { PublicPageHeader } from '@/components/layout/public-page-header';
 import { StepProgressBar } from '@/components/onboarding/step-progress-bar';
 
@@ -13,8 +13,7 @@ const STEPS = [
 export function OnboardingLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
-  const pathnameWithoutLocale = pathname.replace(/^\/(en|fr)/, '');
-  const currentStepIndex = STEPS.findIndex(step => pathnameWithoutLocale === step.path);
+  const currentStepIndex = STEPS.findIndex(step => pathname === step.path);
 
   return (
     <div className="flex min-h-screen flex-col bg-pattern-topo-subtle">

@@ -22,13 +22,12 @@ const mockUseTranslations = (namespace?: string) => (key: string) => {
   return translations[fullKey] || key;
 };
 
-vi.mock('next/navigation', () => ({
+vi.mock('@/i18n/navigation', () => ({
   useRouter: () => mockRouter,
 }));
 
 vi.mock('next-intl', () => ({
   useTranslations: (namespace?: string) => mockUseTranslations(namespace),
-  useLocale: () => 'en',
 }));
 
 describe('GoalDetailError', () => {
@@ -68,7 +67,7 @@ describe('GoalDetailError', () => {
     const button = screen.getByRole('button', { name: /back to goals/i });
     fireEvent.click(button);
 
-    expect(mockPush).toHaveBeenCalledWith('/en/goals');
+    expect(mockPush).toHaveBeenCalledWith('/goals');
   });
 
   it('should have centered layout', () => {

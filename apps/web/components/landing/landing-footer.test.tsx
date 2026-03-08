@@ -17,6 +17,7 @@ vi.mock('next-intl', () => ({
     };
     return messages[key] ?? key;
   },
+  useLocale: () => 'en',
 }));
 
 vi.mock('next/image', () => ({

@@ -1,5 +1,12 @@
 import type { BaseGoal, ProgressStatus } from './types';
 
+export interface TimeAgoTranslations {
+  justNow: string;
+  minutesAgo: (count: number) => string;
+  hoursAgo: (count: number) => string;
+  daysAgo: (count: number) => string;
+}
+
 export function formatDurationCompact(seconds: number): string {
   if (seconds == null || isNaN(seconds) || seconds === 0) return '0h';
 
@@ -18,35 +25,11 @@ export function formatDurationCompact(seconds: number): string {
   return `${hours}h ${minutes}m`;
 }
 
-export function formatDurationLong(seconds: number, locale: string = 'en'): string {
-  if (seconds == null || isNaN(seconds) || seconds === 0) return '0 hours';
-
-  const absSeconds = Math.abs(Math.floor(seconds));
-  const hours = Math.floor(absSeconds / 3600);
-  const minutes = Math.floor((absSeconds % 3600) / 60);
-
-  const parts: string[] = [];
-
-  if (hours > 0) {
-    const hourUnit = locale.startsWith('fr') ? (hours === 1 ? 'heure' : 'heures') : hours === 1 ? 'hour' : 'hours';
-    parts.push(`${hours} ${hourUnit}`);
-  }
-
-  if (minutes > 0) {
-    const minuteUnit = locale.startsWith('fr')
-      ? minutes === 1
-        ? 'minute'
-        : 'minutes'
-      : minutes === 1
-        ? 'minute'
-        : 'minutes';
-    parts.push(`${minutes} ${minuteUnit}`);
-  }
-
-  return parts.join(' ') || '0 hours';
-}
-
-export function formatTimeAgo(date: Date | string | null | undefined, locale: string = 'en'): string | null {
+export function formatTimeAgo(
+  date: Date | string | null | undefined,
+  translations: TimeAgoTranslations,
+  locale: string = 'en',
+): string | null {
   if (!date) return null;
 
   const dateObj = typeof date === 'string' ? new Date(date) : date;
@@ -59,32 +42,10 @@ export function formatTimeAgo(date: Date | string | null | undefined, locale: st
   const diffHours = Math.floor(diffMinutes / 60);
   const diffDays = Math.floor(diffHours / 24);
 
-  const isFrench = locale.startsWith('fr');
-
-  if (diffSeconds < 60) {
-    return isFrench ? 'il y a quelques secondes' : 'just now';
-  }
-
-  if (diffMinutes < 60) {
-    if (isFrench) {
-      return diffMinutes === 1 ? 'il y a 1 minute' : `il y a ${diffMinutes} minutes`;
-    }
-    return diffMinutes === 1 ? '1 minute ago' : `${diffMinutes} minutes ago`;
-  }
-
-  if (diffHours < 24) {
-    if (isFrench) {
-      return diffHours === 1 ? 'il y a 1 heure' : `il y a ${diffHours} heures`;
-    }
-    return diffHours === 1 ? '1 hour ago' : `${diffHours} hours ago`;
-  }
-
-  if (diffDays < 7) {
-    if (isFrench) {
-      return diffDays === 1 ? 'il y a 1 jour' : `il y a ${diffDays} jours`;
-    }
-    return diffDays === 1 ? '1 day ago' : `${diffDays} days ago`;
-  }
+  if (diffSeconds < 60) return translations.justNow;
+  if (diffMinutes < 60) return translations.minutesAgo(diffMinutes);
+  if (diffHours < 24) return translations.hoursAgo(diffHours);
+  if (diffDays < 7) return translations.daysAgo(diffDays);
 
   return dateObj.toLocaleDateString(locale, {
     month: 'short',
@@ -131,28 +92,6 @@ export function getProgressStatusFromGoal(goal: BaseGoal, tolerance: number = 0.
   return getProgressStatus(goal.currentValue, idealProgress, tolerance);
 }
 
-export function getDaysRemainingText(daysRemaining: number | null, isExpired: boolean, locale: string = 'en'): string {
-  const isFrench = locale.startsWith('fr');
-
-  if (isExpired) {
-    return isFrench ? 'Expiré' : 'Expired';
-  }
-
-  if (daysRemaining === null) {
-    return isFrench ? 'Expiré' : 'Expired';
-  }
-
-  if (daysRemaining === 0) {
-    return isFrench ? "Se termine aujourd'hui" : 'Ends today';
-  }
-
-  if (daysRemaining === 1) {
-    return isFrench ? '1 jour restant' : '1 day left';
-  }
-
-  return isFrench ? `${daysRemaining} jours restants` : `${daysRemaining} days left`;
-}
-
 export function getCurrentYear(): number {
   return new Date().getFullYear();
 }
@@ -195,20 +134,6 @@ export function getYearDates(year?: number): { start: Date; end: Date } {
   const end = new Date(targetYear, 11, 31, 23, 59, 59, 999);
 
   return { start, end };
-}
-
-export function formatActivityCount(count: number, locale: string = 'en'): string {
-  const isFrench = locale.startsWith('fr');
-
-  if (count === 0) {
-    return isFrench ? '0 activité' : '0 activities';
-  }
-
-  if (count === 1) {
-    return isFrench ? '1 activité' : '1 activity';
-  }
-
-  return isFrench ? `${count} activités` : `${count} activities`;
 }
 
 export function formatAverageSessionTime(seconds: number): string {

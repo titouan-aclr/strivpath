@@ -1,8 +1,7 @@
 'use client';
 
 import { LayoutDashboard, Activity, Target, Award, Settings } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { Link, usePathname } from '@/i18n/navigation';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -28,8 +27,7 @@ export function SidebarNavContent({ onNavigate }: SidebarNavContentProps) {
   const { sportConfigs, loading: sportsLoading } = useAvailableSports();
 
   const isActiveRoute = (href: string) => {
-    const pathnameWithoutLocale = pathname.replace(/^\/(en|fr)/, '');
-    return pathnameWithoutLocale === href || pathnameWithoutLocale.startsWith(`${href}/`);
+    return pathname === href || pathname.startsWith(`${href}/`);
   };
 
   return (

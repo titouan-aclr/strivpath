@@ -19,6 +19,10 @@ vi.mock('next-intl', () => ({
   },
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children }: { href: string; children: React.ReactNode }) => <a href={href}>{children}</a>,
+}));
+
 vi.mock('motion/react', () => ({
   motion: {
     div: ({ children, className }: { children?: React.ReactNode; className?: string }) => (
