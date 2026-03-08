@@ -35,7 +35,8 @@ export function AppearanceSection() {
   }, []);
 
   const handleLocaleChange = (newLocale: string) => {
-    router.replace(pathname, { locale: newLocale });
+    router.push(pathname, { locale: newLocale });
+    router.refresh();
   };
 
   return (

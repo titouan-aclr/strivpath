@@ -6,7 +6,7 @@ export interface LegalLinks {
   terms: string;
 }
 
-export function getLegalLinks(): LegalLinks {
+export function getLegalLinks(locale: string = 'en'): LegalLinks {
   const baseUrl = process.env.NEXT_PUBLIC_LEGAL_BASE_URL;
 
   if (!baseUrl) {
@@ -17,10 +17,11 @@ export function getLegalLinks(): LegalLinks {
   }
 
   const normalizedBaseUrl = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl;
+  const localePrefix = locale !== 'en' ? `/${locale}` : '';
 
   return {
-    legalNotice: `${normalizedBaseUrl}/legal-notice`,
-    privacy: `${normalizedBaseUrl}/${APP_SLUG}/privacy`,
-    terms: `${normalizedBaseUrl}/${APP_SLUG}/terms`,
+    legalNotice: `${normalizedBaseUrl}${localePrefix}/legal-notice`,
+    privacy: `${normalizedBaseUrl}${localePrefix}/${APP_SLUG}/privacy`,
+    terms: `${normalizedBaseUrl}${localePrefix}/${APP_SLUG}/terms`,
   };
 }

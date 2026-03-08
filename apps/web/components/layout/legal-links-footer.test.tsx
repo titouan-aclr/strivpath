@@ -12,6 +12,7 @@ vi.mock('next-intl', () => ({
     };
     return messages[key] ?? key;
   },
+  useLocale: () => 'en',
 }));
 
 const mockGetLegalLinks = vi.fn<() => LegalLinks>();

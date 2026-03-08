@@ -1,14 +1,15 @@
 'use client';
 
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { getLegalLinks, type LegalLinks } from '@/lib/legal/legal-links';
 
 export function LegalLinksFooter() {
   const t = useTranslations('legal');
+  const locale = useLocale();
 
   let links: LegalLinks | null = null;
   try {
-    links = getLegalLinks();
+    links = getLegalLinks(locale);
   } catch {
     // env var not configured, legal links are hidden gracefully
   }

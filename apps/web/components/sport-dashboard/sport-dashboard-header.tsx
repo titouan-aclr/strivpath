@@ -4,7 +4,7 @@ import { useTranslations, useLocale } from 'next-intl';
 import { Clock } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getSportConfig } from '@/lib/sports/config';
-import { formatTimeAgo } from '@/lib/dashboard/utils';
+import { formatTimeAgo, type TimeAgoTranslations } from '@/lib/dashboard/utils';
 import type { SportType } from '@/gql/graphql';
 
 const SPORT_TRANSLATION_KEY: Record<string, string> = {
@@ -22,7 +22,15 @@ export interface SportDashboardHeaderProps {
 export function SportDashboardHeader({ sportType, lastSyncTime, loading }: SportDashboardHeaderProps) {
   const t = useTranslations('sportDashboard.header');
   const tSports = useTranslations('navigation.sports');
+  const tCommon = useTranslations('common');
   const locale = useLocale();
+
+  const timeAgoTranslations: TimeAgoTranslations = {
+    justNow: tCommon('timeAgo.justNow'),
+    minutesAgo: (count: number) => tCommon('timeAgo.minutesAgo', { count }),
+    hoursAgo: (count: number) => tCommon('timeAgo.hoursAgo', { count }),
+    daysAgo: (count: number) => tCommon('timeAgo.daysAgo', { count }),
+  };
 
   if (loading) {
     return <SportDashboardHeaderSkeleton />;
@@ -33,7 +41,7 @@ export function SportDashboardHeader({ sportType, lastSyncTime, loading }: Sport
   const sportColors = config?.colors;
   const sportName = tSports(SPORT_TRANSLATION_KEY[sportType] ?? 'running');
 
-  const lastSyncText = lastSyncTime ? formatTimeAgo(lastSyncTime, locale) : null;
+  const lastSyncText = lastSyncTime ? formatTimeAgo(lastSyncTime, timeAgoTranslations, locale) : null;
 
   return (
     <header className="flex items-center gap-3">

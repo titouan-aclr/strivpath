@@ -33,7 +33,7 @@ vi.mock('next-intl', () => ({
 }));
 
 vi.mock('@/lib/dashboard/utils', () => ({
-  formatTimeAgo: vi.fn((date: Date | string) => {
+  formatTimeAgo: vi.fn((date: Date | string | null | undefined) => {
     if (!date) return null;
     return '5 minutes ago';
   }),

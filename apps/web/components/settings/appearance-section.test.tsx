@@ -147,7 +147,7 @@ describe('AppearanceSection', () => {
     render(<AppearanceSection />);
 
     const englishButton = screen.getByRole('button', { name: /English/i });
-    expect(englishButton).toHaveTextContent('🇺🇸');
+    expect(englishButton).toHaveTextContent('🇬🇧');
   });
 
   it('should call setTheme with light when light button clicked', async () => {
