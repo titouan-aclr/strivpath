@@ -3,7 +3,7 @@
 import { ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 import { AnimatedGradientText } from '@/components/ui/animated-gradient-text';
 import { Button } from '@/components/ui/button';

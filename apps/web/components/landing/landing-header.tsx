@@ -4,7 +4,7 @@ import { Menu } from 'lucide-react';
 import { useMotionValueEvent, useScroll } from 'motion/react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 import { useState } from 'react';
 
 import { LanguageSwitcher } from '@/components/language-switcher';
