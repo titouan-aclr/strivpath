@@ -23,6 +23,14 @@ vi.mock('next-intl', () => ({
   useLocale: () => 'en',
 }));
 
+vi.mock('@/i18n/navigation', () => ({
+  Link: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => (
+    <a href={href} className={className}>
+      {children}
+    </a>
+  ),
+}));
+
 vi.mock('@/lib/sport-dashboard/hooks/use-personal-records', () => ({
   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   usePersonalRecords: (...args: unknown[]) => mockUsePersonalRecords(...args),

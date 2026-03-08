@@ -10,7 +10,7 @@ import { formatPaceFromSeconds, formatSpeed } from '@/lib/sports/formatters';
 import { cn } from '@/lib/utils';
 import { Trophy, ChevronRight } from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
-import Link from 'next/link';
+import { Link } from '@/i18n/navigation';
 
 export interface PersonalRecordsSectionProps {
   sportType: SportType;
