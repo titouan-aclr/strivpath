@@ -1,9 +1,7 @@
-<table align="center" border="0" cellpadding="0" cellspacing="0">
-  <tr>
-    <td valign="middle"><img src="apps/web/public/logo.svg" alt="StrivPath" width="52" /></td>
-    <td valign="middle"><h1>StrivPath</h1></td>
-  </tr>
-</table>
+<p align="center">
+  <img src="apps/web/public/logo.svg" width="80" alt="StrivPath" />
+</p>
+<h1 align="center">StrivPath</h1>
 
 <p align="center">
   <em>Stop logging workouts. Start tracking progress.</em>
@@ -11,6 +9,11 @@
 
 <p align="center">
   <a href="https://github.com/titouan-aclr/strivpath/actions/workflows/ci.yml"><img src="https://github.com/titouan-aclr/strivpath/actions/workflows/ci.yml/badge.svg" alt="CI" /></a>
+  <a href="https://codecov.io/gh/titouan-aclr/strivpath"><img src="https://codecov.io/gh/titouan-aclr/strivpath/graph/badge.svg" alt="Coverage" /></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-AGPL%20v3-blue" alt="License: AGPL v3" /></a>
+</p>
+
+<p align="center">
   <img src="https://img.shields.io/badge/TypeScript-blue?logo=typescript&logoColor=white" alt="TypeScript" />
   <img src="https://img.shields.io/badge/NestJS-red?logo=nestjs&logoColor=white" alt="NestJS" />
   <img src="https://img.shields.io/badge/Next.js-black?logo=next.js&logoColor=white" alt="Next.js" />
