@@ -46,6 +46,7 @@ StrivPath connects to your Strava account and turns your activity history into g
 - [Development Commands](#development-commands)
 - [Testing](#testing)
 - [CI/CD & Deployment](#cicd--deployment)
+- [License](#license)
 
 ---
 
@@ -588,3 +589,13 @@ pnpm --filter web test:ui             # Vitest UI
 - Deployed via **Dokploy** with **Traefik** as reverse proxy (SSL/TLS)
 - PostgreSQL with persistent volumes
 - Cross-subdomain cookies: `api.domain.com` ↔ `domain.com` via `COOKIES_DOMAIN`
+
+---
+
+## License
+
+This project is licensed under the [GNU Affero General Public License v3.0](LICENSE).
+
+You are free to view, study, and fork this code. Any derivative work that is distributed or offered as a network service must also be released under the AGPL v3 with full source code disclosure.
+
+© 2026 [Titouan Auclair](https://titouanauclair.com)
