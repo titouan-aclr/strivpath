@@ -31,13 +31,10 @@
 
 ---
 
-StrivPath connects to your Strava account and turns your activity history into goal-driven progress tracking. Set meaningful targets, follow your journey across every sport, and celebrate each milestone — built for athletes who want to grow, not just accumulate sessions. Built as a production-grade full-stack application with NestJS, Next.js, and GraphQL.
-
----
-
 ## Table of Contents
 
 - [Overview](#overview)
+- [Screenshots](#screenshots)
 - [Features](#features)
 - [Tech Stack](#tech-stack)
 - [Architecture](#architecture)
@@ -55,11 +52,30 @@ StrivPath connects to your Strava account and turns your activity history into g
 
 ## Overview
 
-StrivPath is a goal tracking and progress platform built on top of Strava. It is not a Strava replacement or a general-purpose analytics tool — it is a complement: Strava records what you do, StrivPath helps you figure out where you're going.
+StrivPath connects to your Strava account and turns your activity history into goal-driven progress tracking. Set meaningful targets, follow your journey across every sport, and celebrate each milestone — built for athletes who want to grow, not just accumulate sessions.
 
-After connecting via Strava OAuth 2.0, the app imports your full activity history and lets you set meaningful goals (distance, duration, elevation, frequency) across all your sports. Every activity you sync automatically advances your goals and statistics and dashboards are there to support that journey.
+It is not a Strava replacement or a general-purpose analytics tool — it is a complement: Strava records what you do, StrivPath helps you figure out where you're going. Built as a production-grade full-stack application with NestJS, Next.js, and GraphQL.
+
+After connecting via Strava OAuth 2.0, the app imports your full activity history and lets you set meaningful goals (distance, duration, elevation, frequency) across all your sports. Every activity you sync automatically advances your goals — statistics and dashboards are there to support that journey.
 
 The platform currently supports running, cycling, and swimming, with a sport-agnostic architecture designed to extend to any discipline. Non-commercial and open source — your data is never sold or shared. Available in English and French, with light and dark themes.
+
+---
+
+## Screenshots
+
+<a href="docs/screenshots/dashboard.png"><img src="docs/screenshots/dashboard.png" width="49%" alt="Global Dashboard" /></a> <a href="docs/screenshots/sport-dashboard.png"><img src="docs/screenshots/sport-dashboard.png" width="49%" alt="Sport Dashboard" /></a>
+
+<a href="docs/screenshots/activity-detail.png"><img src="docs/screenshots/activity-detail.png" width="49%" alt="Activity Detail" /></a> <a href="docs/screenshots/goals.png"><img src="docs/screenshots/goals.png" width="49%" alt="Goals" /></a>
+
+<details>
+<summary>More screenshots</summary>
+<br />
+<a href="docs/screenshots/onboarding.png"><img src="docs/screenshots/onboarding.png" width="49%" alt="Onboarding — Sport Selection" /></a> <a href="docs/screenshots/onboarding-sync.png"><img src="docs/screenshots/onboarding-sync.png" width="49%" alt="Onboarding — Sync" /></a>
+
+<a href="docs/screenshots/settings.png"><img src="docs/screenshots/settings.png" width="49%" alt="Settings" /></a>
+
+</details>
 
 ---
 
