@@ -1,42 +1,27 @@
 # Integration Tests
 
-This directory contains integration tests that verify interactions between modules with a real PostgreSQL test database.
+Integration tests verify interactions between modules against a real PostgreSQL database. For a general overview of the test strategy, see [`test/README.md`](../README.md).
 
 ## Prerequisites
 
-1. **PostgreSQL Test Database**: A test database must be running and accessible
-2. **Database Migrations**: All Prisma migrations must be applied to the test database
-3. **Environment Variables**: Test environment variables must be configured
+- Docker running with a PostgreSQL container accessible on port 5432
+- `apps/api` environment variables configured (see `apps/api/.env.example`)
 
 ## Setup
 
-### 1. Start PostgreSQL Database
-
-Ensure Docker is running and start the PostgreSQL container:
+### 1. Start PostgreSQL
 
 ```bash
-docker compose up -d
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-### 2. Create Test Database
-
-The test database URL is configured in `test/setup-integration.ts`:
-
-```
-postgresql://postgres:postgres@localhost:5432/strivpath_test
-```
-
-You can create the test database manually:
+### 2. Create the test database
 
 ```bash
-psql -U postgres -h localhost -p 5432 -c "CREATE DATABASE strivpath_test;"
+docker exec strivpath-postgres psql -U postgres -c "CREATE DATABASE strivpath_test;"
 ```
 
-Or the integration tests will attempt to apply migrations automatically.
-
-### 3. Apply Migrations
-
-Migrations are automatically applied during test setup, but you can apply them manually:
+Migrations are applied automatically when the test suite starts. To apply them manually:
 
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/strivpath_test pnpm prisma migrate deploy
@@ -44,138 +29,74 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/strivpath_test pnpm p
 
 ## Running Tests
 
-### Run all integration tests
-
 ```bash
-pnpm test:integration
+pnpm test:integration           # Run all integration tests
+pnpm test:integration:watch     # Watch mode
+pnpm test:integration -- -t "test name pattern"   # Run a specific test
 ```
 
-### Run in watch mode
+## Test Files
 
-```bash
-pnpm test:integration:watch
-```
+| File                                        | What it covers                                                                                                  |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| `auth-flow.integration.spec.ts`             | User creation/update on Strava auth, refresh token storage and hashing, token rotation, logout, cascade deletes |
+| `auth-graphql.integration.spec.ts`          | GraphQL auth queries and mutations against a real NestJS module                                                 |
+| `auth-oauth-callback.integration.spec.ts`   | OAuth callback route, Strava token exchange, redirect and error handling                                        |
+| `activity-sync.integration.spec.ts`         | Bulk import, sync stage progression, incremental sync, sport filtering, failure handling, BigInt stravaId       |
+| `activity-detail-fetch.integration.spec.ts` | Single activity fetch from Strava API, DB storage, optional field handling                                      |
+| `goal-auto-update.integration.spec.ts`      | Goal progress calculation after activity import, multi-goal updates, completion detection                       |
+| `goal-recurring.integration.spec.ts`        | Weekly/monthly/yearly recurring goal cycles, period boundaries                                                  |
+| `goal-template.integration.spec.ts`         | Predefined template retrieval, sport filtering, i18n translations                                               |
+| `user-preferences.integration.spec.ts`      | Sport selection, onboarding state, locale/theme updates, concurrent updates, cascade deletes                    |
 
-### Run specific test file
+## Test Infrastructure
 
-```bash
-pnpm test:integration -- auth-flow.integration.spec.ts
-```
+### Database utilities (`test/test-db.ts`)
 
-## Test Structure
+- `getTestPrismaClient()` — singleton Prisma client for the `strivpath_test` database
+- `seedTestUser(overrides?)` — creates a user with default preferences
+- `seedTestActivity(userId, overrides?)` — creates an activity
+- `seedTestRefreshToken(userId)` — creates a refresh token for auth tests
 
-### Test Database Utilities (`test/test-db.ts`)
+### Setup (`test/setup-integration.ts`)
 
-Provides utilities for managing the test database:
+Runs automatically before the suite:
 
-- `setupTestDatabase()`: Initialize test database connection and apply migrations
-- `resetTestDatabase()`: Clear all tables and reset sequences between tests
-- `closeTestDatabase()`: Close database connection
-- `getTestPrismaClient()`: Get Prisma client for direct database access
-- `seedTestUser()`: Create test user with default preferences
-- `seedTestActivity()`: Create test activity
-- `seedTestRefreshToken()`: Create refresh token for testing
-
-### Test Setup (`test/setup-integration.ts`)
-
-Global setup for all integration tests:
-
-- Configures test environment variables
-- Sets up test database connection before all tests
-- Resets database after each test for isolation
-- Closes database connection after all tests
-- Sets Jest timeout to 10 seconds
-
-### Integration Test Files
-
-1. **`auth-flow.integration.spec.ts`**: Authentication flow tests
-   - User creation and preferences on first authentication
-   - User updates on re-authentication
-   - Refresh token storage and hashing
-   - Token refresh without rotation
-   - Logout and token revocation
-   - Cascade delete operations
-
-2. **`activity-sync.integration.spec.ts`**: Activity synchronization tests
-   - Activity import and sync history creation
-   - Sync stage progression
-   - Incremental sync with existing activities
-   - Sport type filtering
-   - Sync failure handling
-   - User-scoped activities
-   - Optional fields handling
-   - BigInt stravaId preservation
-
-3. **`user-preferences.integration.spec.ts`**: User preferences tests
-   - Default preferences creation
-   - Selected sports updates
-   - Onboarding completion logic
-   - Independent locale and theme updates
-   - Multiple field updates
-   - Cascade delete operations
-   - Concurrent update handling
-   - JSON field storage
+- Sets `DATABASE_URL` to the `strivpath_test` database
+- Applies Prisma migrations
+- Truncates all tables before each test (clean state, no shared data)
+- Closes the database connection after all tests
 
 ## Test Isolation
 
-Each test is completely independent:
+Each test runs against a clean database:
 
-- Database is reset after each test using `TRUNCATE TABLE ... CASCADE`
-- Sequences are reset to start from 1
-- No shared state between tests
-- Tests can run in any order
+- All tables are truncated before each test with `TRUNCATE TABLE ... CASCADE`
+- Identity sequences are reset
+- No state shared between tests — tests can run in any order
 
-## Performance
+## Configuration
 
-Integration tests are optimized for speed:
+Defined in `apps/api/jest.integration.config.ts`:
 
-- Single worker (`maxWorkers: 1`) to avoid database conflicts
-- Efficient database cleanup with TRUNCATE
-- Realistic mocking of external APIs (Strava)
-- Test timeout: 10 seconds per test
+- `testRegex`: `test/integration/.*\.integration\.spec\.ts$`
+- `maxWorkers: 1` — prevents database conflicts from parallel execution
+- `testTimeout: 10000` (10 seconds per test)
 
 ## Debugging
 
-### View test output
-
 ```bash
+# Run with verbose output
 pnpm test:integration --verbose
-```
 
-### Run single test
-
-```bash
-pnpm test:integration -- -t "should create user and preferences on first Strava authentication"
-```
-
-### Inspect database state
-
-During debugging, you can connect to the test database:
-
-```bash
+# Connect to the test database directly
 psql -U postgres -h localhost -p 5432 -d strivpath_test
 ```
 
-### Common Issues
-
-1. **Docker not running**: Start Docker Desktop before running tests
-2. **Database connection failed**: Verify PostgreSQL is running on port 5432
-3. **Migrations not applied**: Run `pnpm prisma migrate deploy` manually
-4. **Port already in use**: Stop any other PostgreSQL instances on port 5432
-
 ## Best Practices
 
-1. **Test real interactions**: Integration tests use real database, not mocks
-2. **Clean database**: Always reset database after each test
-3. **Mock external APIs**: Mock Strava API calls to avoid rate limits
-4. **Test edge cases**: Include null values, empty arrays, large IDs
-5. **Verify cascade operations**: Test database constraints and cascades
-6. **Check data integrity**: Verify data after operations complete
-
-## Next Steps
-
-- Add E2E tests with Supertest for GraphQL endpoint testing
-- Add performance benchmarks for sync operations
-- Add tests for background job processing
-- Add tests for concurrent user operations
-- Add tests for database transactions and rollbacks
+1. **Use real database**: Integration tests never mock Prisma — the whole point is testing real queries
+2. **Mock external APIs**: Always mock Strava API calls to avoid real HTTP requests and rate limits
+3. **Use seed helpers**: Use `seedTestUser()` and related helpers from `test-db.ts` rather than raw Prisma inserts
+4. **Test edge cases**: Include null values, empty arrays, BigInt IDs, concurrent operations
+5. **Verify cascade operations**: Test database constraints and cascade deletes explicitly
