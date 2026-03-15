@@ -1,158 +1,283 @@
-# API - NestJS GraphQL Backend
+# StrivPath API — NestJS GraphQL Backend
 
-GraphQL API backend for StrivPath, built with NestJS using a code-first approach.
+NestJS GraphQL backend for StrivPath. Uses a code-first approach, **CommonJS modules** (no `.js` extensions in imports, stable decorator execution and DI), and a strict layered architecture (Resolver → Service → Mapper → Prisma).
+
+→ For project overview, screenshots, and setup instructions, see the [root README](../../README.md).
+
+## Table of Contents
+
+- [Tech Stack](#tech-stack)
+- [Module Architecture](#module-architecture)
+- [Architecture Pattern](#architecture-pattern)
+- [Auth Flow](#auth-flow)
+- [Strava App Setup](#strava-app-setup)
+- [GraphQL Operations](#graphql-operations)
+- [Database Schema](#database-schema)
+- [Environment Variables](#environment-variables)
+- [Development](#development)
+- [Testing](#testing)
+- [Code-First Schema Generation](#code-first-schema-generation)
+
+---
 
 ## Tech Stack
 
-- **Framework**: NestJS (CommonJS modules)
-- **API**: GraphQL via Apollo Server (code-first)
-- **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: Passport.js (Strava OAuth2 + JWT)
-- **Testing**: Jest with jest-mock-extended
-- **Validation**: class-validator
+| Technology                            | Version    |
+| ------------------------------------- | ---------- |
+| NestJS (CommonJS)                     | 11.x       |
+| GraphQL · Apollo Server               | 16.x / 5.x |
+| PostgreSQL · Prisma ORM               | 16 / 6.x   |
+| Passport.js · Strava OAuth 2.0 · JWT  | —          |
+| Jest · Supertest · jest-mock-extended | 30.x       |
+| class-validator · class-transformer   | —          |
 
-## Key Features
+---
 
-- GraphQL code-first schema generation
-- Strava OAuth 2.0 authentication flow
-- JWT-based session management
-- Auto-generated GraphQL schema at `src/schema.gql`
-- Type-safe database access via Prisma
-- Strict separation: Prisma types → GraphQL types (via mappers)
-
-## Module System
-
-Uses **CommonJS** for production stability:
-
-- TypeScript `"module": "commonjs"`
-- No `.js` extensions in imports
-- Stable decorator and dependency injection support
-
-## Project Structure
+## Module Architecture
 
 ```
 src/
-├── auth/               # Authentication (Strava OAuth + JWT)
-│   ├── guards/        # Auth guards
-│   └── strategies/    # Passport strategies
-├── user/              # User module
-│   ├── user.service.ts
-│   ├── user.resolver.ts
-│   └── user.mapper.ts
-├── database/          # Database module (global)
+├── activity/             # Activity import, sync & retrieval
+│   ├── models/           # @ObjectType GraphQL models
+│   ├── dto/              # @InputType GraphQL inputs
+│   ├── enums/            # Sport type and status enums
+│   ├── activity.resolver.ts
+│   ├── activity.service.ts
+│   └── activity.mapper.ts
+├── auth/                 # Strava OAuth 2.0 + JWT session
+│   ├── guards/           # GqlAuthGuard, JwtAuthGuard
+│   └── strategies/       # Strava, JWT Passport strategies
+├── common/               # Shared utilities and decorators
+├── config/               # Environment variable configuration
+├── database/             # Global PrismaService module
 │   └── prisma.service.ts
-└── app.module.ts      # Root module
+├── goal/                 # Goal management and templates
+├── health/               # /health endpoint (HealthModule)
+├── statistics/           # Stats computation and aggregation
+├── strava/               # Strava API client
+├── sync-history/         # Import job tracking
+├── user/                 # User management
+├── user-preferences/     # Sport selection and settings
+├── webhook/              # Strava event webhook handler
+├── schema.gql            # Auto-generated GraphQL schema
+└── app.module.ts         # Root module
 
 prisma/
-└── schema.prisma      # Database schema
+├── schema.prisma         # Database schema (source of truth)
+├── migrations/           # 12 versioned Prisma migrations
+└── seed.ts               # Database seeder
 
 test/
-├── mocks/            # Mock factories and services
-├── helpers/          # Test helpers
-├── setup.ts          # Unit test setup (auto-mock PrismaService)
-└── setup-e2e.ts      # E2E test setup
+├── mocks/                # Mock factories (PrismaService, entities)
+├── helpers/              # Test utilities
+├── setup.ts              # Unit test setup (auto-mock PrismaService)
+└── setup-e2e.ts          # E2E test setup (real DB, cleanup)
 ```
+
+---
 
 ## Architecture Pattern
 
-**Resolvers → Services → Database**
+**Resolvers → Services → Mappers → Prisma**
 
 ```typescript
-// 1. Resolver handles GraphQL requests
+// Resolver: handles GraphQL operations
 @Resolver(() => User)
 export class UserResolver {
-  @Query(() => User)
-  async userByStravaId(@Args('stravaId') stravaId: number) {
-    return this.userService.findByStravaId(stravaId);
+  @Query(() => User, { nullable: true })
+  async currentUser(@CurrentUser() user: User) {
+    return this.userService.findById(user.id);
   }
 }
 
-// 2. Service contains business logic
+// Service: business logic only
 @Injectable()
 export class UserService {
-  async findByStravaId(stravaId: number) {
-    const prismaUser = await this.prisma.user.findUnique(...);
-    return UserMapper.toGraphQL(prismaUser);
+  async findById(id: number) {
+    const prismaUser = await this.prisma.user.findUnique({ where: { id } });
+    return prismaUser ? UserMapper.toGraphQL(prismaUser) : null;
   }
 }
 
-// 3. Mapper converts Prisma types → GraphQL types
+// Mapper: converts Prisma types to GraphQL types
 export class UserMapper {
   static toGraphQL(prismaUser: PrismaUser): User {
-    return { ...prismaUser };
+    return { id: prismaUser.id, username: prismaUser.username, ... };
   }
 }
 ```
 
-**Critical**: Never expose Prisma types via GraphQL. Always use mappers.
+**Critical**: Prisma types are never exposed directly via GraphQL — mappers enforce the boundary.
+
+---
+
+## Auth Flow
+
+```
+Browser → GET /v1/auth/strava
+        ← redirect to Strava OAuth consent page
+
+Strava  → GET /v1/auth/strava/callback?code=...
+        → exchange code for Strava access + refresh tokens
+        → upsert User and StravaToken in DB
+        → issue JWT access token (15m) + refresh token (7d, hashed in DB)
+        ← Set-Cookie: access_token (httpOnly) + refresh_token (httpOnly)
+
+GraphQL → Authorization via GqlAuthGuard → JwtStrategy
+        → @CurrentUser() decorator extracts user from JWT payload
+
+Refresh → POST /v1/auth/refresh
+        → validate refresh token JTI (DB lookup + revocation check)
+        → rotate: revoke old token, issue new pair
+        ← Set-Cookie: new access_token + refresh_token
+
+Logout  → GraphQL mutation logout
+        → revoke refresh token in DB
+        ← clear cookies
+```
+
+**Strava tokens** (separate from JWT) are stored in `StravaToken` and used by `StravaModule` to call the Strava API on behalf of the user.
+
+---
+
+## Strava App Setup
+
+You need a Strava API application to run StrivPath. This is a one-time setup at [strava.com/settings/api](https://www.strava.com/settings/api).
+
+1. Go to `https://www.strava.com/settings/api` and create a new application
+2. Fill in the required fields:
+   - **Application Name**: anything (e.g. `StrivPath Local`)
+   - **Website**: `http://localhost`
+   - **Authorization Callback Domain**: `localhost` — no protocol, no port
+3. Note your **Client ID** and **Client Secret** and set them in `apps/api/.env`:
+   ```
+   STRAVA_CLIENT_ID=your_client_id
+   STRAVA_CLIENT_SECRET=your_client_secret
+   STRAVA_REDIRECT_URI=http://localhost:3011/v1/auth/strava/callback
+   ```
+4. `STRAVA_WEBHOOK_VERIFY_TOKEN` is a string you define freely — it is sent back by Strava to verify webhook subscription ownership. Any non-empty string works for development.
+
+> The **Authorization Callback Domain** in the Strava app settings must match the domain of `STRAVA_REDIRECT_URI` (without protocol or port). `localhost` covers any port on localhost.
+
+---
+
+## GraphQL Operations
+
+Full schema at `src/schema.gql`. All operations require authentication unless noted.
+
+**Queries**
+
+| Operation          | Description                          |
+| ------------------ | ------------------------------------ |
+| `currentUser`      | Authenticated user with preferences  |
+| `activities`       | Paginated activity list with filters |
+| `activity`         | Single activity by ID                |
+| `globalStatistics` | Aggregated stats across all sports   |
+| `sportStatistics`  | Stats filtered by sport type         |
+| `goals`            | User goals (active and completed)    |
+| `goalTemplates`    | Predefined templates (i18n, public)  |
+| `syncHistory`      | Import job history                   |
+
+**Mutations**
+
+| Operation               | Description                         |
+| ----------------------- | ----------------------------------- |
+| `importActivities`      | Trigger bulk Strava activity import |
+| `syncNewActivities`     | Incremental sync for new activities |
+| `createGoal`            | Create a new goal                   |
+| `updateGoal`            | Update an existing goal             |
+| `deleteGoal`            | Delete a goal                       |
+| `updateUserPreferences` | Update sport selection and settings |
+| `logout`                | Revoke session and clear cookies    |
+
+**REST endpoints** (outside GraphQL prefix)
+
+| Method | Path                       | Description                      |
+| ------ | -------------------------- | -------------------------------- |
+| `GET`  | `/v1/auth/strava`          | Initiate Strava OAuth flow       |
+| `GET`  | `/v1/auth/strava/callback` | OAuth callback (Strava redirect) |
+| `POST` | `/v1/auth/refresh`         | Rotate JWT tokens                |
+| `POST` | `/v1/webhook`              | Strava webhook event receiver    |
+| `GET`  | `/health`                  | Health check                     |
+
+---
 
 ## Database Schema
 
-**User**
+Source of truth: `prisma/schema.prisma` — 12 versioned migrations in `prisma/migrations/`.
 
-- Core athlete data from Strava
-- One-to-many relationship with StravaToken
+See the [root README](../../README.md#database-schema) for the full ER diagram.
 
-**StravaToken**
+---
 
-- OAuth access/refresh tokens
-- Token expiration tracking
-- Cascade delete with User
+## Environment Variables
+
+See `.env.example` for the full list.
+
+| Variable                       | Description                              | Example                                                   | Required |
+| ------------------------------ | ---------------------------------------- | --------------------------------------------------------- | -------- |
+| `DATABASE_URL`                 | PostgreSQL connection string             | `postgresql://postgres:password@127.0.0.1:5432/strivpath` | ✅       |
+| `STRAVA_CLIENT_ID`             | Strava app client ID                     | `12345`                                                   | ✅       |
+| `STRAVA_CLIENT_SECRET`         | Strava app secret                        | `abc...`                                                  | ✅       |
+| `STRAVA_REDIRECT_URI`          | OAuth callback URL                       | `http://localhost:3011/v1/auth/strava/callback`           | ✅       |
+| `STRAVA_WEBHOOK_VERIFY_TOKEN`  | Token for Strava webhook verification    | `my_token`                                                | ✅       |
+| `JWT_ACCESS_TOKEN_SECRET`      | Secret for signing access tokens         | min 32 chars                                              | ✅       |
+| `JWT_REFRESH_TOKEN_SECRET`     | Secret for signing refresh tokens        | min 32 chars                                              | ✅       |
+| `FRONTEND_URL`                 | Frontend origin for CORS                 | `http://localhost:3000`                                   | ✅       |
+| `JWT_ACCESS_TOKEN_EXPIRATION`  | Access token TTL                         | `15m`                                                     | ❌       |
+| `JWT_REFRESH_TOKEN_EXPIRATION` | Refresh token TTL                        | `7d`                                                      | ❌       |
+| `PORT`                         | API server port                          | `3011`                                                    | ❌       |
+| `NODE_ENV`                     | Runtime environment                      | `development`                                             | ❌       |
+| `COOKIES_SAME_SITE`            | Cookie SameSite policy                   | `lax`                                                     | ❌       |
+| `COOKIES_SECURE`               | Secure cookies flag                      | `false` (dev)                                             | ❌       |
+| `COOKIES_DOMAIN`               | Cookie domain for cross-subdomain (prod) | `.yourdomain.com`                                         | ❌       |
+| `TOKEN_CLEANUP_ENABLED`        | Enable expired token cleanup job         | `true`                                                    | ❌       |
+| `THROTTLE_DEFAULT_TTL`         | Rate limit window in ms                  | `60000`                                                   | ❌       |
+| `THROTTLE_DEFAULT_LIMIT`       | Max requests per window                  | `100`                                                     | ❌       |
+
+---
 
 ## Development
 
-### Prerequisites
-
-- PostgreSQL running (via `docker compose up -d` from root)
-- Environment variables configured in `.env`
-
-### Running
+**Prerequisites**: PostgreSQL running · `.env` configured from `.env.example`
 
 ```bash
-# From root
-pnpm --filter api dev
+# Start PostgreSQL (from repo root)
+docker compose -f docker-compose.dev.yml up -d
 
-# Or from apps/api
+# Start API in watch mode (port 3011)
 pnpm dev
+
+# Build (CommonJS output to dist/)
+pnpm build
+
+# Database
+pnpm db:migrate:dev       # Create & apply migration
+pnpm db:migrate:deploy    # Apply migrations (production)
+pnpm db:push              # Push schema directly (dev only)
+pnpm generate             # Regenerate Prisma client after schema change
+pnpm db:studio            # Open Prisma Studio
+pnpm db:seed              # Seed the database
 ```
 
-Server runs at: http://localhost:3011
+Server: `http://localhost:3011`
+GraphQL Playground: `http://localhost:3011/graphql` (bypasses `/v1` global prefix)
 
-### GraphQL Playground
-
-Available at: http://localhost:3011/graphql
-
-The GraphQL endpoint bypasses the global `/v1` prefix.
-
-### Database Operations
-
-```bash
-# Push schema changes (development)
-pnpm db:push
-
-# Generate Prisma client (after schema changes)
-pnpm generate
-
-# Create migration (production-ready)
-pnpm db:migrate:dev
-
-# Apply migrations (production)
-pnpm db:migrate:deploy
-```
+---
 
 ## Testing
 
-### Unit Tests
-
 ```bash
-pnpm test              # Run all unit tests
-pnpm test:watch        # Watch mode
-pnpm test:cov          # With coverage
+pnpm test                 # Unit tests
+pnpm test:watch           # Watch mode
+pnpm test:cov             # With coverage
+pnpm test:e2e             # E2E tests (requires running database)
+pnpm test:integration     # Integration tests (requires running database)
 ```
 
-**Setup**: PrismaService is auto-mocked via `test/setup.ts`
+### Unit Tests
 
-Example:
+`PrismaService` is auto-mocked via `test/setup.ts`. Use the provided factories:
 
 ```typescript
 import { createMockPrismaService } from '../test/mocks/prisma.mock';
@@ -162,67 +287,24 @@ const mockPrisma = createMockPrismaService();
 mockPrisma.user.findUnique.mockResolvedValue(createMockPrismaUser());
 ```
 
-### E2E Tests
+### E2E / Integration Tests
 
-```bash
-pnpm test:e2e
-```
+Uses a real PostgreSQL database with full cleanup between tests. Set `DATABASE_URL` to a dedicated test database.
 
-**Setup**: Uses real database with cleanup via `test/setup-e2e.ts`
+→ See [test/README.md](test/README.md) for detailed setup, database helpers, and all 9 integration test files.
 
-## Environment Variables
+---
 
-Required in `.env`:
+## Code-First Schema Generation
 
-```env
-DATABASE_URL="postgresql://user:password@localhost:5432/strivpath"
-STRAVA_CLIENT_ID="your_client_id"
-STRAVA_CLIENT_SECRET="your_client_secret"
-STRAVA_CALLBACK_URL="http://localhost:3011/v1/auth/strava/callback"
-JWT_SECRET="your_secret_key"
-JWT_EXPIRATION="7d"
-```
+`src/schema.gql` is auto-generated on server start from NestJS decorators — never edit it manually.
 
-## Building
+| Decorator                                  | Role                              | Location        |
+| ------------------------------------------ | --------------------------------- | --------------- |
+| `@ObjectType()`                            | GraphQL object types              | `models/`       |
+| `@InputType()`                             | Input types                       | `dto/`          |
+| `@Field()`                                 | Field definitions and nullability | inline          |
+| `registerEnumType()`                       | Enum registration                 | `enums/`        |
+| `@Resolver()` / `@Query()` / `@Mutation()` | Operations                        | `*.resolver.ts` |
 
-```bash
-pnpm build
-```
-
-Outputs to `dist/` directory.
-
-## Scripts
-
-- `dev` - Start in watch mode (port 3011)
-- `build` - Compile TypeScript to CommonJS
-- `start:prod` - Run production build
-- `test` - Run unit tests
-- `test:e2e` - Run e2e tests
-- `test:cov` - Generate coverage report
-- `lint` - Run ESLint
-- `db:push` - Push schema to database (dev)
-- `db:migrate:dev` - Create migration
-- `db:migrate:deploy` - Apply migrations (prod)
-- `generate` - Generate Prisma client
-
-## Code Quality
-
-- **TypeScript strict mode** enabled
-- **ESLint** with TypeScript rules
-- **No code comments** - self-documenting code only
-- **Dependency injection** via NestJS DI container
-- **Layered architecture** enforced
-
-## GraphQL Schema
-
-Auto-generated at `src/schema.gql` on server start.
-
-Uses NestJS decorators for schema definition:
-
-- `@ObjectType()` - GraphQL object types
-- `@InputType()` - Input types
-- `@Field()` - Field definitions
-- `@Resolver()` - Query/Mutation resolvers
-- `@Query()` / `@Mutation()` - Operations
-
-Schema is sorted alphabetically via `sortSchema: true`.
+Schema is sorted alphabetically (`sortSchema: true`). After modifying types, restart the API to regenerate `schema.gql`, then run `pnpm --filter web codegen` from the repo root to update frontend types.

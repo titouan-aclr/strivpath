@@ -6,167 +6,185 @@ This directory contains the testing infrastructure for the NestJS GraphQL API.
 
 ```
 test/
-├── setup.ts                  # Unit test setup (auto-mock PrismaService)
-├── setup-e2e.ts              # E2E test setup (database cleanup)
-├── jest-e2e.json             # E2E Jest configuration
-├── mocks/                    # Mock factories and utilities
-│   ├── prisma.mock.ts        # PrismaService mock utilities
-│   └── factories.ts          # Test data factories (Faker.js)
-└── helpers/                  # Test helper utilities
-    └── graphql-test.helper.ts # GraphQL testing utilities
+├── setup.ts                    # Unit test global setup (auto-mocks PrismaService)
+├── setup-e2e.ts                # E2E test setup (PostgreSQL truncation before each test)
+├── setup-integration.ts        # Integration test setup (dedicated test database)
+├── test-db.ts                  # Test database utilities (seed helpers, Prisma client)
+├── jest-e2e.json               # E2E Jest configuration
+├── mocks/
+│   ├── prisma.mock.ts          # MockPrismaService type + createMockPrismaService()
+│   └── factories.ts            # Faker.js test data factories
+├── helpers/
+│   └── graphql-test.helper.ts  # NestJS GraphQL testing utilities
+└── integration/
+    ├── auth-flow.integration.spec.ts
+    ├── auth-graphql.integration.spec.ts
+    ├── auth-oauth-callback.integration.spec.ts
+    ├── activity-detail-fetch.integration.spec.ts
+    ├── activity-sync.integration.spec.ts
+    ├── goal-auto-update.integration.spec.ts
+    ├── goal-recurring.integration.spec.ts
+    ├── goal-template.integration.spec.ts
+    └── user-preferences.integration.spec.ts
 ```
+
+---
 
 ## Test Types
 
 ### Unit Tests
 
-Unit tests are located **next to the code** they test:
+Unit tests are co-located with the source files they test:
 
 ```
 src/
-├── user/
-│   ├── user.service.ts
-│   ├── user.service.spec.ts       ← Unit test
-│   ├── user.resolver.ts
-│   └── user.resolver.spec.ts      ← Unit test
+├── goal/
+│   ├── goal.service.ts
+│   ├── goal.service.spec.ts         ← Unit test
+│   ├── goal.resolver.ts
+│   └── goal.resolver.spec.ts        ← Unit test
 ```
 
 **Naming convention**: `*.spec.ts`
 
-**Run unit tests**:
+**Run**:
 
 ```bash
-pnpm test              # Run all unit tests
-pnpm test:watch        # Watch mode
-pnpm test:cov          # With coverage
+pnpm test                  # Run all unit tests
+pnpm test:watch            # Watch mode
+pnpm test:cov              # With coverage report
 ```
+
+Coverage thresholds enforced: 85% lines/statements · 75% branches/functions.
+
+---
+
+### Integration Tests
+
+Integration tests verify interactions between services against a real PostgreSQL database (`strivpath_test`). 9 test files cover auth flows, activity sync, goal logic, templates, and user preferences.
+
+**Naming convention**: `*.integration.spec.ts`
+
+**Run**:
+
+```bash
+pnpm test:integration          # Run all integration tests
+pnpm test:integration:watch    # Watch mode
+```
+
+For setup instructions, database configuration, debugging, and the full list of test files, see [`test/integration/README.md`](integration/README.md).
+
+---
 
 ### E2E Tests
 
-E2E tests are located in the `test/` directory:
-
-```
-test/
-├── graphql/
-│   ├── user.e2e-spec.ts          ← GraphQL query/mutation tests
-│   └── auth.e2e-spec.ts          ← Auth flow tests
-```
+E2E tests cover full HTTP request cycles using Supertest. Located at the root of `test/`.
 
 **Naming convention**: `*.e2e-spec.ts`
 
-**Run e2e tests**:
+**Run**:
 
 ```bash
 pnpm test:e2e
 ```
 
+| File                             | What it covers                                                                 |
+| -------------------------------- | ------------------------------------------------------------------------------ |
+| `auth.e2e-spec.ts`               | `stravaAuthUrl` query, unauthenticated access rejection                        |
+| `auth-throttling.e2e-spec.ts`    | Rate limiting enforcement on auth endpoints                                    |
+| `goal.e2e-spec.ts`               | Goal creation and retrieval via GraphQL                                        |
+| `goal-authenticated.e2e-spec.ts` | Full goal lifecycle for authenticated users (create, update, delete, progress) |
+| `user-preferences.e2e-spec.ts`   | `updateUserPreferences` mutation, sport selection via GraphQL                  |
+
+---
+
 ## Writing Unit Tests
 
-### Testing a Service
+PrismaService is auto-mocked globally via `test/setup.ts`. Inject mock implementations inline using `jest.fn()`:
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
-import { UserService } from './user.service';
+import { GoalService } from './goal.service';
 import { PrismaService } from '@/database/prisma.service';
-import { createMockPrismaService, MockPrismaService } from '../../test/mocks/prisma.mock';
-import { createMockPrismaUser } from '../../test/mocks/factories';
 
-describe('UserService', () => {
-  let service: UserService;
-  let prisma: MockPrismaService;
+describe('GoalService', () => {
+  let service: GoalService;
+  let prisma: PrismaService;
+
+  const mockPrismaService = {
+    goal: {
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
 
   beforeEach(async () => {
-    const mockPrisma = createMockPrismaService();
-
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService, { provide: PrismaService, useValue: mockPrisma }],
+      providers: [GoalService, { provide: PrismaService, useValue: mockPrismaService }],
     }).compile();
 
-    service = module.get<UserService>(UserService);
-    prisma = module.get(PrismaService);
+    service = module.get<GoalService>(GoalService);
+    prisma = module.get<PrismaService>(PrismaService);
   });
 
-  it('should find user by stravaId', async () => {
-    const mockUser = createMockPrismaUser({ stravaId: 12345 });
-    prisma.user.findUnique.mockResolvedValue(mockUser);
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 
-    const result = await service.findByStravaId(12345);
+  it('should return goals for a user', async () => {
+    const mockGoal = { id: 1, userId: 1, title: 'Run 100km', status: 'ACTIVE' };
+    (prisma.goal.findMany as jest.Mock).mockResolvedValue([mockGoal]);
 
-    expect(result).toEqual(mockUser);
-    expect(prisma.user.findUnique).toHaveBeenCalledWith({
-      where: { stravaId: 12345 },
-    });
+    const result = await service.findAllForUser(1);
+
+    expect(result).toHaveLength(1);
+    expect(prisma.goal.findMany).toHaveBeenCalledWith(expect.objectContaining({ where: { userId: 1 } }));
   });
 });
 ```
 
-### Testing a Resolver
+### Test Data Factories
+
+Use the factories in `test/mocks/factories.ts` to generate consistent, randomized test data:
 
 ```typescript
-import { Test, TestingModule } from '@nestjs/testing';
-import { UserResolver } from './user.resolver';
-import { UserService } from './user.service';
-import { createMockPrismaUser } from '../../test/mocks/factories';
-import { UserMapper } from './user.mapper';
+import {
+  createMockPrismaUser,
+  createMockPrismaActivity,
+  createMockPrismaSyncHistory,
+} from '../../test/mocks/factories';
 
-describe('UserResolver', () => {
-  let resolver: UserResolver;
-  let userService: UserService;
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        UserResolver,
-        {
-          provide: UserService,
-          useValue: {
-            findAll: jest.fn(),
-            findByStravaId: jest.fn(),
-          },
-        },
-      ],
-    }).compile();
-
-    resolver = module.get<UserResolver>(UserResolver);
-    userService = module.get<UserService>(UserService);
-  });
-
-  it('should return all users', async () => {
-    const mockPrismaUsers = [createMockPrismaUser()];
-    const expectedGraphQLUsers = mockPrismaUsers.map(UserMapper.toGraphQL);
-
-    jest.spyOn(userService, 'findAll').mockResolvedValue(mockPrismaUsers);
-
-    const result = await resolver.users();
-
-    expect(result).toEqual(expectedGraphQLUsers);
-  });
-});
+const user = createMockPrismaUser({ stravaId: 12345 });
+const activity = createMockPrismaActivity({ userId: user.id, type: 'Run' });
+const syncHistory = createMockPrismaSyncHistory({ userId: user.id });
 ```
 
-## Writing E2E Tests
+Available factories: `createMockPrismaUser` · `createMockStravaToken` · `createMockPrismaUserPreferences` · `createMockPrismaActivity` · `createMockPrismaSyncHistory`.
 
-### Testing GraphQL Queries
+---
+
+## Writing Integration Tests
+
+Integration tests load the full `AppModule` against a dedicated `strivpath_test` database. The database is automatically reset between tests via `test/setup-integration.ts`.
 
 ```typescript
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
-import { AppModule } from '@/app.module';
-import { PrismaService } from '@/database/prisma.service';
-import { createMockPrismaUser } from '../mocks/factories';
+import { AppModule } from '../../src/app.module';
+import { getTestPrismaClient, seedTestUser } from '../test-db';
 
-describe('User GraphQL (e2e)', () => {
+describe('Goal Auto-Update Integration', () => {
   let app: INestApplication;
-  let prisma: PrismaService;
 
   beforeAll(async () => {
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    const module: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    app = moduleFixture.createNestApplication();
-    prisma = moduleFixture.get<PrismaService>(PrismaService);
+    app = module.createNestApplication();
     await app.init();
   });
 
@@ -174,45 +192,79 @@ describe('User GraphQL (e2e)', () => {
     await app.close();
   });
 
-  it('should query all users', async () => {
-    const mockUser = createMockPrismaUser();
-    await prisma.user.create({ data: mockUser });
+  it('should update goal progress after activity sync', async () => {
+    const prisma = getTestPrismaClient();
+    const { user } = await seedTestUser({ stravaId: 99999 });
 
-    const query = `
-      query {
-        users {
-          id
-          stravaId
-          username
-        }
-      }
-    `;
-
-    const response = await request(app.getHttpServer()).post('/graphql').send({ query }).expect(200);
-
-    expect(response.body.data.users).toBeDefined();
-    expect(response.body.data.users.length).toBeGreaterThan(0);
+    // ... test against real database
+    const goals = await prisma.goal.findMany({ where: { userId: user.id } });
+    expect(goals).toBeDefined();
   });
 });
 ```
 
-## Best Practices
+Always mock external Strava API calls to avoid real HTTP requests and rate limits.
 
-1. **Use factories for test data**: Always use `factories.ts` to generate test data
-2. **Mock external dependencies**: Use `createMockPrismaService()` for database mocking
-3. **Test business logic, not implementation**: Focus on behavior, not internal details
-4. **Arrange-Act-Assert pattern**: Structure tests clearly
-5. **One assertion per test**: Keep tests focused and atomic
-6. **Descriptive test names**: Use `it('should...')` format
+---
+
+## Writing E2E Tests
+
+```typescript
+import { Test, TestingModule } from '@nestjs/testing';
+import { INestApplication } from '@nestjs/common';
+import * as request from 'supertest';
+import { AppModule } from '@/app.module';
+
+describe('Auth (e2e)', () => {
+  let app: INestApplication;
+
+  beforeAll(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      imports: [AppModule],
+    }).compile();
+
+    app = module.createNestApplication();
+    await app.init();
+  });
+
+  afterAll(async () => {
+    await app.close();
+  });
+
+  it('returns a Strava OAuth URL', async () => {
+    const response = await request(app.getHttpServer())
+      .post('/graphql')
+      .send({ query: `query { stravaAuthUrl }` })
+      .expect(200);
+
+    expect(response.body.data.stravaAuthUrl).toContain('strava.com/oauth/authorize');
+  });
+});
+```
+
+---
 
 ## Configuration
 
-- **Unit tests**: Configured in `jest.config.ts` at the root
-- **E2E tests**: Configured in `test/jest-e2e.json`
-- **Path aliases**: Use `@/` to import from `src/`
+| Config file                  | Test type   | File match                                  |
+| ---------------------------- | ----------- | ------------------------------------------- |
+| `jest.config.ts`             | Unit        | `src/**/*.spec.ts`                          |
+| `jest.integration.config.ts` | Integration | `test/integration/**/*.integration.spec.ts` |
+| `test/jest-e2e.json`         | E2E         | `test/**/*.e2e-spec.ts`                     |
 
-## Database for E2E Tests
+Integration and E2E configs run with `maxWorkers: 1` to avoid database conflicts.
 
-E2E tests use the same PostgreSQL database configured in `.env`, but **all tables are truncated** before each test via `setup-e2e.ts`.
+## Database
 
-For isolated testing, consider using a separate test database by creating a `.env.test` file.
+- **Unit tests**: PrismaService auto-mocked via `test/setup.ts` — no database needed
+- **Integration tests**: `strivpath_test` database — created and migrated automatically by `test/setup-integration.ts`
+- **E2E tests**: Same `strivpath_test` database — all tables truncated before each test via `test/setup-e2e.ts`
+
+## Best Practices
+
+1. **Unit tests**: Mock all dependencies inline with `jest.fn()` — isolate one service per test file
+2. **Integration tests**: Use `seedTestUser()` and helpers from `test-db.ts` for initial data setup
+3. **Mock Strava API**: Never make real HTTP calls to Strava — mock all `StravaService` methods
+4. **Arrange-Act-Assert**: Structure each test in three clear phases
+5. **Descriptive names**: Use `it('should...')` format with a full sentence
+6. **One behavior per test**: Keep each test focused on a single outcome

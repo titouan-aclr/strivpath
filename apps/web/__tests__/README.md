@@ -2,218 +2,209 @@
 
 This directory contains E2E tests using Playwright for the Next.js application.
 
+For unit and component tests (Vitest), see the `*.test.ts` / `*.test.tsx` files co-located with the source.
+
 ## Directory Structure
 
 ```
 apps/web/
-├── __tests__/                # E2E tests (Playwright)
-│   └── *.spec.ts
-├── app/                      # Next.js app directory
-│   ├── page.tsx
-│   └── page.test.tsx         # Component tests (Vitest)
+├── __tests__/                        # E2E tests (Playwright)
+│   ├── auth/
+│   │   ├── auth-flow.spec.ts         # Auth setup, cookie validation, token persistence
+│   │   └── smoke.spec.ts             # Infrastructure and environment validation
+│   ├── fixtures/
+│   │   ├── auth.fixture.ts           # Playwright fixtures (db, authenticatedUser, authenticatedPage)
+│   │   └── test-data.ts              # Predefined test users and URLs
+│   ├── helpers/
+│   │   ├── auth.ts                   # loginViaBackend, loginViaOAuth, logout, waitForAuth
+│   │   └── cookies.ts                # setAuthCookies, getAuthCookies, clearAuthCookies
+│   └── setup/
+│       ├── global-setup.ts           # Migrations before all tests
+│       ├── global-teardown.ts        # Cleanup after all tests
+│       ├── db-helpers.ts             # resetDatabase, createTestUser, seedAuthenticatedUser
+│       ├── msw-server.ts             # MSW HTTP handlers for OAuth callback mock
+│       └── prisma-client.ts          # Prisma client for E2E test database
+├── components/
+│   └── **/*.test.tsx                 # Component tests (Vitest + Testing Library)
 ├── lib/
-│   └── *.test.ts             # Unit tests (Vitest)
-├── mocks/                    # MSW mock handlers
-│   ├── handlers.ts
-│   └── server.ts
-├── vitest.config.ts          # Vitest configuration
-├── vitest.setup.ts           # Vitest global setup
-└── playwright.config.ts      # Playwright configuration
+│   └── **/*.test.ts                  # Utility and hook tests (Vitest)
+├── mocks/
+│   ├── handlers.ts                   # MSW GraphQL handlers (CurrentUser, Activities, Goals, …)
+│   └── server.ts                     # MSW server setup for Vitest
+├── vitest.config.mts                 # Vitest configuration
+├── vitest.setup.ts                   # Global Vitest setup (MSW, polyfills)
+└── playwright.config.ts              # Playwright configuration
 ```
+
+---
 
 ## Test Types
 
 ### Unit & Component Tests (Vitest)
 
-Tests are located **next to the code** they test:
+Tests are co-located with the source files they test:
 
 ```
-app/
-├── page.tsx
-└── page.test.tsx              ← Component test
+app/[locale]/(dashboard)/goals/
+├── goals-page-content.tsx
+└── goals-page-content.test.tsx       ← Component test
 
-lib/
-├── apollo-client.ts
-└── apollo-client.test.ts      ← Unit test
+lib/sync/
+├── context.tsx
+└── context.test.tsx                  ← Hook/context test
 ```
 
 **Naming convention**: `*.test.ts` or `*.test.tsx`
 
-**Run unit/component tests**:
+**Run**:
 
 ```bash
-pnpm test              # Run all tests
+pnpm test              # Run all unit/component tests
 pnpm test:watch        # Watch mode
-pnpm test:ui           # Interactive UI mode
-pnpm test:cov          # With coverage
+pnpm test:ui           # Interactive Vitest UI
+pnpm test:cov          # With coverage report
 ```
 
 ### E2E Tests (Playwright)
 
-E2E tests are located in the `__tests__/` directory:
-
-```
-__tests__/
-├── home.spec.ts              ← Homepage E2E tests
-└── auth.spec.ts              ← Authentication flow tests
-```
+Located in `__tests__/`. Tests run against a real running API and a dedicated E2E database (`strivpath_test_e2e`).
 
 **Naming convention**: `*.spec.ts`
 
-**Run e2e tests**:
+**Run**:
 
 ```bash
-pnpm test:e2e          # Run all E2E tests
-pnpm test:e2e:ui       # Interactive UI mode
+pnpm test:e2e          # Run all E2E tests (headless)
+pnpm test:e2e:ui       # Interactive Playwright UI
 ```
+
+---
 
 ## Writing Component Tests
 
-### Testing a Server Component
-
 ```typescript
-import { render, screen } from '@testing-library/react';
-import { describe, it, expect } from 'vitest';
-import HomePage from './page';
+import { describe, it, expect, vi } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/react';
+import { NextIntlClientProvider } from 'next-intl';
+import { GoalCard } from './goal-card';
+import { useGoals } from '@/lib/goals/use-goals';
+import messages from '@/messages/en.json';
 
-describe('HomePage', () => {
-  it('should render the heading', () => {
-    render(<HomePage />);
-    expect(screen.getByRole('heading', { name: /strivpath/i })).toBeInTheDocument();
+vi.mock('@/lib/goals/use-goals');
+
+describe('GoalCard', () => {
+  it('renders goal title and progress', async () => {
+    vi.mocked(useGoals).mockReturnValue({
+      goals: [{ id: 1, title: 'Run 100km', progressPercentage: 45 }],
+      loading: false,
+    });
+
+    render(
+      <NextIntlClientProvider locale="en" messages={messages}>
+        <GoalCard goalId={1} />
+      </NextIntlClientProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.getByText('Run 100km')).toBeInTheDocument();
+    });
   });
 });
 ```
 
 ### Testing with GraphQL Mocks (MSW)
 
+MSW is configured globally in `vitest.setup.ts` and active for all component tests. Override handlers per test when needed:
+
 ```typescript
-import { render, screen, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from 'vitest';
 import { graphql, HttpResponse } from 'msw';
-import { server } from '../mocks/server';
-import UsersPage from './users/page';
+import { server } from '@/mocks/server';
 
-describe('UsersPage', () => {
-  beforeEach(() => {
-    server.use(
-      graphql.query('GetUsers', () => {
-        return HttpResponse.json({
-          data: {
-            users: [
-              {
-                id: '1',
-                stravaId: 12345,
-                username: 'john_doe',
-                firstname: 'John',
-                lastname: 'Doe',
-              },
-            ],
-          },
-        });
-      })
-    );
-  });
-
-  it('should display users from GraphQL API', async () => {
-    render(<UsersPage />);
-
-    await waitFor(() => {
-      expect(screen.getByText('john_doe')).toBeInTheDocument();
-    });
-  });
+beforeEach(() => {
+  server.use(
+    graphql.query('Goals', () =>
+      HttpResponse.json({
+        data: {
+          goals: [{ id: 1, title: 'Run 100km', status: 'ACTIVE' }],
+        },
+      }),
+    ),
+  );
 });
 ```
 
-## E2E Test Infrastructure
+Existing MSW handler operation names: `CurrentUser`, `RefreshToken`, `Logout`, `SyncActivities`, `SyncStatus`, `Activities`, `Goals`, `ActiveGoals`, and others defined in `mocks/handlers.ts`.
 
-The E2E testing infrastructure provides complete isolation with dedicated database, authentication helpers, and Playwright fixtures.
+---
 
-### Directory Structure (E2E)
+## Writing E2E Tests
 
-```
-__tests__/
-├── setup/
-│   ├── global-setup.ts          # Database initialization and migrations
-│   ├── global-teardown.ts       # Cleanup after all tests
-│   └── db-helpers.ts            # Database utilities (reset, seed)
-├── fixtures/
-│   ├── auth.fixture.ts          # Playwright fixtures with auth support
-│   └── test-data.ts             # Test data constants
-├── helpers/
-│   ├── auth.ts                  # Auth helpers (login, logout, wait)
-│   └── cookies.ts               # Cookie management helpers
-└── auth/
-    └── smoke.spec.ts            # Infrastructure validation tests
-```
+### With Authentication Fixtures
 
-### Database Setup
-
-E2E tests use a dedicated database: `strivpath_test_e2e`
-
-Create the database:
-
-```bash
-docker exec strivpath-postgres psql -U postgres -c "CREATE DATABASE strivpath_test_e2e;"
-```
-
-The global setup automatically applies migrations before tests run.
-
-### Using Fixtures
-
-The `auth.fixture.ts` provides ready-to-use authenticated pages:
+The `auth.fixture.ts` provides ready-to-use authenticated pages via Playwright fixtures:
 
 ```typescript
 import { test, expect } from '../fixtures/auth.fixture';
 
-test('should access protected page when authenticated', async ({ authenticatedPage }) => {
-  await authenticatedPage.goto('/dashboard');
-  await expect(authenticatedPage).toHaveURL(/\/dashboard/);
+test.describe('Dashboard', () => {
+  test('displays user name when authenticated', async ({ authenticatedPage, authenticatedUser }) => {
+    await authenticatedPage.goto('/dashboard');
+
+    await expect(authenticatedPage.getByText(authenticatedUser.user.firstname)).toBeVisible();
+  });
 });
 ```
 
-Available fixtures:
+**Available fixtures**:
 
-- **`authenticatedPage`**: Page with authenticated user and cookies set
-- **`authenticatedUser`**: User data, tokens, and preferences
-- **`db`**: Direct Prisma database access for assertions
+| Fixture             | Type                    | Description                               |
+| ------------------- | ----------------------- | ----------------------------------------- |
+| `db`                | `PrismaClient`          | Direct database access for assertions     |
+| `authenticatedUser` | `AuthenticatedTestUser` | User data, tokens, and preferences        |
+| `authenticatedPage` | `Page`                  | Playwright page with auth cookies pre-set |
 
-### Auth Helpers: Two Approaches
+### Without Authentication
 
-This project provides two authentication methods for E2E tests, each suited for different testing scenarios.
+```typescript
+import { test as base, expect } from '@playwright/test';
+import { resetDatabase } from '../setup/db-helpers';
+import { expectUnauthenticated } from '../helpers/auth';
 
-#### `loginViaBackend()` - Direct Authentication
+base.beforeEach(async () => {
+  await resetDatabase();
+});
 
-**Use for**: Tests focused on authenticated behavior without testing OAuth flow
+base('redirects to login when unauthenticated', async ({ page }) => {
+  await page.goto('/dashboard');
+  await expectUnauthenticated(page);
+});
+```
 
-**Advantages**:
+---
 
-- Fast execution (no HTTP round-trip)
-- Complete control over user state
-- Simplified test setup
+## Auth Helpers (`helpers/auth.ts`)
 
-**Example**:
+Two authentication approaches for different test scenarios:
+
+### `loginViaBackend(page, options?)` — Direct Authentication
+
+Creates a user in the database and injects auth cookies directly. Fast and deterministic.
 
 ```typescript
 import { loginViaBackend } from '../helpers/auth';
 
 const user = await loginViaBackend(page, {
-  username: 'testuser',
   stravaId: 123456,
+  username: 'testathlete',
   onboardingCompleted: true,
 });
 ```
 
-#### `loginViaOAuth()` - Realistic OAuth Flow
+**Use for**: Tests focused on authenticated behavior (dashboard, goals, settings).
 
-**Use for**: Tests validating OAuth integration and cookie handling
+### `loginViaOAuth(page, options?)` — OAuth Flow
 
-**Advantages**:
-
-- Tests real OAuth callback route
-- Validates MSW handler behavior
-- Realistic browser flow
-
-**Example**:
+Navigates through the OAuth callback route with MSW mocking the Strava endpoint.
 
 ```typescript
 import { loginViaOAuth } from '../helpers/auth';
@@ -224,167 +215,92 @@ await loginViaOAuth(page, {
 });
 ```
 
-#### Other Auth Helpers
+**Use for**: Tests validating the OAuth callback, cookie setting, and post-auth redirects.
+
+### Other helpers
 
 ```typescript
-// Logout (calls GraphQL mutation + clears cookies)
-await logout(page);
-
-// Wait for auth to be loaded in Apollo cache
-await waitForAuth(page);
+await logout(page);                        // GraphQL logout mutation + clear cookies
+await waitForAuth(page);                   // Wait for Apollo cache to populate
+await expectUnauthenticated(page);         // Assert page is on /login
+await expectAuthenticated(page, url?);     // Assert page is NOT on /login
+await waitForGraphQL(page, 'CurrentUser'); // Wait for a specific GraphQL operation
 ```
 
-### Database Helpers
+---
+
+## Database Helpers (`setup/db-helpers.ts`)
 
 ```typescript
 import { resetDatabase, createTestUser, seedAuthenticatedUser } from '../setup/db-helpers';
 
-// Reset database (truncate all tables)
+// Truncate all tables and reset sequences
 await resetDatabase();
 
-// Create simple test user
+// Create a user with default preferences (no tokens)
 const { user, preferences } = await createTestUser({
-  username: 'testuser',
   stravaId: 123456,
+  username: 'testuser',
 });
 
-// Create authenticated user with JWT tokens
+// Create a user with valid JWT access and refresh tokens
 const authUser = await seedAuthenticatedUser({
+  stravaId: 987654,
   username: 'authuser',
   onboardingCompleted: true,
 });
+// authUser: { user, preferences, accessToken, refreshToken, refreshTokenJti }
 ```
 
-## Writing E2E Tests
+---
 
-### Testing with Authentication
+## Test Data (`fixtures/test-data.ts`)
+
+Predefined users for common scenarios:
 
 ```typescript
-import { test, expect } from '../fixtures/auth.fixture';
+import { TEST_USERS } from '../fixtures/test-data';
 
-test.describe('Dashboard', () => {
-  test('should display user info when authenticated', async ({ authenticatedPage, authenticatedUser }) => {
-    await authenticatedPage.goto('/dashboard');
-
-    await expect(authenticatedPage.getByText(authenticatedUser.user.firstname)).toBeVisible();
-  });
-});
+// TEST_USERS.default    — stravaId: 123456789, onboardingCompleted: false
+// TEST_USERS.onboarded  — stravaId: 987654321, onboardingCompleted: true
+// TEST_USERS.newUser    — stravaId: 111222333, onboardingCompleted: false
 ```
 
-### Testing Unauthenticated Access
+---
 
-```typescript
-import { test as base } from '@playwright/test';
-import { resetDatabase } from '../setup/db-helpers';
-import { expectUnauthenticated } from '../helpers/auth';
+## E2E Database Setup
 
-base.beforeEach(async () => {
-  await resetDatabase();
-});
+E2E tests use a dedicated database `strivpath_test_e2e`, separate from the development database.
 
-base('should redirect to login when unauthenticated', async ({ page }) => {
-  await page.goto('/dashboard');
-  await expectUnauthenticated(page);
-});
+Run the following once before running E2E tests for the first time:
+
+```bash
+# Install Playwright browsers
+pnpm exec playwright install
+
+# Create the E2E database
+docker exec strivpath-postgres psql -U postgres -c "CREATE DATABASE strivpath_test_e2e;"
 ```
 
-### Testing Page Navigation
+The global setup (`setup/global-setup.ts`) automatically applies Prisma migrations before the test suite starts.
 
-```typescript
-import { test, expect } from '@playwright/test';
-
-test.describe('Homepage', () => {
-  test('should display the main heading', async ({ page }) => {
-    await page.goto('/');
-
-    await expect(page.getByRole('heading', { name: /strivpath/i })).toBeVisible();
-  });
-
-  test('should navigate to login page', async ({ page }) => {
-    await page.goto('/');
-
-    await page.getByRole('link', { name: /login/i }).click();
-
-    await expect(page).toHaveURL(/.*login/);
-  });
-});
-```
-
-### Testing Forms
-
-```typescript
-import { test, expect } from '@playwright/test';
-
-test.describe('Authentication', () => {
-  test('should complete OAuth flow', async ({ page }) => {
-    await page.goto('/login');
-
-    await page.getByRole('button', { name: /connect with strava/i }).click();
-
-    // Should redirect to Strava OAuth
-    await expect(page).toHaveURL(/.*strava.com.*/);
-  });
-});
-```
-
-## Best Practices
-
-1. **Co-locate tests**: Place component tests next to the components they test
-2. **Use MSW for API mocking**: Mock GraphQL queries/mutations in component tests
-3. **Test user behavior**: Focus on what users see and do, not implementation details
-4. **Use semantic queries**: Prefer `getByRole`, `getByLabelText` over `getByTestId`
-5. **Wait for async operations**: Use `waitFor` for asynchronous state changes
-6. **E2E for critical paths**: Use Playwright for user flows like authentication, checkout, etc.
-
-## MSW (Mock Service Worker)
-
-MSW is configured in `vitest.setup.ts` and runs automatically for all component tests.
-
-**Adding a new GraphQL mock**:
-
-Edit `mocks/handlers.ts`:
-
-```typescript
-import { graphql, HttpResponse } from 'msw';
-
-export const handlers = [
-  graphql.query('GetUsers', () => {
-    return HttpResponse.json({
-      data: {
-        users: [
-          /* mock data */
-        ],
-      },
-    });
-  }),
-
-  graphql.mutation('CreateUser', ({ variables }) => {
-    return HttpResponse.json({
-      data: {
-        createUser: {
-          id: '1',
-          username: variables.username,
-        },
-      },
-    });
-  }),
-];
-```
+---
 
 ## Configuration
 
-- **Vitest**: Configured in `vitest.config.ts`
-- **Playwright**: Configured in `playwright.config.ts`
-- **MSW**: Setup in `mocks/server.ts` and `vitest.setup.ts`
+| Config file            | Purpose                                                   |
+| ---------------------- | --------------------------------------------------------- |
+| `vitest.config.mts`    | Vitest setup — jsdom environment, excludes `__tests__/`   |
+| `vitest.setup.ts`      | Global Vitest setup — MSW server, polyfills, cleanup      |
+| `playwright.config.ts` | Playwright setup — base URL, E2E database URL, web server |
 
-## Running Tests in CI
+---
 
-Tests are configured in Turborepo for parallel execution:
+## Best Practices
 
-```bash
-# From repository root
-pnpm test              # Run all tests (unit + component)
-pnpm test:e2e          # Run all E2E tests
-```
-
-E2E tests automatically start the Next.js dev server via Playwright's `webServer` configuration.
+1. **Co-locate tests**: Place component/unit tests next to the files they test
+2. **Use MSW for GraphQL mocking**: Override handlers per-test rather than creating custom mocks
+3. **Use semantic queries**: Prefer `getByRole`, `getByLabelText`, `getByText` over `getByTestId`
+4. **Wait for async operations**: Use `waitFor` for asynchronous rendering or data fetching
+5. **E2E for critical paths**: Use Playwright for complete user journeys — auth, onboarding, goal creation
+6. **Reset database between E2E tests**: Call `resetDatabase()` in `beforeEach` for clean isolation
