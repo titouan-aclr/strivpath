@@ -46,6 +46,7 @@
 - [Development Commands](#development-commands)
 - [Testing](#testing)
 - [CI/CD & Deployment](#cicd--deployment)
+- [Roadmap](#roadmap)
 - [License](#license)
 
 ---
@@ -608,6 +609,14 @@ pnpm --filter web test:ui             # Vitest UI
 - Deployed via **Dokploy** with **Traefik** as reverse proxy (SSL/TLS)
 - PostgreSQL with persistent volumes
 - Cross-subdomain cookies: `api.domain.com` ↔ `domain.com` via `COOKIES_DOMAIN`
+
+---
+
+## Roadmap
+
+v1.0 covers authentication, activity import, statistics dashboards, goal tracking, and onboarding. The planned track after initial release includes a demo mode for exploring the app without a Strava account, a badge and achievement system, advanced analytics (personal records, charts, route maps), performance and infrastructure improvements (structured logging, token encryption, BullMQ), and a potential React Native companion app.
+
+See [ROADMAP.md](ROADMAP.md) for the full versioned plan.
 
 ---
 
