@@ -10,6 +10,7 @@ NestJS GraphQL backend for StrivPath. Uses a code-first approach, **CommonJS mod
 - [Module Architecture](#module-architecture)
 - [Architecture Pattern](#architecture-pattern)
 - [Auth Flow](#auth-flow)
+- [Strava App Setup](#strava-app-setup)
 - [GraphQL Operations](#graphql-operations)
 - [Database Schema](#database-schema)
 - [Environment Variables](#environment-variables)
@@ -136,6 +137,27 @@ Logout  → GraphQL mutation logout
 ```
 
 **Strava tokens** (separate from JWT) are stored in `StravaToken` and used by `StravaModule` to call the Strava API on behalf of the user.
+
+---
+
+## Strava App Setup
+
+You need a Strava API application to run StrivPath. This is a one-time setup at [strava.com/settings/api](https://www.strava.com/settings/api).
+
+1. Go to `https://www.strava.com/settings/api` and create a new application
+2. Fill in the required fields:
+   - **Application Name**: anything (e.g. `StrivPath Local`)
+   - **Website**: `http://localhost`
+   - **Authorization Callback Domain**: `localhost` — no protocol, no port
+3. Note your **Client ID** and **Client Secret** and set them in `apps/api/.env`:
+   ```
+   STRAVA_CLIENT_ID=your_client_id
+   STRAVA_CLIENT_SECRET=your_client_secret
+   STRAVA_REDIRECT_URI=http://localhost:3011/v1/auth/strava/callback
+   ```
+4. `STRAVA_WEBHOOK_VERIFY_TOKEN` is a string you define freely — it is sent back by Strava to verify webhook subscription ownership. Any non-empty string works for development.
+
+> The **Authorization Callback Domain** in the Strava app settings must match the domain of `STRAVA_REDIRECT_URI` (without protocol or port). `localhost` covers any port on localhost.
 
 ---
 
@@ -268,6 +290,8 @@ mockPrisma.user.findUnique.mockResolvedValue(createMockPrismaUser());
 ### E2E / Integration Tests
 
 Uses a real PostgreSQL database with full cleanup between tests. Set `DATABASE_URL` to a dedicated test database.
+
+→ See [test/README.md](test/README.md) for detailed setup, database helpers, and all 9 integration test files.
 
 ---
 

@@ -250,7 +250,7 @@ strivpath/
 
 ## Getting Started
 
-**Prerequisites** (both setups): Node.js >= 24 · pnpm 10.30.1+ · Docker · [Strava Developer Account](https://developers.strava.com/)
+**Prerequisites** (both setups): Node.js >= 24 · pnpm 10.30.1+ · Docker · [Strava Developer Account](https://developers.strava.com/) — see [Strava App Setup](apps/api/README.md#strava-app-setup) for step-by-step instructions
 
 ---
 
@@ -590,6 +590,8 @@ pnpm --filter web test:ui             # Vitest UI
 | Frontend unit       | Vitest + Testing Library  | Component rendering, hooks, utilities             |
 | Frontend GraphQL    | MSW                       | Mock handlers for all GraphQL operations          |
 | Frontend E2E        | Playwright                | Critical user journeys (login, sync, goals)       |
+
+For detailed setup, database helpers, and test patterns see [apps/api/test/README.md](apps/api/test/README.md) and [apps/web/\_\_tests\_\_/README.md](apps/web/__tests__/README.md).
 
 ---
 

@@ -399,3 +399,5 @@ MSW starts automatically before each test suite via `vitest.setup.ts`.
 ### E2E Tests
 
 Playwright tests in `__tests__/` run against a real API and database. A dedicated test database is recommended. The global setup initializes the database and creates auth fixtures before the suite runs.
+
+→ See [\_\_tests\_\_/README.md](__tests__/README.md) for prerequisites, fixture usage, auth helpers, and database setup.
