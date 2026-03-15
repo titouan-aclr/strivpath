@@ -56,8 +56,6 @@ export interface TestUserPreferences {
   userId: number;
   selectedSports: string[];
   onboardingCompleted: boolean;
-  locale: string;
-  theme: string;
 }
 
 export interface AuthenticatedTestUser {
@@ -98,8 +96,6 @@ export async function createTestUser(overrides?: {
       userId: user.id,
       selectedSports: ['Run'],
       onboardingCompleted: false,
-      locale: 'en',
-      theme: 'system',
     },
   });
 
@@ -121,8 +117,6 @@ export async function createTestUser(overrides?: {
       userId: preferences.userId,
       selectedSports: Array.isArray(preferences.selectedSports) ? (preferences.selectedSports as string[]) : [],
       onboardingCompleted: preferences.onboardingCompleted,
-      locale: preferences.locale,
-      theme: preferences.theme,
     },
   };
 }

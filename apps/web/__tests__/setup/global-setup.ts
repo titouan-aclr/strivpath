@@ -1,5 +1,4 @@
 import { execSync } from 'child_process';
-import { PrismaClient } from './prisma-client';
 
 const E2E_DATABASE_URL =
   process.env.E2E_DATABASE_URL ||
@@ -11,20 +10,9 @@ async function globalSetup() {
 
   process.env.DATABASE_URL = E2E_DATABASE_URL;
 
-  const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: E2E_DATABASE_URL,
-      },
-    },
-  });
-
   try {
-    await prisma.$connect();
-    console.log('✅ Connected to E2E database');
-
     console.log('🔄 Applying database migrations...');
-    execSync('pnpm --filter api prisma migrate deploy', {
+    execSync('pnpm --filter api db:migrate:deploy', {
       cwd: process.cwd(),
       stdio: 'inherit',
       env: {
@@ -32,13 +20,9 @@ async function globalSetup() {
         DATABASE_URL: E2E_DATABASE_URL,
       },
     });
-    console.log('✅ Migrations applied successfully');
-
-    await prisma.$disconnect();
     console.log('✅ E2E test environment setup complete');
   } catch (error) {
     console.error('❌ Failed to setup E2E test environment:', error);
-    await prisma.$disconnect();
     throw error;
   }
 }
