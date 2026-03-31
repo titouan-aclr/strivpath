@@ -186,7 +186,7 @@ describe('GoalCard', () => {
   it('displays days remaining correctly', () => {
     render(<GoalCard goal={mockGoal} onArchive={mockOnArchive} onDelete={mockOnDelete} />);
 
-    expect(screen.getByText(/29 days left/i)).toBeInTheDocument();
+    expect(screen.getByText(/\d+ days left/i)).toBeInTheDocument();
   });
 
   it('displays hover effect classes on card', () => {

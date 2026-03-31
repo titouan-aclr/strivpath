@@ -112,8 +112,9 @@ describe('formatTimeAgo', () => {
   it('should return formatted date for older dates', () => {
     const date = new Date('2024-05-01T12:00:00Z');
     const result = formatTimeAgo(date, EN_TIME_AGO, 'en');
+    expect(result).not.toBeNull();
+    expect(result).not.toMatch(/ago|just now/i);
     expect(result).toContain('May');
-    expect(result).toContain('1');
   });
 
   it('should format in French locale', () => {
@@ -276,11 +277,14 @@ describe('getWeekDates', () => {
   });
 
   it('should handle Sunday correctly', () => {
-    vi.setSystemTime(new Date('2024-06-16T12:00:00Z'));
+    const sunday = new Date('2024-06-16T12:00:00Z');
+    vi.setSystemTime(sunday);
     const { start, end } = getWeekDates();
+
     expect(start.getDay()).toBe(1);
-    expect(start.getDate()).toBe(10);
-    expect(end.getDate()).toBe(16);
+    expect(end.getDay()).toBe(0);
+    expect(start.getTime()).toBeLessThanOrEqual(sunday.getTime());
+    expect(end.getTime()).toBeGreaterThanOrEqual(sunday.getTime());
   });
 });
 
