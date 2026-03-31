@@ -1,0 +1,42 @@
+import { registerEnumType } from '@nestjs/graphql';
+
+export enum ActivityType {
+  RUN = 'RUN',
+  RIDE = 'RIDE',
+  SWIM = 'SWIM',
+  WALK = 'WALK',
+  HIKE = 'HIKE',
+  ALPINE_SKI = 'ALPINE_SKI',
+  BACKCOUNTRY_SKI = 'BACKCOUNTRY_SKI',
+  CANOE = 'CANOE',
+  CROSSFIT = 'CROSSFIT',
+  ELLIPTICAL = 'ELLIPTICAL',
+  GOLF = 'GOLF',
+  HANDCYCLE = 'HANDCYCLE',
+  INLINE_SKATE = 'INLINE_SKATE',
+  KAYAK = 'KAYAK',
+  KITESURF = 'KITESURF',
+  NORDIC_SKI = 'NORDIC_SKI',
+  ROCK_CLIMB = 'ROCK_CLIMB',
+  ROLLER_SKI = 'ROLLER_SKI',
+  ROWING = 'ROWING',
+  SNOWBOARD = 'SNOWBOARD',
+  SNOWSHOE = 'SNOWSHOE',
+  SOCCER = 'SOCCER',
+  STAIR_STEPPER = 'STAIR_STEPPER',
+  STAND_UP_PADDLING = 'STAND_UP_PADDLING',
+  SURFING = 'SURFING',
+  VELOMOBILE = 'VELOMOBILE',
+  VIRTUAL_RIDE = 'VIRTUAL_RIDE',
+  VIRTUAL_RUN = 'VIRTUAL_RUN',
+  WEIGHT_TRAINING = 'WEIGHT_TRAINING',
+  WHEELCHAIR = 'WHEELCHAIR',
+  WINDSURF = 'WINDSURF',
+  WORKOUT = 'WORKOUT',
+  YOGA = 'YOGA',
+}
+
+registerEnumType(ActivityType, {
+  name: 'ActivityType',
+  description: 'Types of activities supported by Strava',
+});

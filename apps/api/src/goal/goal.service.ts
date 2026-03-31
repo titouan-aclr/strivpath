@@ -1,0 +1,333 @@
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../database/prisma.service';
+import { GoalMapper } from './goal.mapper';
+import { Goal } from './models/goal.model';
+import { GoalProgressPoint } from './models/goal-progress-point.model';
+import { CreateGoalInput, UpdateGoalInput } from './dto/goal.input';
+import { GoalTargetType } from './enums/goal-target-type.enum';
+import { GoalPeriodHelper } from './helpers/goal-period.helper';
+import { GoalStatus } from './enums/goal-status.enum';
+import { Prisma } from '@prisma/client';
+import { SportType } from '../user-preferences/enums/sport-type.enum';
+
+@Injectable()
+export class GoalService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async create(userId: number, input: CreateGoalInput): Promise<Goal> {
+    const startDate = new Date(input.startDate);
+    const endDate = GoalPeriodHelper.calculateEndDate(
+      input.periodType,
+      startDate,
+      input.endDate ? new Date(input.endDate) : undefined,
+    );
+
+    const prismaGoal = await this.prisma.goal.create({
+      data: {
+        userId,
+        title: input.title,
+        description: input.description,
+        targetType: input.targetType,
+        targetValue: input.targetValue,
+        periodType: input.periodType,
+        startDate,
+        endDate,
+        isRecurring: input.isRecurring ?? false,
+        recurrenceEndDate: input.recurrenceEndDate ? new Date(input.recurrenceEndDate) : null,
+        sportType: input.sportType,
+        status: GoalStatus.ACTIVE,
+        currentValue: 0,
+      },
+    });
+
+    await this.updateGoalProgress(prismaGoal.id);
+
+    const updatedGoal = await this.prisma.goal.findUnique({
+      where: { id: prismaGoal.id },
+    });
+
+    return GoalMapper.toGraphQL(updatedGoal!);
+  }
+
+  async update(id: number, userId: number, input: UpdateGoalInput): Promise<Goal> {
+    const existingGoal = await this.findByIdOrThrow(id, userId);
+
+    const updateData: Prisma.GoalUpdateInput = {
+      ...(input.title && { title: input.title }),
+      ...(input.description !== undefined && { description: input.description }),
+      ...(input.targetValue !== undefined && { targetValue: input.targetValue }),
+      ...(input.endDate && { endDate: new Date(input.endDate) }),
+    };
+
+    if (input.endDate) {
+      const startDate = new Date(existingGoal.startDate);
+      const newEndDate = new Date(input.endDate);
+      GoalPeriodHelper.validateDateRange(startDate, newEndDate);
+    }
+
+    await this.prisma.goal.update({
+      where: { id },
+      data: updateData,
+    });
+
+    await this.updateGoalProgress(id);
+
+    const updatedGoal = await this.prisma.goal.findUnique({
+      where: { id },
+    });
+
+    return GoalMapper.toGraphQL(updatedGoal!);
+  }
+
+  async delete(id: number, userId: number): Promise<Goal> {
+    await this.findByIdOrThrow(id, userId);
+
+    const prismaGoal = await this.prisma.goal.delete({
+      where: { id },
+    });
+
+    return GoalMapper.toGraphQL(prismaGoal);
+  }
+
+  async archive(id: number, userId: number): Promise<Goal> {
+    await this.findByIdOrThrow(id, userId);
+
+    const prismaGoal = await this.prisma.goal.update({
+      where: { id },
+      data: { status: GoalStatus.ARCHIVED },
+    });
+
+    return GoalMapper.toGraphQL(prismaGoal);
+  }
+
+  async findById(id: number, userId: number): Promise<Goal | null> {
+    const prismaGoal = await this.prisma.goal.findFirst({
+      where: { id, userId },
+    });
+
+    return prismaGoal ? GoalMapper.toGraphQL(prismaGoal) : null;
+  }
+
+  async findAll(
+    userId: number,
+    options?: {
+      status?: GoalStatus;
+      sportType?: SportType;
+      includeArchived?: boolean;
+    },
+  ): Promise<Goal[]> {
+    const status: GoalStatus | undefined = options?.status;
+    const sportType: SportType | undefined = options?.sportType;
+    const includeArchived: boolean = options?.includeArchived ?? false;
+
+    const where: Prisma.GoalWhereInput = {
+      userId,
+      ...(status && { status }),
+      ...(sportType && { sportType }),
+      ...(!status && !includeArchived && { status: { not: GoalStatus.ARCHIVED } }),
+    };
+
+    const prismaGoals = await this.prisma.goal.findMany({
+      where,
+      orderBy: [{ status: 'asc' }, { endDate: 'asc' }],
+    });
+
+    return prismaGoals.map(goal => GoalMapper.toGraphQL(goal));
+  }
+
+  async findActiveGoals(userId: number): Promise<Goal[]> {
+    return this.findAll(userId, { status: GoalStatus.ACTIVE });
+  }
+
+  async findPrimaryDashboardGoal(userId: number): Promise<Goal | null> {
+    const sortedGoals = await this.getSortedActiveGoals(userId);
+    const primaryGoal = sortedGoals[0];
+    return primaryGoal ? GoalMapper.toGraphQL(primaryGoal) : null;
+  }
+
+  async findSecondaryDashboardGoals(userId: number): Promise<Goal[]> {
+    const sortedGoals = await this.getSortedActiveGoals(userId);
+    return sortedGoals.slice(1, 3).map(goal => GoalMapper.toGraphQL(goal));
+  }
+
+  private async getSortedActiveGoals(userId: number) {
+    const prismaGoals = await this.prisma.goal.findMany({
+      where: {
+        userId,
+        status: GoalStatus.ACTIVE,
+      },
+      orderBy: { endDate: 'asc' },
+      take: 10,
+    });
+
+    return prismaGoals.sort((a, b) => {
+      const aIsGlobal = a.sportType === null;
+      const bIsGlobal = b.sportType === null;
+      if (aIsGlobal && !bIsGlobal) return -1;
+      if (!aIsGlobal && bIsGlobal) return 1;
+      return a.endDate.getTime() - b.endDate.getTime();
+    });
+  }
+
+  async calculateProgressHistory(goal: Goal): Promise<GoalProgressPoint[]> {
+    const activityFilter: Prisma.ActivityWhereInput = {
+      userId: goal.userId,
+      startDate: {
+        gte: goal.startDate,
+        lte: goal.endDate,
+      },
+      ...(goal.sportType && { type: goal.sportType }),
+    };
+
+    const activities = await this.prisma.activity.findMany({
+      where: activityFilter,
+      select: {
+        startDate: true,
+        distance: true,
+        movingTime: true,
+        totalElevationGain: true,
+      },
+      orderBy: { startDate: 'asc' },
+    });
+
+    const dailyValues = new Map<string, number>();
+
+    for (const activity of activities) {
+      const dateKey = activity.startDate.toISOString().split('T')[0];
+      const currentDayValue = dailyValues.get(dateKey) ?? 0;
+      const activityValue = this.extractActivityValue(activity, goal.targetType);
+      dailyValues.set(dateKey, currentDayValue + activityValue);
+    }
+
+    const progressPoints: GoalProgressPoint[] = [];
+    let cumulativeValue = 0;
+
+    const sortedDates = Array.from(dailyValues.keys()).sort();
+    for (const dateKey of sortedDates) {
+      cumulativeValue += dailyValues.get(dateKey)!;
+      progressPoints.push({
+        date: new Date(dateKey),
+        value: Number(cumulativeValue.toFixed(2)),
+      });
+    }
+
+    return progressPoints;
+  }
+
+  private extractActivityValue(
+    activity: { distance: number; movingTime: number; totalElevationGain: number },
+    targetType: GoalTargetType,
+  ): number {
+    switch (targetType) {
+      case GoalTargetType.DISTANCE:
+        return activity.distance / 1000;
+      case GoalTargetType.DURATION:
+        return activity.movingTime / 3600;
+      case GoalTargetType.ELEVATION:
+        return activity.totalElevationGain;
+      case GoalTargetType.FREQUENCY:
+        return 1;
+      default:
+        return 0;
+    }
+  }
+
+  async findByTemplate(templateId: number, userId: number): Promise<Goal[]> {
+    const prismaGoals = await this.prisma.goal.findMany({
+      where: { templateId, userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    return prismaGoals.map(goal => GoalMapper.toGraphQL(goal));
+  }
+
+  async updateGoalProgress(goalId: number): Promise<void> {
+    const goal = await this.prisma.goal.findUnique({
+      where: { id: goalId },
+    });
+
+    if (!goal) {
+      throw new NotFoundException(`Goal with ID ${goalId} not found`);
+    }
+
+    const currentValue = await this.calculateProgress(goal);
+
+    const shouldComplete = currentValue >= goal.targetValue && goal.status === 'ACTIVE';
+    const shouldFail = new Date() > goal.endDate && currentValue < goal.targetValue && goal.status === 'ACTIVE';
+
+    await this.prisma.goal.update({
+      where: { id: goalId },
+      data: {
+        currentValue,
+        ...(shouldComplete && {
+          status: GoalStatus.COMPLETED,
+          completedAt: new Date(),
+        }),
+        ...(shouldFail && {
+          status: GoalStatus.FAILED,
+        }),
+      },
+    });
+  }
+
+  private async calculateProgress(goal: {
+    userId: number;
+    targetType: string;
+    startDate: Date;
+    endDate: Date;
+    sportType: string | null;
+  }): Promise<number> {
+    const activityFilter: Prisma.ActivityWhereInput = {
+      userId: goal.userId,
+      startDate: {
+        gte: goal.startDate,
+        lte: goal.endDate,
+      },
+      ...(goal.sportType && { type: goal.sportType }),
+    };
+
+    switch (goal.targetType) {
+      case 'DISTANCE': {
+        const result = await this.prisma.activity.aggregate({
+          where: activityFilter,
+          _sum: { distance: true },
+        });
+        return (result._sum.distance ?? 0) / 1000;
+      }
+
+      case 'DURATION': {
+        const result = await this.prisma.activity.aggregate({
+          where: activityFilter,
+          _sum: { movingTime: true },
+        });
+        return (result._sum.movingTime ?? 0) / 3600;
+      }
+
+      case 'ELEVATION': {
+        const result = await this.prisma.activity.aggregate({
+          where: activityFilter,
+          _sum: { totalElevationGain: true },
+        });
+        return result._sum.totalElevationGain ?? 0;
+      }
+
+      case 'FREQUENCY': {
+        const count = await this.prisma.activity.count({
+          where: activityFilter,
+        });
+        return count;
+      }
+
+      default:
+        throw new BadRequestException(`Unsupported target type: ${goal.targetType}`);
+    }
+  }
+
+  private async findByIdOrThrow(id: number, userId: number): Promise<Goal> {
+    const goal = await this.findById(id, userId);
+    if (!goal) {
+      throw new NotFoundException(`Goal with ID ${id} not found`);
+    }
+    return goal;
+  }
+}

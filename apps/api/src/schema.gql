@@ -2,14 +2,694 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input ActivitiesFilterInput {
+  """Filter activities up to this date"""
+  endDate: DateTime
+
+  """Maximum number of items to return"""
+  limit: Int
+
+  """Number of items to skip"""
+  offset: Int
+
+  """Field to sort by"""
+  orderBy: OrderBy = DATE
+
+  """Sort direction"""
+  orderDirection: OrderDirection = DESC
+
+  """Filter activities starting from this date"""
+  startDate: DateTime
+
+  """Filter by activity type"""
+  type: ActivityType
+}
+
+type Activity {
+  averageCadence: Float
+  averageHeartrate: Float
+  averageSpeed: Float
+
+  """Average power in watts"""
+  averageWatts: Float
+
+  """Calories burned"""
+  calories: Float
+  createdAt: DateTime!
+
+  """Activity description or notes"""
+  description: String
+
+  """Whether detailed data has been fetched from Strava"""
+  detailsFetched: Boolean!
+
+  """Timestamp when details were fetched"""
+  detailsFetchedAt: DateTime
+  deviceWatts: Boolean
+  distance: Float!
+  elapsedTime: Int!
+
+  """Maximum altitude in meters"""
+  elevHigh: Float
+
+  """Minimum altitude in meters"""
+  elevLow: Float
+  hasKudoed: Boolean!
+  id: ID!
+  kilojoules: Float
+  kudosCount: Int!
+  maxHeartrate: Float
+  maxSpeed: Float
+
+  """Maximum power in watts"""
+  maxWatts: Int
+  movingTime: Int!
+  name: String!
+
+  """Split data per kilometer"""
+  splits: [Split!]
+  startDate: DateTime!
+  startDateLocal: DateTime!
+  stravaId: BigInt!
+  timezone: String!
+  totalElevationGain: Float!
+  type: String!
+  updatedAt: DateTime!
+  userId: Int!
+
+  """Weighted average power in watts"""
+  weightedAverageWatts: Float
+}
+
+"""Represents a single day in the activity calendar with activity status"""
+type ActivityCalendarDay {
+  """The date of the calendar day"""
+  date: DateTime!
+
+  """Whether an activity occurred on this day"""
+  hasActivity: Boolean!
+}
+
+"""Types of activities supported by Strava"""
+enum ActivityType {
+  ALPINE_SKI
+  BACKCOUNTRY_SKI
+  CANOE
+  CROSSFIT
+  ELLIPTICAL
+  GOLF
+  HANDCYCLE
+  HIKE
+  INLINE_SKATE
+  KAYAK
+  KITESURF
+  NORDIC_SKI
+  RIDE
+  ROCK_CLIMB
+  ROLLER_SKI
+  ROWING
+  RUN
+  SNOWBOARD
+  SNOWSHOE
+  SOCCER
+  STAIR_STEPPER
+  STAND_UP_PADDLING
+  SURFING
+  SWIM
+  VELOMOBILE
+  VIRTUAL_RIDE
+  VIRTUAL_RUN
+  WALK
+  WEIGHT_TRAINING
+  WHEELCHAIR
+  WINDSURF
+  WORKOUT
+  YOGA
+}
+
+type AuthResponse {
+  user: User!
+}
+
+"""
+The `BigInt` scalar type represents non-fractional signed whole numeric values.
+"""
+scalar BigInt
+
+"""Input for creating a goal from a preset template"""
+input CreateGoalFromTemplateInput {
+  """Optional custom title (overrides template title)"""
+  customTitle: String
+
+  """Locale for template translation"""
+  locale: Locale = EN
+
+  """Start date for the goal (ISO 8601 format)"""
+  startDate: String!
+
+  """ID of the template to use"""
+  templateId: Int!
+}
+
+"""Input for creating a new goal"""
+input CreateGoalInput {
+  """Optional goal description"""
+  description: String
+
+  """End date (required for CUSTOM period, auto-calculated for others)"""
+  endDate: String
+
+  """Whether this goal repeats automatically each period"""
+  isRecurring: Boolean = false
+
+  """Time period type"""
+  periodType: GoalPeriodType!
+
+  """End date for recurring goals (null = repeats indefinitely)"""
+  recurrenceEndDate: String
+
+  """Sport type filter (Run, Ride, Swim) or null for all sports"""
+  sportType: SportType
+
+  """Start date of the goal period (ISO 8601 format)"""
+  startDate: String!
+
+  """Type of metric to track"""
+  targetType: GoalTargetType!
+
+  """Target value to achieve (must be positive)"""
+  targetValue: Float!
+
+  """Goal title"""
+  title: String!
+}
+
 """
 A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
 """
 scalar DateTime
 
+"""A user goal for tracking progress over a defined period"""
+type Goal {
+  """Timestamp when the goal was completed"""
+  completedAt: DateTime
+
+  """Timestamp when the goal was created"""
+  createdAt: DateTime!
+
+  """Current progress value (updated automatically from activities)"""
+  currentValue: Float!
+
+  """Number of days remaining until goal end date (null if expired)"""
+  daysRemaining: Int
+
+  """Optional description or notes about the goal"""
+  description: String
+
+  """End date of the goal period"""
+  endDate: DateTime!
+  id: ID!
+
+  """Whether the goal end date has passed"""
+  isExpired: Boolean!
+
+  """
+  Whether this goal repeats automatically (creates new instances each period)
+  """
+  isRecurring: Boolean!
+
+  """Time period type for this goal"""
+  periodType: GoalPeriodType!
+
+  """
+  Historical progress data points for charting (cumulative values per day with activity)
+  """
+  progressHistory: [GoalProgressPoint!]!
+
+  """Calculated progress percentage (0-100+)"""
+  progressPercentage: Float!
+
+  """End date for recurring goals (null = repeats indefinitely)"""
+  recurrenceEndDate: DateTime
+
+  """Sport type filter (Run, Ride, Swim, or null for all sports)"""
+  sportType: SportType
+
+  """Start date of the goal period"""
+  startDate: DateTime!
+
+  """Current status of the goal"""
+  status: GoalStatus!
+
+  """Type of metric being tracked"""
+  targetType: GoalTargetType!
+
+  """Target value to achieve (e.g., 50 for 50km)"""
+  targetValue: Float!
+
+  """ID of the template this goal was created from (if any)"""
+  templateId: Int
+
+  """Goal title (e.g., "Run 50km this month")"""
+  title: String!
+
+  """Timestamp when the goal was last updated"""
+  updatedAt: DateTime!
+
+  """ID of the user who owns this goal"""
+  userId: Int!
+}
+
+"""
+Time period for goal tracking (weekly from Monday, monthly, yearly, or custom date range)
+"""
+enum GoalPeriodType {
+  CUSTOM
+  MONTHLY
+  WEEKLY
+  YEARLY
+}
+
+"""
+A single data point representing cumulative progress on a specific date
+"""
+type GoalProgressPoint {
+  """Date of the progress point"""
+  date: DateTime!
+
+  """Cumulative progress value up to this date"""
+  value: Float!
+}
+
+"""
+Current status of a goal (active, completed when target reached, failed when expired, or archived by user)
+"""
+enum GoalStatus {
+  ACTIVE
+  ARCHIVED
+  COMPLETED
+  FAILED
+}
+
+"""
+Type of metric to track for a goal (distance, duration, elevation gain, or activity frequency)
+"""
+enum GoalTargetType {
+  DISTANCE
+  DURATION
+  ELEVATION
+  FREQUENCY
+}
+
+"""A preset goal template with localized title and description"""
+type GoalTemplate {
+  """Template category (beginner, intermediate, advanced, challenge)"""
+  category: String!
+
+  """Timestamp when the template was created"""
+  createdAt: DateTime!
+
+  """
+  Localized description (resolved by field resolver based on user locale)
+  """
+  description: String
+  id: ID!
+
+  """Whether this is a system preset template"""
+  isPreset: Boolean!
+
+  """Recommended period type for this template"""
+  periodType: GoalPeriodType!
+
+  """Suggested sport type (Run, Ride, Swim, or null for all sports)"""
+  sportType: SportType
+
+  """Type of metric to track"""
+  targetType: GoalTargetType!
+
+  """Target value for the goal"""
+  targetValue: Float!
+
+  """Localized title (resolved by field resolver based on user locale)"""
+  title: String!
+
+  """Timestamp when the template was last updated"""
+  updatedAt: DateTime!
+}
+
+"""Type of time interval for progression data"""
+enum IntervalType {
+  DAY
+  MONTH
+  WEEK
+}
+
+"""Supported locales for internationalization"""
+enum Locale {
+  EN
+  FR
+}
+
+type Mutation {
+  """Add a sport to user preferences"""
+  addSportToPreferences(sport: SportType!): UserPreferences!
+
+  """Archive a goal (soft delete, can be restored)"""
+  archiveGoal(id: Int!): Goal!
+
+  """Complete onboarding process"""
+  completeOnboarding: UserPreferences!
+
+  """Create a new custom goal"""
+  createGoal(input: CreateGoalInput!): Goal!
+
+  """Create a goal from a preset template"""
+  createGoalFromTemplate(input: CreateGoalFromTemplateInput!): Goal!
+
+  """Permanently delete user account and all data"""
+  deleteAccount: Boolean!
+
+  """Delete a goal permanently"""
+  deleteGoal(id: Int!): Boolean!
+
+  """Delete all user data but keep account"""
+  deleteUserData: Boolean!
+
+  """
+  Fetch detailed activity data from Strava on-demand (calories, splits, description)
+  """
+  fetchActivityDetails(stravaId: String!): Activity!
+
+  """Logout and revoke refresh token"""
+  logout: Boolean!
+
+  """Manually refresh goal progress calculation"""
+  refreshGoalProgress(id: Int!): Goal!
+
+  """Refresh access token using refresh token cookie"""
+  refreshToken: AuthResponse!
+
+  """Remove a sport from preferences with optional data deletion"""
+  removeSportFromPreferences(deleteData: Boolean!, sport: SportType!): Boolean!
+
+  """Synchronize activities from Strava"""
+  syncActivities: SyncHistory!
+
+  """Update an existing goal"""
+  updateGoal(id: Int!, input: UpdateGoalInput!): Goal!
+}
+
+"""Field to order activities by"""
+enum OrderBy {
+  DATE
+  DISTANCE
+  DURATION
+}
+
+"""Sort direction for activity ordering"""
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+"""Aggregated statistics for a specific time period"""
+type PeriodStatistics {
+  """Number of activities in the period"""
+  activityCount: Int!
+
+  """Average time per session in seconds"""
+  averageTimePerSession: Float!
+
+  """End date of the period"""
+  periodEnd: DateTime!
+
+  """Start date of the period"""
+  periodStart: DateTime!
+
+  """Total training time in seconds"""
+  totalTime: Int!
+}
+
+"""A personal record achievement for a specific sport"""
+type PersonalRecord {
+  """Date when the record was achieved"""
+  achievedAt: DateTime!
+
+  """ID of the activity where the record was set"""
+  activityId: ID!
+
+  """Type of record (e.g., "longest_distance", "best_pace")"""
+  type: String!
+
+  """Numeric value of the record (raw units: meters, seconds, m/s)"""
+  value: Float!
+}
+
+"""A single data point for progression chart visualization"""
+type ProgressionDataPoint {
+  """
+  Index within the interval (0-6 for days, 1-5 for weeks, 0-11 for months)
+  """
+  index: Int!
+
+  """Type of interval (DAY, WEEK, MONTH)"""
+  intervalType: IntervalType!
+
+  """Numeric value for the data point"""
+  value: Float!
+}
+
+"""Available metrics for progression chart visualization"""
+enum ProgressionMetric {
+  DISTANCE
+  DURATION
+  ELEVATION
+  PACE
+  SESSIONS
+  SPEED
+}
+
 type Query {
-  userByStravaId(stravaId: Int!): User
-  users: [User!]!
+  """Get all active goals for the current user"""
+  activeGoals: [Goal!]!
+
+  """Get activities with optional filtering and pagination"""
+  activities(filter: ActivitiesFilterInput): [Activity!]!
+
+  """Get a single activity by Strava ID"""
+  activity(stravaId: String!): Activity
+
+  """Get activity calendar data for heatmap visualization"""
+  activityCalendar(
+    """Optional month (1-12) to limit results to a specific month"""
+    month: Int
+
+    """The year to retrieve calendar data for"""
+    year: Int!
+  ): [ActivityCalendarDay!]!
+
+  """Get current authenticated user"""
+  currentUser: User
+
+  """Get a single goal by ID (user-scoped)"""
+  goal(id: Int!): Goal
+
+  """Get all preset goal templates with localized content"""
+  goalTemplates(category: String, locale: Locale = EN): [GoalTemplate!]!
+
+  """Get all goals for the current user with optional filtering"""
+  goals(includeArchived: Boolean = false, sportType: SportType, status: GoalStatus): [Goal!]!
+
+  """Get the latest sync history for current user"""
+  latestSyncHistory: SyncHistory
+
+  """Get aggregated statistics for a specific time period"""
+  periodStatistics(period: StatisticsPeriod!): PeriodStatistics!
+
+  """Get personal records for a specific sport"""
+  personalRecords(sportType: SportType!): [PersonalRecord!]!
+
+  """
+  Get the primary goal for dashboard display (highest priority: global goals first, then by deadline)
+  """
+  primaryDashboardGoal: Goal
+
+  """
+  Get secondary goals for dashboard display (max 2, excluding the primary goal)
+  """
+  secondaryDashboardGoals: [Goal!]!
+
+  """Get average performance metrics for a sport over a time period"""
+  sportAverageMetrics(period: StatisticsPeriod!, sportType: SportType!): SportAverageMetrics!
+
+  """Get count of activities and goals for a sport"""
+  sportDataCount(sport: SportType!): SportDataCount!
+
+  """Get distribution of training time by sport type for the current month"""
+  sportDistribution: [SportDistribution!]!
+
+  """
+  Get aggregated statistics for a sport over a specific time period with trend comparisons
+  """
+  sportPeriodStatistics(period: StatisticsPeriod!, sportType: SportType!): SportPeriodStatistics!
+
+  """Get progression data points for chart visualization"""
+  sportProgressionData(metric: ProgressionMetric!, period: StatisticsPeriod!, sportType: SportType!): [ProgressionDataPoint!]!
+
+  """Generate Strava OAuth authorization URL"""
+  stravaAuthUrl(redirect: String): String!
+
+  """Get the latest sync status"""
+  syncStatus: SyncHistory
+
+  """Get current user preferences"""
+  userPreferences: UserPreferences
+}
+
+"""Split data for a segment of the activity"""
+type Split {
+  """Average speed for this split in m/s"""
+  averageSpeed: Float
+
+  """Distance of this split in meters"""
+  distance: Float
+
+  """Elapsed time for this split in seconds"""
+  elapsedTime: Int
+
+  """Elevation gain/loss in meters"""
+  elevationDifference: Float
+
+  """Moving time for this split in seconds"""
+  movingTime: Int
+}
+
+"""Average performance metrics for a sport over a time period"""
+type SportAverageMetrics {
+  """Average cadence (steps/strokes per minute)"""
+  averageCadence: Float
+
+  """Average heart rate in beats per minute"""
+  averageHeartRate: Float
+
+  """Average pace in seconds per kilometer (for running/swimming)"""
+  averagePace: Float
+
+  """Average power output in watts (cycling only)"""
+  averagePower: Float
+
+  """Average speed in meters per second (for cycling)"""
+  averageSpeed: Float
+}
+
+"""Count of activities and goals for a specific sport"""
+type SportDataCount {
+  """Number of activities for this sport"""
+  activitiesCount: Int!
+
+  """Number of goals for this sport"""
+  goalsCount: Int!
+}
+
+"""Distribution of training time by sport type for the current month"""
+type SportDistribution {
+  """Percentage of total training time (0-100)"""
+  percentage: Float!
+
+  """The sport type"""
+  sport: SportType!
+
+  """Total time in seconds for this sport"""
+  totalTime: Int!
+}
+
+"""
+Aggregated statistics for a sport over a specific time period with trend comparisons
+"""
+type SportPeriodStatistics {
+  """Number of activities in the period"""
+  activityCount: Int!
+
+  """Percentage change in activity count compared to previous period"""
+  activityTrend: Float
+
+  """Percentage change in distance compared to previous period"""
+  distanceTrend: Float
+
+  """Percentage change in duration compared to previous period"""
+  durationTrend: Float
+
+  """Percentage change in elevation compared to previous period"""
+  elevationTrend: Float
+
+  """Total distance in meters"""
+  totalDistance: Float!
+
+  """Total duration in seconds"""
+  totalDuration: Int!
+
+  """Total elevation gain in meters"""
+  totalElevation: Float!
+}
+
+"""Available sport types for activity tracking"""
+enum SportType {
+  RIDE
+  RUN
+  SWIM
+}
+
+"""Time period for statistics aggregation"""
+enum StatisticsPeriod {
+  MONTH
+  WEEK
+  YEAR
+}
+
+type SyncHistory {
+  completedAt: DateTime
+  completedGoalIds: [Int!]
+  errorMessage: String
+  goalsCompletedCount: Int
+  goalsUpdatedCount: Int
+  id: ID!
+  processedActivities: Int!
+  stage: SyncStage
+  startedAt: DateTime!
+  status: SyncStatus!
+  totalActivities: Int!
+  userId: Int!
+}
+
+"""Current stage of an activity synchronization"""
+enum SyncStage {
+  COMPUTING
+  DONE
+  FETCHING
+  STORING
+}
+
+"""Status of an activity synchronization"""
+enum SyncStatus {
+  COMPLETED
+  FAILED
+  IN_PROGRESS
+  PENDING
+}
+
+"""Input for updating an existing goal"""
+input UpdateGoalInput {
+  """Updated goal description"""
+  description: String
+
+  """Updated end date (for extending or shortening the goal period)"""
+  endDate: String
+
+  """Updated target value (must be positive)"""
+  targetValue: Float
+
+  """Updated goal title"""
+  title: String
 }
 
 type User {
@@ -25,4 +705,13 @@ type User {
   stravaId: Int!
   updatedAt: DateTime!
   username: String
+}
+
+type UserPreferences {
+  createdAt: DateTime!
+  id: Int!
+  onboardingCompleted: Boolean!
+  selectedSports: [SportType!]!
+  updatedAt: DateTime!
+  userId: Int!
 }

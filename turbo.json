@@ -6,6 +6,11 @@
       "inputs": ["$TURBO_DEFAULT$", ".env*"],
       "outputs": ["dist/**", ".next/**", "!.next/cache/**"]
     },
+    "codegen": {
+      "cache": true,
+      "inputs": ["../api/src/schema.gql", "src/graphql/**/*.graphql", "codegen.ts"],
+      "outputs": ["src/gql/**"]
+    },
     "db:migrate:dev": {
       "cache": false,
       "persistent": true
@@ -42,6 +47,11 @@
       "cache": false,
       "outputs": ["playwright-report/**", "test-results/**"],
       "env": ["PORT", "CI"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "cache": false,
+      "env": ["DATABASE_URL", "CI"]
     }
   }
 }

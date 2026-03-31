@@ -1,0 +1,16 @@
+query SyncStatus {
+  syncStatus {
+    id
+    userId
+    status
+    stage
+    totalActivities
+    processedActivities
+    startedAt
+    completedAt
+    errorMessage
+    goalsUpdatedCount
+    goalsCompletedCount
+    completedGoalIds
+  }
+}

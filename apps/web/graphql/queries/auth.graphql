@@ -1,0 +1,9 @@
+query CurrentUser {
+  currentUser {
+    ...UserFullInfo
+  }
+}
+
+query StravaAuthUrl($redirect: String) {
+  stravaAuthUrl(redirect: $redirect)
+}

@@ -1,0 +1,23 @@
+query Goals($status: GoalStatus, $sportType: SportType, $includeArchived: Boolean) {
+  goals(status: $status, sportType: $sportType, includeArchived: $includeArchived) {
+    ...GoalCard
+  }
+}
+
+query Goal($id: Int!) {
+  goal(id: $id) {
+    ...GoalDetail
+  }
+}
+
+query ActiveGoals {
+  activeGoals {
+    ...GoalCard
+  }
+}
+
+query GoalTemplates($category: String, $locale: Locale) {
+  goalTemplates(category: $category, locale: $locale) {
+    ...GoalTemplateInfo
+  }
+}

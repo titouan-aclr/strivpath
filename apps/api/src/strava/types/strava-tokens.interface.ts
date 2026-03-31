@@ -1,0 +1,43 @@
+export interface StravaTokenResponse {
+  token_type: string;
+  expires_at: number;
+  expires_in: number;
+  refresh_token: string;
+  access_token: string;
+  athlete: StravaAthleteResponse;
+}
+
+export interface StravaAthleteResponse {
+  id: number;
+  username: string;
+  resource_state: number;
+  firstname: string;
+  lastname: string;
+  bio: string;
+  city: string;
+  state: string;
+  country: string;
+  sex: string;
+  premium: boolean;
+  summit: boolean;
+  created_at: string;
+  updated_at: string;
+  badge_type_id: number;
+  weight: number;
+  profile_medium: string;
+  profile: string;
+  friend: null | string;
+  follower: null | string;
+  blocked: boolean;
+  can_follow: boolean;
+  follower_count: number;
+  friend_count: number;
+  mutual_friend_count: number;
+  athlete_type: number;
+  date_preference: string;
+  measurement_preference: string;
+  clubs: unknown[];
+  ftp: null | number;
+  bikes: unknown[];
+  shoes: unknown[];
+}

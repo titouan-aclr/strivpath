@@ -3,7 +3,7 @@ import type { Config } from 'jest';
 const config: Config = {
   moduleFileExtensions: ['js', 'json', 'ts'],
   rootDir: '.',
-  testRegex: '.*\\.spec\\.ts$',
+  testRegex: 'src/.*\\.spec\\.ts$',
   transform: {
     '^.+\\.(t|j)s$': 'ts-jest',
   },
@@ -13,15 +13,24 @@ const config: Config = {
     '!src/**/*.module.ts',
     '!src/**/*.input.ts',
     '!src/**/*.model.ts',
-    '!src/**/*.mapper.ts',
+    '!src/**/*.type.ts',
+    '!src/**/types/**',
   ],
   coverageDirectory: './coverage',
+  coverageThreshold: {
+    global: {
+      branches: 75,
+      functions: 75,
+      lines: 85,
+      statements: 85,
+    },
+  },
   testEnvironment: 'node',
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
   },
   setupFilesAfterEnv: ['<rootDir>/test/setup.ts'],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/test/'],
+  testPathIgnorePatterns: ['/node_modules/', '/dist/'],
 };
 
 export default config;

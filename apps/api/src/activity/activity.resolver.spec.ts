@@ -1,0 +1,224 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ActivityResolver } from './activity.resolver';
+import { ActivityService } from './activity.service';
+import { SyncHistoryService } from '../sync-history/sync-history.service';
+import { Activity } from './models/activity.model';
+import { SyncHistory } from '../sync-history/models/sync-history.model';
+import { SyncStatus } from '../sync-history/enums/sync-status.enum';
+import { SyncStage } from '../sync-history/enums/sync-stage.enum';
+import { ActivityType } from './enums/activity-type.enum';
+import { TokenPayload } from '../auth/types';
+
+describe('ActivityResolver', () => {
+  let resolver: ActivityResolver;
+  let activityService: ActivityService;
+  let syncHistoryService: SyncHistoryService;
+
+  const mockActivityService = {
+    syncActivities: jest.fn(),
+    findAll: jest.fn(),
+    findByStravaId: jest.fn(),
+    fetchActivityDetails: jest.fn(),
+  };
+
+  const mockSyncHistoryService = {
+    findLatestForUser: jest.fn(),
+  };
+
+  const mockTokenPayload: TokenPayload = {
+    sub: 1,
+    stravaId: 12345,
+  };
+
+  const mockActivity: Activity = {
+    id: 1,
+    stravaId: BigInt(123),
+    userId: 1,
+    name: 'Morning Run',
+    type: 'Run',
+    distance: 5000,
+    movingTime: 1800,
+    elapsedTime: 1900,
+    totalElevationGain: 50,
+    startDate: new Date(),
+    startDateLocal: new Date(),
+    timezone: 'Europe/Paris',
+    averageSpeed: 2.78,
+    maxSpeed: 4.5,
+    hasKudoed: false,
+    kudosCount: 0,
+    detailsFetched: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  const mockSyncHistory: SyncHistory = {
+    id: 1,
+    userId: 1,
+    status: SyncStatus.COMPLETED,
+    stage: SyncStage.DONE,
+    totalActivities: 10,
+    processedActivities: 10,
+    startedAt: new Date(),
+    completedAt: new Date(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ActivityResolver,
+        { provide: ActivityService, useValue: mockActivityService },
+        { provide: SyncHistoryService, useValue: mockSyncHistoryService },
+      ],
+    }).compile();
+
+    resolver = module.get<ActivityResolver>(ActivityResolver);
+    activityService = module.get<ActivityService>(ActivityService);
+    syncHistoryService = module.get<SyncHistoryService>(SyncHistoryService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('syncActivities', () => {
+    it('should trigger activity synchronization', async () => {
+      mockActivityService.syncActivities.mockResolvedValue(mockSyncHistory);
+
+      const result = await resolver.syncActivities(mockTokenPayload);
+
+      expect(activityService.syncActivities).toHaveBeenCalledWith(mockTokenPayload.sub);
+      expect(result).toEqual(mockSyncHistory);
+    });
+  });
+
+  describe('activities', () => {
+    it('should return activities with default pagination', async () => {
+      mockActivityService.findAll.mockResolvedValue([mockActivity]);
+
+      const result = await resolver.activities(mockTokenPayload);
+
+      expect(activityService.findAll).toHaveBeenCalledWith(mockTokenPayload.sub, {
+        offset: undefined,
+        limit: undefined,
+        type: undefined,
+      });
+      expect(result).toEqual([mockActivity]);
+    });
+
+    it('should return activities with custom filter', async () => {
+      const filter = { offset: 10, limit: 20, type: ActivityType.RUN };
+      mockActivityService.findAll.mockResolvedValue([mockActivity]);
+
+      const result = await resolver.activities(mockTokenPayload, filter);
+
+      expect(activityService.findAll).toHaveBeenCalledWith(mockTokenPayload.sub, {
+        offset: 10,
+        limit: 20,
+        type: ActivityType.RUN,
+      });
+      expect(result).toEqual([mockActivity]);
+    });
+  });
+
+  describe('activity', () => {
+    it('should return a single activity by stravaId', async () => {
+      const stravaId = '123';
+      mockActivityService.findByStravaId.mockResolvedValue(mockActivity);
+
+      const result = await resolver.activity(mockTokenPayload, stravaId);
+
+      expect(activityService.findByStravaId).toHaveBeenCalledWith(BigInt(stravaId), mockTokenPayload.sub);
+      expect(result).toEqual(mockActivity);
+    });
+
+    it('should return null if activity not found', async () => {
+      const stravaId = '999';
+      mockActivityService.findByStravaId.mockResolvedValue(null);
+
+      const result = await resolver.activity(mockTokenPayload, stravaId);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('syncStatus', () => {
+    it('should return the latest sync status', async () => {
+      mockSyncHistoryService.findLatestForUser.mockResolvedValue(mockSyncHistory);
+
+      const result = await resolver.syncStatus(mockTokenPayload);
+
+      expect(syncHistoryService.findLatestForUser).toHaveBeenCalledWith(mockTokenPayload.sub);
+      expect(result).toEqual(mockSyncHistory);
+    });
+
+    it('should return null if no sync found', async () => {
+      mockSyncHistoryService.findLatestForUser.mockResolvedValue(null);
+
+      const result = await resolver.syncStatus(mockTokenPayload);
+
+      expect(result).toBeNull();
+    });
+  });
+
+  describe('fetchActivityDetails', () => {
+    it('should call service.fetchActivityDetails with correct parameters', async () => {
+      const stravaId = '123456';
+      const mockActivityWithDetails = {
+        ...mockActivity,
+        stravaId: BigInt(123456),
+        calories: 350,
+        description: 'Great morning run',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockActivityWithDetails);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
+      expect(result).toEqual(mockActivityWithDetails);
+    });
+
+    it('should return updated activity after fetch', async () => {
+      const stravaId = '789012';
+      const mockUpdatedActivity = {
+        ...mockActivity,
+        stravaId: BigInt(789012),
+        calories: 450,
+        splits: [
+          {
+            distance: 1000,
+            movingTime: 300,
+            elapsedTime: 305,
+            averageSpeed: 3.33,
+            elevationDifference: 5,
+          },
+        ],
+        description: 'Afternoon run with hills',
+        detailsFetched: true,
+        detailsFetchedAt: new Date(),
+      };
+
+      mockActivityService.fetchActivityDetails.mockResolvedValue(mockUpdatedActivity);
+
+      const result = await resolver.fetchActivityDetails(stravaId, mockTokenPayload);
+
+      expect(result.calories).toBe(450);
+      expect(result.description).toBe('Afternoon run with hills');
+      expect(result.splits).toHaveLength(1);
+      expect(result.detailsFetched).toBe(true);
+    });
+
+    it('should propagate errors from service', async () => {
+      const stravaId = '999999';
+      const error = new Error('Activity not found');
+
+      mockActivityService.fetchActivityDetails.mockRejectedValue(error);
+
+      await expect(resolver.fetchActivityDetails(stravaId, mockTokenPayload)).rejects.toThrow('Activity not found');
+      expect(activityService.fetchActivityDetails).toHaveBeenCalledWith(mockTokenPayload.sub, BigInt(stravaId));
+    });
+  });
+});

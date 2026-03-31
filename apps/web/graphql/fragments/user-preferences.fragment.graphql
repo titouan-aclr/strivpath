@@ -1,0 +1,7 @@
+fragment UserPreferencesInfo on UserPreferences {
+  id
+  selectedSports
+  onboardingCompleted
+  createdAt
+  updatedAt
+}

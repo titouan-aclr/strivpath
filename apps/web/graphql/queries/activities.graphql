@@ -1,0 +1,11 @@
+query Activities($filter: ActivitiesFilterInput) {
+  activities(filter: $filter) {
+    ...ActivityCard
+  }
+}
+
+query Activity($stravaId: String!) {
+  activity(stravaId: $stravaId) {
+    ...ActivityDetail
+  }
+}

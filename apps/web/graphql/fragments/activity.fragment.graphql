@@ -1,0 +1,44 @@
+fragment ActivityCard on Activity {
+  id
+  stravaId
+  name
+  type
+  distance
+  movingTime
+  elapsedTime
+  totalElevationGain
+  startDate
+  averageSpeed
+  maxHeartrate
+  kudosCount
+}
+
+fragment ActivityDetail on Activity {
+  ...ActivityCard
+  startDateLocal
+  timezone
+  averageHeartrate
+  maxSpeed
+  kilojoules
+  deviceWatts
+  hasKudoed
+  averageCadence
+  calories
+  elevHigh
+  elevLow
+  averageWatts
+  weightedAverageWatts
+  maxWatts
+  splits {
+    distance
+    movingTime
+    elapsedTime
+    averageSpeed
+    elevationDifference
+  }
+  description
+  detailsFetched
+  detailsFetchedAt
+  createdAt
+  updatedAt
+}
