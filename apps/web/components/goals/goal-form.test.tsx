@@ -27,6 +27,12 @@ vi.mock('next-intl', () => ({
   useLocale: () => 'en',
 }));
 
+const tomorrow = (): Date => {
+  const d = new Date();
+  d.setDate(d.getDate() + 1);
+  return d;
+};
+
 const defaultInitialData: GoalFormData = {
   title: '',
   description: '',
@@ -35,7 +41,7 @@ const defaultInitialData: GoalFormData = {
   periodType: GoalPeriodType.Weekly,
   sportType: null,
   isRecurring: false,
-  startDate: new Date('2026-06-01'),
+  startDate: tomorrow(),
   endDate: null,
 };
 
@@ -158,7 +164,7 @@ describe('GoalForm', () => {
         periodType: GoalPeriodType.Monthly,
         sportType: SportType.Run,
         isRecurring: true,
-        startDate: new Date('2026-06-01'),
+        startDate: tomorrow(),
         endDate: null,
       };
 
@@ -348,7 +354,7 @@ describe('GoalForm', () => {
         periodType: GoalPeriodType.Monthly,
         sportType: SportType.Run,
         isRecurring: false,
-        startDate: new Date('2026-06-01'),
+        startDate: tomorrow(),
         endDate: null,
       };
 
