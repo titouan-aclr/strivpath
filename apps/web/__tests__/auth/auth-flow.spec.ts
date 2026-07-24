@@ -58,7 +58,7 @@ test.describe('E2E Authentication Flow', () => {
       await authenticatedPage.goto('/en/dashboard');
       await authenticatedPage.waitForLoadState('domcontentloaded');
 
-      await expect(authenticatedPage).toHaveURL(/\/en\/dashboard/);
+      await expect(authenticatedPage).toHaveURL(/\/dashboard/);
 
       const cookies = await authenticatedPage.context().cookies();
       const authCookie = cookies.find(c => c.name === 'Authentication');
@@ -70,7 +70,7 @@ test.describe('E2E Authentication Flow', () => {
       await authenticatedPage.goto('/en/settings');
       await authenticatedPage.waitForLoadState('domcontentloaded');
 
-      await expect(authenticatedPage).toHaveURL(/\/en\/settings/);
+      await expect(authenticatedPage).toHaveURL(/\/settings/);
 
       const cookies = await authenticatedPage.context().cookies();
       const authCookie = cookies.find(c => c.name === 'Authentication');
